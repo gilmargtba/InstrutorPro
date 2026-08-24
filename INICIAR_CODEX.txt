@@ -1,0 +1,82 @@
+INSTRUTORPRO — INSTRUÇÃO INICIAL PARA O CODEX
+
+Você está trabalhando no projeto InstrutorPro.
+
+REGRA PRINCIPAL
+Não recrie o projeto do zero e não altere a arquitetura por preferência própria.
+
+ANTES DE ESCREVER CÓDIGO
+1. Leia integralmente AGENTS.md.
+2. Leia docs/CHECKPOINT.md.
+3. Leia os documentos de arquitetura e domínio referenciados nesses arquivos.
+4. Leia integralmente docs/CODEX_01_FOUNDATION.md.
+5. Inspecione a árvore atual do repositório.
+6. Apresente um resumo curto do que já existe e do que será criado nesta etapa.
+7. Execute SOMENTE o escopo definido em docs/CODEX_01_FOUNDATION.md.
+
+CONTEXTO OBRIGATÓRIO
+A InstrutorPro é uma plataforma nacional para a jornada da CNH, preparada para as 27 UFs.
+
+Primeira onda operacional:
+- RS — Rio Grande do Sul
+- SC — Santa Catarina
+- SP — São Paulo
+- RJ — Rio de Janeiro
+- ES — Espírito Santo
+
+Essa é uma prioridade operacional, não uma limitação arquitetural.
+
+O MVP contempla aluno, instrutor, clínica, médico e psicólogo, além da jornada CNH, localização/mapa, demanda de alunos, matching, agenda/agendamento, contratação quando aplicável, pagamentos quando aplicável, avaliação, verificação e auditoria.
+
+"Quero me tornar instrutor" e "Academia do Instrutor" estão FORA do MVP atual.
+
+ARQUITETURA DEFINIDA
+Preserve as decisões documentadas:
+- Backend: Django + Django REST Framework
+- Banco: PostgreSQL + PostGIS
+- Frontend: Angular + PrimeNG
+- Redis/Celery conforme documentação
+- API versionada em /api/v1
+- monólito modular
+- Docker para desenvolvimento
+
+Não substitua Django por FastAPI, PostgreSQL por MySQL, Angular por React/Next.js ou PostGIS por outra solução sem uma decisão arquitetural formal aprovada.
+
+LGPD E SEGURANÇA
+Trate docs/LGPD.md e docs/SECURITY.md como requisitos obrigatórios.
+
+Nesta etapa:
+- não use dados pessoais reais em seeds ou testes;
+- não armazene laudos, diagnósticos, prontuários ou resultados médicos/psicológicos;
+- não implemente scraping de DETRAN/SENATRAN;
+- não publique localização exata de alunos;
+- não transforme listas públicas oficiais automaticamente em perfis comerciais;
+- não inclua segredos reais no repositório.
+
+LIMITE DESTA EXECUÇÃO
+Esta execução é o CODEX 01 — FOUNDATION.
+
+Não avance por conta própria para matching completo, mapas funcionais, pagamentos, integração DETRAN/SENATRAN, importação de profissionais, agenda completa, marketplace completo ou fases posteriores.
+
+Implemente somente a fundação especificada em docs/CODEX_01_FOUNDATION.md.
+
+QUALIDADE
+Antes de encerrar:
+1. Execute os testes e validações definidos no projeto.
+2. Verifique migrations.
+3. Verifique a inicialização dos serviços Docker previstos.
+4. Verifique health/readiness da API quando aplicável.
+5. Verifique que o frontend compila/inicializa conforme o escopo.
+6. Não esconda erros nem testes falhando.
+
+RELATÓRIO FINAL OBRIGATÓRIO
+Ao terminar, NÃO continue para o próximo módulo.
+
+Entregue um relatório com:
+- Implementado: arquivos/módulos criados ou alterados, migrations, endpoints e infraestrutura.
+- Validação: comandos executados, testes aprovados/falhos e erros/limitações.
+- Decisões: decisões técnicas tomadas dentro do escopo e divergências documentais.
+- Pendências: o que depende de decisão humana.
+- Próximo passo: pare e aguarde aprovação para o CODEX 02.
+
+NÃO implemente o CODEX 02 automaticamente.

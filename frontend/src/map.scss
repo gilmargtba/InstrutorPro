@@ -1,0 +1,14 @@
+.demo-marker {
+  display: grid !important;
+  place-items: center;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: #0c8790;
+  box-shadow: 0 5px 14px #153f5966;
+  font-size: 1.05rem;
+}
+
+.demo-marker:hover {
+  background: #ef702b;
+  transform: scale(1.08);
+}
