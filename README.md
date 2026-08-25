@@ -221,3 +221,9 @@ docker compose exec backend python manage.py seed_demo_instructors
 Pesquise `Porto Alegre`, `Florianópolis`, `São Paulo`, `Rio de Janeiro` ou
 `Vitória`. Não há chave nesta demo; o geocoder é local. Provider de produção
 permanece pendente.
+
+### Demo em Ubuntu
+
+O fluxo separado para publicar e atualizar a demo sintética em um servidor Ubuntu
+está em `docs/DEPLOY_UBUNTU_DEMO.md`. Use `compose.demo.yaml` e `.env.demo`; o Compose
+local acima continua dedicado ao desenvolvimento.

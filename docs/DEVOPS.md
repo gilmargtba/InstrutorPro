@@ -2,6 +2,10 @@
 
 Fonte oficial de ambientes, automação, release, observabilidade e continuidade. Valores de SLO/RPO/RTO permanecem bloqueados em `OPEN-009` até aprovação; o processo para defini-los já é obrigatório.
 
+A implantação reproduzível da demo sintética em um servidor único Ubuntu está descrita
+em `DEPLOY_UBUNTU_DEMO.md`. Ela é ambiente de demonstração, não aprovação de produção,
+piloto, dados reais ou relaxamento dos gates desta política.
+
 ## Ambientes e promoção
 
 | Ambiente   | Dados/integrações                                         | Finalidade                            | Acesso                        |

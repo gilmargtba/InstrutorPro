@@ -1,7 +1,7 @@
 # Checkpoint do Projeto
 
 - Atualizado em: **2026-08-24**
-- Versão documental: **2.7**
+- Versão documental: **2.8**
 - Código-fonte: **CODEX 02E concluído; fundações anteriores preservadas**
 
 ## Consolidação de produto em 2026-08-19
@@ -15,6 +15,12 @@ A fase continua **M0**, com `GOV-001/OPEN-001` concluído. Esta consolidação n
 **INSTRUTORPRO DEMO 01 concluída.** O frontend contém experiência visual navegável e mobile-first apenas com fixtures sintéticas. CODEX 01, 02A e 02B permanecem preservados; CODEX 02C está suspenso e não deve ser retomado sem autorização explícita. Capacidades reguladas, usuários reais, perfis e publicação continuam condicionados aos respectivos gates.
 
 ## Últimas atividades concluídas
+
+Deploy da demo no Ubuntu preparado em 24/08/2026: Compose isolado do ambiente local,
+frontend Angular estático em Nginx, Django/Gunicorn, redes privadas para PostGIS/Redis,
+volumes persistentes, configuração não versionada, backup pré-deploy, atualização
+fast-forward e smoke/readiness. O ambiente continua exclusivamente sintético; domínio,
+TLS e instalação no servidor dependem dos dados/acesso do operador.
 
 CODEX 02E executado em 24/08/2026 com dados exclusivamente sintéticos: serviços
 transacionais para submissão, revisão, verificação, publicação, suspensão/despublicação e

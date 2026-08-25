@@ -1,6 +1,6 @@
 {
   "package": "instrutorpro-documentation",
-  "version": "2.7",
+  "version": "2.8",
   "reviewed_on": "2026-08-24",
   "path_base": "repository-root",
   "normative_documents": [
@@ -17,6 +17,7 @@
     "docs/LGPD.md",
     "docs/TEST_STRATEGY.md",
     "docs/DEVOPS.md",
+    "docs/DEPLOY_UBUNTU_DEMO.md",
     "docs/ROADMAP.md",
     "docs/IMPLEMENTATION_PLAN.md",
     "docs/BACKLOG.md",
@@ -81,5 +82,5 @@
     "INSTRUCTOR_CANDIDATE",
     "INSTRUCTOR_ACADEMY"
   ],
-  "notes": "CODEX 02E concluído com onboarding sintético, workflow auditado, Admin sem edição direta e mapa integrado. Nenhum dado real; CODEX 02C suspenso."
+  "notes": "Deploy reproduzível da demo sintética no Ubuntu preparado; CODEX 02E permanece concluído e CODEX 02C suspenso."
 }
