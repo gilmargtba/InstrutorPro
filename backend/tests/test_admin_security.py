@@ -87,3 +87,24 @@ def test_admin_prod_access_grants_only_explicit_permissions():
     }
     assert granted < set(Permission.objects.values_list("codename", flat=True))
     assert AuditEvent.objects.filter(action="accounts.admin_prod_access_granted").count() == 1
+
+
+@pytest.mark.django_db
+def test_recovery_code_rotation_revokes_previous_codes_and_is_audited():
+    account = Account.objects.create_user(
+        username="rotate-admin",
+        email="rotate@example.invalid",
+        password="strong-test-password",
+        is_staff=True,
+    )
+    TOTPDevice.objects.create(user=account, name="test", confirmed=True)
+    old_device = account.staticdevice_set.create(name="old")
+    old_token = StaticToken.objects.create(device=old_device, token="old-token")
+    output = StringIO()
+    call_command("rotate_admin_recovery_codes", account.username, stdout=output)
+    assert not StaticToken.objects.filter(pk=old_token.pk).exists()
+    assert StaticToken.objects.filter(device__user=account).count() == 10
+    assert "old-token" not in output.getvalue()
+    assert (
+        AuditEvent.objects.filter(action="accounts.admin_mfa_recovery_codes_rotated").count() == 1
+    )
