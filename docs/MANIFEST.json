@@ -1,6 +1,6 @@
 {
   "package": "instrutorpro-documentation",
-  "version": "3.2",
+  "version": "3.3",
   "reviewed_on": "2026-08-29",
   "path_base": "repository-root",
   "normative_documents": [
@@ -29,6 +29,7 @@
     "docs/GOV_003_REVIEW_POLICY.md",
     "docs/GOV_004_ORGANIZATION.md",
     "docs/M1_PREPRODUCTION_READINESS.md",
+    "docs/ADMIN_PROD_01.md",
     "AGENTS.md",
     "docs/PROMPT.md",
     "docs/CODEX_01_FOUNDATION.md",

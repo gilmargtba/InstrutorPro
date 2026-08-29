@@ -131,3 +131,11 @@ Variações obrigatórias: perda de elegibilidade; dois alunos no mesmo slot; pa
 CI verde; cobertura de risco (não apenas percentual); migrations/OpenAPI sem quebra; nenhuma falha crítica/alta sem exceção formal; backup restaurado na janela; rollback/roll-forward ensaiado; smoke e alertas confirmados; UAT/owners aprovados; checkpoint e release notes atualizados.
 
 Flaky test é defeito: quarentena só com owner, prazo e issue; não pode ocultar suite crítica. Evidências de gate guardam commit, ambiente, data, resultado e aprovador.
+
+## ADMIN-PROD-01
+
+- Admin recusa sessão autenticada sem MFA e aceita sessão TOTP verificada;
+- formulário solicita OTP, enrolamento gera recovery codes e auditoria sem segredo;
+- concessão atribui somente permissões explícitas;
+- organização, auditoria, CSRF, autorização e regressão permanecem obrigatórios;
+- produção exige smoke externo de TLS, renovação, health/readiness e login humano com TOTP.

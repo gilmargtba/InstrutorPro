@@ -19,6 +19,7 @@ class AuditEvent(models.Model):
 
     class Meta:
         ordering = ["-occurred_at"]
+        permissions = [("view_security_audit", "Can view security audit events")]
         indexes = [models.Index(fields=["target_type", "target_id"], name="audit_target_idx")]
 
     def __str__(self):

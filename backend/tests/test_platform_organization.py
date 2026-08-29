@@ -4,6 +4,8 @@ from django.core.exceptions import ValidationError
 from django.core.management import call_command
 from django.db import IntegrityError
 from django.urls import reverse
+from django_otp import DEVICE_ID_SESSION_KEY
+from django_otp.plugins.otp_totp.models import TOTPDevice
 
 from apps.accounts.models import Account
 from apps.audit.models import AuditEvent
@@ -16,6 +18,15 @@ from apps.organizations.services import (
     validate_platform_organization,
 )
 from apps.organizations.validators import validate_cnpj
+
+
+def force_otp_login(client, account):
+    device = TOTPDevice.objects.create(user=account, name="test-admin", confirmed=True)
+    client.force_login(account)
+    session = client.session
+    session[DEVICE_ID_SESSION_KEY] = device.persistent_id
+    session.save()
+
 
 COMPLETE_DATA = {
     "cnpj": "00.000.000/0001-91",
@@ -214,12 +225,12 @@ def test_admin_reuses_existing_panel_and_denies_staff_without_permission(client)
         password="test-only",
         is_staff=True,
     )
-    client.force_login(unauthorized)
+    force_otp_login(client, unauthorized)
     response = client.get(reverse("admin:organizations_platformorganization_changelist"))
     assert response.status_code == 403
 
     manager = actor_with_permission("manage_platform_organization", "admin-manager")
-    client.force_login(manager)
+    force_otp_login(client, manager)
     add_response = client.get(reverse("admin:organizations_platformorganization_add"))
     assert add_response.status_code == 200
     assert "Organização / Controlador" in add_response.content.decode()
@@ -228,7 +239,7 @@ def test_admin_reuses_existing_panel_and_denies_staff_without_permission(client)
 @pytest.mark.django_db
 def test_admin_can_save_pending_configuration_without_public_api(client):
     manager = actor_with_permission("manage_platform_organization", "admin-editor")
-    client.force_login(manager)
+    force_otp_login(client, manager)
     response = client.post(
         reverse("admin:organizations_platformorganization_add"),
         {**COMPLETE_DATA, "expected_version": 0, "_save": "Salvar"},
@@ -255,7 +266,7 @@ def test_validator_can_validate_from_admin_action_without_edit_permission(client
         reason="TEST_ADMIN_ACTION_SETUP",
     )
 
-    client.force_login(validator)
+    force_otp_login(client, validator)
     response = client.post(
         reverse("admin:organizations_platformorganization_changelist"),
         {

@@ -13,7 +13,7 @@ DEBUG = False
 ALLOWED_HOSTS = [item for item in os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",") if item]
 
 INSTALLED_APPS = [
-    "django.contrib.admin",
+    "apps.core.admin_apps.InstrutorProAdminConfig",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
@@ -23,6 +23,10 @@ INSTALLED_APPS = [
     "corsheaders",
     "rest_framework",
     "drf_spectacular",
+    "axes",
+    "django_otp",
+    "django_otp.plugins.otp_static",
+    "django_otp.plugins.otp_totp",
     "apps.accounts",
     "apps.audit",
     "apps.people",
@@ -39,6 +43,8 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django_otp.middleware.OTPMiddleware",
+    "axes.middleware.AxesMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -111,3 +117,17 @@ X_FRAME_OPTIONS = "DENY"
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_SAMESITE = "Lax"
+
+AUTHENTICATION_BACKENDS = [
+    "axes.backends.AxesStandaloneBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
+AXES_ENABLED = os.getenv("DJANGO_AXES_ENABLED", "true").lower() == "true"
+AXES_ONLY_ADMIN_SITE = True
+AXES_FAILURE_LIMIT = int(os.getenv("DJANGO_AXES_FAILURE_LIMIT", "5"))
+AXES_COOLOFF_TIME = 1
+AXES_RESET_ON_SUCCESS = True
+AXES_LOCKOUT_PARAMETERS = [["username", "ip_address"]]
+AXES_SENSITIVE_PARAMETERS = ["password", "otp_token"]
+
+OTP_ADMIN_HIDE_SENSITIVE_DATA = True

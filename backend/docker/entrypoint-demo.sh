@@ -3,7 +3,9 @@ set -eu
 
 python manage.py migrate --noinput
 python manage.py seed_territories
-python manage.py seed_demo_instructors
+if [ "${DJANGO_LOAD_DEMO_DATA:-false}" = "true" ]; then
+  python manage.py seed_demo_instructors
+fi
 python manage.py collectstatic --noinput
 
 exec gunicorn config.wsgi:application \

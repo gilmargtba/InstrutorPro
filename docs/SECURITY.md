@@ -4,6 +4,11 @@
 
 O Admin exige staff e permissões explícitas; aprovar/suspender chama serviço transacional auditado. Nenhum endpoint administrativo público foi criado.
 
+ADMIN-PROD-01 adiciona MFA TOTP obrigatório ao Admin, códigos de recuperação de uso único,
+bloqueio de tentativas por usuário/IP e sessão curta. O bootstrap e o acesso são auditados;
+segredos TOTP e códigos não são persistidos em auditoria. A publicação profissional existente
+permanece DEMO.
+
 Fonte oficial dos controles técnicos e operacionais. Autorização está em `AUTHORIZATION.md`; tratamento pessoal em `LGPD.md`; procedimentos de plataforma em `DEVOPS.md`.
 
 ## Objetivos e ameaças prioritárias

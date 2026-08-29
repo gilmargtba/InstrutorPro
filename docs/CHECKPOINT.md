@@ -1,7 +1,7 @@
 # Checkpoint do Projeto
 
 - Atualizado em: **2026-08-29**
-- Versão documental: **3.2**
+- Versão documental: **3.3**
 - Código-fonte: **CODEX 02E e configuração administrativa GOV-004 concluídos; fundações anteriores preservadas**
 
 ## Consolidação de produto em 2026-08-19
@@ -152,14 +152,10 @@ HTTPS/segurança e implementação bloqueiam localizações/profissionais reais.
 
 ## Próxima atividade
 
-Criar/selecionar uma conta administrativa local, atribuir explicitamente as permissões
-`organizations.manage_platform_organization` e
-`organizations.validate_platform_organization`, preencher a organização no Admin e
-executar sua validação humana. Em paralelo, aguardar propostas de serviço externo de DPO,
-sem contratar. Depois, comparar propostas,
-selecionar fornecedor por
-decisão humana específica e registrar identidade/ato; então aprovar LIA/RIPD/avisos e fechar
-sequencialmente os bloqueadores restantes de `M1_PREPRODUCTION_READINESS.md`. Não retomar
+`ADMIN-PROD-01` foi implementado e validado localmente, mas permanece `BLOCKED` para produção:
+o acesso SSH a `gilmar@179.199.136.4` foi recusado, portanto backup, TLS, deploy, bootstrap do
+administrador/MFA e smoke tests no Ubuntu ainda não possuem evidência. Nenhuma publicação real foi
+liberada. Retomar somente com acesso humano/autenticação SSH ao servidor existente. Não retomar
 automaticamente inventário/revogação interna de sessões (`IAM-003`/CODEX 02C).
 
 ## Decisões abertas

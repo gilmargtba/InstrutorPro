@@ -6,6 +6,7 @@ import pytest
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import Permission
 from django.db import connections
+from django.test import RequestFactory
 
 from apps.accounts.models import Account
 from apps.accounts.policies import can_account_operate, can_manage_account_lifecycle
@@ -128,7 +129,14 @@ def test_deny_by_default_includes_superuser_without_explicit_permission(target):
 def test_non_active_account_cannot_authenticate_or_operate(actor, target, operation):
     changed = operation(**command(actor, target))
     assert not can_account_operate(account=changed)
-    assert authenticate(username=target.username, password="test-only") is None
+    assert (
+        authenticate(
+            request=RequestFactory().post("/admin/login/"),
+            username=target.username,
+            password="test-only",
+        )
+        is None
+    )
 
 
 def test_block_preserves_person_and_role_assignments(actor, target):

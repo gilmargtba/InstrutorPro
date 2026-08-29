@@ -242,6 +242,10 @@ endereço, representante, contato operacional e canal de privacidade preenchidos
 `PENDING_VALIDATION`. A ação Validar altera para `VALIDATED`; qualquer edição posterior
 exige nova validação.
 
+O perfil de produção controlado exige MFA TOTP, rate limiting e permissões explícitas
+adicionais. Consulte `docs/ADMIN_PROD_01.md`; isso não converte o workflow profissional
+DEMO em publicação real.
+
 ### Demo em Ubuntu
 
 O fluxo separado para publicar e atualizar a demo sintética em um servidor Ubuntu
