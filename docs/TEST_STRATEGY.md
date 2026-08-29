@@ -76,6 +76,9 @@ Para cada mutação aplicável: sucesso, não autenticado, sem papel, objeto alh
 ### Auditoria, privacidade e segurança
 
 - todo evento sensível esperado e nenhum segredo/dado completo;
+- configuração organizacional: singleton, CNPJ, incompleto/pendente/validado, edição
+  invalidando validação, versão stale, permissões distintas de editar/validar, Admin
+  deny-by-default, auditoria redigida e ausência em API pública;
 - audit append-only, ator sistema, request ID e acesso autorizado;
 - aceite obrigatório não cria consentimento; concessão/retirada são granulares, versionadas e equivalentes em facilidade;
 - direitos cobrem resposta imediata/15 dias aplicável, exportação sem dado de terceiro, propagação, correção, desativação, retenção/hold e reexecução após restore;

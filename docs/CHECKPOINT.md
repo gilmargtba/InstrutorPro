@@ -1,8 +1,8 @@
 # Checkpoint do Projeto
 
 - Atualizado em: **2026-08-29**
-- Versão documental: **3.1**
-- Código-fonte: **CODEX 02E concluído; fundações anteriores preservadas**
+- Versão documental: **3.2**
+- Código-fonte: **CODEX 02E e configuração administrativa GOV-004 concluídos; fundações anteriores preservadas**
 
 ## Consolidação de produto em 2026-08-19
 
@@ -15,6 +15,14 @@ A fase continua **M0**, com `GOV-001/OPEN-001` concluído. Esta consolidação n
 **INSTRUTORPRO DEMO 01 concluída.** O frontend contém experiência visual navegável e mobile-first apenas com fixtures sintéticas. CODEX 01, 02A e 02B permanecem preservados; CODEX 02C está suspenso e não deve ser retomado sem autorização explícita. Capacidades reguladas, usuários reais, perfis e publicação continuam condicionados aos respectivos gates.
 
 ## Últimas atividades concluídas
+
+Configuração administrativa GOV-004 implementada em 29/08/2026 no app `organizations`:
+`PlatformOrganization` singleton, CNPJ validado/normalizado, estados
+`INCOMPLETE/PENDING_VALIDATION/VALIDATED`, edição e validação com permissões separadas,
+lock/versão, auditoria redigida e Django Admin reutilizado. Migration
+`organizations/0002_platformorganization.py` aplicada somente no banco local. Nenhum
+dado real foi semeado, nenhum endpoint público, upload, deploy ou liberação de BCR-02 foi
+criado. Foram aprovados 11 testes direcionados e 83 testes backend completos.
 
 Dados organizacionais adicionais declarados pelo responsável humano em 29/08/2026:
 razão social `FOCUS INFORMATICA E CELULAR LTDA`, endereço parcial
@@ -137,13 +145,18 @@ Revisão jurídico-técnica de privacidade em fontes oficiais vigentes em 22/07/
 
 ## Atividade em execução
 
-Nenhuma implementação em execução. CODEX 02E terminou; não retomar CODEX 02C.
+Nenhuma implementação em execução. A pequena fatia administrativa GOV-004 terminou;
+não retomar CODEX 02C.
 `GOV-002/003` passaram no recorte M1 aprovado; condições de LGPD/jurídico, `OPEN-007`,
 HTTPS/segurança e implementação bloqueiam localizações/profissionais reais.
 
 ## Próxima atividade
 
-Aguardar propostas de serviço externo de DPO, sem contratar. Depois, comparar propostas,
+Criar/selecionar uma conta administrativa local, atribuir explicitamente as permissões
+`organizations.manage_platform_organization` e
+`organizations.validate_platform_organization`, preencher a organização no Admin e
+executar sua validação humana. Em paralelo, aguardar propostas de serviço externo de DPO,
+sem contratar. Depois, comparar propostas,
 selecionar fornecedor por
 decisão humana específica e registrar identidade/ato; então aprovar LIA/RIPD/avisos e fechar
 sequencialmente os bloqueadores restantes de `M1_PREPRODUCTION_READINESS.md`. Não retomar

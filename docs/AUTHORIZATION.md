@@ -13,6 +13,20 @@ Publicação exige `discovery.manage_instructor_publication` explícita e conta 
 
 Fonte oficial de papéis e políticas. O sistema aplica deny by default no serviço e no selector; esconder controles no frontend não é autorização.
 
+## Configuração da organização/controlador M1
+
+O Django Admin reutilizado expõe a configuração singleton somente a conta operacional e
+`is_staff` com permissão explícita `organizations.manage_platform_organization`. A ação
+separada **Validar organização/controlador** exige
+`organizations.validate_platform_organization`. Superusuário sem atribuição explícita
+dessas permissões também falha fechado. Não existe exclusão pelo Admin nem endpoint
+público de escrita/leitura administrativa.
+
+Criação, edição e validação passam por serviços transacionais, lock e versão. A auditoria
+preserva ator, ação, campos alterados e estados anterior/posterior; CNPJ é mascarado e
+endereço, representante, telefones, contatos e DPO são redigidos no metadata. Editar uma
+organização validada retorna o registro a `PENDING_VALIDATION` ou `INCOMPLETE`.
+
 ## Separação
 
 - autenticação: quem é a conta;

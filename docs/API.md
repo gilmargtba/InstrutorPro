@@ -8,6 +8,13 @@ atendimento. Não aceita CPF, CNH, residência ou upload. Cria conta sintética 
 utilizável e termina em `SUBMITTED/UNPUBLISHED`. Não há endpoint público de revisão,
 verificação ou publicação.
 
+## Configuração organizacional administrativa
+
+`PlatformOrganization` é configurada exclusivamente no Django Admin. Não existe rota
+pública em `/api/v1` para criar, alterar, validar ou consultar os dados administrativos
+do controlador. Avisos/termos futuros só poderão consumir uma projeção pública mínima e
+aprovada; esta fatia não criou essa projeção.
+
 ## Descoberta geoespacial demonstrativa
 
 - `GET /api/v1/geocoding/search/?q=Porto%20Alegre`: catálogo sintético local.

@@ -223,6 +223,25 @@ Pesquise `Porto Alegre`, `Florianópolis`, `São Paulo`, `Rio de Janeiro` ou
 `Vitória`. Não há chave nesta demo; o geocoder é local. Provider de produção
 permanece pendente.
 
+### Organização/controlador no painel administrativo
+
+O cadastro M1 reutiliza o Django Admin em `http://localhost:8000/admin/`, menu
+**Configurações → Organização / Controlador**. Não há registro real inicial nem endpoint
+público. Uma conta `is_staff` precisa receber explicitamente:
+
+- `organizations.manage_platform_organization` para criar/editar;
+- `organizations.validate_platform_organization` para executar a ação **Validar
+  organização/controlador selecionado**.
+
+Crie a conta local, quando necessário, com `docker compose exec backend python manage.py
+createsuperuser`. Depois execute `docker compose exec backend python manage.py
+grant_organization_admin SEU_USUARIO`; o comando exige conta `is_staff` ativa, concede
+somente as duas permissões e registra auditoria. Superusuário sem atribuição explícita
+continua negado por policy. O primeiro salvamento incompleto fica `INCOMPLETE`; com CNPJ, razão social,
+endereço, representante, contato operacional e canal de privacidade preenchidos, fica
+`PENDING_VALIDATION`. A ação Validar altera para `VALIDATED`; qualquer edição posterior
+exige nova validação.
+
 ### Demo em Ubuntu
 
 O fluxo separado para publicar e atualizar a demo sintética em um servidor Ubuntu

@@ -74,11 +74,15 @@ Fonte oficial das unidades implementáveis. Prioridade: `P0` bloqueia a sequênc
 
 ### GOV-004 — Identificar organização e responsáveis (`P0`)
 
-- **Estado em 24/08/2026:** estrutura e gates aprovados; campos reais permanecem `PENDING_HUMAN_INPUT`. GOV-004 não bloqueia desenvolvimento exclusivamente sintético, mas bloqueia homologação aplicável/produção conforme a tabela do documento.
+- **Estado em 29/08/2026:** fonte administrativa singleton implementada no Django Admin,
+  sem seed de dados reais e sem endpoint público. Campos, comprovação, validação e DPO
+  permanecem pendentes; GOV-004 continua bloqueando dados reais/produção conforme a
+  tabela do documento.
 
 - **Objetivo/contexto:** impedir termos, finanças e privacidade ligados a entidade fictícia.
 - **Dependências:** nenhuma técnica.
-- **Arquivos/módulos:** `BUSINESS_MODEL`, `LGPD`, `RISKS`, futura app `compliance`.
+- **Arquivos/módulos:** `organizations.PlatformOrganization`, Django Admin, `LGPD`,
+  `AUTHORIZATION`, `RISKS`.
 - **Aceite:** organização operadora e owners Legal/Privacy/Security/Finance/Operations formalmente identificados ou bloqueio explícito mantido.
 - **Testes necessários:** revisão de segregação e contatos de escalonamento.
 - **Concluído quando:** owner de cada gate crítico consta nos registros.

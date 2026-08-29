@@ -116,6 +116,7 @@ Cada questão fechada deve gerar ADR ou atualização desta tabela com: decisão
 | ADR-052 | **M1 exige Encarregado/DPO formal antes de dados reais.** | A decisão mantém a política interna reforçada; pessoa ou serviço, ato formal, substituição, recursos e avaliação de conflito permanecem pendentes. O canal de privacidade não equivale à nomeação. |
 | ADR-053 | **Modelo de Encarregado/DPO externo independente aprovado para o M1.** | A decisão reduz conflito com as funções acumuladas por Gilmar, mas não seleciona fornecedor nem autoriza contratação/cobrança. Identidade, contrato e ato formal continuam pendentes. |
 | ADR-054 | **Coleta controlada de até três propostas de DPO externo autorizada para o M1.** | A shortlist e a mensagem uniforme permitem comparação sem escolher fornecedor. Envio não equivale a contratação; identidade, conflito, DPA, ato formal, preço e aceite continuam pendentes de evidência e decisão humana. |
+| ADR-055 | **Dados do controlador M1 passam a ser configuração administrativa, não hardcode.** | `PlatformOrganization` singleton reutiliza Django Admin, separa cadastro de validação, exige permissões explícitas, versiona edições e audita com redação. A implementação não fecha BCR-02, não cria API pública e não semeia dados reais. |
 
 ## Decisões aceitas — consolidação 2026-08-19
 

@@ -121,6 +121,12 @@ Concessão auditável de papel pessoal, com `person`, `role`, status derivado, `
 
 Pessoa jurídica operadora do marketplace, independente de contas administrativas. Mantém identificação e configuração institucional necessárias a termos, contratos e titularidade financeira interna. No MVP existe uma organização ativa.
 
+A configuração M1 é singleton e possui estados `INCOMPLETE`, `PENDING_VALIDATION` e
+`VALIDATED`. Cadastro completo apenas produz `PENDING_VALIDATION`; a validação exige
+comando humano separado e permissão explícita. Qualquer edição posterior remove a
+validação anterior e incrementa a versão para impedir sobrescrita concorrente. CNPJ pode
+ser digitado formatado, mas é persistido normalizado e validado pelo dígito verificador.
+
 O requisito de uma organização ativa é de configuração/deploy, não a criação automática de uma pessoa jurídica fictícia. Razão social, CNPJ e dados contratuais são bloqueantes antes da publicação de termos reais.
 
 Para LGPD, a pessoa jurídica real — não este registro — assume o papel funcional de controladora apenas nas operações cujas finalidades e meios essenciais determinar. A matriz de agentes por operação permanece bloqueada em `OPEN-004/008`.

@@ -18,6 +18,13 @@ As funções permitem atribuir trabalho e risco durante desenvolvimento. Não su
 
 ## Cadastro pendente da organização operadora
 
+O sistema agora possui `organizations.PlatformOrganization` como fonte administrativa
+singleton, acessível no Django Admin em **Configurações → Organização / Controlador**.
+Nenhum dado real foi semeado: o administrador deve cadastrar manualmente, e um cadastro
+completo fica `PENDING_VALIDATION` até a ação humana separada **Validar**. A validação é
+invalidada por edição posterior. O conteúdo documental abaixo continua sendo
+proveniência/estado do gate, não seed nem hardcode da aplicação.
+
 Não há campo organizacional obrigatório antes do desenvolvimento exclusivamente sintético.
 Valores fornecidos por decisão humana são registrados com sua proveniência; os demais
 permanecem literalmente `PENDING_HUMAN_INPUT`.
@@ -71,6 +78,11 @@ Encarregado/DPO formal por serviço externo independente; fornecedor/identidade 
 precisam ser escolhidos e o ato
 formal preservado. Não
 publicar termos definitivos nem contratar usando informação não comprovada.
+
+A implementação da fonte administrativa não conclui o gate: o registro ainda precisa ser
+criado, preenchido e validado por usuários com permissões explícitas. Upload de ato
+societário/comprovante, storage e scanner não integram esta fatia; a conferência externa
+pode ser registrada pela decisão auditada sem armazenar cópia.
 
 Em 29/08/2026 foi autorizada e executada a solicitação controlada de propostas para três
 fornecedores. A shortlist, o registro de envio, o texto uniforme e a matriz de avaliação
