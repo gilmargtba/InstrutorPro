@@ -1,6 +1,6 @@
 # GOV-003 — Política de revisão e aplicação ativa
 
-Status: **SLAs OPERACIONAIS INICIAIS APROVADOS; TABLETOP M1 EXECUTADO COM RESULTADO FAIL** — 29/08/2026.
+Status: **SLAs APROVADOS; TABLETOP M1 REPETIDO COM RESULTADO PASS CONDICIONADO AO ESCOPO** — 29/08/2026.
 
 ## Objetivo
 
@@ -226,6 +226,30 @@ necessária, o exercício registra pendência em vez de presumir aprovação.
 | F-005 | alta | tolerância para fonte oficial indisponível não está aprovada na linha RS | `COMPLIANCE` | definir por fonte/regra; até lá manter `VERIFICATION_PENDING` | `OPEN` |
 | F-006 | média | DPO/Encarregado, controlador e canal reais permanecem pendentes | `PRIVACY_SECURITY` + `LEGAL` | fechar `GOV-004`/gate LGPD aplicável sem equiparar designação provisória a DPO formal | `OPEN` |
 
+### Reexecução após aprovação do procedimento RS
+
+Em 29/08/2026, após decisão humana nominal sobre `GOV002-RS-INSTRUCTOR`, o cenário foi
+repetido com o primeiro instrutor voluntário, independente de Gilmar, sem upload de CNH ou
+documentos. A verificação usa lista oficial manual, revalidação a cada 24 horas e tolerância
+de 72 horas para indisponibilidade. O resultado foi **`PASS` para o fluxo operacional
+GOV-003 nesse recorte**:
+
+1. a presença/autorização foi confirmada manualmente antes da publicação;
+2. publicação interna não alterou o fato oficial e entrou em novas buscas somente após a
+   decisão auditada;
+3. retirada/irregularidade confirmada suspendeu o perfil e o excluiu de novas buscas;
+4. histórico, fonte, horário, ator, regra, motivo e decisão permaneceram preservados;
+5. indisponibilidade bloqueou publicação/republicação, iniciou `VERIFICATION_PENDING` e
+   aplicou a tolerância aprovada ao perfil já publicado;
+6. contestação preservou a decisão anterior; self-review, relação ou manipulação prévia
+   continuaram bloqueados até revisor fisicamente distinto;
+7. falso positivo exigiu nova verificação e decisão compensatória antes da republicação.
+
+Reclassificação dos achados: `F-001=CLOSED`; `F-002=CONDITIONAL` (não bloqueia primeiro
+instrutor independente, bloqueia conflito); `F-004=N/A` para o caminho sem upload;
+`F-005=CLOSED`; `F-003` e `F-006` permanecem `OPEN` em gates jurídico/LGPD separados e
+não são tratados como aprovação legal pelo tabletop.
+
 As ações correspondentes são `AC-001` a `AC-006`, na mesma ordem dos achados. Nenhuma
 recebe prazo inventado; prazo e responsável nominal adicional exigem decisão humana.
 
@@ -244,11 +268,13 @@ recebe prazo inventado; prazo e responsável nominal adicional exigem decisão h
 - [x] rollback por decisão compensatória, sem editar histórico;
 - [x] registrar achados, owner funcional e decisão de reprovar o gate; prazos permanecem pendentes de decisão humana.
 
-Estado do checklist: **executado com evidência sintética e resultado `FAIL`**.
+Estado do checklist: **reexecutado com evidência sintética e resultado `PASS` somente no
+recorte M1 aprovado; operação real ainda depende dos demais gates**.
 
 ## Estado do gate
 
-Os SLAs e papéis funcionais foram aprovados por decisão humana. O tabletop M1 foi
-executado em 29/08/2026 e resultou em **`FAIL`** pelos achados abertos acima. O gate
-continua reprovado antes de operação real de revisão/publicação. Nenhum estado `ACTIVE`,
-elegibilidade ou publicação é liberado por este documento isoladamente.
+Os SLAs, papéis e procedimento RS foram aprovados por decisão humana. O tabletop M1 foi
+repetido em 29/08/2026 e resultou em **`PASS` condicionado ao primeiro instrutor
+independente, Porto Alegre/categoria B e fluxo sem upload**. Esse resultado fecha o gate
+operacional GOV-003 do recorte, mas não libera estado `ACTIVE`, dado real ou publicação
+enquanto LGPD/jurídico, MapTiler, HTTPS/segurança e implementação permanecerem abertos.

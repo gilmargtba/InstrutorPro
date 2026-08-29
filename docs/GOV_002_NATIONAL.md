@@ -67,7 +67,7 @@ Todas as linhas abaixo usam `capability_service=FIRST_LICENSE/CATEGORY_B`, `sour
 
 | UF | provider_type | requirement / credential_document | official_source | effective_from | verification_method | official_flow_mode | review_status | notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| RS | INSTRUCTOR | autorização de instrutor autônomo compatível com categoria/serviço e presença na lista oficial | página Instrutor + Portaria 099/2026 + lista oficial | 2026 | `PUBLIC_LIST+MANUAL` | `UNKNOWN` | `HUMAN_REVIEW_REQUIRED` | aprovar campos/evidência, validade, periodicidade, indisponibilidade e owner |
+| RS | INSTRUCTOR | autorização de instrutor autônomo compatível com categoria/serviço e presença na lista oficial | página Instrutor + Portaria 099/2026 + lista oficial | 2026 | `PUBLIC_LIST+MANUAL` | `UNKNOWN` | `APPROVED` | M1 Porto Alegre/categoria B; consulta manual, 24h, tolerância 72h; sem upload |
 | RS | CLINIC | credenciamento aplicável ao fluxo de habilitação; documento exato a confirmar | Profissionais Processo de Habilitação / Portarias | `UNKNOWN` | `DOCUMENT+MANUAL` | `UNKNOWN` | `HUMAN_REVIEW_REQUIRED` | confirmar livre escolha ou distribuição |
 | RS | DOCTOR | credenciamento e especialidade aplicáveis; evidência individual | Profissionais Processo de Habilitação / Portaria 040/2026 | 2026 | `DOCUMENT+MANUAL` | `UNKNOWN` | `HUMAN_REVIEW_REQUIRED` | vínculo com estabelecimento não pode ser inferido |
 | RS | PSYCHOLOGIST | credenciamento e especialidade aplicáveis; evidência individual | Profissionais Processo de Habilitação / Portaria 040/2026 | 2026 | `DOCUMENT+MANUAL` | `UNKNOWN` | `HUMAN_REVIEW_REQUIRED` | vínculo com estabelecimento não pode ser inferido |
@@ -133,12 +133,14 @@ autônomo pode atuar em primeira habilitação nas categorias ACC, A e B e que q
 consta na lista oficial não pode ministrar aulas como IA. Essa evidência torna
 `PUBLIC_LIST + MANUAL` uma rota candidata para o M1, mas não define automaticamente
 campos preserváveis, validade, frequência, tolerância de indisponibilidade ou aprovação
-humana. Por isso `GOV002-RS-INSTRUCTOR` permanece `HUMAN_REVIEW_REQUIRED`.
+humana. Em 29/08/2026, o responsável humano aprovou nominalmente o procedimento mínimo
+para Porto Alegre/categoria B; `GOV002-RS-INSTRUCTOR` passou a `APPROVED` somente nesse
+recorte, sem promover outra linha, UF, categoria ou publicação automática.
 
-### Procedimento operacional mínimo proposto — `GOV002-RS-INSTRUCTOR`
+### Procedimento operacional mínimo aprovado — `GOV002-RS-INSTRUCTOR`
 
-O M1 pode evitar upload/cópia de CNH ou credencial se a decisão humana aprovar a consulta
-manual à fonte oficial como evidência suficiente para publicação interna. A adesão do
+O M1 evita upload/cópia de CNH ou credencial usando consulta manual à fonte oficial como
+evidência suficiente para a decisão interna. A adesão do
 profissional é voluntária; a lista pública não cria perfil nem autoriza prospecção.
 
 1. receber do candidato somente os identificadores mínimos necessários para localizar e
@@ -150,8 +152,7 @@ profissional é voluntária; a lista pública não cria perfil nem autoriza pros
 4. registrar URL/fonte, data/hora UTC, regra/versão, resultado estruturado, ator, motivo e
    identificador mínimo da evidência; não copiar a lista inteira nem guardar CNH;
 5. verificar novamente antes da primeira publicação e de toda republicação;
-6. enquanto publicado, revalidar na periodicidade aprovada; a recomendação técnica é a
-   cada 24 horas no piloto controlado;
+6. enquanto publicado, revalidar a cada 24 horas no piloto controlado;
 7. indisponibilidade bloqueia nova publicação/republicação. Para perfil já publicado, não
    inferir perda de autorização: marcar verificação pendente, tentar novamente e aplicar
    a tolerância expressamente aprovada;
@@ -159,10 +160,8 @@ profissional é voluntária; a lista pública não cria perfil nem autoriza pros
    transacionalmente, preserva histórico/auditoria e abre canal de contestação;
 9. republicação exige nova consulta válida e nova decisão auditada.
 
-Recomendação pendente de decisão humana: tolerância máxima de 72 horas desde a última
-consulta válida quando a fonte estiver indisponível; após isso, suspensão preventiva até
-nova verificação. Alternativa: tolerância zero, com maior risco de falso bloqueio por
-indisponibilidade do DetranRS. Até aprovação, não existe periodicidade/tolerância operacional.
+Foi aprovada tolerância máxima de 72 horas desde a última consulta válida quando a fonte
+estiver indisponível; após isso, suspensão preventiva até nova verificação.
 
 ### Segregação no M1 mínimo
 
@@ -213,7 +212,7 @@ A tabela abaixo é uma fotografia regulatória para desenho do produto. `PUBLIC_
 
 | UF | Tipo | Baseline encontrado | Fonte/canal oficial | Verificação MVP | Estado interno inicial |
 | --- | --- | --- | --- | --- | --- |
-| RS | INSTRUCTOR | Portaria DETRAN/RS 099/2026; atuação autônoma autorizada para primeira habilitação em ACC/A/B; lista pública de IA autorizados | DetranRS — página Instrutor de Trânsito | `PUBLIC_LIST + MANUAL` | `HUMAN_REVIEW_REQUIRED` |
+| RS | INSTRUCTOR | Portaria DETRAN/RS 099/2026; atuação autônoma autorizada para primeira habilitação em ACC/A/B; lista pública de IA autorizados | DetranRS — página Instrutor de Trânsito | `PUBLIC_LIST + MANUAL` | `APPROVED` para M1 Porto Alegre/categoria B |
 | RS | CLINIC/DOCTOR/PSYCHOLOGIST | DETRAN/RS publica fluxo de credenciamento de médicos e psicólogos; médico exige título de especialista em Medicina de Tráfego e psicólogo título de especialista em Psicologia do Trânsito; atuação ocorre no ecossistema de CFCs/Juntas conforme regra estadual | DetranRS — Profissionais Processo de Habilitação / Portarias | `DOCUMENT + MANUAL` | `HUMAN_REVIEW_REQUIRED` |
 | SC | INSTRUCTOR | cadastro de instrutores credenciados/autônomos e credenciamento digital; lista pública no portal | DETRAN/SC — CNH / Credenciados | `PUBLIC_LIST + MANUAL` | `HUMAN_REVIEW_REQUIRED` |
 | SC | CLINIC | listas públicas de clínicas médicas e psicológicas credenciadas | DETRAN/SC — Credenciados / Endereços | `PUBLIC_LIST + MANUAL` | `HUMAN_REVIEW_REQUIRED` |
@@ -362,7 +361,7 @@ Metadados comuns: decisão anterior e final referem-se a `review_status`; impact
 
 | Identificador | UF/tipo | Decisão anterior → final | Fundamento e evidência/fonte registrada | Dependências remanescentes |
 | --- | --- | --- | --- | --- |
-| `GOV002-RS-INSTRUCTOR` | RS / INSTRUCTOR | `HUMAN_REVIEW_REQUIRED` → `HUMAN_REVIEW_REQUIRED` | Portaria DETRAN/RS 099/2026 e página Instrutor de Trânsito; há evidência potencial, sem decisão nominal | vigência, documento individual, campos mínimos, periodicidade e `official_flow_mode` |
+| `GOV002-RS-INSTRUCTOR` | RS / INSTRUCTOR | `HUMAN_REVIEW_REQUIRED` → `APPROVED` | decisão humana de 29/08/2026; Portaria 099/2026, página/lista oficial, procedimento manual sem upload, revalidação 24h e tolerância 72h | limitado a M1 Porto Alegre/categoria B; demais escopos exigem novo gate |
 | `GOV002-RS-CLINIC` | RS / CLINIC | `HUMAN_REVIEW_REQUIRED` → `HUMAN_REVIEW_REQUIRED` | Profissionais Processo de Habilitação/portarias; documento e fluxo exatos não aprovados | evidência do estabelecimento, validade, projeção pública e modo de fluxo |
 | `GOV002-RS-DOCTOR` | RS / DOCTOR | `HUMAN_REVIEW_REQUIRED` → `HUMAN_REVIEW_REQUIRED` | Profissionais Processo de Habilitação e Portaria 040/2026; especialidade registrada, evidência individual ainda não aprovada | credenciamento individual, validade, vínculo e periodicidade |
 | `GOV002-RS-PSYCHOLOGIST` | RS / PSYCHOLOGIST | `HUMAN_REVIEW_REQUIRED` → `HUMAN_REVIEW_REQUIRED` | Profissionais Processo de Habilitação e Portaria 040/2026; especialidade registrada, evidência individual ainda não aprovada | credenciamento individual, validade, vínculo e periodicidade |
@@ -383,7 +382,7 @@ Metadados comuns: decisão anterior e final referem-se a `review_status`; impact
 | `GOV002-ES-DOCTOR` | ES / DOCTOR | `RESEARCH_REQUIRED` → `RESEARCH_REQUIRED` | SIT/Instruções de Serviço confirmam ecossistema de clínicas, não prova individual | localizar ato/evidência individual, validade, vínculo e modo de fluxo |
 | `GOV002-ES-PSYCHOLOGIST` | ES / PSYCHOLOGIST | `RESEARCH_REQUIRED` → `RESEARCH_REQUIRED` | SIT/Instruções de Serviço confirmam ecossistema de clínicas, não prova individual | localizar ato/evidência individual, validade, vínculo e modo de fluxo |
 
-Resultado documental: **0 `APPROVED`, 16 `HUMAN_REVIEW_REQUIRED`, 4 `RESEARCH_REQUIRED`**. A estrutura nacional e o recorte `FIRST_LICENSE/CATEGORY_B` permanecem decisões aceitas; o conteúdo operacional das linhas continua pendente. `OPEN-002` não foi fechado.
+Resultado documental: **1 `APPROVED`, 15 `HUMAN_REVIEW_REQUIRED`, 4 `RESEARCH_REQUIRED`**. A aprovação é exclusivamente `GOV002-RS-INSTRUCTOR` para M1 Porto Alegre/categoria B. `OPEN-002` está resolvido para esse recorte e permanece aberto para todo escopo não aprovado.
 
 ## Estado do gate
 

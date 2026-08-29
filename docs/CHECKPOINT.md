@@ -16,6 +16,13 @@ A fase continua **M0**, com `GOV-001/OPEN-001` concluído. Esta consolidação n
 
 ## Últimas atividades concluídas
 
+Procedimento `GOV002-RS-INSTRUCTOR` aprovado por decisão humana em 29/08/2026 somente
+para M1 Porto Alegre/categoria B: consulta manual voluntária sem upload, revalidação a
+cada 24 horas e tolerância de 72 horas para indisponibilidade. A linha passou a
+`APPROVED`; as outras 19 permanecem inalteradas. O tabletop GOV-003 foi repetido e obteve
+`PASS` no mesmo recorte, com self-review/conflito ainda exigindo pessoa distinta. Isso não
+libera dados reais ou implementação.
+
 Operador/controlador do M1 registrado em 29/08/2026 como pessoa jurídica, CNPJ
 `10.280.826/0001-05`, e canal inicial de privacidade `focusgtba@gmail.com`. A decisão não
 comprova razão social, representação, endereço nem designa DPO. O caminho mínimo RS foi
@@ -23,12 +30,13 @@ reduzido: consulta manual oficial pode dispensar upload/storage/scanner no prime
 instrutor se o procedimento proposto for aprovado; segundo revisor só é bloqueante para
 self-review, relação ou conflito. Nenhum dado real ou código foi ativado.
 
-Prontidão pré-produção M1 avaliada em 29/08/2026 com resultado **`NOT READY`**. A análise
+Prontidão pré-produção M1 inicialmente avaliada em 29/08/2026 com resultado **`NOT READY`**. A análise
 focada em Porto Alegre/RS consolidou seis bloqueadores reais: regra/operação RS,
 operador/LGPD/jurídico, segregação, cadastro/documentos reais, MapTiler contratual e
 plataforma segura de produção. A fonte oficial do DetranRS confirma categoria B e lista
-de IA autorizados, mas `GOV002-RS-INSTRUCTOR` continua sem aprovação nominal. Nenhum dado
-real, código, migration, deploy ou integração foi ativado.
+de IA autorizados; naquela avaliação `GOV002-RS-INSTRUCTOR` ainda não tinha aprovação
+nominal. A decisão posterior registrada acima substitui esse bloqueio, sem ativar dado
+real, código, migration, deploy ou integração.
 
 Tabletop obrigatório `GOV-003` do piloto M1 executado documentalmente em 29/08/2026,
 com Gilmar Cesar Alves atuando separadamente nas cinco funções provisórias e Codex apenas
@@ -107,15 +115,14 @@ Revisão jurídico-técnica de privacidade em fontes oficiais vigentes em 22/07/
 
 ## Atividade em execução
 
-Nenhuma implementação em execução. CODEX 02E terminou; não retomar CODEX 02C. O
-`GOV-003` está executado e reprovado; F-001 a F-006, as condições contratuais de
-`OPEN-007`, elegibilidade e LGPD bloqueiam localizações/profissionais reais.
+Nenhuma implementação em execução. CODEX 02E terminou; não retomar CODEX 02C.
+`GOV-002/003` passaram no recorte M1 aprovado; condições de LGPD/jurídico, `OPEN-007`,
+HTTPS/segurança e implementação bloqueiam localizações/profissionais reais.
 
 ## Próxima atividade
 
-Receber como próxima decisão única a aprovação ou rejeição do procedimento
-`GOV002-RS-INSTRUCTOR`: verificação manual sem upload, revalidação a cada 24 horas e
-tolerância máxima de 72 horas para indisponibilidade da fonte. Depois, fechar
+Receber como próxima decisão única a designação formal do Encarregado/DPO do M1 exigida
+pela política interna, com avaliação de conflito. Depois, aprovar LIA/RIPD/avisos e fechar
 sequencialmente os bloqueadores restantes de `M1_PREPRODUCTION_READINESS.md`. Não retomar
 automaticamente inventário/revogação interna de sessões (`IAM-003`/CODEX 02C).
 
@@ -123,7 +130,7 @@ automaticamente inventário/revogação interna de sessões (`IAM-003`/CODEX 02C
 
 | ID       | Classe         | Resumo                                                          | Gate                 |
 | -------- | -------------- | --------------------------------------------------------------- | -------------------- |
-| OPEN-002 | bloqueante     | requisitos locais e política de revisão                         | A14/M2               |
+| OPEN-002 | resolvido M1 / bloqueante demais escopos | RS/Porto Alegre/B aprovado; demais linhas pendentes | A14/M2 |
 | OPEN-003 | bloqueante     | comissão, hold, cancelamento, no-show, conclusão e disputa      | B5/B6/M3             |
 | OPEN-004 | bloqueante     | responsabilidade, consumo, vínculo, seguro, termos e bases LGPD | usuários reais/M6    |
 | OPEN-005 | bloqueante     | gateway, split/KYC, tributação e política contábil              | C1/M4                |
@@ -141,8 +148,7 @@ Detalhes, recomendação, alternativas, impactos e owner estão em `DECISIONS.md
 
 ## Bloqueios
 
-- conteúdo regulatório por linha ainda precisa de aprovação humana antes de elegibilidade/publicação (`OPEN-002`);
-- tabletop de `GOV-003` foi executado com `FAIL`; F-001 a F-006 e a repetição aprovada continuam bloqueando operação real;
+- `GOV002-RS-INSTRUCTOR` e o tabletop passaram no recorte M1; qualquer outra linha/escopo continua bloqueada por `OPEN-002`;
 - operador PJ/CNPJ e canal inicial estão definidos; razão social, representação, endereço, DPO e documentos aplicáveis permanecem pendentes para homologação/produção;
 - provider real continua bloqueado até decisão contratual, mas adapters/simuladores estão liberados para desenvolvimento (`OPEN-006`);
 - menores permanecem bloqueados no MVP; `OPEN-014` não bloqueia desenvolvimento sintético para adultos, mas bloqueia qualquer expansão/cadastro operacional de menores.

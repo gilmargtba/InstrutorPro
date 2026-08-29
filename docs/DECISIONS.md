@@ -55,7 +55,7 @@ Este documento é a fonte oficial de decisões consolidadas, contradições reso
 
 | ID       | Classe/gate                            | Questão                                                                         | Recomendação proposta                                                                            | Alternativas e impactos                                                                       | Dono                                       |
 | -------- | -------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------- | ------------------------------------------ |
-| OPEN-002 | **Bloqueante para regra regulada/A14; não bloqueia fundação sintética** | Quais evidências e requisitos locais, validade e revisão? | Matriz normalizada baseada em fontes oficiais e revisão humana por linha. | URL/pesquisa não basta; nenhuma linha pode liberar elegibilidade/publicação sem aprovação. | COMPLIANCE + LEGAL |
+| OPEN-002 | **Resolvido para M1 Porto Alegre/categoria B; bloqueante nos demais escopos** | Quais evidências e requisitos locais, validade e revisão? | `GOV002-RS-INSTRUCTOR` aprovado com lista manual, 24h, tolerância 72h e sem upload; demais linhas seguem conservadoras. | A aprovação M1 não se estende a outra UF/categoria/tipo. | COMPLIANCE + LEGAL |
 | OPEN-003 | **Bloqueante B5/B6**                   | Comissão, preço, hold, cancelamento, no-show, conclusão e disputa.              | Uma política simples e versionada, validada por jurídico/finanças e testada no piloto.           | Regras flexíveis aumentam casos e suporte; regras rígidas elevam abandono/risco consumerista. | Product + Legal + Finance + Operations     |
 | OPEN-004 | **Bloqueante antes de usuários reais** | Responsabilidade da plataforma, consumo, vínculo, seguros, termos e bases LGPD. | Parecer jurídico brasileiro documentado e termos aprovados.                                      | Operar só com disclaimers não reduz adequadamente o risco.                                    | Legal + Compliance                         |
 | OPEN-005 | **Bloqueante C1**                      | Gateway, fluxo de split/KYC, tributação e política contábil.                    | RFP com sandbox e prova de webhook/conciliação; parecer jurídico-contábil antes do ledger final. | Checkout simples sem split muda repasse/risco; custódia pela plataforma está fora do escopo.  | Finance + Legal + Accounting + Engineering |
@@ -83,8 +83,8 @@ Cada questão fechada deve gerar ADR ou atualização desta tabela com: decisão
 
 | ID | Proposta | Evidência pendente para aceite |
 | --- | --- | --- |
-| P-002 | Adotar a matriz de `GOV_002_NATIONAL.md` e a revisão manual documentada como baseline de elegibilidade. | Aprovação Compliance/Legal, owner/periodicidade por linha e tratamento dos gaps individuais; fecha `OPEN-002` somente depois disso. |
-| P-003 | Adotar `GOV_003_REVIEW_POLICY.md` para segregação, motivos, concorrência, expiração e contestação. | SLAs e papéis funcionais aprovados; tabletop M1 executado em 29/08/2026 com `FAIL`. F-001 a F-006 permanecem abertos e bloqueiam operação real de revisão/publicação. |
+| P-002 | Adotar a matriz de `GOV_002_NATIONAL.md` e a revisão manual documentada como baseline de elegibilidade. | `APPROVED` somente para `GOV002-RS-INSTRUCTOR` no M1 Porto Alegre/categoria B; demais linhas continuam pendentes. |
+| P-003 | Adotar `GOV_003_REVIEW_POLICY.md` para segregação, motivos, concorrência, expiração e contestação. | Tabletop repetido com `PASS` no recorte RS aprovado, sem upload e com instrutor independente; outros gates não são liberados. |
 
 ## Questões encerradas por decisão humana — 24/08/2026
 
@@ -112,6 +112,7 @@ Cada questão fechada deve gerar ADR ou atualização desta tabela com: decisão
 | ADR-048 | **Tabletop GOV-003 do M1 foi executado com resultado `FAIL`.** | O exercício sintético validou o fluxo esperado, mas `RS/INSTRUCTOR` não aprovado, ausência de revisor independente, validação jurídica externa, storage/scanner e pendências organizacionais impedem aprovação do gate e qualquer operação real. |
 | ADR-049 | **Prontidão pré-produção M1 avaliada como `NOT READY`.** | Seis bloqueadores concretos permanecem: regra/operação RS, operador/LGPD/jurídico, segregação, cadastro/documentos reais, MapTiler contratual e plataforma segura de produção. Nenhuma implementação ou operação real foi liberada. |
 | ADR-050 | **Operador/controlador e canal inicial do M1 definidos.** | Pessoa jurídica CNPJ `10.280.826/0001-05` e `focusgtba@gmail.com` foram informados por decisão humana para Porto Alegre/RS. Razão social, representação, endereço e DPO não foram inventados e continuam pendentes de comprovação/decisão aplicável. |
+| ADR-051 | **Procedimento `GOV002-RS-INSTRUCTOR` aprovado para M1 e tabletop GOV-003 aprovado no mesmo recorte.** | Verificação manual voluntária sem upload, revalidação 24h e tolerância 72h; self-review/conflito exige pessoa distinta. A decisão não libera dado real, código ou outra UF/categoria. |
 
 ## Decisões aceitas — consolidação 2026-08-19
 

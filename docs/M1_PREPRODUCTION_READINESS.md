@@ -13,30 +13,27 @@ as decisões humanas registradas e as fontes oficiais revalidadas nesta data.
 
 ## 1. GOV-002 M1
 
-**FAIL.** Somente `RS/INSTRUCTOR` e `FIRST_LICENSE/CATEGORY_B` são necessários neste
+**PASS documental no recorte.** Somente `RS/INSTRUCTOR` e `FIRST_LICENSE/CATEGORY_B` são necessários neste
 recorte; clínica, médico e psicólogo são `N/A` para o fluxo avaliado.
 
 | Capacidade necessária | Estado | Evidência | Pendência impeditiva |
 | --- | --- | --- | --- |
-| autorização oficial individual | `PENDING` | DetranRS informa que somente IA constante da lista oficial pode ministrar aulas como autônomo | procedimento de conferência, evidência preservável, validade e owner ainda não aprovados |
-| categoria/serviço | `PENDING` | DetranRS informa ACC/A/B e primeira habilitação/adição; Resolução CONTRAN 1.020/2025 disciplina aulas práticas | aprovação nominal da regra `RS/INSTRUCTOR` ainda ausente |
-| verificação | `PENDING` | rota manual por página/lista oficial é tecnicamente possível | campos mínimos, indisponibilidade, periodicidade e contestação não aprovados |
+| autorização oficial individual | `APPROVED` para o M1 | DetranRS informa que somente IA constante da lista oficial pode ministrar aulas como autônomo | consulta manual antes de publicar/republicar e a cada 24h |
+| categoria/serviço | `APPROVED` para Porto Alegre/B | DetranRS informa ACC/A/B e primeira habilitação/adição; Resolução CONTRAN 1.020/2025 disciplina aulas práticas | não se estende a outra categoria/UF |
+| verificação | `APPROVED` sem upload | fonte/data/ator/resultado/regra registrados; tolerância 72h | implementação e homologação ainda pendentes |
 | elegibilidade/publicação | `BLOCKED` | policy interna separa verificação, decisão e publicação | depende da linha aprovada, documentos reais, contato verificado e controles A14–A18 |
 | suspensão/retirada | `CONDITIONAL` | serviços sintéticos suspendem e selectors retiram de novas buscas | homologação com estados/evidências reais e revisor independente pendente |
 
-Não houve autorização humana nominal para transformar `GOV002-RS-INSTRUCTOR` em
-`APPROVED`. A linha permanece `HUMAN_REVIEW_REQUIRED`.
+Houve autorização humana nominal para transformar `GOV002-RS-INSTRUCTOR` em `APPROVED`
+somente no M1 Porto Alegre/categoria B.
 
 ## 2. GOV-003
 
-**FAIL.** O tabletop foi executado e percorreu suspensão, retirada de novas buscas,
+**PASS operacional condicionado ao recorte.** O tabletop foi repetido após a aprovação RS e percorreu suspensão, retirada de novas buscas,
 preservação histórica, auditoria, contestação e decisão compensatória. Permanecem abertos
-F-001 a F-006. Os impeditivos centrais são a linha RS não aprovada, ausência de segundo
-revisor independente, validação jurídica externa quando necessária, storage/scanner não
-homologados, tolerância de fonte não definida e organização/canal LGPD pendentes.
-
-Correção exclusivamente textual não transforma esses fatos externos em `PASS`; por isso o
-tabletop não foi repetido artificialmente.
+contestação e decisão compensatória. `F-001/F-005` foram fechados, `F-004` é `N/A` no
+caminho sem upload e `F-002` é condicional a conflito. Pendências jurídicas/LGPD continuam
+em gates separados.
 
 ## 3. LGPD visitante
 
@@ -118,7 +115,7 @@ produção. `ADMIN` não recebe poder automático de revisão/publicação.
 
 | Bloqueador concreto | Regra/evidência | Risco | O que falta | Quem decide | Ação mínima |
 | --- | --- | --- | --- | --- | --- |
-| BCR-01 — regra e operação RS | `GOV002-RS-INSTRUCTOR` segue `HUMAN_REVIEW_REQUIRED`; DetranRS exige IA autorizado/listado | publicar não autorizado ou manter inelegível | aprovação nominal, campos, validade, periodicidade, indisponibilidade e evidência | Compliance + coordenação Legal; jurídico externo quando necessário | aprovar a linha e procedimento manual M1 |
+| BCR-01 — regra e operação RS | `GOV002-RS-INSTRUCTOR=APPROVED` no M1 | risco controlado documentalmente | falta implementação/homologação | Compliance + Engineering | implementar exatamente o procedimento aprovado |
 | BCR-02 — LGPD/jurídico | operador PJ/CNPJ e canal inicial foram definidos; razão social/representação, aviso, LIA/RIPD e retenção seguem pendentes | tratamento sem transparência, base ou responsabilidade comprovada | comprovação institucional aplicável, termos/aviso, bases/LIA/RIPD, retenção e eventual Encarregado | responsável humano + Privacy/Legal; terceiro qualificado quando exigido | preparar e aprovar pacote LGPD M1 |
 | BCR-03 — segregação condicional | policy bloqueia self-review/relação/manipulação prévia; segundo revisor em contestação é “quando possível” | conflito de interesse | segunda pessoa somente para caso próprio/relacionado/conflitante; revisão posterior não substitui independência | Administração + Compliance | primeiro instrutor deve ser independente de Gilmar; caso conflitante fica bloqueado |
 | BCR-04 — cadastro/verificação real minimizados | implementação é `DEMO/SYNTHETIC`; consulta oficial pode dispensar upload no primeiro piloto | vazamento ou publicação inválida | cadastro seguro, contato, termos, registro manual oficial, elegibilidade, MFA e testes; storage/scan saem do caminho imediato somente se o procedimento RS for aprovado | Product/Engineering + Security/Operations | aprovar procedimento sem upload e depois autorizar implementação |
@@ -130,9 +127,9 @@ regulatórias, de privacidade, segurança e técnica já existentes.
 
 ## 12. Decisões humanas restantes
 
-Operador PJ/CNPJ e canal inicial foram definidos. A próxima decisão única é aprovar ou não
-o procedimento `GOV002-RS-INSTRUCTOR` sem upload, com revalidação a cada 24 horas e
-tolerância de 72 horas para indisponibilidade da fonte. Depois: pacote jurídico/LGPD,
+Operador/canal e procedimento RS foram aprovados. A próxima decisão única pertence ao
+pacote LGPD M1: definir formalmente o Encarregado/DPO exigido pela política interna do
+projeto, preservando conflito de interesse. Depois: aprovação da LIA/RIPD/avisos,
 aceite MapTiler e autorização do card de implementação production-ready.
 
 ## 13. Arquivos alterados
@@ -153,4 +150,4 @@ O M1 continua documentalmente delimitado em Porto Alegre/RS, mas não pode receb
 ou profissionais reais. `CODEX 02C/IAM-003`, pagamentos, Pix, split, IA, integrações
 governamentais, scraping e importação automática continuam suspensos.
 
-**PRÉ-PRODUÇÃO M1 NOT READY — EXISTEM OS SEGUINTES BLOQUEADORES CRÍTICOS: REGRA E OPERAÇÃO RS, LGPD/JURÍDICO, CADASTRO/VERIFICAÇÃO REAIS, MAPTILER CONTRATUAL E PLATAFORMA SEGURA DE PRODUÇÃO. SEGREGAÇÃO É CONDICIONAL AO CONFLITO DO CASO.**
+**PRÉ-PRODUÇÃO M1 NOT READY — EXISTEM OS SEGUINTES BLOQUEADORES CRÍTICOS: LGPD/JURÍDICO, CADASTRO/VERIFICAÇÃO REAIS, MAPTILER CONTRATUAL E PLATAFORMA SEGURA DE PRODUÇÃO. SEGREGAÇÃO É CONDICIONAL AO CONFLITO DO CASO.**
