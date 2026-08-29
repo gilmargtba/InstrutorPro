@@ -1,7 +1,7 @@
 # Checkpoint do Projeto
 
 - Atualizado em: **2026-08-29**
-- Versão documental: **3.0**
+- Versão documental: **3.1**
 - Código-fonte: **CODEX 02E concluído; fundações anteriores preservadas**
 
 ## Consolidação de produto em 2026-08-19
@@ -15,6 +15,13 @@ A fase continua **M0**, com `GOV-001/OPEN-001` concluído. Esta consolidação n
 **INSTRUTORPRO DEMO 01 concluída.** O frontend contém experiência visual navegável e mobile-first apenas com fixtures sintéticas. CODEX 01, 02A e 02B permanecem preservados; CODEX 02C está suspenso e não deve ser retomado sem autorização explícita. Capacidades reguladas, usuários reais, perfis e publicação continuam condicionados aos respectivos gates.
 
 ## Últimas atividades concluídas
+
+Dados organizacionais adicionais declarados pelo responsável humano em 29/08/2026:
+razão social `FOCUS INFORMATICA E CELULAR LTDA`, endereço parcial
+`RUA MATO GROSSO 1660`, representante parcial `Gilmar Cesar` e contato operacional
+`64996765431`. O registro é documental e mantém pendentes comprovação, endereço completo,
+nome civil/qualidade de representação e homologação do canal; nenhum dado foi gravado no
+banco ou exposto pelo painel administrativo.
 
 Cotação controlada para Encarregado/DPO externo enviada em 29/08/2026 a Seusdados,
 Omnisblue e Global Data Solutions, com mensagem uniforme e matriz de avaliação. Os três
@@ -39,7 +46,8 @@ libera dados reais ou implementação.
 
 Operador/controlador do M1 registrado em 29/08/2026 como pessoa jurídica, CNPJ
 `10.280.826/0001-05`, e canal inicial de privacidade `focusgtba@gmail.com`. A decisão não
-comprova razão social, representação, endereço nem designa DPO. O caminho mínimo RS foi
+comprova as declarações posteriores de razão social, representação e endereço parcial,
+nem designa DPO. O caminho mínimo RS foi
 reduzido: consulta manual oficial pode dispensar upload/storage/scanner no primeiro
 instrutor se o procedimento proposto for aprovado; segundo revisor só é bloqueante para
 self-review, relação ou conflito. Nenhum dado real ou código foi ativado.
@@ -164,7 +172,7 @@ Detalhes, recomendação, alternativas, impactos e owner estão em `DECISIONS.md
 ## Bloqueios
 
 - `GOV002-RS-INSTRUCTOR` e o tabletop passaram no recorte M1; qualquer outra linha/escopo continua bloqueada por `OPEN-002`;
-- operador PJ/CNPJ e canal inicial estão definidos; razão social, representação, endereço, DPO e documentos aplicáveis permanecem pendentes para homologação/produção;
+- operador PJ/CNPJ, razão social declarada e canais iniciais estão definidos; comprovação, endereço completo, representação, DPO e documentos aplicáveis permanecem pendentes para homologação/produção;
 - provider real continua bloqueado até decisão contratual, mas adapters/simuladores estão liberados para desenvolvimento (`OPEN-006`);
 - menores permanecem bloqueados no MVP; `OPEN-014` não bloqueia desenvolvimento sintético para adultos, mas bloqueia qualquer expansão/cadastro operacional de menores.
 

@@ -24,13 +24,13 @@ permanecem literalmente `PENDING_HUMAN_INPUT`.
 
 | Campo | Valor atual | Necessário antes de |
 | --- | --- | --- |
-| razão social | `PENDING_HUMAN_INPUT` | homologação com contratos/avisos reais; produção |
+| razão social | `FOCUS INFORMATICA E CELULAR LTDA` — declarada pelo responsável humano em 29/08/2026; comprovação documental pendente | homologação com contratos/avisos reais; produção |
 | nome fantasia | `PENDING_HUMAN_INPUT` | homologação de conteúdo/identidade pública; produção |
 | tipo de operador | `PESSOA_JURIDICA` — decisão humana de 29/08/2026 | M1 Porto Alegre/RS |
 | CNPJ | `10.280.826/0001-05` — informado pelo responsável humano; razão social ainda sem comprovação | homologação contratual/fiscal; produção |
-| endereço empresarial | `PENDING_HUMAN_INPUT` | termos, privacidade, contratos e produção |
-| responsável legal | `PENDING_HUMAN_INPUT` | assinatura/aprovação de documentos; produção |
-| contato operacional | `PENDING_HUMAN_INPUT` | homologação operacional/piloto; produção |
+| endereço empresarial | `RUA MATO GROSSO 1660` — declarado pelo responsável humano em 29/08/2026; município/UF/CEP e comprovação pendentes | termos, privacidade, contratos e produção |
+| responsável legal | `Gilmar Cesar` — declarado pelo responsável humano em 29/08/2026; nome civil completo, qualidade de representação e comprovação pendentes | assinatura/aprovação de documentos; produção |
+| contato operacional | `64996765431` — declarado pelo responsável humano em 29/08/2026; formato/canal e homologação pendentes | homologação operacional/piloto; produção |
 | contato de privacidade | `focusgtba@gmail.com` — canal inicial do M1 | homologação do fluxo de direitos; antes de qualquer dado real |
 | encarregado/DPO | modelo `EXTERNAL_INDEPENDENT` aprovado; fornecedor, identidade e ato formal `PENDING_HUMAN_INPUT` | antes de qualquer dado real |
 | contato jurídico | `PENDING_HUMAN_INPUT` | homologação jurídica/contestação; produção |
@@ -48,9 +48,13 @@ permanecem literalmente `PENDING_HUMAN_INPUT`.
 
 - operador/controlador declarado para o M1: pessoa jurídica, CNPJ
   `10.280.826/0001-05`, limitado ao recorte Porto Alegre/RS;
+- razão social declarada: `FOCUS INFORMATICA E CELULAR LTDA`;
+- endereço empresarial declarado parcialmente: `RUA MATO GROSSO 1660`;
+- representante declarado parcialmente: `Gilmar Cesar`;
+- contato operacional declarado: `64996765431`;
 - canal inicial de privacidade e direitos: `focusgtba@gmail.com`;
-- essa decisão não comprova razão social, representação, endereço, CNAE nem designa
-  Encarregado/DPO;
+- essas declarações ainda não comprovam cadastro, representação, endereço completo,
+  CNAE nem designam Encarregado/DPO;
 - nome operacional do produto: `InstrutorPro`, sujeito à validação jurídica de marca/domínio;
 - arquitetura: monólito modular nacional para 27 UFs;
 - primeira onda técnica/comercial autorizada: RS, SC, SP, RJ e ES; AM, RO, AC e RR permanecem somente na matriz regulatória;

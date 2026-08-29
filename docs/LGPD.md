@@ -299,7 +299,7 @@ Este recorte não declara conformidade LGPD integral. Ele cobre somente a opera�
 | fontes | entrada explícita do visitante; área de serviço declarada/autorizada pelo instrutor; elegibilidade vem de processo separado |
 | sistemas | frontend, API/selector público, PostGIS e MapTiler condicionado em `ADR-047` |
 | compartilhamentos | MapTiler recebe consulta minimizada somente após condições contratuais de `OPEN-007`; nenhum instrutor recebe a consulta individual |
-| controlador | pessoa jurídica operadora declarada para o M1, CNPJ `10.280.826/0001-05`; razão social/representação pendentes de comprovação em `GOV-004` |
+| controlador | pessoa jurídica operadora declarada para o M1, CNPJ `10.280.826/0001-05`, razão social declarada `FOCUS INFORMATICA E CELULAR LTDA`; identidade, endereço e representação completos ainda dependem de comprovação em `GOV-004` |
 | operadores/suboperadores | infraestrutura/geocoding/observabilidade `PENDING` até seleção, contrato, países e subprocessadores |
 | canal de direitos | `focusgtba@gmail.com`, canal inicial do M1; Encarregado/DPO formal é exigido, mas ainda não foi designado |
 | owner | Gilmar Cesar Alves nas funções provisórias de Product/Privacy/Legal/Operations; aprovações externas permanecem separadas quando exigidas |
