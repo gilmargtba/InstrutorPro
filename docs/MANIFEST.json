@@ -1,7 +1,7 @@
 {
   "package": "instrutorpro-documentation",
-  "version": "2.8",
-  "reviewed_on": "2026-08-24",
+  "version": "2.9",
+  "reviewed_on": "2026-08-29",
   "path_base": "repository-root",
   "normative_documents": [
     "README.md",
@@ -28,6 +28,7 @@
     "docs/GOV_002_NATIONAL.md",
     "docs/GOV_003_REVIEW_POLICY.md",
     "docs/GOV_004_ORGANIZATION.md",
+    "docs/M1_PREPRODUCTION_READINESS.md",
     "AGENTS.md",
     "docs/PROMPT.md",
     "docs/CODEX_01_FOUNDATION.md",
@@ -52,7 +53,7 @@
       "note": "Provisional brand asset; the product name and visual identity remain open decisions."
     }
   ],
-  "updated_at": "2026-08-24",
+  "updated_at": "2026-08-29",
   "scope": "national-27-ufs",
   "first_wave": [
     "RS",
@@ -82,5 +83,5 @@
     "INSTRUCTOR_CANDIDATE",
     "INSTRUCTOR_ACADEMY"
   ],
-  "notes": "Deploy reproduzível da demo sintética no Ubuntu preparado; CODEX 02E permanece concluído e CODEX 02C suspenso."
+  "notes": "Prontidão pré-produção M1 avaliada como NOT READY; CODEX 02E permanece concluído e CODEX 02C suspenso."
 }

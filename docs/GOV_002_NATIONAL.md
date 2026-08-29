@@ -67,7 +67,7 @@ Todas as linhas abaixo usam `capability_service=FIRST_LICENSE/CATEGORY_B`, `sour
 
 | UF | provider_type | requirement / credential_document | official_source | effective_from | verification_method | official_flow_mode | review_status | notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| RS | INSTRUCTOR | autorização de instrutor compatível com categoria/serviço; documento individual a confirmar | página Instrutor + Portaria 099/2026 | 2026 | `PUBLIC_SOURCE+MANUAL` | `UNKNOWN` | `HUMAN_REVIEW_REQUIRED` | confirmar vigência, campos mínimos e periodicidade |
+| RS | INSTRUCTOR | autorização de instrutor autônomo compatível com categoria/serviço e presença na lista oficial | página Instrutor + Portaria 099/2026 + lista oficial | 2026 | `PUBLIC_LIST+MANUAL` | `UNKNOWN` | `HUMAN_REVIEW_REQUIRED` | aprovar campos/evidência, validade, periodicidade, indisponibilidade e owner |
 | RS | CLINIC | credenciamento aplicável ao fluxo de habilitação; documento exato a confirmar | Profissionais Processo de Habilitação / Portarias | `UNKNOWN` | `DOCUMENT+MANUAL` | `UNKNOWN` | `HUMAN_REVIEW_REQUIRED` | confirmar livre escolha ou distribuição |
 | RS | DOCTOR | credenciamento e especialidade aplicáveis; evidência individual | Profissionais Processo de Habilitação / Portaria 040/2026 | 2026 | `DOCUMENT+MANUAL` | `UNKNOWN` | `HUMAN_REVIEW_REQUIRED` | vínculo com estabelecimento não pode ser inferido |
 | RS | PSYCHOLOGIST | credenciamento e especialidade aplicáveis; evidência individual | Profissionais Processo de Habilitação / Portaria 040/2026 | 2026 | `DOCUMENT+MANUAL` | `UNKNOWN` | `HUMAN_REVIEW_REQUIRED` | vínculo com estabelecimento não pode ser inferido |
@@ -127,6 +127,13 @@ controlado do M1. A decisão reduz a próxima análise à linha `RS/INSTRUCTOR` 
 na cidade, mas não promove seu `review_status`: ela permanece
 `HUMAN_REVIEW_REQUIRED`, sem elegibilidade ou publicação real, até aprovação nominal de
 Compliance/Legal e fechamento dos gaps registrados.
+
+Na revalidação oficial de 29/08/2026, a página do DetranRS confirmou que o instrutor
+autônomo pode atuar em primeira habilitação nas categorias ACC, A e B e que quem não
+consta na lista oficial não pode ministrar aulas como IA. Essa evidência torna
+`PUBLIC_LIST + MANUAL` uma rota candidata para o M1, mas não define automaticamente
+campos preserváveis, validade, frequência, tolerância de indisponibilidade ou aprovação
+humana. Por isso `GOV002-RS-INSTRUCTOR` permanece `HUMAN_REVIEW_REQUIRED`.
 
 ## Privacidade
 

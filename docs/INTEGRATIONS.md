@@ -167,6 +167,12 @@ mecanismo de transferência, retenção da consulta, endpoint europeu, restriç�
 budget/rate limit e testes de indisponibilidade. Nenhum segredo ou chamada real é ativado
 por esta decisão documental.
 
+Revalidação em 29/08/2026: o plano Flex publicado custa US$ 30/mês e inclui 25 mil
+sessões de mapa, 3 mil sessões de busca e 500 mil requisições de API; os excedentes
+publicados são US$ 2,50/1.000 sessões e US$ 0,15/1.000 requisições. O endpoint
+`api.maptiler.eu` exige plano pago e pode reduzir a priorização de resultados fora da
+Europa. Preço e limites são variáveis externas e devem ser confirmados no aceite.
+
 ## Fontes oficiais e primeira onda
 
 A matriz de verificação começa por **RS, SC, SP, RJ e ES** e detalha também **RO, AM, AC e RR**, mas o contrato técnico é nacional. Para cada UF e tipo (`INSTRUCTOR`, `CLINIC`, `DOCTOR`, `PSYCHOLOGIST`) registrar: órgão/fonte oficial, capacidade de consulta, campos disponíveis, termos/limites, atualização, fallback manual e evidência preservada.

@@ -80,6 +80,7 @@ Flex em Porto Alegre/RS:
 - [MapTiler Cloud — preços e franquias](https://www.maptiler.com/cloud/pricing/)
 - [MapTiler Cloud — termos](https://www.maptiler.com/terms/cloud/)
 - [MapTiler — dados pessoais e endpoint europeu](https://docs.maptiler.com/guides/maps-apis/maps-platform/personal-data-in-maptiler-cloud/)
+- [MapTiler — endpoint europeu](https://docs.maptiler.com/guides/api/eu-based-api-endpoint/)
 - [MapTiler — segurança e papel de operador](https://www.maptiler.com/security/)
 - [MapTiler — API de geocoding](https://docs.maptiler.com/cloud/api/reference/)
 - [MapTiler — integração com Leaflet](https://docs.maptiler.com/sdk-js/modules/geocoding/)

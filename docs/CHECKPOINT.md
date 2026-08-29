@@ -1,7 +1,7 @@
 # Checkpoint do Projeto
 
 - Atualizado em: **2026-08-29**
-- Versão documental: **2.8**
+- Versão documental: **2.9**
 - Código-fonte: **CODEX 02E concluído; fundações anteriores preservadas**
 
 ## Consolidação de produto em 2026-08-19
@@ -15,6 +15,13 @@ A fase continua **M0**, com `GOV-001/OPEN-001` concluído. Esta consolidação n
 **INSTRUTORPRO DEMO 01 concluída.** O frontend contém experiência visual navegável e mobile-first apenas com fixtures sintéticas. CODEX 01, 02A e 02B permanecem preservados; CODEX 02C está suspenso e não deve ser retomado sem autorização explícita. Capacidades reguladas, usuários reais, perfis e publicação continuam condicionados aos respectivos gates.
 
 ## Últimas atividades concluídas
+
+Prontidão pré-produção M1 avaliada em 29/08/2026 com resultado **`NOT READY`**. A análise
+focada em Porto Alegre/RS consolidou seis bloqueadores reais: regra/operação RS,
+operador/LGPD/jurídico, segregação, cadastro/documentos reais, MapTiler contratual e
+plataforma segura de produção. A fonte oficial do DetranRS confirma categoria B e lista
+de IA autorizados, mas `GOV002-RS-INSTRUCTOR` continua sem aprovação nominal. Nenhum dado
+real, código, migration, deploy ou integração foi ativado.
 
 Tabletop obrigatório `GOV-003` do piloto M1 executado documentalmente em 29/08/2026,
 com Gilmar Cesar Alves atuando separadamente nas cinco funções provisórias e Codex apenas
@@ -99,11 +106,10 @@ Nenhuma implementação em execução. CODEX 02E terminou; não retomar CODEX 02
 
 ## Próxima atividade
 
-Receber autorização explícita para qualquer próximo passo. Antes de elegibilidade ou
-publicação, corrigir F-001 a F-006 e repetir/aprovar o tabletop `GOV-003`; isso inclui
-aprovar nominalmente `RS/INSTRUCTOR` em `GOV-002`, designar revisão independente e fechar
-as dependências externas aplicáveis. Não retomar automaticamente inventário/revogação
-interna de sessões (`IAM-003`/CODEX 02C).
+Receber como próxima decisão única a identificação da organização/pessoa operadora real e
+do canal de privacidade do M1, ou a declaração de que ainda não existem. Depois, fechar
+sequencialmente os seis bloqueadores de `M1_PREPRODUCTION_READINESS.md`. Não retomar
+automaticamente inventário/revogação interna de sessões (`IAM-003`/CODEX 02C).
 
 ## Decisões abertas
 

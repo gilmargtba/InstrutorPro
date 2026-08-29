@@ -76,6 +76,7 @@ Não há referência normativa de volta de um documento-fonte para seu refinamen
 | `DECISIONS.md`           | ADRs, contradições resolvidas e questões abertas                          | todos os documentos afetados              |
 | `RISKS.md`               | registro de riscos, sinais, responsáveis e respostas                      | negócio, técnica, jurídico e operação     |
 | `PILOT.md`               | população, operação e critérios de entrada/saída do piloto                | escopo, roadmap e riscos                  |
+| `M1_PREPRODUCTION_READINESS.md` | decisão objetiva de prontidão do recorte Porto Alegre/RS           | GOV-002/003, LGPD, segurança e produção   |
 | `AGENTS.md`              | regras inegociáveis e método dos agentes                                  | governança do repositório                 |
 | `PROMPT.md`              | instrução de retomada orientada pelo checkpoint                           | manifest, agentes, plano e checkpoint     |
 | `GLOSSARY.md`            | vocabulário comum                                                         | fontes normativas                         |
