@@ -44,7 +44,11 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/readiness/', timeout=3)"]
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; r=urllib.request.Request('http://localhost:8000/api/v1/readiness/', headers={'X-Forwarded-Proto':'https'}); urllib.request.urlopen(r, timeout=3)"
       interval: 10s
       timeout: 5s
       retries: 12
