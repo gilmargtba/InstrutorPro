@@ -1,5 +1,6 @@
 from urllib.parse import parse_qs, urlparse
 
+import segno
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django_otp.plugins.otp_static.models import StaticDevice, StaticToken
@@ -69,6 +70,8 @@ class Command(BaseCommand):
         self.stdout.write(manual_secret)
         self.stdout.write("URI alternativa (sensível; não compartilhe):")
         self.stdout.write(device.config_url)
+        self.stdout.write("QR Code sensível — escaneie diretamente com o aplicativo:")
+        segno.make(device.config_url).terminal(compact=True)
         self.stdout.write("\nCódigos de recuperação (guarde offline; exibidos uma única vez):")
         for token in recovery_codes:
             self.stdout.write(token)
