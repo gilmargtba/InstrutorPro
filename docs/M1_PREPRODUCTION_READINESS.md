@@ -1,8 +1,10 @@
 # Prontidão pré-produção M1 — Porto Alegre/RS
 
-Data da avaliação: **29/08/2026**  
+Data da avaliação: **29/08/2026**
+
 Escopo: visitante anônimo pesquisando instrutores e primeiro instrutor real cadastrado,
-revisado, publicado, suspenso e retirado de novas buscas.  
+revisado, publicado, suspenso e retirado de novas buscas.
+
 Resultado: **PRÉ-PRODUÇÃO M1 NOT READY**.
 
 Esta avaliação não declara conformidade integral com a LGPD, não aprova regra jurídica e
