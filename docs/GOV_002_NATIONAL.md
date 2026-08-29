@@ -122,6 +122,12 @@ Ausência de campo público não autoriza inferência. Evidência faltante segue
 
 Por decisão humana registrada no encerramento de `OPEN-001`, a primeira oferta prática priorizada é `FIRST_LICENSE / CATEGORY_B` para `INSTRUCTOR`: primeira habilitação, categoria B. A prioridade não limita estruturalmente cidades, UFs, categorias ou serviços futuros. Cidade de operação assistida/piloto é decisão operacional posterior e não altera o domínio.
 
+Em 29/08/2026, Porto Alegre/RS foi escolhida como primeiro território operacional
+controlado do M1. A decisão reduz a próxima análise à linha `RS/INSTRUCTOR` e à operação
+na cidade, mas não promove seu `review_status`: ela permanece
+`HUMAN_REVIEW_REQUIRED`, sem elegibilidade ou publicação real, até aprovação nominal de
+Compliance/Legal e fechamento dos gaps registrados.
+
 ## Privacidade
 
 Listas públicas são evidência potencial, não autorização genérica para replicação integral ou marketing. Dados de saúde/resultados de exames ficam fora do MVP por padrão. Geolocalização pública é minimizada.

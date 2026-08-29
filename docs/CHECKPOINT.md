@@ -16,6 +16,14 @@ A fase continua **M0**, com `GOV-001/OPEN-001` concluído. Esta consolidação n
 
 ## Últimas atividades concluídas
 
+Decisões territoriais e de provider do M1 registradas em 29/08/2026: Porto Alegre/RS é
+o primeiro território operacional controlado, sem limitar a arquitetura nacional;
+MapTiler Cloud Flex é o provider preferencial condicionado, com PostGIS como fonte de
+verdade, geocoding no backend, Leaflet, sem GPS e fallback de busca/lista por Porto Alegre.
+`OPEN-007` não é mais uma escolha genérica, mas produção permanece bloqueada até aceite
+do plano/DPA, subprocessadores, países/transferência, retenção da consulta, endpoint
+europeu, chaves/limites e testes. Nenhuma integração ou dado real foi ativado.
+
 Gate LGPD mínimo da busca de instrutores documentado em 29/08/2026. Foram aprovados
 somente a busca com dados sintéticos e o desenho minimizado: pesquisa sem login por
 cidade/bairro/CEP explícito, sem GPS automático, histórico individual, saúde ou residência
@@ -77,7 +85,9 @@ Revisão jurídico-técnica de privacidade em fontes oficiais vigentes em 22/07/
 
 ## Atividade em execução
 
-Nenhuma implementação em execução. CODEX 02E terminou; não iniciar outra fatia sem autorização humana e não retomar CODEX 02C. `OPEN-007`, elegibilidade e LGPD bloqueiam localizações/profissionais reais.
+Nenhuma implementação em execução. CODEX 02E terminou; não retomar CODEX 02C. As
+condições contratuais de `OPEN-007`, elegibilidade e LGPD bloqueiam
+localizações/profissionais reais.
 
 ## Próxima atividade
 
@@ -98,7 +108,7 @@ aprovar nominalmente as linhas aplicáveis de `GOV-002` e executar/aprovar o tab
 | OPEN-004 | bloqueante     | responsabilidade, consumo, vínculo, seguro, termos e bases LGPD | usuários reais/M6    |
 | OPEN-005 | bloqueante     | gateway, split/KYC, tributação e política contábil              | C1/M4                |
 | OPEN-006 | parcial        | provider real, contratos, regiões e suboperadores; simuladores liberados para desenvolvimento | provider real/A14/M6 |
-| OPEN-007 | bloqueante     | mapa, precisão e retenção de geolocalização                     | B1/M3                |
+| OPEN-007 | condicional/bloqueante produção | MapTiler escolhido; faltam contrato/DPA, subprocessadores, países, retenção, endpoint e testes | B1/M3 |
 | OPEN-008 | bloqueante     | retenção, direitos e papéis de tratamento                       | produção/M6          |
 | OPEN-009 | bloqueante     | SLO, RPO/RTO, suporte, orçamento e limites                      | piloto/M6            |
 | OPEN-010 | bloqueante     | metas, duração, coortes e go/no-go do piloto                    | M7                   |

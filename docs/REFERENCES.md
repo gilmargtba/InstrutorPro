@@ -71,3 +71,21 @@ O ledger proposto é registro interno, não conta/carteira/custódia. Gateway, s
 ## Regra de manutenção
 
 Cada requisito derivado registra URL, título/número, autoridade, data de consulta, jurisdição, vigência e trecho/parágrafo de referência no artefato de compliance. Link quebrado, página explicativa divergente ou norma alterada reabre `R-001/R-021` e pode retirar publicação até revalidação.
+
+## Mapas e geocoding — decisão M1
+
+Fontes oficiais consultadas em 29/08/2026 para a seleção condicionada do MapTiler Cloud
+Flex em Porto Alegre/RS:
+
+- [MapTiler Cloud — preços e franquias](https://www.maptiler.com/cloud/pricing/)
+- [MapTiler Cloud — termos](https://www.maptiler.com/terms/cloud/)
+- [MapTiler — dados pessoais e endpoint europeu](https://docs.maptiler.com/guides/maps-apis/maps-platform/personal-data-in-maptiler-cloud/)
+- [MapTiler — segurança e papel de operador](https://www.maptiler.com/security/)
+- [MapTiler — API de geocoding](https://docs.maptiler.com/cloud/api/reference/)
+- [MapTiler — integração com Leaflet](https://docs.maptiler.com/sdk-js/modules/geocoding/)
+- [OSMF — política do Nominatim público](https://operations.osmfoundation.org/policies/nominatim/)
+- [OSMF — política de tiles públicos](https://operations.osmfoundation.org/policies/tiles/)
+
+A documentação pública sustenta a preferência técnica e o orçamento inicial, mas não
+substitui DPA/contrato, inventário de subprocessadores, análise de transferência,
+confirmação da retenção da consulta nem aceite de Legal/Privacy.

@@ -293,8 +293,8 @@ Este recorte não declara conformidade LGPD integral. Ele cobre somente a opera�
 | dados do instrutor | nome profissional e atributos públicos permitidos; área/ponto público de serviço autorizado; nunca residência por padrão |
 | dados excluídos | CPF, CNH, nascimento, telefone, documento, endereço residencial, GPS automático, saúde, diagnóstico, laudo, prontuário e resultado psicológico |
 | fontes | entrada explícita do visitante; área de serviço declarada/autorizada pelo instrutor; elegibilidade vem de processo separado |
-| sistemas | frontend, API/selector público, PostGIS e adaptador de geocoding aprovado; fornecedor de produção `PENDING` |
-| compartilhamentos | provedor de geocoding somente após `OPEN-007`; nenhum instrutor recebe a consulta individual nesta operação |
+| sistemas | frontend, API/selector público, PostGIS e MapTiler condicionado em `ADR-047` |
+| compartilhamentos | MapTiler recebe consulta minimizada somente após condições contratuais de `OPEN-007`; nenhum instrutor recebe a consulta individual |
 | controlador | pessoa jurídica operadora `PENDING_HUMAN_INPUT` em `GOV-004` |
 | operadores/suboperadores | infraestrutura/geocoding/observabilidade `PENDING` até seleção, contrato, países e subprocessadores |
 | owner | Product + Privacy + Legal + Engineering; responsáveis nominais `PENDING_HUMAN_INPUT` |
@@ -357,7 +357,7 @@ Direitos aplicáveis incluem informação, confirmação/acesso quando houver da
 | --- | --- | --- |
 | reidentificar residência do instrutor | área/ponto de serviço escolhido, precisão reduzida e residência separada | aceite formal de Privacy pendente |
 | criar histórico de deslocamento/interesse do aluno | consulta efêmera, sem login obrigatório, sem GPS e sem telemetria individual | baixo no desenho; validar implementação |
-| fornecedor receber consulta/coordenada | adapter, minimização, contrato, países/suboperadores e retenção | bloqueado por `OPEN-007/006` |
+| fornecedor receber consulta/coordenada | backend adapter, minimização, contrato, países/suboperadores e retenção | MapTiler escolhido; ativação bloqueada pelas condições de `OPEN-007/006` |
 | enumeração/stalking de profissionais | apenas publicáveis, precisão mínima, rate limit e anti-scraping | teste e limiares pendentes |
 | continuar visível após revogação | retirada transacional das novas buscas, auditoria e teste de reconciliação | validar código antes de dado real |
 | inferência de saúde ou perfil sensível | busca exclusiva de instrutor, sem saúde/analytics/marketing | proibido por policy |
@@ -375,7 +375,7 @@ Direitos aplicáveis incluem informação, confirmação/acesso quando houver da
 | --- | --- | --- |
 | A — busca com dados sintéticos | `LIBERADA` | manter fixtures marcadas, geocoder local e ausência de PII |
 | B — busca do aluno sem login | `LIBERADA PARA IMPLEMENTAÇÃO/TESTE SINTÉTICO`; `BLOQUEADA PARA DADO REAL` | LIA aprovada, controlador/canal reais, aviso contextual, segurança e teste |
-| C — cidade/bairro/CEP informado | `LIBERADO PARA IMPLEMENTAÇÃO/TESTE SINTÉTICO`; `BLOQUEADO PARA DADO REAL` | mesmas condições de B e provider aprovado em `OPEN-007` se houver transmissão externa |
+| C — cidade/bairro/CEP informado | `LIBERADO PARA IMPLEMENTAÇÃO/TESTE SINTÉTICO`; `BLOQUEADO PARA DADO REAL` | MapTiler escolhido; faltam aceite contratual/LGPD de `OPEN-007` e condições de B |
 | D — geolocalização precisa automática | `BLOQUEADA` | fora deste recorte; exigiria nova decisão, RIPD e revisão de necessidade/base |
 | E — área de atendimento autorizada do instrutor | `LIBERADA COMO POLÍTICA E PARA SINTÉTICO`; `BLOQUEADA PARA PROFISSIONAL REAL` | base/aviso aprovados, elegibilidade, GOV-002/003, controlador/canal, retenção, segurança e teste de revogação |
 | F — primeiro instrutor real | `BLOQUEADO` | GOV-002 por linha, GOV-003 tabletop, GOV-004/005, OPEN-004/006/007/008/014 aplicáveis, LIA/RIPD e homologação técnica/operacional |

@@ -153,7 +153,19 @@ Nem toda fonte suportará busca nominal/listagem. A interface concreta deve expo
 
 ### Mapas
 
-O provedor de mapa/geocoding continua condicionado a `OPEN-007`. PostGIS executa regras internas de raio/agregação; o provedor visual não recebe mais precisão/dados pessoais do que o necessário.
+Para o M1 de Porto Alegre/RS, MapTiler Cloud Flex é o provider preferencial aprovado de
+forma condicionada em `ADR-047`. PostGIS executa as regras internas de raio e permanece
+fonte de verdade; o provider não recebe perfis, elegibilidade ou catálogo de instrutores.
+Geocoding ocorre no backend com consulta minimizada, `country=br`, recorte territorial,
+timeout e erro estável. Leaflet permanece no frontend, sem controle de GPS. O fallback é
+busca/lista por Porto Alegre usando centroide territorial local aprovado, sem inventar
+precisão nem reutilizar resposta externa contra os termos.
+
+`OPEN-007` deixa de ser escolha genérica de fornecedor, mas continua bloqueante para
+produção até evidência de aceite do plano comercial/DPA, subprocessadores, países e
+mecanismo de transferência, retenção da consulta, endpoint europeu, restrições de chave,
+budget/rate limit e testes de indisponibilidade. Nenhum segredo ou chamada real é ativado
+por esta decisão documental.
 
 ## Fontes oficiais e primeira onda
 
