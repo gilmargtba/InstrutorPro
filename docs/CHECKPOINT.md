@@ -16,6 +16,14 @@ A fase continua **M0**, com `GOV-001/OPEN-001` concluído. Esta consolidação n
 
 ## Últimas atividades concluídas
 
+Gate LGPD mínimo da busca de instrutores documentado em 29/08/2026. Foram aprovados
+somente a busca com dados sintéticos e o desenho minimizado: pesquisa sem login por
+cidade/bairro/CEP explícito, sem GPS automático, histórico individual, saúde ou residência
+pública; localização de serviço do instrutor permanece separada, granular, auditada e
+revogável. O ROPA mínimo foi registrado. Busca e profissional reais continuam bloqueados
+por LIA/RIPD, organização/canal, retenção, provider, segurança, elegibilidade e gates
+regulatórios/operacionais; `OPEN-007` não foi fechado.
+
 Revisão documental controlada de `GOV-002` registrada em 29/08/2026 para RS, SC, SP,
 RJ e ES. A autorização humana permitiu registrar somente decisões suficientemente
 sustentadas, mas não aprovou nominalmente nenhuma linha nem selecionou opções da análise
@@ -74,7 +82,8 @@ Nenhuma implementação em execução. CODEX 02E terminou; não iniciar outra fa
 ## Próxima atividade
 
 Receber autorização explícita para qualquer próximo passo. O próximo gate documental
-previsto é executar o tabletop obrigatório de `GOV-003`, em etapa separada; ele não foi
+previsto no caminho mínimo continua sendo executar o tabletop obrigatório de `GOV-003`,
+em etapa separada; ele não foi
 executado nesta revisão. Não retomar automaticamente inventário/revogação interna de
 sessões (`IAM-003`/CODEX 02C). Antes de elegibilidade/publicação, ainda é necessário
 aprovar nominalmente as linhas aplicáveis de `GOV-002` e executar/aprovar o tabletop de

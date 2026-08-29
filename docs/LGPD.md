@@ -275,3 +275,113 @@ Antes de sincronização em lote de fonte pública, `OPEN-008` deve conter o pra
 ## Inferência de saúde por navegação
 
 A simples busca, visualização ou clique do usuário em clínica, médico, psicólogo ou etapa da Jornada CNH não deve ser convertido em perfil de saúde, diagnóstico presumido ou segmentação publicitária sensível. Telemetria deve ser minimizada e separada de qualquer dado clínico. Resultados de exame, laudos, prontuários e conclusões psicológicas permanecem fora do MVP.
+
+## Gate mínimo LGPD — busca de instrutores por localização (29/08/2026)
+
+Status: **APROVADO PARA DADOS SINTÉTICOS E PARA O DESENHO TÉCNICO MINIMIZADO; PENDENTE PARA DADOS/PESSOAS REAIS**.
+
+Este recorte não declara conformidade LGPD integral. Ele cobre somente a operação: visitante informa cidade, bairro ou CEP → a plataforma geocodifica de forma minimizada → consulta área pública de serviço → retorna instrutores elegíveis/publicados → exibe mapa/lista e perfil. Solicitação de contato/aula, demanda do aluno, pagamento, marketing e integrações oficiais são operações diferentes e não herdam este gate.
+
+### Registro da operação de tratamento — ROPA mínimo
+
+| Campo | Registro aprovado ou estado atual |
+| --- | --- |
+| identificador | `ROPA-DISCOVERY-LOCATION-001` |
+| finalidade | permitir que o visitante encontre instrutores em uma região informada explicitamente |
+| titulares | visitante/aluno pesquisando e instrutor cuja área de serviço é exibida |
+| dados do visitante | texto explícito de cidade/bairro/CEP; coordenada derivada apenas durante a consulta; IP/user-agent somente no registro técnico legalmente aplicável |
+| dados do instrutor | nome profissional e atributos públicos permitidos; área/ponto público de serviço autorizado; nunca residência por padrão |
+| dados excluídos | CPF, CNH, nascimento, telefone, documento, endereço residencial, GPS automático, saúde, diagnóstico, laudo, prontuário e resultado psicológico |
+| fontes | entrada explícita do visitante; área de serviço declarada/autorizada pelo instrutor; elegibilidade vem de processo separado |
+| sistemas | frontend, API/selector público, PostGIS e adaptador de geocoding aprovado; fornecedor de produção `PENDING` |
+| compartilhamentos | provedor de geocoding somente após `OPEN-007`; nenhum instrutor recebe a consulta individual nesta operação |
+| controlador | pessoa jurídica operadora `PENDING_HUMAN_INPUT` em `GOV-004` |
+| operadores/suboperadores | infraestrutura/geocoding/observabilidade `PENDING` até seleção, contrato, países e subprocessadores |
+| owner | Product + Privacy + Legal + Engineering; responsáveis nominais `PENDING_HUMAN_INPUT` |
+
+### Necessidade e minimização
+
+- pesquisa inicial deve funcionar sem conta e sem autenticação;
+- entrada permitida: cidade, bairro ou CEP digitado pelo visitante; o produto pode aceitar combinação equivalente menos precisa quando suficiente;
+- GPS preciso automático e pedido de permissão do navegador permanecem desativados;
+- endereço completo é rejeitado ou reduzido antes de log/cache; campo livre não pode ser reutilizado para perfil, marketing ou inferência;
+- coordenada derivada existe em memória durante a consulta e não compõe histórico de negócio;
+- logs, traces, métricas, analytics, chaves de cache e erros não carregam texto bruto de busca, CEP completo ou coordenada exata;
+- telemetria de produto permanece desligada neste recorte. Agregação futura exige finalidade própria, limiar aprovado em `OPEN-015` e revisão deste ROPA;
+- registro de acesso à aplicação, quando aplicável, é operação técnica separada: sua retenção legal não autoriza guardar a consulta geográfica.
+
+### Base legal proposta
+
+1. **Busca anônima iniciada pelo visitante:** legítimo interesse, art. 7º, IX, proposto para dado não sensível e restrito à resposta imediata solicitada. O interesse concreto é disponibilizar descoberta regional; a expectativa é compatível com o ato de digitar uma região; não há perfilização, marketing, contato ou histórico. A adoção para dado real depende de LIA aprovada por Legal/Privacy e da identificação do controlador.
+2. **Área pública de serviço do instrutor:** contrato/procedimentos preliminares, art. 7º, V, proposto para publicar a área escolhida pelo próprio profissional como parte do serviço solicitado. A autorização operacional granular não é tratada automaticamente como consentimento LGPD. Legal/Privacy deve validar a base e o aviso antes do primeiro profissional real.
+3. **Auditoria da autorização/revogação:** exercício regular de direitos e legítimo interesse de responsabilização são candidatos; a base final e o prazo permanecem `PENDING` em `OPEN-004/008`.
+
+Consentimento não é adotado como base universal. Se Legal/Privacy decidir que a publicação opcional exige consentimento, a operação deverá usar `ConsentRecord`, texto granular e retirada equivalente antes de dados reais.
+
+### Retenção e descarte
+
+| Dado | Regra deste recorte |
+| --- | --- |
+| texto/coordenada da pesquisa | memória da requisição/sessão; descarte ao terminar; sem histórico individual |
+| cache técnico | somente chave reduzida/não reversível ou região normalizada; TTL técnico a aprovar e sem associação a pessoa/conta |
+| telemetria de demanda | não coletada; agregação futura depende de `OPEN-015` |
+| área pública do instrutor | enquanto autorização operacional e publicação estiverem vigentes |
+| evidência de autorização/revogação | preservar finalidade, versão, ator e timestamps pelo prazo de auditoria/defesa ainda `PENDING` em `OPEN-008` |
+| revogação | retirar imediatamente das novas buscas dependentes da localização; histórico mínimo não é apagado |
+| registro de acesso à aplicação | operação segregada e prazo legal aplicável; não inclui consulta ou coordenada |
+
+O prazo exato de cache, auditoria pós-revogação, backup e descarte por operador permanece pendente. Por isso, a retenção está suficiente para desenvolvimento sintético, não para produção real.
+
+### Localização pública do instrutor
+
+`PRIVATE/RESIDENTIAL LOCATION` e `PUBLIC SERVICE LOCATION` permanecem campos e finalidades separados. Residência nunca é copiada, inferida ou geocodificada para exposição pública por padrão. Para entrar em busca real, a área de serviço exige:
+
+- instrutor elegível e publicado pela policy aplicável;
+- ação afirmativa do próprio profissional ou ator autorizado;
+- finalidade `DISCOVERY_PUBLIC_SERVICE_LOCATION`;
+- versão/hash do aviso ou política apresentada;
+- ponto/área e precisão pública escolhidos;
+- ator, data/hora, origem e trilha de auditoria;
+- revogação acessível, com despublicação das novas buscas sem apagar histórico necessário;
+- selector público deny-by-default e serializer sem localização privada.
+
+Autorização de localização não concede papel, credenciamento, elegibilidade ou publicação.
+
+### Segurança, direitos e riscos
+
+Controles mínimos: TLS; rate limit e proteção contra enumeração; precisão pública mínima; selector/serializer allowlist; segregação entre localização privada e pública; logs redigidos; acesso administrativo auditado; cache sem texto bruto; testes de revogação, IDOR, radius scraping, erro do geocoder e ausência de residência.
+
+Direitos aplicáveis incluem informação, confirmação/acesso quando houver dado associado, correção da área pelo instrutor, oposição ao legítimo interesse, retirada/revogação quando aplicável e eliminação/bloqueio cabíveis. O canal público e o responsável real permanecem `PENDING_HUMAN_INPUT` em `GOV-004`; sem eles, não há operação com dados reais.
+
+| Risco | Mitigação | Estado residual |
+| --- | --- | --- |
+| reidentificar residência do instrutor | área/ponto de serviço escolhido, precisão reduzida e residência separada | aceite formal de Privacy pendente |
+| criar histórico de deslocamento/interesse do aluno | consulta efêmera, sem login obrigatório, sem GPS e sem telemetria individual | baixo no desenho; validar implementação |
+| fornecedor receber consulta/coordenada | adapter, minimização, contrato, países/suboperadores e retenção | bloqueado por `OPEN-007/006` |
+| enumeração/stalking de profissionais | apenas publicáveis, precisão mínima, rate limit e anti-scraping | teste e limiares pendentes |
+| continuar visível após revogação | retirada transacional das novas buscas, auditoria e teste de reconciliação | validar código antes de dado real |
+| inferência de saúde ou perfil sensível | busca exclusiva de instrutor, sem saúde/analytics/marketing | proibido por policy |
+| acesso por menor | operação real permanece bloqueada por `OPEN-014` | não resolvido neste gate |
+
+### LIA e RIPD
+
+- **ROPA:** operação e campos mínimos registrados acima; aprovação nominal dos responsáveis e matriz final de agentes permanecem pendentes.
+- **LIA:** necessária pela decisão interna do projeto antes de usar legítimo interesse. O teste preliminar é favorável apenas ao desenho estrito — finalidade específica, consulta iniciada pelo visitante, dado não sensível, ausência de conta/GPS/histórico/marketing e salvaguardas — mas a LIA não está aprovada enquanto controlador, Legal/Privacy e risco residual não forem identificados e assinarem.
+- **RIPD:** recomendado pela ANPD para tratamento potencialmente de alto risco e obrigatório pela política interna antes de geolocalização em escala. Deve ser concluído antes do piloto com dados reais, mesmo sem GPS preciso, cobrindo fluxo, provider, escala, enumeração, retenção, direitos e risco residual.
+
+### Resultado A–F
+
+| Item | Status | Condição ou gate restante |
+| --- | --- | --- |
+| A — busca com dados sintéticos | `LIBERADA` | manter fixtures marcadas, geocoder local e ausência de PII |
+| B — busca do aluno sem login | `LIBERADA PARA IMPLEMENTAÇÃO/TESTE SINTÉTICO`; `BLOQUEADA PARA DADO REAL` | LIA aprovada, controlador/canal reais, aviso contextual, segurança e teste |
+| C — cidade/bairro/CEP informado | `LIBERADO PARA IMPLEMENTAÇÃO/TESTE SINTÉTICO`; `BLOQUEADO PARA DADO REAL` | mesmas condições de B e provider aprovado em `OPEN-007` se houver transmissão externa |
+| D — geolocalização precisa automática | `BLOQUEADA` | fora deste recorte; exigiria nova decisão, RIPD e revisão de necessidade/base |
+| E — área de atendimento autorizada do instrutor | `LIBERADA COMO POLÍTICA E PARA SINTÉTICO`; `BLOQUEADA PARA PROFISSIONAL REAL` | base/aviso aprovados, elegibilidade, GOV-002/003, controlador/canal, retenção, segurança e teste de revogação |
+| F — primeiro instrutor real | `BLOQUEADO` | GOV-002 por linha, GOV-003 tabletop, GOV-004/005, OPEN-004/006/007/008/014 aplicáveis, LIA/RIPD e homologação técnica/operacional |
+
+### Caminho mínimo e card de código
+
+O caminho mínimo para um instrutor real é: escolher uma UF/linha regulatória nominalmente aprovada → concluir GOV-003 → identificar controlador/canal e aprovar aviso/base/LIA/RIPD/retenção/provider → homologar elegibilidade/publicação e revogação → ativar lote controlado sem pagamento.
+
+Os cards relacionados são `MKT-001` (área geográfica) e `MKT-004` (busca/perfil minimizados). Eles **não estão liberados para implementação real**, pois dependem de `CRD-007` e `OPEN-007`; a busca sintética equivalente já existe no `MAPA ONLINE 01`. Nenhum novo card de código é iniciado por este gate.

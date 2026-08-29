@@ -106,6 +106,7 @@ Cada questão fechada deve gerar ADR ou atualização desta tabela com: decisão
 | ADR-042 | **CODEX 02B separa lifecycle de conta dos papéis.** | `ACTIVE`, `BLOCKED`, `DEACTIVATED` controlam acesso e sincronizam `is_active`; bloqueio/desativação preservam pessoa e papéis; reativação de bloqueada é explícita, desativada é terminal nesta fatia; versão/lock/constraint/auditoria protegem transições. |
 | ADR-043 | **MAPA ONLINE 01 usa Leaflet/OpenStreetMap e geocoder local por adapters.** | PostGIS consulta pontos públicos sintéticos. O geocoder demo não usa rede/chave; `OPEN-007` continua bloqueando provider e dados reais. |
 | ADR-044 | **CODEX 02D centraliza publicação profissional sintética.** | Papel não implica publicação; busca aplica todas as condições, e Admin protegido usa serviço deny-by-default. `OPEN-007` permanece aberto. |
+| ADR-045 | **Gate LGPD mínimo da busca aprova somente dados sintéticos e o desenho minimizado.** Busca inicial sem login usa cidade/bairro/CEP explícito, sem GPS automático, histórico individual, saúde ou residência pública. Área do instrutor exige autorização operacional granular e revogável, separada de elegibilidade/publicação. | Busca real permanece bloqueada até controlador/canal, base/LIA, RIPD, retenção, provider, segurança e gates regulatórios/operacionais. `OPEN-007` não é fechado. |
 
 ## Decisões aceitas — consolidação 2026-08-19
 

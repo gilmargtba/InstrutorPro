@@ -30,6 +30,8 @@ Acesso depende de finalidade, contratação, credenciamento e homologação. Sem
 
 ## LGPD e ANPD
 
+Fontes centrais deste bloco reabertas em **29/08/2026** para o gate mínimo de busca por localização. A revisão confirmou o teste de legítimo interesse em finalidade, necessidade e balanceamento/salvaguardas, a responsabilidade do controlador pelo RIPD e a recomendação de elaborá-lo antes de tratamento potencialmente de alto risco. A conferência não substitui aprovação de Legal/Privacy nem identifica a organização controladora.
+
 - [Lei nº 13.709/2018 — LGPD compilada](https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709compilado.htm)
 - [Regulamentações vigentes da ANPD](https://www.gov.br/anpd/pt-br/acesso-a-informacao/institucional/atos-normativos/regulamentacoes_anpd)
 - [Resolução CD/ANPD nº 2/2022 — agentes de pequeno porte](https://www.gov.br/anpd/pt-br/acesso-a-informacao/institucional/atos-normativos/regulamentacoes_anpd/resolucao-cd-anpd-no-2-de-27-de-janeiro-de-2022)
