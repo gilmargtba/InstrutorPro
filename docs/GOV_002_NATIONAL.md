@@ -135,6 +135,49 @@ consta na lista oficial não pode ministrar aulas como IA. Essa evidência torna
 campos preserváveis, validade, frequência, tolerância de indisponibilidade ou aprovação
 humana. Por isso `GOV002-RS-INSTRUCTOR` permanece `HUMAN_REVIEW_REQUIRED`.
 
+### Procedimento operacional mínimo proposto — `GOV002-RS-INSTRUCTOR`
+
+O M1 pode evitar upload/cópia de CNH ou credencial se a decisão humana aprovar a consulta
+manual à fonte oficial como evidência suficiente para publicação interna. A adesão do
+profissional é voluntária; a lista pública não cria perfil nem autoriza prospecção.
+
+1. receber do candidato somente os identificadores mínimos necessários para localizar e
+   distinguir sua entrada na lista oficial, por canal autenticado e informado;
+2. consultar manualmente a página/lista oficial do DetranRS, sem scraping, automação ou
+   credencial governamental;
+3. conferir identidade compatível, autorização como IA, categoria B e ausência de
+   divergência impeditiva;
+4. registrar URL/fonte, data/hora UTC, regra/versão, resultado estruturado, ator, motivo e
+   identificador mínimo da evidência; não copiar a lista inteira nem guardar CNH;
+5. verificar novamente antes da primeira publicação e de toda republicação;
+6. enquanto publicado, revalidar na periodicidade aprovada; a recomendação técnica é a
+   cada 24 horas no piloto controlado;
+7. indisponibilidade bloqueia nova publicação/republicação. Para perfil já publicado, não
+   inferir perda de autorização: marcar verificação pendente, tentar novamente e aplicar
+   a tolerância expressamente aprovada;
+8. ausência/retirada confirmada da lista, expiração ou divergência suspende novas buscas
+   transacionalmente, preserva histórico/auditoria e abre canal de contestação;
+9. republicação exige nova consulta válida e nova decisão auditada.
+
+Recomendação pendente de decisão humana: tolerância máxima de 72 horas desde a última
+consulta válida quando a fonte estiver indisponível; após isso, suspensão preventiva até
+nova verificação. Alternativa: tolerância zero, com maior risco de falso bloqueio por
+indisponibilidade do DetranRS. Até aprovação, não existe periodicidade/tolerância operacional.
+
+### Segregação no M1 mínimo
+
+- uma pessoa fisicamente distinta é obrigatória quando Gilmar for o candidato, relacionado
+  ao candidato ou tiver manipulado a evidência fora do fluxo; sem ela, o caso é bloqueado;
+- para primeiro instrutor independente, a policy vigente não exige dupla aprovação: Gilmar
+  pode atuar como `COMPLIANCE`, separado logicamente de `ADMIN`, com motivo e auditoria;
+- rejeição por suspeita/fraude e qualquer exceção jurídica exigem revisão humana e podem
+  permanecer pendentes para terceiro qualificado;
+- contestação preserva a decisão e deve usar revisor diferente quando possível; enquanto
+  não houver segundo revisor, não se promete independência e casos com conflito ficam
+  bloqueados;
+- revisão posterior de amostra pode ser adotada como controle operacional, mas não corrige
+  self-review nem conflito de interesse.
+
 ## Privacidade
 
 Listas públicas são evidência potencial, não autorização genérica para replicação integral ou marketing. Dados de saúde/resultados de exames ficam fora do MVP por padrão. Geolocalização pública é minimizada.

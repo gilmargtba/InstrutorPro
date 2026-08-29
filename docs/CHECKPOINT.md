@@ -16,6 +16,13 @@ A fase continua **M0**, com `GOV-001/OPEN-001` concluído. Esta consolidação n
 
 ## Últimas atividades concluídas
 
+Operador/controlador do M1 registrado em 29/08/2026 como pessoa jurídica, CNPJ
+`10.280.826/0001-05`, e canal inicial de privacidade `focusgtba@gmail.com`. A decisão não
+comprova razão social, representação, endereço nem designa DPO. O caminho mínimo RS foi
+reduzido: consulta manual oficial pode dispensar upload/storage/scanner no primeiro
+instrutor se o procedimento proposto for aprovado; segundo revisor só é bloqueante para
+self-review, relação ou conflito. Nenhum dado real ou código foi ativado.
+
 Prontidão pré-produção M1 avaliada em 29/08/2026 com resultado **`NOT READY`**. A análise
 focada em Porto Alegre/RS consolidou seis bloqueadores reais: regra/operação RS,
 operador/LGPD/jurídico, segregação, cadastro/documentos reais, MapTiler contratual e
@@ -28,7 +35,7 @@ com Gilmar Cesar Alves atuando separadamente nas cinco funções provisórias e 
 como facilitador/relator. O cenário e suas variantes usaram somente evidência sintética.
 Resultado: **`FAIL`**. Permanecem abertos F-001 a F-006: linha `RS/INSTRUCTOR` não
 aprovada, falta de revisor independente, validação jurídica externa, storage/scanner real,
-tolerância da fonte e organização/DPO/canal. Nenhuma elegibilidade, revisão ou publicação
+tolerância da fonte e comprovação organizacional/DPO. Nenhuma elegibilidade, revisão ou publicação
 real foi liberada.
 
 Decisões territoriais e de provider do M1 registradas em 29/08/2026: Porto Alegre/RS é
@@ -106,9 +113,10 @@ Nenhuma implementação em execução. CODEX 02E terminou; não retomar CODEX 02
 
 ## Próxima atividade
 
-Receber como próxima decisão única a identificação da organização/pessoa operadora real e
-do canal de privacidade do M1, ou a declaração de que ainda não existem. Depois, fechar
-sequencialmente os seis bloqueadores de `M1_PREPRODUCTION_READINESS.md`. Não retomar
+Receber como próxima decisão única a aprovação ou rejeição do procedimento
+`GOV002-RS-INSTRUCTOR`: verificação manual sem upload, revalidação a cada 24 horas e
+tolerância máxima de 72 horas para indisponibilidade da fonte. Depois, fechar
+sequencialmente os bloqueadores restantes de `M1_PREPRODUCTION_READINESS.md`. Não retomar
 automaticamente inventário/revogação interna de sessões (`IAM-003`/CODEX 02C).
 
 ## Decisões abertas
@@ -135,7 +143,7 @@ Detalhes, recomendação, alternativas, impactos e owner estão em `DECISIONS.md
 
 - conteúdo regulatório por linha ainda precisa de aprovação humana antes de elegibilidade/publicação (`OPEN-002`);
 - tabletop de `GOV-003` foi executado com `FAIL`; F-001 a F-006 e a repetição aprovada continuam bloqueando operação real;
-- dados da organização operadora permanecem `PENDING_HUMAN_INPUT`; não bloqueiam desenvolvimento sintético, apenas homologação/produção conforme o gate;
+- operador PJ/CNPJ e canal inicial estão definidos; razão social, representação, endereço, DPO e documentos aplicáveis permanecem pendentes para homologação/produção;
 - provider real continua bloqueado até decisão contratual, mas adapters/simuladores estão liberados para desenvolvimento (`OPEN-006`);
 - menores permanecem bloqueados no MVP; `OPEN-014` não bloqueia desenvolvimento sintético para adultos, mas bloqueia qualquer expansão/cadastro operacional de menores.
 

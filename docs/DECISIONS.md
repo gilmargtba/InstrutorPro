@@ -111,6 +111,7 @@ Cada questão fechada deve gerar ADR ou atualização desta tabela com: decisão
 | ADR-047 | **MapTiler Cloud Flex é o provider preferencial condicionado de mapas/geocoding do M1.** | PostGIS continua fonte de verdade; geocoding passa pelo backend; Leaflet é preservado; GPS automático fica desativado; fallback é busca/lista por Porto Alegre. Produção exige aceite do plano/DPA, subprocessadores, países, retenção e endpoint europeu. |
 | ADR-048 | **Tabletop GOV-003 do M1 foi executado com resultado `FAIL`.** | O exercício sintético validou o fluxo esperado, mas `RS/INSTRUCTOR` não aprovado, ausência de revisor independente, validação jurídica externa, storage/scanner e pendências organizacionais impedem aprovação do gate e qualquer operação real. |
 | ADR-049 | **Prontidão pré-produção M1 avaliada como `NOT READY`.** | Seis bloqueadores concretos permanecem: regra/operação RS, operador/LGPD/jurídico, segregação, cadastro/documentos reais, MapTiler contratual e plataforma segura de produção. Nenhuma implementação ou operação real foi liberada. |
+| ADR-050 | **Operador/controlador e canal inicial do M1 definidos.** | Pessoa jurídica CNPJ `10.280.826/0001-05` e `focusgtba@gmail.com` foram informados por decisão humana para Porto Alegre/RS. Razão social, representação, endereço e DPO não foram inventados e continuam pendentes de comprovação/decisão aplicável. |
 
 ## Decisões aceitas — consolidação 2026-08-19
 

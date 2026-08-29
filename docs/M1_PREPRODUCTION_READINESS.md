@@ -119,9 +119,9 @@ produção. `ADMIN` não recebe poder automático de revisão/publicação.
 | Bloqueador concreto | Regra/evidência | Risco | O que falta | Quem decide | Ação mínima |
 | --- | --- | --- | --- | --- | --- |
 | BCR-01 — regra e operação RS | `GOV002-RS-INSTRUCTOR` segue `HUMAN_REVIEW_REQUIRED`; DetranRS exige IA autorizado/listado | publicar não autorizado ou manter inelegível | aprovação nominal, campos, validade, periodicidade, indisponibilidade e evidência | Compliance + coordenação Legal; jurídico externo quando necessário | aprovar a linha e procedimento manual M1 |
-| BCR-02 — operador/LGPD/jurídico | `GOV-004`, `OPEN-004/008` e ROPA/LIA/RIPD têm dados/aceites pendentes | tratamento sem controlador, informação, direitos ou retenção definidos | operador real, contato de privacidade, termos/aviso, bases/LIA/RIPD e retenção | responsável humano + Privacy/Legal; terceiro qualificado quando exigido | identificar operador e submeter pacote M1 à aprovação |
-| BCR-03 — segregação | tabletop F-002; uma pessoa acumula todos os papéis | self-review e contestação sem independência | segundo revisor humano autorizado e matriz/MFA | Administração + Compliance | designar segundo revisor antes de caso real |
-| BCR-04 — dados/documentos reais | A3–A18/CRD-001–007 não estão concluídos; implementação é `DEMO/SYNTHETIC` | vazamento, malware, fraude e publicação inválida | cadastro seguro, contatos, termos, documentos, storage/scan, veículo, elegibilidade, MFA e testes | Product/Engineering + Security/Operations | autorizar e implementar o primeiro ciclo production-ready após os gates documentais |
+| BCR-02 — LGPD/jurídico | operador PJ/CNPJ e canal inicial foram definidos; razão social/representação, aviso, LIA/RIPD e retenção seguem pendentes | tratamento sem transparência, base ou responsabilidade comprovada | comprovação institucional aplicável, termos/aviso, bases/LIA/RIPD, retenção e eventual Encarregado | responsável humano + Privacy/Legal; terceiro qualificado quando exigido | preparar e aprovar pacote LGPD M1 |
+| BCR-03 — segregação condicional | policy bloqueia self-review/relação/manipulação prévia; segundo revisor em contestação é “quando possível” | conflito de interesse | segunda pessoa somente para caso próprio/relacionado/conflitante; revisão posterior não substitui independência | Administração + Compliance | primeiro instrutor deve ser independente de Gilmar; caso conflitante fica bloqueado |
+| BCR-04 — cadastro/verificação real minimizados | implementação é `DEMO/SYNTHETIC`; consulta oficial pode dispensar upload no primeiro piloto | vazamento ou publicação inválida | cadastro seguro, contato, termos, registro manual oficial, elegibilidade, MFA e testes; storage/scan saem do caminho imediato somente se o procedimento RS for aprovado | Product/Engineering + Security/Operations | aprovar procedimento sem upload e depois autorizar implementação |
 | BCR-05 — mapas | `OPEN-007` tem escolha técnica, não aceite contratual/LGPD | transferência/retenção/custo e indisponibilidade não controlados | contrato/DPA/subprocessadores/países/retenção/chaves/limites/testes | Privacy + Legal + Engineering + responsável financeiro | concluir checklist contratual MapTiler Flex |
 | BCR-06 — plataforma de produção | `SECURITY/DEVOPS` exigem HTTPS, MFA, restore, observabilidade, contatos e homologação | credenciais/documentos expostos ou serviço irrecuperável | domínio/TLS, settings/segredos, backup/restore, alertas/runbooks, scans e testes | Security/Operations + Administração | preparar staging/produção e executar gate técnico antes de dados reais |
 
@@ -130,13 +130,10 @@ regulatórias, de privacidade, segurança e técnica já existentes.
 
 ## 12. Decisões humanas restantes
 
-Próxima decisão única, por precedência: **identificar a organização/pessoa operadora real
-e o canal de privacidade do M1, ou declarar que ainda não existem**. Sem esse fato não é
-possível aprovar aviso, LIA/RIPD, contratos de operador ou atendimento de direitos.
-
-Depois disso, as decisões seguintes são tomadas sequencialmente: aprovação nominal da
-linha `RS/INSTRUCTOR`; segundo revisor; aceite jurídico/LGPD; aceite MapTiler; e autorização
-do card de implementação production-ready.
+Operador PJ/CNPJ e canal inicial foram definidos. A próxima decisão única é aprovar ou não
+o procedimento `GOV002-RS-INSTRUCTOR` sem upload, com revalidação a cada 24 horas e
+tolerância de 72 horas para indisponibilidade da fonte. Depois: pacote jurídico/LGPD,
+aceite MapTiler e autorização do card de implementação production-ready.
 
 ## 13. Arquivos alterados
 
@@ -156,4 +153,4 @@ O M1 continua documentalmente delimitado em Porto Alegre/RS, mas não pode receb
 ou profissionais reais. `CODEX 02C/IAM-003`, pagamentos, Pix, split, IA, integrações
 governamentais, scraping e importação automática continuam suspensos.
 
-**PRÉ-PRODUÇÃO M1 NOT READY — EXISTEM OS SEGUINTES BLOQUEADORES CRÍTICOS: REGRA E OPERAÇÃO RS, OPERADOR/LGPD/JURÍDICO, SEGREGAÇÃO, CADASTRO/DOCUMENTOS REAIS, MAPTILER CONTRATUAL E PLATAFORMA SEGURA DE PRODUÇÃO.**
+**PRÉ-PRODUÇÃO M1 NOT READY — EXISTEM OS SEGUINTES BLOQUEADORES CRÍTICOS: REGRA E OPERAÇÃO RS, LGPD/JURÍDICO, CADASTRO/VERIFICAÇÃO REAIS, MAPTILER CONTRATUAL E PLATAFORMA SEGURA DE PRODUÇÃO. SEGREGAÇÃO É CONDICIONAL AO CONFLITO DO CASO.**

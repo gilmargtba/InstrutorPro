@@ -295,9 +295,10 @@ Este recorte não declara conformidade LGPD integral. Ele cobre somente a opera�
 | fontes | entrada explícita do visitante; área de serviço declarada/autorizada pelo instrutor; elegibilidade vem de processo separado |
 | sistemas | frontend, API/selector público, PostGIS e MapTiler condicionado em `ADR-047` |
 | compartilhamentos | MapTiler recebe consulta minimizada somente após condições contratuais de `OPEN-007`; nenhum instrutor recebe a consulta individual |
-| controlador | pessoa jurídica operadora `PENDING_HUMAN_INPUT` em `GOV-004` |
+| controlador | pessoa jurídica operadora declarada para o M1, CNPJ `10.280.826/0001-05`; razão social/representação pendentes de comprovação em `GOV-004` |
 | operadores/suboperadores | infraestrutura/geocoding/observabilidade `PENDING` até seleção, contrato, países e subprocessadores |
-| owner | Product + Privacy + Legal + Engineering; responsáveis nominais `PENDING_HUMAN_INPUT` |
+| canal de direitos | `focusgtba@gmail.com`, canal inicial do M1; não equivale a designação de Encarregado/DPO |
+| owner | Gilmar Cesar Alves nas funções provisórias de Product/Privacy/Legal/Operations; aprovações externas permanecem separadas quando exigidas |
 
 ### Necessidade e minimização
 
@@ -351,7 +352,7 @@ Autorização de localização não concede papel, credenciamento, elegibilidade
 
 Controles mínimos: TLS; rate limit e proteção contra enumeração; precisão pública mínima; selector/serializer allowlist; segregação entre localização privada e pública; logs redigidos; acesso administrativo auditado; cache sem texto bruto; testes de revogação, IDOR, radius scraping, erro do geocoder e ausência de residência.
 
-Direitos aplicáveis incluem informação, confirmação/acesso quando houver dado associado, correção da área pelo instrutor, oposição ao legítimo interesse, retirada/revogação quando aplicável e eliminação/bloqueio cabíveis. O canal público e o responsável real permanecem `PENDING_HUMAN_INPUT` em `GOV-004`; sem eles, não há operação com dados reais.
+Direitos aplicáveis incluem informação, confirmação/acesso quando houver dado associado, correção da área pelo instrutor, oposição ao legítimo interesse, retirada/revogação quando aplicável e eliminação/bloqueio cabíveis. O canal inicial do M1 é `focusgtba@gmail.com`; sua homologação no aviso e no procedimento de atendimento continua necessária. A definição não nomeia Encarregado/DPO.
 
 | Risco | Mitigação | Estado residual |
 | --- | --- | --- |
@@ -366,7 +367,7 @@ Direitos aplicáveis incluem informação, confirmação/acesso quando houver da
 ### LIA e RIPD
 
 - **ROPA:** operação e campos mínimos registrados acima; aprovação nominal dos responsáveis e matriz final de agentes permanecem pendentes.
-- **LIA:** necessária pela decisão interna do projeto antes de usar legítimo interesse. O teste preliminar é favorável apenas ao desenho estrito — finalidade específica, consulta iniciada pelo visitante, dado não sensível, ausência de conta/GPS/histórico/marketing e salvaguardas — mas a LIA não está aprovada enquanto controlador, Legal/Privacy e risco residual não forem identificados e assinarem.
+- **LIA:** necessária pela decisão interna do projeto antes de usar legítimo interesse. O controlador e o owner provisório estão identificados; o teste preliminar é favorável apenas ao desenho estrito — finalidade específica, consulta iniciada pelo visitante, dado não sensível, ausência de conta/GPS/histórico/marketing e salvaguardas — mas a LIA ainda exige aprovação humana registrada e validação jurídica externa quando aplicável.
 - **RIPD:** recomendado pela ANPD para tratamento potencialmente de alto risco e obrigatório pela política interna antes de geolocalização em escala. Deve ser concluído antes do piloto com dados reais, mesmo sem GPS preciso, cobrindo fluxo, provider, escala, enumeração, retenção, direitos e risco residual.
 
 ### Resultado A–F
