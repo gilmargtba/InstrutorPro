@@ -113,6 +113,7 @@ Cada questão fechada deve gerar ADR ou atualização desta tabela com: decisão
 | ADR-049 | **Prontidão pré-produção M1 avaliada como `NOT READY`.** | Seis bloqueadores concretos permanecem: regra/operação RS, operador/LGPD/jurídico, segregação, cadastro/documentos reais, MapTiler contratual e plataforma segura de produção. Nenhuma implementação ou operação real foi liberada. |
 | ADR-050 | **Operador/controlador e canal inicial do M1 definidos.** | Pessoa jurídica CNPJ `10.280.826/0001-05` e `focusgtba@gmail.com` foram informados por decisão humana para Porto Alegre/RS. Razão social, representação, endereço e DPO não foram inventados e continuam pendentes de comprovação/decisão aplicável. |
 | ADR-051 | **Procedimento `GOV002-RS-INSTRUCTOR` aprovado para M1 e tabletop GOV-003 aprovado no mesmo recorte.** | Verificação manual voluntária sem upload, revalidação 24h e tolerância 72h; self-review/conflito exige pessoa distinta. A decisão não libera dado real, código ou outra UF/categoria. |
+| ADR-052 | **M1 exige Encarregado/DPO formal antes de dados reais.** | A decisão mantém a política interna reforçada; pessoa ou serviço, ato formal, substituição, recursos e avaliação de conflito permanecem pendentes. O canal de privacidade não equivale à nomeação. |
 
 ## Decisões aceitas — consolidação 2026-08-19
 

@@ -127,9 +127,9 @@ regulatórias, de privacidade, segurança e técnica já existentes.
 
 ## 12. Decisões humanas restantes
 
-Operador/canal e procedimento RS foram aprovados. A próxima decisão única pertence ao
-pacote LGPD M1: definir formalmente o Encarregado/DPO exigido pela política interna do
-projeto, preservando conflito de interesse. Depois: aprovação da LIA/RIPD/avisos,
+Operador/canal, procedimento RS e exigência de Encarregado/DPO foram aprovados. A próxima
+decisão única é escolher o modelo de designação: serviço externo independente ou pessoa
+física distinta e qualificada. Depois: identidade/ato formal, aprovação da LIA/RIPD/avisos,
 aceite MapTiler e autorização do card de implementação production-ready.
 
 ## 13. Arquivos alterados

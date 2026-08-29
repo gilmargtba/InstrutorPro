@@ -46,6 +46,11 @@ A pessoa jurídica real configurada como `PlatformOrganization`, e não o regist
 
 O mapa registra controlador, operador, suboperador, terceiro controlador, instruções, responsabilidade por direitos/incidente e contato. O contrato não corrige uma classificação incompatível com a atividade real.
 
+Em 29/08/2026, o responsável humano confirmou que o M1 manterá a exigência interna de
+Encarregado/DPO formal antes de dados reais, preferencialmente pessoa ou serviço distinto
+de Gilmar quando houver conflito com decisões sobre finalidades e meios. A exigência está
+aprovada; identidade, aceite, ato formal, substituição e recursos continuam pendentes.
+
 Antes de dados reais, a plataforma designará encarregado mesmo que futuramente possa demonstrar enquadramento como agente de pequeno porte. A indicação exige ato formal preservado, identidade e canal público, comunicação em português, substituto, recursos, acesso à direção e verificação de conflito com funções que decidem finalidades/meios. A responsabilidade pela conformidade continua com o agente de tratamento, não é transferida ao encarregado.
 
 O ROPA terá uma linha por operação/finalidade, não apenas por tabela, contendo no mínimo: owner, titulares e fontes; dados comuns, sensíveis e inferidos; finalidade; hipótese legal e evidência; sistemas; destinatários e papéis; países/mecanismo de transferência; trigger/prazo/descarte; acessos; medidas de segurança; direitos; risco e vínculo com LIA/RIPD. Mudança material de finalidade, dado, fornecedor, país, público ou tecnologia exige revisão antes do deploy.
@@ -297,7 +302,7 @@ Este recorte não declara conformidade LGPD integral. Ele cobre somente a opera�
 | compartilhamentos | MapTiler recebe consulta minimizada somente após condições contratuais de `OPEN-007`; nenhum instrutor recebe a consulta individual |
 | controlador | pessoa jurídica operadora declarada para o M1, CNPJ `10.280.826/0001-05`; razão social/representação pendentes de comprovação em `GOV-004` |
 | operadores/suboperadores | infraestrutura/geocoding/observabilidade `PENDING` até seleção, contrato, países e subprocessadores |
-| canal de direitos | `focusgtba@gmail.com`, canal inicial do M1; não equivale a designação de Encarregado/DPO |
+| canal de direitos | `focusgtba@gmail.com`, canal inicial do M1; Encarregado/DPO formal é exigido, mas ainda não foi designado |
 | owner | Gilmar Cesar Alves nas funções provisórias de Product/Privacy/Legal/Operations; aprovações externas permanecem separadas quando exigidas |
 
 ### Necessidade e minimização

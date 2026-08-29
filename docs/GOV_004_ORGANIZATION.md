@@ -32,7 +32,7 @@ permanecem literalmente `PENDING_HUMAN_INPUT`.
 | responsável legal | `PENDING_HUMAN_INPUT` | assinatura/aprovação de documentos; produção |
 | contato operacional | `PENDING_HUMAN_INPUT` | homologação operacional/piloto; produção |
 | contato de privacidade | `focusgtba@gmail.com` — canal inicial do M1 | homologação do fluxo de direitos; antes de qualquer dado real |
-| encarregado/DPO, quando aplicável | `PENDING_HUMAN_INPUT` | decisão LGPD/documentos e produção; nomeação conforme aplicabilidade legal |
+| encarregado/DPO | `REQUIRED_APPROVED`; identidade/serviço e ato formal `PENDING_HUMAN_INPUT` | antes de qualquer dado real |
 | contato jurídico | `PENDING_HUMAN_INPUT` | homologação jurídica/contestação; produção |
 | domínio oficial | `PENDING_HUMAN_INPUT` | configuração de hosts, origens, e-mail e produção pública |
 | política de privacidade | `PENDING_HUMAN_INPUT` | homologação jurídica com dados reais; produção |
@@ -62,5 +62,7 @@ permanecem literalmente `PENDING_HUMAN_INPUT`.
 `GOV-004` está fechado para desenvolvimento técnico sintético e possui operador/controlador
 e canal inicial definidos para preparar o M1. Permanece aberto para produção: razão social,
 representação, endereço e demais dados exigidos pelos documentos/contratos aplicáveis
-precisam de comprovação; a designação formal de Encarregado/DPO continua separada. Não
+precisam de comprovação. A decisão humana de 29/08/2026 manteve a exigência interna de
+Encarregado/DPO formal; pessoa ou serviço distinto ainda precisa ser escolhido e o ato
+formal preservado. Não
 publicar termos definitivos nem contratar usando informação não comprovada.

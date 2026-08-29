@@ -16,6 +16,11 @@ A fase continua **M0**, com `GOV-001/OPEN-001` concluído. Esta consolidação n
 
 ## Últimas atividades concluídas
 
+Exigência de Encarregado/DPO formal antes de dados reais aprovada em 29/08/2026. O canal
+`focusgtba@gmail.com` permanece válido para contato inicial, mas não é nomeação. Pessoa ou
+serviço, ato formal, substituição, recursos e avaliação de conflito continuam pendentes;
+nenhum DPO foi inventado ou considerado designado.
+
 Procedimento `GOV002-RS-INSTRUCTOR` aprovado por decisão humana em 29/08/2026 somente
 para M1 Porto Alegre/categoria B: consulta manual voluntária sem upload, revalidação a
 cada 24 horas e tolerância de 72 horas para indisponibilidade. A linha passou a
@@ -121,8 +126,9 @@ HTTPS/segurança e implementação bloqueiam localizações/profissionais reais.
 
 ## Próxima atividade
 
-Receber como próxima decisão única a designação formal do Encarregado/DPO do M1 exigida
-pela política interna, com avaliação de conflito. Depois, aprovar LIA/RIPD/avisos e fechar
+Receber como próxima decisão única o modelo do Encarregado/DPO do M1: serviço externo
+independente ou pessoa física distinta e qualificada. Depois, registrar identidade/ato,
+aprovar LIA/RIPD/avisos e fechar
 sequencialmente os bloqueadores restantes de `M1_PREPRODUCTION_READINESS.md`. Não retomar
 automaticamente inventário/revogação interna de sessões (`IAM-003`/CODEX 02C).
 
