@@ -53,6 +53,25 @@ def test_mfa_enrollment_is_one_time_and_audited():
 
 
 @pytest.mark.django_db
+def test_mfa_replacement_revokes_old_device_and_codes():
+    account = Account.objects.create_superuser(
+        username="replace-admin",
+        email="replace@example.invalid",
+        password="strong-test-password",
+    )
+    old_device = TOTPDevice.objects.create(user=account, name="old", confirmed=True)
+    old_static = account.staticdevice_set.create(name="old recovery")
+    StaticToken.objects.create(device=old_static, token="old-token")
+    output = StringIO()
+    call_command("enroll_admin_mfa", account.username, "--replace", stdout=output)
+    assert not TOTPDevice.objects.filter(pk=old_device.pk).exists()
+    assert TOTPDevice.objects.filter(user=account, confirmed=True).count() == 1
+    assert StaticToken.objects.filter(device__user=account).count() == 10
+    assert "Chave manual" in output.getvalue()
+    assert AuditEvent.objects.filter(action="accounts.admin_mfa_rotated").count() == 1
+
+
+@pytest.mark.django_db
 def test_admin_login_form_requests_otp(client):
     response = client.get(reverse("admin:login"))
     assert response.status_code == 200
