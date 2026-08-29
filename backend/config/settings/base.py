@@ -131,3 +131,4 @@ AXES_LOCKOUT_PARAMETERS = [["username", "ip_address"]]
 AXES_SENSITIVE_PARAMETERS = ["password", "otp_token"]
 
 OTP_ADMIN_HIDE_SENSITIVE_DATA = True
+ADMIN_MFA_REQUIRED = os.getenv("DJANGO_ADMIN_MFA_REQUIRED", "true").lower() == "true"

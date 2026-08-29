@@ -17,6 +17,18 @@ explicitamente DEMO até um gate próprio de elegibilidade real.
 - banco, Redis, backend e frontend sem porta pública; somente o gateway Docker publica 80/443;
 - seeds DEMO somente quando `DJANGO_LOAD_DEMO_DATA=true`.
 
+## Exceção temporária de avaliação em pré-produção
+
+Por decisão humana de 29/08/2026, o servidor de demonstração pode usar
+`DJANGO_ADMIN_MFA_REQUIRED=false` exclusivamente durante a avaliação do painel por sócios e
+colaboradores, com dados sintéticos. A flag é segura por padrão (`true`), não remove dispositivos ou
+códigos cadastrados e não contorna staff, senha, permissões explícitas, Axes, sessão curta ou
+auditoria. Gilmar Cesar Alves é o responsável pela exceção.
+
+Enquanto a exceção estiver ativa, `ADMIN-PROD-01` permanece `NOT READY`: profissionais/dados reais,
+publicação real e produção continuam proibidos. O MFA deve ser reativado antes desses gates e a
+exceção deve ser revista ao encerrar a avaliação administrativa.
+
 ## Bootstrap humano
 
 Depois de criar uma senha forte sem registrá-la em shell, log ou Git:
@@ -55,4 +67,5 @@ dura cerca de seis dias, portanto falha de renovação é bloqueador operacional
 
 READY exige evidência no Ubuntu de backup validado, certificado/renovação, migrations, containers,
 health/readiness, login com senha+TOTP, negativa sem MFA/permissão, organização e auditoria. Enquanto
-o acesso SSH e o bootstrap humano não ocorrerem, o estado é `BLOCKED`.
+a exceção temporária estiver ativa, o estado é `NOT READY`, ainda que o restante da infraestrutura
+esteja operacional.

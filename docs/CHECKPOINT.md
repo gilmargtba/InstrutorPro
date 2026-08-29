@@ -16,6 +16,12 @@ A fase continua **M0**, com `GOV-001/OPEN-001` concluído. Esta consolidação n
 
 ## Últimas atividades concluídas
 
+Exceção temporária do painel autorizada em 29/08/2026 para avaliação por sócios e colaboradores:
+MFA pode ser desativado somente no servidor de demonstração com dados sintéticos por flag segura por
+padrão. Senha, staff, permissões explícitas, Axes, sessão curta e auditoria permanecem. Enquanto a
+flag estiver desativada, `ADMIN-PROD-01` continua `NOT READY` e nenhum dado/profissional/publicação
+real é permitido; reativar MFA é condição anterior a produção.
+
 Configuração administrativa GOV-004 implementada em 29/08/2026 no app `organizations`:
 `PlatformOrganization` singleton, CNPJ validado/normalizado, estados
 `INCOMPLETE/PENDING_VALIDATION/VALIDATED`, edição e validação com permissões separadas,
@@ -145,18 +151,17 @@ Revisão jurídico-técnica de privacidade em fontes oficiais vigentes em 22/07/
 
 ## Atividade em execução
 
-Nenhuma implementação em execução. A pequena fatia administrativa GOV-004 terminou;
-não retomar CODEX 02C.
-`GOV-002/003` passaram no recorte M1 aprovado; condições de LGPD/jurídico, `OPEN-007`,
-HTTPS/segurança e implementação bloqueiam localizações/profissionais reais.
+Exceção temporária de MFA do painel em implantação no servidor de demonstração; não retomar CODEX
+02C. `GOV-002/003` passaram no recorte M1 aprovado; condições de LGPD/jurídico, `OPEN-007` e a
+reativação/validação do MFA bloqueiam localizações/profissionais reais.
 
 ## Próxima atividade
 
-`ADMIN-PROD-01` foi implementado e validado localmente, mas permanece `BLOCKED` para produção:
-o acesso SSH a `gilmar@179.199.136.4` foi recusado, portanto backup, TLS, deploy, bootstrap do
-administrador/MFA e smoke tests no Ubuntu ainda não possuem evidência. Nenhuma publicação real foi
-liberada. Retomar somente com acesso humano/autenticação SSH ao servidor existente. Não retomar
-automaticamente inventário/revogação interna de sessões (`IAM-003`/CODEX 02C).
+Concluir a avaliação administrativa apenas com dados sintéticos e, antes de qualquer produção ou
+dado/profissional real, reativar `DJANGO_ADMIN_MFA_REQUIRED=true` e comprovar login com TOTP. Backup,
+TLS, deploy e infraestrutura no Ubuntu já possuem evidência operacional; a exceção deliberada mantém
+`ADMIN-PROD-01` em `NOT READY`. Não retomar automaticamente inventário/revogação interna de sessões
+(`IAM-003`/CODEX 02C).
 
 ## Decisões abertas
 

@@ -9,6 +9,11 @@ bloqueio de tentativas por usuário/IP e sessão curta. O bootstrap e o acesso s
 segredos TOTP e códigos não são persistidos em auditoria. A publicação profissional existente
 permanece DEMO.
 
+Uma exceção humana temporária permite desativar o desafio MFA somente no servidor de avaliação com
+dados sintéticos. A flag mantém default seguro, não remove o cadastro TOTP e conserva senha, staff,
+permissões explícitas, rate limit e sessão curta. Enquanto ativa, impede classificar o ambiente como
+pronto para produção ou admitir dados/profissionais reais.
+
 Fonte oficial dos controles técnicos e operacionais. Autorização está em `AUTHORIZATION.md`; tratamento pessoal em `LGPD.md`; procedimentos de plataforma em `DEVOPS.md`.
 
 ## Objetivos e ameaças prioritárias

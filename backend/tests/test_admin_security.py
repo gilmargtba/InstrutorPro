@@ -4,6 +4,7 @@ import pytest
 from django.contrib.auth.models import Permission
 from django.core.management import call_command
 from django.test import Client
+from django.test.utils import override_settings
 from django.urls import reverse
 from django_otp import DEVICE_ID_SESSION_KEY
 from django_otp.plugins.otp_static.models import StaticToken
@@ -76,6 +77,27 @@ def test_admin_login_form_requests_otp(client):
     response = client.get(reverse("admin:login"))
     assert response.status_code == 200
     assert "otp_token" in response.context["form"].fields
+
+
+@pytest.mark.django_db
+@override_settings(ADMIN_MFA_REQUIRED=False)
+def test_admin_preproduction_exception_accepts_password_only(client):
+    account = Account.objects.create_user(
+        username="preproduction-reviewer",
+        email="reviewer@example.invalid",
+        password="strong-test-password",
+        is_staff=True,
+    )
+    response = client.post(
+        reverse("admin:login"),
+        {
+            "username": account.username,
+            "password": "strong-test-password",
+            "next": reverse("admin:index"),
+        },
+    )
+    assert response.status_code == 302
+    assert response.url == reverse("admin:index")
 
 
 @pytest.mark.django_db

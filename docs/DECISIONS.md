@@ -117,6 +117,7 @@ Cada questão fechada deve gerar ADR ou atualização desta tabela com: decisão
 | ADR-053 | **Modelo de Encarregado/DPO externo independente aprovado para o M1.** | A decisão reduz conflito com as funções acumuladas por Gilmar, mas não seleciona fornecedor nem autoriza contratação/cobrança. Identidade, contrato e ato formal continuam pendentes. |
 | ADR-054 | **Coleta controlada de até três propostas de DPO externo autorizada para o M1.** | A shortlist e a mensagem uniforme permitem comparação sem escolher fornecedor. Envio não equivale a contratação; identidade, conflito, DPA, ato formal, preço e aceite continuam pendentes de evidência e decisão humana. |
 | ADR-055 | **Dados do controlador M1 passam a ser configuração administrativa, não hardcode.** | `PlatformOrganization` singleton reutiliza Django Admin, separa cadastro de validação, exige permissões explícitas, versiona edições e audita com redação. A implementação não fecha BCR-02, não cria API pública e não semeia dados reais. |
+| ADR-056 | **MFA do Admin pode ser suspenso somente na avaliação sintética de pré-produção.** | A flag `DJANGO_ADMIN_MFA_REQUIRED` permanece segura por padrão e pode ser `false` no servidor de demonstração por decisão humana, sob responsabilidade de Gilmar Cesar Alves. A exceção preserva senha, staff, permissões, Axes e sessão curta, mantém `ADMIN-PROD-01` em `NOT READY` e proíbe dados/profissionais/publicação reais até reativação do MFA. |
 
 ## Decisões aceitas — consolidação 2026-08-19
 
