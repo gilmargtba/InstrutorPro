@@ -84,7 +84,7 @@ Cada questão fechada deve gerar ADR ou atualização desta tabela com: decisão
 | ID | Proposta | Evidência pendente para aceite |
 | --- | --- | --- |
 | P-002 | Adotar a matriz de `GOV_002_NATIONAL.md` e a revisão manual documentada como baseline de elegibilidade. | Aprovação Compliance/Legal, owner/periodicidade por linha e tratamento dos gaps individuais; fecha `OPEN-002` somente depois disso. |
-| P-003 | Adotar `GOV_003_REVIEW_POLICY.md` para segregação, motivos, concorrência, expiração e contestação. | SLAs e papéis funcionais aprovados; tabletop continua não executado e bloqueia operação real de revisão/publicação. |
+| P-003 | Adotar `GOV_003_REVIEW_POLICY.md` para segregação, motivos, concorrência, expiração e contestação. | SLAs e papéis funcionais aprovados; tabletop M1 executado em 29/08/2026 com `FAIL`. F-001 a F-006 permanecem abertos e bloqueiam operação real de revisão/publicação. |
 
 ## Questões encerradas por decisão humana — 24/08/2026
 
@@ -109,6 +109,7 @@ Cada questão fechada deve gerar ADR ou atualização desta tabela com: decisão
 | ADR-045 | **Gate LGPD mínimo da busca aprova somente dados sintéticos e o desenho minimizado.** Busca inicial sem login usa cidade/bairro/CEP explícito, sem GPS automático, histórico individual, saúde ou residência pública. Área do instrutor exige autorização operacional granular e revogável, separada de elegibilidade/publicação. | Busca real permanece bloqueada até controlador/canal, base/LIA, RIPD, retenção, provider, segurança e gates regulatórios/operacionais. `OPEN-007` não é fechado. |
 | ADR-046 | **Porto Alegre/RS é o primeiro território operacional controlado do M1.** | O recorte permite fechar regras e homologação do primeiro piloto sem limitar arquitetura, domínio ou expansão às 27 UFs; SC/SP/RJ/ES continuam prioritárias depois do gate próprio. |
 | ADR-047 | **MapTiler Cloud Flex é o provider preferencial condicionado de mapas/geocoding do M1.** | PostGIS continua fonte de verdade; geocoding passa pelo backend; Leaflet é preservado; GPS automático fica desativado; fallback é busca/lista por Porto Alegre. Produção exige aceite do plano/DPA, subprocessadores, países, retenção e endpoint europeu. |
+| ADR-048 | **Tabletop GOV-003 do M1 foi executado com resultado `FAIL`.** | O exercício sintético validou o fluxo esperado, mas `RS/INSTRUCTOR` não aprovado, ausência de revisor independente, validação jurídica externa, storage/scanner e pendências organizacionais impedem aprovação do gate e qualquer operação real. |
 
 ## Decisões aceitas — consolidação 2026-08-19
 

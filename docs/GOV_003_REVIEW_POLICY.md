@@ -1,6 +1,6 @@
 # GOV-003 — Política de revisão e aplicação ativa
 
-Status: **SLAs OPERACIONAIS INICIAIS APROVADOS; TABLETOP PREPARADO E NÃO EXECUTADO** — 24/08/2026.
+Status: **SLAs OPERACIONAIS INICIAIS APROVADOS; TABLETOP M1 EXECUTADO COM RESULTADO FAIL** — 29/08/2026.
 
 ## Objetivo
 
@@ -120,7 +120,7 @@ O titular pode corrigir evidência e contestar decisão. A contestação cria ca
 
 O sistema futuro deverá registrar recebimento, responsável, andamento, decisão, timestamps e evidências pertinentes. Os SLAs internos não substituem prazos legais e não são promessa pública automática. `OPERATIONS` acompanha capacidade/escalonamento; `COMPLIANCE` valida regra e evidência; `LEGAL` apoia linguagem/efeito jurídico; `PRIVACY_SECURITY` conduz os controles de privacidade e segurança.
 
-## Checklist do tabletop obrigatório — não executado
+## Checklist do tabletop obrigatório — executado em 29/08/2026
 
 **Cenário formal:** “Um profissional publicado na InstrutorPro contesta sua suspensão após uma fonte oficial indicar possível irregularidade ou expiração de credencial.”
 
@@ -141,47 +141,114 @@ O sistema futuro deverá registrar recebimento, responsável, andamento, decisã
 
 ### Checklist específico
 
-- [ ] recebimento do alerta e correlação do caso;
-- [ ] preservação minimizada da evidência e da versão da fonte/regra;
-- [ ] fundamento e autoridade para suspensão preventiva;
-- [ ] notificação ao profissional;
-- [ ] abertura e confirmação da contestação;
-- [ ] revisão humana e conflito de interesse;
-- [ ] consulta manual à fonte oficial;
-- [ ] correção de falso positivo por decisão compensatória;
-- [ ] manutenção motivada da suspensão quando confirmada;
-- [ ] trilha de auditoria completa;
-- [ ] comunicação final ao titular;
-- [ ] encerramento formal do caso.
+- [x] recebimento do alerta e correlação do caso;
+- [x] preservação minimizada da evidência e da versão da fonte/regra;
+- [x] fundamento e autoridade para suspensão preventiva;
+- [x] notificação ao profissional;
+- [x] abertura e confirmação da contestação;
+- [x] revisão humana e conflito de interesse — falhou por ausência de segundo revisor;
+- [x] consulta manual à fonte oficial — exercitada somente com resposta sintética;
+- [x] correção de falso positivo por decisão compensatória;
+- [x] manutenção motivada da suspensão quando confirmada;
+- [x] trilha de auditoria completa no desenho do exercício;
+- [x] comunicação final ao titular;
+- [x] encerramento formal do caso com resultado `FAIL`.
 
-### Registro da sessão — preencher somente quando executada
+### Registro da sessão
 
 | Campo | Valor |
 | --- | --- |
-| data | `NOT_EXECUTED` |
-| participantes | `NOT_EXECUTED` |
-| resultado | `NOT_EXECUTED` |
-| problemas encontrados | `NOT_EXECUTED` |
-| ações corretivas | `NOT_EXECUTED` |
-| aprovação final | `NOT_EXECUTED` |
+| data | 29/08/2026 |
+| escopo | piloto M1, Porto Alegre/RS, `FIRST_LICENSE/CATEGORY_B`, cenário integralmente sintético |
+| matriz/policy | `GOV_002_NATIONAL.md` e esta policy na revisão versionada no commit-base `9762cba` |
+| participante humano | Gilmar Cesar Alves, atuando separadamente como `OPERATIONS`, `COMPLIANCE`, coordenação interna `LEGAL`, `PRIVACY_SECURITY` e `ADMIN` |
+| facilitador/relator | Codex, sem papel de aprovador humano |
+| resultado | `FAIL` — gate não aprovado para operação real |
+| problemas encontrados | matriz `RS/INSTRUCTOR` não aprovada; ausência de revisor independente; validação jurídica externa pendente; storage/scanner real e seus controles não homologados |
+| ações corretivas | AC-001 a AC-006 abaixo |
+| aprovação final | `REPROVADO/PENDENTE`; nenhuma elegibilidade, revisão ou publicação real liberada |
 
-- [ ] registrar data, versão da matriz/policy, participantes por função e facilitador;
-- [ ] caso feliz com autorização oficial válida e todos os requisitos;
-- [ ] requisito obrigatório ausente e pedido de informação;
-- [ ] documento ilegível, divergente, vencido ou adulterado;
-- [ ] fonte oficial indisponível, instável ou contraditória;
-- [ ] autorização oficial suspensa/cancelada após publicação interna;
-- [ ] dois revisores concorrentes e decisão stale;
-- [ ] tentativa de self-review, relação pessoal ou conflito de interesse;
-- [ ] mudança de regra durante revisão;
-- [ ] falha de storage, malware scanner, notificação e outbox;
-- [ ] contestação com nova evidência e revisor diferente quando possível;
-- [ ] minimização do acesso e ausência de documento/PII em log e resposta pública;
-- [ ] rollback por decisão compensatória, sem editar histórico;
-- [ ] registrar achados, owner funcional, prazo e decisão de aprovar/reprovar o gate.
+O acúmulo provisório de funções foi aceito apenas para o exercício. Cada intervenção
+abaixo identifica o papel funcional. Quando independência ou qualificação externa é
+necessária, o exercício registra pendência em vez de presumir aprovação.
 
-Estado do checklist: **não executado**. Marcar itens somente durante sessão real com evidência preservada.
+### Cronologia exercitada
+
+| Marco | Papel | Evento/decisão simulada | Evidência preservada | Resultado |
+| --- | --- | --- | --- | --- |
+| T+00 | `OPERATIONS` | recebe alerta sintético e abre caso correlacionado ao profissional, fonte e regra | ID sintético, UF/categoria, código do alerta e versão da regra; sem documento ou PII em log | caso aberto |
+| T+10 | `COMPLIANCE` | confere fonte, timestamp e resposta permitida | URL, horário lógico, hash/metadado e resultado sintéticos minimizados | evidência preservada; mérito pendente |
+| T+20 | `COMPLIANCE` | avalia suspensão preventiva por possível expiração | `SOURCE_UNAVAILABLE` ou `DOCUMENT_EXPIRED`, conforme variante; nunca altera fato oficial | suspensão apenas simulada; produção bloqueada |
+| T+30 | `OPERATIONS` | prepara comunicação segura e canal de contestação | template sem antifraude, documento ou dado de terceiro | SLA de recebimento em 1 dia útil aplicável |
+| T+1d | `OPERATIONS` | confirma contestação sintética e preserva decisão anterior | ID do caso, recebimento e nova evidência sintética | contestação aberta |
+| T+1d | `COMPLIANCE` | verifica self-review/conflito antes de assumir análise | ator e papéis efetivos | conflito detectado: não há segundo revisor humano |
+| T+3d | `LEGAL` | avalia necessidade de interpretação jurídica | questão e escalonamento minimizados | parecer externo continua `PENDING` |
+| T+3d | `PRIVACY_SECURITY` | verifica minimização, acesso e ausência de PII em logs/resposta pública | checklist sintético de acesso/log | desenho aceito para teste; homologação real pendente |
+| encerramento | `ADMIN` | verifica que administração não concede poder de revisão/publicação | matriz de autorização e trilha por papel | nenhuma liberação concedida |
+
+### Variantes e decisões por função
+
+| Variante | Decisão exercitada | Resultado esperado pela policy |
+| --- | --- | --- |
+| caso feliz | `COMPLIANCE` só poderia aprovar uma versão exata com todos os requisitos e linha regulatória aprovada | bloqueado no M1 porque `RS/INSTRUCTOR` permanece `HUMAN_REVIEW_REQUIRED` |
+| requisito ausente | `COMPLIANCE` registra `REQUIREMENT_MISSING`; `OPERATIONS` solicita informação com prazo | `PENDING_INFORMATION`, sem publicação |
+| ilegível/divergente/vencido | `COMPLIANCE` usa motivo estruturado aplicável | pendência, rejeição ou expiração conforme evidência; revisão humana para fraude |
+| fonte indisponível/contraditória | `COMPLIANCE` registra `SOURCE_UNAVAILABLE`, sem inventar validade ou tolerância | `VERIFICATION_PENDING`; nenhuma nova publicação |
+| perda após publicação | `COMPLIANCE` aplica suspensão preventiva conforme regra e preserva fato oficial | retirada simulada da publicação; histórico mantido |
+| decisão concorrente/stale | serviço rejeita a segunda decisão após mudança de versão/regra/evidência | conflito auditado; nenhum overwrite |
+| self-review/relação/conflito | claim é negado e encaminhado a outro revisor | `PENDING`, pois não há revisor independente designado |
+| regra muda durante revisão | snapshot antigo não é reaproveitado silenciosamente | decisão stale; reavaliação com nova versão |
+| falha de storage/scanner | documento não é promovido | bloqueio técnico; provider/homologação continuam pendentes |
+| falha de notificação/outbox | decisão não é desfeita; retry idempotente e alerta | nenhuma duplicação; homologação real pendente |
+| contestação com nova evidência | decisão anterior é preservada e novo ciclo é criado | análise por pessoa diferente `PENDING` |
+| falso positivo | nova decisão compensatória, nunca edição do histórico | restauração somente após policy/evidência válidas |
+| irregularidade confirmada | suspensão motivada é mantida e titular recebe orientação segura | sem exposição de antifraude ou terceiros |
+
+### Evidências do exercício
+
+- policy, motivos, estados, SLAs e roteiro deste documento;
+- matriz `GOV_002_NATIONAL.md`, na qual `RS/INSTRUCTOR` continua
+  `HUMAN_REVIEW_REQUIRED`;
+- atribuição humana das cinco funções para o tabletop, com acumulação provisória e
+  exigência explícita de segregação;
+- decisões `ADR-039`, `ADR-046` e `ADR-047` e bloqueios de `CHECKPOINT.md`;
+- nenhuma evidência pessoal, documento real, consulta oficial real, scraping, upload,
+  integração externa ou publicação foi utilizada.
+
+### Achados e ações corretivas
+
+| ID | Severidade | Achado/falha | Owner funcional | Ação corretiva / critério de fechamento | Estado |
+| --- | --- | --- | --- | --- | --- |
+| F-001 | crítica | `RS/INSTRUCTOR` não possui aprovação nominal em GOV-002 | `COMPLIANCE` + `LEGAL` | aprovar nominalmente a linha com fonte, vigência, gaps e owner; validação externa quando exigir interpretação jurídica | `OPEN` |
+| F-002 | crítica | uma única pessoa acumula revisão, contestação e administração; não há revisor independente | `ADMIN` + `COMPLIANCE` | designar segundo revisor autorizado e testar conflito/self-review com atores distintos | `OPEN` |
+| F-003 | alta | coordenação jurídica interna não substitui parecer profissional | `LEGAL` | obter validação jurídica externa para fundamentos/efeitos que a exijam | `OPEN` |
+| F-004 | alta | storage privado, quarentena e scanner reais não estão selecionados/homologados | `PRIVACY_SECURITY` + `OPERATIONS` | fechar provider aplicável, contrato, falhas, retenção e teste antes de upload real | `OPEN` |
+| F-005 | alta | tolerância para fonte oficial indisponível não está aprovada na linha RS | `COMPLIANCE` | definir por fonte/regra; até lá manter `VERIFICATION_PENDING` | `OPEN` |
+| F-006 | média | DPO/Encarregado, controlador e canal reais permanecem pendentes | `PRIVACY_SECURITY` + `LEGAL` | fechar `GOV-004`/gate LGPD aplicável sem equiparar designação provisória a DPO formal | `OPEN` |
+
+As ações correspondentes são `AC-001` a `AC-006`, na mesma ordem dos achados. Nenhuma
+recebe prazo inventado; prazo e responsável nominal adicional exigem decisão humana.
+
+- [x] registrar data, versão da matriz/policy, participantes por função e facilitador;
+- [x] caso feliz com autorização oficial válida e todos os requisitos;
+- [x] requisito obrigatório ausente e pedido de informação;
+- [x] documento ilegível, divergente, vencido ou adulterado;
+- [x] fonte oficial indisponível, instável ou contraditória;
+- [x] autorização oficial suspensa/cancelada após publicação interna;
+- [x] dois revisores concorrentes e decisão stale;
+- [x] tentativa de self-review, relação pessoal ou conflito de interesse;
+- [x] mudança de regra durante revisão;
+- [x] falha de storage, malware scanner, notificação e outbox;
+- [x] contestação com nova evidência e revisor diferente quando possível;
+- [x] minimização do acesso e ausência de documento/PII em log e resposta pública;
+- [x] rollback por decisão compensatória, sem editar histórico;
+- [x] registrar achados, owner funcional e decisão de reprovar o gate; prazos permanecem pendentes de decisão humana.
+
+Estado do checklist: **executado com evidência sintética e resultado `FAIL`**.
 
 ## Estado do gate
 
-Os SLAs e papéis funcionais foram aprovados por decisão humana. O tabletop está formalmente preparado, porém **não executado**; sua execução e aprovação final continuam gate antes de operação real de revisão/publicação. Nenhum estado `ACTIVE` ou publicação é liberado por este documento isoladamente.
+Os SLAs e papéis funcionais foram aprovados por decisão humana. O tabletop M1 foi
+executado em 29/08/2026 e resultou em **`FAIL`** pelos achados abertos acima. O gate
+continua reprovado antes de operação real de revisão/publicação. Nenhum estado `ACTIVE`,
+elegibilidade ou publicação é liberado por este documento isoladamente.

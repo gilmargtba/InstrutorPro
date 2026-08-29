@@ -16,6 +16,14 @@ A fase continua **M0**, com `GOV-001/OPEN-001` concluído. Esta consolidação n
 
 ## Últimas atividades concluídas
 
+Tabletop obrigatório `GOV-003` do piloto M1 executado documentalmente em 29/08/2026,
+com Gilmar Cesar Alves atuando separadamente nas cinco funções provisórias e Codex apenas
+como facilitador/relator. O cenário e suas variantes usaram somente evidência sintética.
+Resultado: **`FAIL`**. Permanecem abertos F-001 a F-006: linha `RS/INSTRUCTOR` não
+aprovada, falta de revisor independente, validação jurídica externa, storage/scanner real,
+tolerância da fonte e organização/DPO/canal. Nenhuma elegibilidade, revisão ou publicação
+real foi liberada.
+
 Decisões territoriais e de provider do M1 registradas em 29/08/2026: Porto Alegre/RS é
 o primeiro território operacional controlado, sem limitar a arquitetura nacional;
 MapTiler Cloud Flex é o provider preferencial condicionado, com PostGIS como fonte de
@@ -85,19 +93,17 @@ Revisão jurídico-técnica de privacidade em fontes oficiais vigentes em 22/07/
 
 ## Atividade em execução
 
-Nenhuma implementação em execução. CODEX 02E terminou; não retomar CODEX 02C. As
-condições contratuais de `OPEN-007`, elegibilidade e LGPD bloqueiam
-localizações/profissionais reais.
+Nenhuma implementação em execução. CODEX 02E terminou; não retomar CODEX 02C. O
+`GOV-003` está executado e reprovado; F-001 a F-006, as condições contratuais de
+`OPEN-007`, elegibilidade e LGPD bloqueiam localizações/profissionais reais.
 
 ## Próxima atividade
 
-Receber autorização explícita para qualquer próximo passo. O próximo gate documental
-previsto no caminho mínimo continua sendo executar o tabletop obrigatório de `GOV-003`,
-em etapa separada; ele não foi
-executado nesta revisão. Não retomar automaticamente inventário/revogação interna de
-sessões (`IAM-003`/CODEX 02C). Antes de elegibilidade/publicação, ainda é necessário
-aprovar nominalmente as linhas aplicáveis de `GOV-002` e executar/aprovar o tabletop de
-`GOV-003`.
+Receber autorização explícita para qualquer próximo passo. Antes de elegibilidade ou
+publicação, corrigir F-001 a F-006 e repetir/aprovar o tabletop `GOV-003`; isso inclui
+aprovar nominalmente `RS/INSTRUCTOR` em `GOV-002`, designar revisão independente e fechar
+as dependências externas aplicáveis. Não retomar automaticamente inventário/revogação
+interna de sessões (`IAM-003`/CODEX 02C).
 
 ## Decisões abertas
 
@@ -122,7 +128,7 @@ Detalhes, recomendação, alternativas, impactos e owner estão em `DECISIONS.md
 ## Bloqueios
 
 - conteúdo regulatório por linha ainda precisa de aprovação humana antes de elegibilidade/publicação (`OPEN-002`);
-- tabletop de `GOV-003` não foi executado; os SLAs já estão aprovados, mas a operação real continua bloqueada;
+- tabletop de `GOV-003` foi executado com `FAIL`; F-001 a F-006 e a repetição aprovada continuam bloqueando operação real;
 - dados da organização operadora permanecem `PENDING_HUMAN_INPUT`; não bloqueiam desenvolvimento sintético, apenas homologação/produção conforme o gate;
 - provider real continua bloqueado até decisão contratual, mas adapters/simuladores estão liberados para desenvolvimento (`OPEN-006`);
 - menores permanecem bloqueados no MVP; `OPEN-014` não bloqueia desenvolvimento sintético para adultos, mas bloqueia qualquer expansão/cadastro operacional de menores.
