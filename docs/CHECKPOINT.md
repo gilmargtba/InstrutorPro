@@ -1,7 +1,7 @@
 # Checkpoint do Projeto
 
 - Atualizado em: **2026-08-29**
-- Versão documental: **2.9**
+- Versão documental: **3.0**
 - Código-fonte: **CODEX 02E concluído; fundações anteriores preservadas**
 
 ## Consolidação de produto em 2026-08-19
@@ -15,6 +15,11 @@ A fase continua **M0**, com `GOV-001/OPEN-001` concluído. Esta consolidação n
 **INSTRUTORPRO DEMO 01 concluída.** O frontend contém experiência visual navegável e mobile-first apenas com fixtures sintéticas. CODEX 01, 02A e 02B permanecem preservados; CODEX 02C está suspenso e não deve ser retomado sem autorização explícita. Capacidades reguladas, usuários reais, perfis e publicação continuam condicionados aos respectivos gates.
 
 ## Últimas atividades concluídas
+
+Cotação controlada para Encarregado/DPO externo enviada em 29/08/2026 a Seusdados,
+Omnisblue e Global Data Solutions, com mensagem uniforme e matriz de avaliação. Os três
+envios foram confirmados; as propostas continuam pendentes. Nenhum fornecedor foi
+escolhido, nenhum contrato/custo foi aceito e nenhum dado de instrutor foi compartilhado.
 
 Modelo de Encarregado/DPO externo independente aprovado em 29/08/2026, sem seleção de
 fornecedor, contrato ou cobrança. A identidade e o ato formal continuam pendentes antes
@@ -130,9 +135,9 @@ HTTPS/segurança e implementação bloqueiam localizações/profissionais reais.
 
 ## Próxima atividade
 
-Receber como próxima decisão única autorização para coletar propostas de serviço externo
-de DPO, sem contratar. Depois, selecionar fornecedor e registrar identidade/ato,
-aprovar LIA/RIPD/avisos e fechar
+Aguardar propostas de serviço externo de DPO, sem contratar. Depois, comparar propostas,
+selecionar fornecedor por
+decisão humana específica e registrar identidade/ato; então aprovar LIA/RIPD/avisos e fechar
 sequencialmente os bloqueadores restantes de `M1_PREPRODUCTION_READINESS.md`. Não retomar
 automaticamente inventário/revogação interna de sessões (`IAM-003`/CODEX 02C).
 

@@ -67,3 +67,8 @@ Encarregado/DPO formal por serviço externo independente; fornecedor/identidade 
 precisam ser escolhidos e o ato
 formal preservado. Não
 publicar termos definitivos nem contratar usando informação não comprovada.
+
+Em 29/08/2026 foi autorizada e executada a solicitação controlada de propostas para três
+fornecedores. A shortlist, o registro de envio, o texto uniforme e a matriz de avaliação
+estão em `DPO_M1_RFQ.md`. Enviar a cotação não escolhe fornecedor e não altera os campos
+pendentes desta tabela.

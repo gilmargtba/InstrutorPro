@@ -128,8 +128,8 @@ regulatórias, de privacidade, segurança e técnica já existentes.
 ## 12. Decisões humanas restantes
 
 Operador/canal, procedimento RS e modelo de DPO externo independente foram aprovados. A
-próxima decisão única é autorizar a coleta de propostas para selecionar o serviço, sem
-contratação automática. Depois: fornecedor/identidade/ato formal, aprovação da LIA/RIPD/avisos,
+solicitação uniforme foi enviada a três fornecedores, sem seleção ou contratação; as
+respostas permanecem pendentes. Depois: fornecedor/identidade/ato formal, aprovação da LIA/RIPD/avisos,
 aceite MapTiler e autorização do card de implementação production-ready.
 
 ## 13. Arquivos alterados

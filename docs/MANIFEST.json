@@ -1,6 +1,6 @@
 {
   "package": "instrutorpro-documentation",
-  "version": "2.9",
+  "version": "3.0",
   "reviewed_on": "2026-08-29",
   "path_base": "repository-root",
   "normative_documents": [
@@ -36,7 +36,8 @@
   ],
   "supporting_documents": [
     "docs/GLOSSARY.md",
-    "docs/REFERENCES.md"
+    "docs/REFERENCES.md",
+    "docs/DPO_M1_RFQ.md"
   ],
   "governance_files": [
     "docs/MANIFEST.json"

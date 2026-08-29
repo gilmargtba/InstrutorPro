@@ -90,3 +90,15 @@ Flex em Porto Alegre/RS:
 A documentação pública sustenta a preferência técnica e o orçamento inicial, mas não
 substitui DPA/contrato, inventário de subprocessadores, análise de transferência,
 confirmação da retenção da consulta nem aceite de Legal/Privacy.
+
+## Encarregado/DPO externo — shortlist M1
+
+Fontes públicas consultadas em 29/08/2026 somente para preparar a cotação comparável;
+as alegações comerciais precisam ser comprovadas na proposta e no contrato:
+
+- [Seusdados — DPO as a Service](https://www.seusdados.com/solucoes/dpo-as-a-service)
+- [Seusdados — contato comercial](https://www.seusdados.com/contato)
+- [Omnisblue — DPO as a Service](https://omnisblue.com/servicos/dpo-as-a-service)
+- [Global Data Solutions — DPO as a Service](https://globaldata.com.br/dpo-as-a-service/)
+- [ANPD — guia sobre a atuação do Encarregado](https://www.gov.br/anpd/pt-br/assuntos/noticias/anpd-lanca-guia-sobre-atuacao-do-encarregado)
+- [Resolução CD/ANPD nº 18/2024](https://www.gov.br/anpd/pt-br/acesso-a-informacao/institucional/atos-normativos/regulamentacoes_anpd/processo_integra_-resolucao_cd_anpd_no_18_2024.pdf)
