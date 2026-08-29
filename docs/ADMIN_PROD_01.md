@@ -14,7 +14,7 @@ explicitamente DEMO até um gate próprio de elegibilidade real.
 - MFA TOTP obrigatório em todo o Admin, com dez códigos de recuperação de uso único;
 - cinco falhas de login por combinação usuário/IP bloqueiam por uma hora;
 - permissões ADMIN-PROD-01 explícitas e auditadas;
-- banco, Redis e backend somente na rede privada; frontend ligado a `127.0.0.1:8080` em produção;
+- banco, Redis, backend e frontend sem porta pública; somente o gateway Docker publica 80/443;
 - seeds DEMO somente quando `DJANGO_LOAD_DEMO_DATA=true`.
 
 ## Bootstrap humano
@@ -47,9 +47,9 @@ documentação, logs ou relatório.
 ## HTTPS no IP
 
 Usar Certbot 5.4 ou superior e certificado IP short-lived da Let's Encrypt, inicialmente em staging.
-O arquivo `deploy/nginx/instrutorpro-ip.conf` termina TLS no Nginx do host e encaminha ao frontend em
-`127.0.0.1:8080`. O timer systemd renova a cada 12 horas; a emissão dura cerca de seis dias, portanto
-falha de renovação é bloqueador operacional.
+O arquivo `deploy/nginx/instrutorpro-gateway.conf` termina TLS no gateway Nginx em Docker. O serviço
+`certbot-renew` renova a cada 12 horas e o gateway recarrega certificados a cada seis horas; a emissão
+dura cerca de seis dias, portanto falha de renovação é bloqueador operacional.
 
 ## Critério de prontidão
 

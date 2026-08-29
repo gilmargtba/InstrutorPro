@@ -83,8 +83,6 @@ services:
       context: ./frontend
       dockerfile: Dockerfile.demo
     restart: unless-stopped
-    ports:
-      - "${DEMO_BIND_ADDRESS:-0.0.0.0}:${DEMO_HTTP_PORT:-80}:8080"
     volumes:
       - demo_static_data:/var/www/django-static:ro
     depends_on:
@@ -92,11 +90,44 @@ services:
         condition: service_healthy
     networks: [public, private]
 
+  gateway:
+    image: nginx:1.28-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/nginx/instrutorpro-gateway.conf:/etc/nginx/conf.d/default.conf:ro
+      - letsencrypt_config:/etc/letsencrypt:ro
+      - letsencrypt_webroot:/var/www/certbot:ro
+    depends_on:
+      frontend:
+        condition: service_started
+    command:
+      - /bin/sh
+      - -c
+      - "(while sleep 21600; do nginx -s reload; done) & exec nginx -g 'daemon off;'"
+    networks: [public]
+
+  certbot-renew:
+    image: certbot/certbot:v5.4.0
+    restart: unless-stopped
+    volumes:
+      - letsencrypt_config:/etc/letsencrypt
+      - letsencrypt_webroot:/var/www/certbot
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - "while :; do certbot renew --quiet --webroot -w /var/www/certbot; sleep 43200; done"
+    networks: [public]
+
 volumes:
   demo_postgres_data:
   demo_redis_data:
   demo_static_data:
   demo_celerybeat_data:
+  letsencrypt_config:
+  letsencrypt_webroot:
 
 networks:
   public:
