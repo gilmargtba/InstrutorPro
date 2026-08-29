@@ -16,6 +16,10 @@ A fase continua **M0**, com `GOV-001/OPEN-001` concluído. Esta consolidação n
 
 ## Últimas atividades concluídas
 
+Modelo de Encarregado/DPO externo independente aprovado em 29/08/2026, sem seleção de
+fornecedor, contrato ou cobrança. A identidade e o ato formal continuam pendentes antes
+de dados reais.
+
 Exigência de Encarregado/DPO formal antes de dados reais aprovada em 29/08/2026. O canal
 `focusgtba@gmail.com` permanece válido para contato inicial, mas não é nomeação. Pessoa ou
 serviço, ato formal, substituição, recursos e avaliação de conflito continuam pendentes;
@@ -126,8 +130,8 @@ HTTPS/segurança e implementação bloqueiam localizações/profissionais reais.
 
 ## Próxima atividade
 
-Receber como próxima decisão única o modelo do Encarregado/DPO do M1: serviço externo
-independente ou pessoa física distinta e qualificada. Depois, registrar identidade/ato,
+Receber como próxima decisão única autorização para coletar propostas de serviço externo
+de DPO, sem contratar. Depois, selecionar fornecedor e registrar identidade/ato,
 aprovar LIA/RIPD/avisos e fechar
 sequencialmente os bloqueadores restantes de `M1_PREPRODUCTION_READINESS.md`. Não retomar
 automaticamente inventário/revogação interna de sessões (`IAM-003`/CODEX 02C).

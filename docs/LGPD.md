@@ -46,10 +46,9 @@ A pessoa jurídica real configurada como `PlatformOrganization`, e não o regist
 
 O mapa registra controlador, operador, suboperador, terceiro controlador, instruções, responsabilidade por direitos/incidente e contato. O contrato não corrige uma classificação incompatível com a atividade real.
 
-Em 29/08/2026, o responsável humano confirmou que o M1 manterá a exigência interna de
-Encarregado/DPO formal antes de dados reais, preferencialmente pessoa ou serviço distinto
-de Gilmar quando houver conflito com decisões sobre finalidades e meios. A exigência está
-aprovada; identidade, aceite, ato formal, substituição e recursos continuam pendentes.
+Em 29/08/2026, o responsável humano confirmou a exigência interna de Encarregado/DPO
+formal e aprovou o modelo de serviço externo independente. Fornecedor, identidade, aceite,
+ato formal, substituição e recursos continuam pendentes; nenhuma contratação foi iniciada.
 
 Antes de dados reais, a plataforma designará encarregado mesmo que futuramente possa demonstrar enquadramento como agente de pequeno porte. A indicação exige ato formal preservado, identidade e canal público, comunicação em português, substituto, recursos, acesso à direção e verificação de conflito com funções que decidem finalidades/meios. A responsabilidade pela conformidade continua com o agente de tratamento, não é transferida ao encarregado.
 
