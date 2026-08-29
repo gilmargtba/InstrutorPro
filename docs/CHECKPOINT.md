@@ -1,6 +1,6 @@
 # Checkpoint do Projeto
 
-- Atualizado em: **2026-08-24**
+- Atualizado em: **2026-08-29**
 - Versão documental: **2.8**
 - Código-fonte: **CODEX 02E concluído; fundações anteriores preservadas**
 
@@ -15,6 +15,13 @@ A fase continua **M0**, com `GOV-001/OPEN-001` concluído. Esta consolidação n
 **INSTRUTORPRO DEMO 01 concluída.** O frontend contém experiência visual navegável e mobile-first apenas com fixtures sintéticas. CODEX 01, 02A e 02B permanecem preservados; CODEX 02C está suspenso e não deve ser retomado sem autorização explícita. Capacidades reguladas, usuários reais, perfis e publicação continuam condicionados aos respectivos gates.
 
 ## Últimas atividades concluídas
+
+Revisão documental controlada de `GOV-002` registrada em 29/08/2026 para RS, SC, SP,
+RJ e ES. A autorização humana permitiu registrar somente decisões suficientemente
+sustentadas, mas não aprovou nominalmente nenhuma linha nem selecionou opções da análise
+anterior. Resultado conservador: 0 linhas `APPROVED`, 16 permanecem
+`HUMAN_REVIEW_REQUIRED` e 4 permanecem `RESEARCH_REQUIRED`. `OPEN-002` continua aberto;
+nenhuma elegibilidade, publicação, pessoa real, integração ou funcionalidade foi liberada.
 
 Deploy da demo no Ubuntu preparado em 24/08/2026: Compose isolado do ambiente local,
 frontend Angular estático em Nginx, Django/Gunicorn, redes privadas para PostGIS/Redis,
@@ -66,7 +73,12 @@ Nenhuma implementação em execução. CODEX 02E terminou; não iniciar outra fa
 
 ## Próxima atividade
 
-Receber autorização explícita para qualquer próximo passo. Não retomar automaticamente inventário/revogação interna de sessões (`IAM-003`/CODEX 02C). Antes de elegibilidade/publicação: aprovar as linhas aplicáveis de `GOV-002` e executar/aprovar o tabletop de `GOV-003`.
+Receber autorização explícita para qualquer próximo passo. O próximo gate documental
+previsto é executar o tabletop obrigatório de `GOV-003`, em etapa separada; ele não foi
+executado nesta revisão. Não retomar automaticamente inventário/revogação interna de
+sessões (`IAM-003`/CODEX 02C). Antes de elegibilidade/publicação, ainda é necessário
+aprovar nominalmente as linhas aplicáveis de `GOV-002` e executar/aprovar o tabletop de
+`GOV-003`.
 
 ## Decisões abertas
 

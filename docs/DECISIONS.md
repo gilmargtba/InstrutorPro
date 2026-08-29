@@ -71,6 +71,12 @@ Este documento é a fonte oficial de decisões consolidadas, contradições reso
 
 ## Regra de decisão
 
+### Registro de revisão controlada GOV-002 — 29/08/2026
+
+O responsável humano autorizou o registro documental controlado das decisões da primeira onda, condicionado a evidência suficiente, ausência de dependência pendente e aprovação efetivamente expressa. A autorização não escolheu as opções levantadas na análise anterior e não aprovou nominalmente nenhuma das 20 linhas.
+
+Por aplicação de `deny by default`, evidência encontrada, recomendação técnica, autorização para editar e aprovação documental permaneceram fatos distintos. O resultado registrado em `GOV_002_NATIONAL.md` foi: 0 linhas `APPROVED`, 16 linhas mantidas em `HUMAN_REVIEW_REQUIRED` e 4 mantidas em `RESEARCH_REQUIRED`. `P-002` continua aguardando aprovação de Compliance/Legal e `OPEN-002` permanece aberto. Não houve liberação de elegibilidade, publicação, usuário/profissional real ou integração oficial.
+
 Cada questão fechada deve gerar ADR ou atualização desta tabela com: decisão, data, responsáveis, evidência, alternativas, consequência, rollback/revisão e documentos afetados. O checkpoint só remove o bloqueio depois que todas as fontes oficiais afetadas forem atualizadas.
 
 ## Propostas aguardando aprovação — 24/08/2026

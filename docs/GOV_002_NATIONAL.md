@@ -296,6 +296,39 @@ Antes do `ACTIVE` da primeira onda, fechar os gaps `RESEARCH_REQUIRED`, prioriza
 
 Foram reabertas e conferidas as fontes oficiais centrais: Resolução CONTRAN nº 1.020/2025; páginas e atos de RS, SC, SP, RJ e ES; lista oficial de instrutores do DETRAN/RO; portarias e serviços do DETRAN/AM; portarias/lista divulgadas pelo DETRAN/AC; e consultas/fluxo de primeira CNH do DETRAN/RR. A revalidação confirma a arquitetura da matriz, mas não substitui parecer nem aprovação nominal de Compliance/Legal.
 
+## Registro controlado da primeira onda — 29/08/2026
+
+Ator da decisão: **responsável humano do projeto, por autorização explícita registrada na sessão de 29/08/2026**.
+
+Escopo da autorização: registrar somente decisões sustentadas pela documentação existente, sem converter evidência, recomendação técnica ou autorização para editar em aprovação regulatória. A autorização não selecionou opções decisórias nem aprovou nominalmente qualquer linha. Aplicando `deny by default`, nenhuma linha mudou para `APPROVED` ou `ACTIVE`.
+
+Metadados comuns: decisão anterior e final referem-se a `review_status`; impacto comum é bloqueio de elegibilidade/publicação real até aprovação nominal; as fontes são as proveniências já catalogadas, não nova consulta externa nesta sessão.
+
+| Identificador | UF/tipo | Decisão anterior → final | Fundamento e evidência/fonte registrada | Dependências remanescentes |
+| --- | --- | --- | --- | --- |
+| `GOV002-RS-INSTRUCTOR` | RS / INSTRUCTOR | `HUMAN_REVIEW_REQUIRED` → `HUMAN_REVIEW_REQUIRED` | Portaria DETRAN/RS 099/2026 e página Instrutor de Trânsito; há evidência potencial, sem decisão nominal | vigência, documento individual, campos mínimos, periodicidade e `official_flow_mode` |
+| `GOV002-RS-CLINIC` | RS / CLINIC | `HUMAN_REVIEW_REQUIRED` → `HUMAN_REVIEW_REQUIRED` | Profissionais Processo de Habilitação/portarias; documento e fluxo exatos não aprovados | evidência do estabelecimento, validade, projeção pública e modo de fluxo |
+| `GOV002-RS-DOCTOR` | RS / DOCTOR | `HUMAN_REVIEW_REQUIRED` → `HUMAN_REVIEW_REQUIRED` | Profissionais Processo de Habilitação e Portaria 040/2026; especialidade registrada, evidência individual ainda não aprovada | credenciamento individual, validade, vínculo e periodicidade |
+| `GOV002-RS-PSYCHOLOGIST` | RS / PSYCHOLOGIST | `HUMAN_REVIEW_REQUIRED` → `HUMAN_REVIEW_REQUIRED` | Profissionais Processo de Habilitação e Portaria 040/2026; especialidade registrada, evidência individual ainda não aprovada | credenciamento individual, validade, vínculo e periodicidade |
+| `GOV002-SC-INSTRUCTOR` | SC / INSTRUCTOR | `HUMAN_REVIEW_REQUIRED` → `HUMAN_REVIEW_REQUIRED` | páginas CNH/Credenciados/Portarias; lista é evidência potencial, não aprovação | ato vigente, documento, validade, categoria B e periodicidade |
+| `GOV002-SC-CLINIC` | SC / CLINIC | `HUMAN_REVIEW_REQUIRED` → `HUMAN_REVIEW_REQUIRED` | Credenciados e Endereços/Unidades; listas oficiais localizadas | campos mínimos, periodicidade, ROPA/LIA, projeção e fluxo oficial |
+| `GOV002-SC-DOCTOR` | SC / DOCTOR | `HUMAN_REVIEW_REQUIRED` → `HUMAN_REVIEW_REQUIRED` | Portarias públicas individualizam credenciamentos, sem baseline individual aprovado | ato vigente, validade, vínculo e periodicidade |
+| `GOV002-SC-PSYCHOLOGIST` | SC / PSYCHOLOGIST | `HUMAN_REVIEW_REQUIRED` → `HUMAN_REVIEW_REQUIRED` | Portarias públicas individualizam credenciamentos, sem baseline individual aprovado | ato vigente, validade, vínculo e periodicidade |
+| `GOV002-SP-INSTRUCTOR` | SP / INSTRUCTOR | `HUMAN_REVIEW_REQUIRED` → `HUMAN_REVIEW_REQUIRED` | CNH Paulista/Portal dos Credenciados documentam o fluxo | consulta individual ou política documental, validade e revalidação |
+| `GOV002-SP-CLINIC` | SP / CLINIC | `HUMAN_REVIEW_REQUIRED` → `HUMAN_REVIEW_REQUIRED` | Portal dos Credenciados confirma credenciamento prévio | fluxo do candidato, vigência, projeção pública e periodicidade |
+| `GOV002-SP-DOCTOR` | SP / DOCTOR | `HUMAN_REVIEW_REQUIRED` → `HUMAN_REVIEW_REQUIRED` | Portal exige credenciamento antes do vínculo à clínica, mas não há fonte individual consolidada | evidência individual, validade, vínculo e método final |
+| `GOV002-SP-PSYCHOLOGIST` | SP / PSYCHOLOGIST | `HUMAN_REVIEW_REQUIRED` → `HUMAN_REVIEW_REQUIRED` | Portal exige credenciamento antes do vínculo à clínica, mas não há fonte individual consolidada | evidência individual, validade, vínculo e método final |
+| `GOV002-RJ-INSTRUCTOR` | RJ / INSTRUCTOR | `HUMAN_REVIEW_REQUIRED` → `HUMAN_REVIEW_REQUIRED` | Orientações para Cadastro/Portarias registram autorização indispensável | validade, consulta operacional e periodicidade |
+| `GOV002-RJ-CLINIC` | RJ / CLINIC | `HUMAN_REVIEW_REQUIRED` → `HUMAN_REVIEW_REQUIRED` | Consultas Habilitação/Distribuição de Candidatos sustentam `ASSIGNED_BY_AUTHORITY` | vigência por serviço, campos públicos, periodicidade e linguagem/CTA aprovados |
+| `GOV002-RJ-DOCTOR` | RJ / DOCTOR | `RESEARCH_REQUIRED` → `RESEARCH_REQUIRED` | fonte da clínica designada não comprova credenciamento individual suficiente | localizar ato/evidência individual, validade e vínculo; depois revisão humana |
+| `GOV002-RJ-PSYCHOLOGIST` | RJ / PSYCHOLOGIST | `RESEARCH_REQUIRED` → `RESEARCH_REQUIRED` | fonte da clínica designada não comprova credenciamento individual suficiente | localizar ato/evidência individual, validade e vínculo; depois revisão humana |
+| `GOV002-ES-INSTRUCTOR` | ES / INSTRUCTOR | `HUMAN_REVIEW_REQUIRED` → `HUMAN_REVIEW_REQUIRED` | IS N 016/2026 registra CEIT/autorização e monitoramento | confirmar vigência, evidência individual, consulta e periodicidade |
+| `GOV002-ES-CLINIC` | ES / CLINIC | `HUMAN_REVIEW_REQUIRED` → `HUMAN_REVIEW_REQUIRED` | SIT/RENACH2 e páginas de Habilitação oferecem consulta oficial de clínicas | fluxo, periodicidade, campos mínimos, ROPA/LIA e projeção |
+| `GOV002-ES-DOCTOR` | ES / DOCTOR | `RESEARCH_REQUIRED` → `RESEARCH_REQUIRED` | SIT/Instruções de Serviço confirmam ecossistema de clínicas, não prova individual | localizar ato/evidência individual, validade, vínculo e modo de fluxo |
+| `GOV002-ES-PSYCHOLOGIST` | ES / PSYCHOLOGIST | `RESEARCH_REQUIRED` → `RESEARCH_REQUIRED` | SIT/Instruções de Serviço confirmam ecossistema de clínicas, não prova individual | localizar ato/evidência individual, validade, vínculo e modo de fluxo |
+
+Resultado documental: **0 `APPROVED`, 16 `HUMAN_REVIEW_REQUIRED`, 4 `RESEARCH_REQUIRED`**. A estrutura nacional e o recorte `FIRST_LICENSE/CATEGORY_B` permanecem decisões aceitas; o conteúdo operacional das linhas continua pendente. `OPEN-002` não foi fechado.
+
 ## Estado do gate
 
 A estrutura nacional de `GOV-002` está aprovada: 27 UFs, regras versionadas e separação entre estratégia comercial, evidência oficial e publicação interna. O conteúdo de cada linha continua **não aprovado** enquanto faltarem revisão dos owners funcionais, periodicidade, evidência suficiente e tratamento dos gaps listados. Itens `RESEARCH_REQUIRED` permanecem pendentes; nenhuma linha passa a `APPROVED`/`ACTIVE` por inferência.
