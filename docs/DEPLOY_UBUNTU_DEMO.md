@@ -65,7 +65,8 @@ cd InstrutorPro
 
 O script recusa árvore Git alterada, cria backup se o banco estiver rodando, usa
 `git pull --ff-only`, reconstrói as imagens, aplica migrations/seeds idempotentes e
-aguarda o readiness. Backups ficam em `backups/`, que não é versionado. Defina uma
+aguarda o readiness pelo frontend com o cabeçalho HTTPS esperado pelo perfil seguro.
+Backups ficam em `backups/`, que não é versionado. Defina uma
 política de cópia externa e retenção antes de usar dados que não sejam sintéticos.
 
 ## Diagnóstico e rollback

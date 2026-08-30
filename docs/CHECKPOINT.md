@@ -16,6 +16,10 @@ A fase continua **M0**, com `GOV-001/OPEN-001` concluído. Esta consolidação n
 
 ## Últimas atividades concluídas
 
+Verificação de deploy corrigida em 30/08/2026: o readiness interno executado pelo container frontend
+passa a declarar `X-Forwarded-Proto: https`, evitando que o redirecionamento seguro `301` seja tratado
+como indisponibilidade. A exigência de HTTPS permanece ativa e não foi afrouxada.
+
 Mapa agregado nacional refinado em 30/08/2026: a ilustração conceitual foi substituída pela malha
 local das 27 UFs obtida do IBGE, com seleção estadual e detalhamento por cidade. Somente RS, SC, SP,
 RJ e ES recebem marcadores e contagens sintéticas; as demais UFs ficam neutras, sem sugerir ativação

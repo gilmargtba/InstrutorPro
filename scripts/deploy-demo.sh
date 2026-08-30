@@ -24,7 +24,8 @@ docker compose --env-file .env.demo -f compose.demo.yaml up -d --remove-orphans
 
 attempt=0
 until docker compose --env-file .env.demo -f compose.demo.yaml exec -T frontend \
-  wget -qO- http://127.0.0.1:8080/api/v1/readiness/ >/dev/null; do
+  wget -qO- --header='X-Forwarded-Proto: https' \
+  http://127.0.0.1:8080/api/v1/readiness/ >/dev/null; do
   attempt=$((attempt + 1))
   if [ "$attempt" -ge 30 ]; then
     echo "Erro: readiness não respondeu após o deploy." >&2
