@@ -16,6 +16,11 @@ A fase continua **M0**, com `GOV-001/OPEN-001` concluído. Esta consolidação n
 
 ## Últimas atividades concluídas
 
+Mapa agregado nacional refinado em 30/08/2026: a ilustração conceitual foi substituída pela malha
+local das 27 UFs obtida do IBGE, com seleção estadual e detalhamento por cidade. Somente RS, SC, SP,
+RJ e ES recebem marcadores e contagens sintéticas; as demais UFs ficam neutras, sem sugerir ativação
+operacional. Nenhuma demanda ou localização individual real foi adicionada.
+
 Experiência visual da busca de instrutores refinada em 30/08/2026: entrada por cidade/bairro/CEP,
 mapa Leaflet amplo, marcadores identificáveis, filtros, painel de resultados e alternância móvel
 mapa/lista. A interface preserva identidade InstrutorPro, minimização sem GPS automático e dados

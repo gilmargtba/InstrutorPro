@@ -227,6 +227,11 @@ A busca visual começa por cidade/bairro/CEP informado pelo visitante e abre um 
 marcadores, filtros e painel responsivo de resultados. O fluxo não solicita GPS automático, mantém
 PostGIS como fonte da consulta e exibe somente profissionais e avaliações sintéticos nesta etapa.
 
+O painel profissional de demanda usa a malha local das 27 UFs fornecida pelo IBGE. Somente os cinco
+estados ativos na primeira onda visual (`RS`, `SC`, `SP`, `RJ` e `ES`) recebem destaque e contagens;
+as demais UFs aparecem de forma neutra, como territórios em preparação. Todas as contagens e cidades
+desse painel continuam exclusivamente sintéticas e não representam demanda real.
+
 ### Organização/controlador no painel administrativo
 
 O cadastro M1 reutiliza o Django Admin em `http://localhost:8000/admin/`, menu
