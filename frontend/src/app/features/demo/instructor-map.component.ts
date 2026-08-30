@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute,RouterLink } from '@angular/router';
 
 import {
   InstructorSearchProvider,
@@ -208,6 +208,7 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
 
   private readonly api = inject(InstructorSearchProvider);
   private readonly map = inject(LeafletMapProvider);
+  private readonly route = inject(ActivatedRoute);
 
   filters: SearchFilters = {
     location: 'Porto Alegre',
@@ -230,6 +231,11 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
       const item = this.items.find((candidate) => candidate.id === id);
       if (item) this.select(item);
     });
+    const routedLocation = this.route.snapshot.queryParamMap.get('local');
+    if (routedLocation) {
+      this.filters.location = routedLocation;
+      this.search();
+    }
   }
 
   search() {

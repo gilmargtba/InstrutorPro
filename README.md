@@ -230,7 +230,9 @@ PostGIS como fonte da consulta e exibe somente profissionais e avaliações sint
 O painel profissional de demanda usa a malha local das 27 UFs fornecida pelo IBGE. Somente os cinco
 estados ativos na primeira onda visual (`RS`, `SC`, `SP`, `RJ` e `ES`) recebem destaque e contagens;
 as demais UFs aparecem de forma neutra, como territórios em preparação. Todas as contagens e cidades
-desse painel continuam exclusivamente sintéticas e não representam demanda real.
+desse painel continuam exclusivamente sintéticas e não representam demanda real. Ao selecionar uma
+UF ativa, a demo abre `/aluno/instrutores` com a capital demonstrativa correspondente e executa a
+busca local dos profissionais sintéticos publicados no PostGIS.
 
 ### Organização/controlador no painel administrativo
 

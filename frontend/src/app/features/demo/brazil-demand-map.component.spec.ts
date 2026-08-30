@@ -4,11 +4,11 @@ import { BrazilDemandMapComponent } from './brazil-demand-map.component';
 
 describe('BrazilDemandMapComponent',()=>{
   const states=[
-    {uf:'RS',total:184,cities:[['Porto Alegre',58]] as [string,number][]},
-    {uf:'SC',total:146,cities:[['Florianópolis',42]] as [string,number][]},
-    {uf:'SP',total:418,cities:[['São Paulo',136]] as [string,number][]},
-    {uf:'RJ',total:237,cities:[['Rio de Janeiro',91]] as [string,number][]},
-    {uf:'ES',total:112,cities:[['Vitória',36]] as [string,number][]},
+    {uf:'RS',total:184,searchLocation:'Porto Alegre',cities:[['Porto Alegre',58]] as [string,number][]},
+    {uf:'SC',total:146,searchLocation:'Florianópolis',cities:[['Florianópolis',42]] as [string,number][]},
+    {uf:'SP',total:418,searchLocation:'São Paulo',cities:[['São Paulo',136]] as [string,number][]},
+    {uf:'RJ',total:237,searchLocation:'Rio de Janeiro',cities:[['Rio de Janeiro',91]] as [string,number][]},
+    {uf:'ES',total:112,searchLocation:'Vitória',cities:[['Vitória',36]] as [string,number][]},
   ];
   const geoJson={type:'FeatureCollection',features:[{type:'Feature',properties:{codarea:'43'},geometry:{type:'Polygon',coordinates:[[[-57,-34],[-49,-34],[-49,-27],[-57,-27],[-57,-34]]]}}]};
 
