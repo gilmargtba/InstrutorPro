@@ -1,6 +1,6 @@
 # Checkpoint do Projeto
 
-- Atualizado em: **2026-08-29**
+- Atualizado em: **2026-08-30**
 - Versão documental: **3.3**
 - Código-fonte: **CODEX 02E e configuração administrativa GOV-004 concluídos; fundações anteriores preservadas**
 
@@ -15,6 +15,12 @@ A fase continua **M0**, com `GOV-001/OPEN-001` concluído. Esta consolidação n
 **INSTRUTORPRO DEMO 01 concluída.** O frontend contém experiência visual navegável e mobile-first apenas com fixtures sintéticas. CODEX 01, 02A e 02B permanecem preservados; CODEX 02C está suspenso e não deve ser retomado sem autorização explícita. Capacidades reguladas, usuários reais, perfis e publicação continuam condicionados aos respectivos gates.
 
 ## Últimas atividades concluídas
+
+Experiência visual da busca de instrutores refinada em 30/08/2026: entrada por cidade/bairro/CEP,
+mapa Leaflet amplo, marcadores identificáveis, filtros, painel de resultados e alternância móvel
+mapa/lista. A interface preserva identidade InstrutorPro, minimização sem GPS automático e dados
+exclusivamente sintéticos; não altera elegibilidade, provider de produção, publicação real ou os
+gates de `OPEN-007`.
 
 Exceção temporária do painel autorizada em 29/08/2026 para avaliação por sócios e colaboradores:
 MFA pode ser desativado somente no servidor de demonstração com dados sintéticos por flag segura por

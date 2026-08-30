@@ -223,6 +223,10 @@ Pesquise `Porto Alegre`, `Florianópolis`, `São Paulo`, `Rio de Janeiro` ou
 `Vitória`. Não há chave nesta demo; o geocoder é local. Provider de produção
 permanece pendente.
 
+A busca visual começa por cidade/bairro/CEP informado pelo visitante e abre um mapa amplo com
+marcadores, filtros e painel responsivo de resultados. O fluxo não solicita GPS automático, mantém
+PostGIS como fonte da consulta e exibe somente profissionais e avaliações sintéticos nesta etapa.
+
 ### Organização/controlador no painel administrativo
 
 O cadastro M1 reutiliza o Django Admin em `http://localhost:8000/admin/`, menu

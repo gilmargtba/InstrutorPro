@@ -3,9 +3,13 @@
   place-items: center;
   border: 3px solid #fff;
   border-radius: 50%;
-  background: #0c8790;
+  color: #fff;
+  background: linear-gradient(145deg, #087f83, #2aa391);
   box-shadow: 0 5px 14px #153f5966;
-  font-size: 1.05rem;
+  font-size: .72rem;
+  font-weight: 900;
+  letter-spacing: -.02em;
+  transition: transform .15s ease, background .15s ease;
 }
 
 .demo-marker:hover {
