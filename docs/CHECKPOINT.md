@@ -182,6 +182,14 @@ com sessão de aluno DEMO, agregação de demanda por limiar configurável, tran
 funcional em `/aluno/demanda`. As flags de cadastro/publicação/demanda real permanecem `false` por
 padrão. `OPEN-015` não foi resolvido: o valor `3` existe apenas nos exemplos/testes sintéticos.
 
+Correção funcional executada em 30/08/2026: landing e header agora expõem encontrar instrutor,
+entrar, criar conta, aluno e profissional; cadastro de aluno persiste `Account`, `Person`, papel
+`STUDENT` e `StudentProfile`; login por e-mail cria sessão e direciona à área do papel. O onboarding
+do instrutor possui pré-requisito e seis etapas, cria conta acessível, veículo e aceite sintéticos,
+área de atendimento, perfil `SUBMITTED/UNPUBLISHED` e exibe status `EM ANÁLISE`. O registro permanece
+visível no Django Admin protegido por MFA. Fluxos foram verificados no navegador local e no banco;
+nenhuma flag real foi ativada e nenhum deploy Ubuntu foi realizado.
+
 O certificado Let's Encrypt do endpoint `179.199.136.4` teve renovação simulada com sucesso em
 30/08/2026; o mecanismo Docker `certbot-renew` verifica a cada 12 horas e o gateway recarrega a cada
 6 horas. Essa evidência não equivale a domínio registrado nem amplia o gate de produção.

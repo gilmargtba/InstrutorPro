@@ -25,6 +25,14 @@ services:
   backend:
     build: ./backend
     env_file: .env
+    environment:
+      SYNTHETIC_MARKETPLACE_ENABLED: "true"
+      REAL_STUDENT_REGISTRATION_ENABLED: "false"
+      REAL_INSTRUCTOR_REGISTRATION_ENABLED: "false"
+      REAL_INSTRUCTOR_PUBLICATION_ENABLED: "false"
+      REAL_STUDENT_DEMAND_ENABLED: "false"
+      PUBLIC_DEMAND_MAP_ENABLED: "false"
+      DEMAND_MAP_MIN_AGGREGATION_COUNT: "3"
     command: sh -c "python manage.py migrate && python manage.py seed_territories && python manage.py runserver 0.0.0.0:8000"
     volumes:
       - ./backend:/app

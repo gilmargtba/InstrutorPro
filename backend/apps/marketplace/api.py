@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.contrib.auth import login, logout
+from django.contrib.auth import authenticate, login, logout
 from django.db import transaction
 from django.db.models import Count
 from rest_framework import serializers, status
@@ -70,6 +70,7 @@ class StudentRegistrationSerializer(serializers.Serializer):
 
 class StudentRegistrationView(APIView):
     permission_classes = [AllowAny]
+    authentication_classes = []
 
     def post(self, request):
         serializer = StudentRegistrationSerializer(data=request.data)
@@ -94,6 +95,66 @@ class SessionLogoutView(APIView):
     def post(self, request):
         logout(request)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class SessionLoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+
+
+class SessionLoginView(APIView):
+    permission_classes = [AllowAny]
+    authentication_classes = []
+
+    def post(self, request):
+        serializer = SessionLoginSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            account = Account.objects.get(email__iexact=serializer.validated_data["email"])
+        except Account.DoesNotExist:
+            return Response({"detail": "Credenciais inválidas"}, status=400)
+        user = authenticate(
+            request,
+            username=account.username,
+            password=serializer.validated_data["password"],
+        )
+        if user is None or not user.can_operate:
+            return Response({"detail": "Credenciais inválidas"}, status=400)
+        login(request, user)
+        roles = list(
+            RoleAssignment.objects.filter(
+                person__account=user, revoked_at__isnull=True
+            ).values_list("role", flat=True)
+        )
+        return Response({"account_id": user.id, "roles": roles})
+
+
+class SessionMeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        roles = list(
+            RoleAssignment.objects.filter(
+                person__account=request.user, revoked_at__isnull=True
+            ).values_list("role", flat=True)
+        )
+        payload = {"email": request.user.email, "roles": roles}
+        person = getattr(request.user, "person", None)
+        instructor = getattr(person, "instructor_profile", None) if person else None
+        student = getattr(person, "student_profile", None) if person else None
+        if instructor:
+            payload["instructor"] = {
+                "display_name": instructor.display_name,
+                "profile_status": instructor.profile_status,
+                "publication_status": instructor.publication_status,
+            }
+        if student:
+            payload["student"] = {
+                "display_name": student.display_name,
+                "city": student.city,
+                "uf": student.uf.code,
+            }
+        return Response(payload)
 
 
 class DemandSerializer(serializers.ModelSerializer):

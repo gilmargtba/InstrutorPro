@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 import pytest
+from django.contrib import admin
 from django.contrib.auth.models import Permission
 from django.contrib.gis.geos import Point
 from django.utils import timezone
@@ -267,11 +268,18 @@ def test_demo_onboarding_submits_without_auto_publication():
     response = APIClient().post(
         "/api/v1/demo/instructor-onboarding/",
         {
+            "email": "alex-instructor@example.invalid",
+            "password": "DemoSeguro123!",
+            "prerequisite_accepted": True,
             "display_name": "Alex Demo",
             "city": "Porto Alegre",
             "uf": "RS",
             "category": "B",
             "vehicle_available": True,
+            "vehicle_make": "Marca Demo",
+            "vehicle_model": "Modelo Demo",
+            "vehicle_year": 2024,
+            "vehicle_transmission": "MANUAL",
             "transmissions": ["MANUAL"],
             "radius_km": 10,
             "latitude": -30.0346,
@@ -291,6 +299,10 @@ def test_demo_onboarding_submits_without_auto_publication():
         profile.service_area.private_location is None and profile.service_area.location_authorized
     )
     assert AuditEvent.objects.filter(target_id=profile.id).count() == 3
+    assert profile.vehicle.model == "Modelo Demo"
+    assert profile.prerequisite_acceptances.count() == 1
+    assert profile.person.account.check_password("DemoSeguro123!")
+    assert InstructorProfile in admin.site._registry
 
 
 @pytest.mark.django_db

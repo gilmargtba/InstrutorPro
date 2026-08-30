@@ -4,10 +4,13 @@ import { ClinicDemoComponent, DemandDemoComponent, InstructorDashboardComponent,
 import { InstructorMapComponent } from './features/demo/instructor-map.component';
 import { InstructorOnboardingComponent } from './features/demo/instructor-onboarding.component';
 import { StudentMarketplaceComponent } from './features/demo/student-marketplace.component';
+import { InstructorEntryComponent, InstructorStatusComponent, LoginComponent, StudentEntryComponent } from './features/demo/marketplace-entry.component';
 
 export const routes: Routes = [
   { path:'', component:HomeComponent, title:'InstrutorPro — Sua jornada para a CNH' },
-  { path:'aluno', redirectTo:'aluno/jornada', pathMatch:'full' },
+  { path:'aluno', component:StudentEntryComponent, title:'Aluno — InstrutorPro' },
+  { path:'cadastro/aluno', component:StudentMarketplaceComponent, title:'Criar conta de aluno — InstrutorPro' },
+  { path:'entrar', component:LoginComponent, title:'Entrar — InstrutorPro' },
   { path:'aluno/jornada', component:JourneyComponent, title:'Minha Jornada CNH — InstrutorPro' },
   { path:'aluno/servicos', component:ServiceDiscoveryComponent, title:'Encontre serviços — InstrutorPro' },
   { path:'aluno/instrutores', component:InstructorMapComponent, title:'Instrutores — InstrutorPro' },
@@ -18,7 +21,9 @@ export const routes: Routes = [
   { path:'aluno/cadastro-demo', component:StudentMarketplaceComponent, title:'Cadastro do aluno DEMO — InstrutorPro' },
   { path:'aluno/clinicas', component:ClinicDemoComponent, title:'Clínicas e exames — InstrutorPro' },
   { path:'profissional', component:ProfessionalEntryComponent, title:'Área profissional — InstrutorPro' },
+  { path:'profissional/instrutor/entrada', component:InstructorEntryComponent, title:'Cadastro do instrutor — InstrutorPro' },
   { path:'profissional/instrutor', component:InstructorDashboardComponent, title:'Painel do instrutor — InstrutorPro' },
+  { path:'profissional/instrutor/status', component:InstructorStatusComponent, title:'Status do instrutor — InstrutorPro' },
   { path:'profissional/instrutor/onboarding', component:InstructorOnboardingComponent, title:'Quero atuar como instrutor — InstrutorPro' },
   { path:'profissional/demanda', component:DemandDemoComponent, title:'Mapa de demanda — InstrutorPro' },
   { path:'**', redirectTo:'' },

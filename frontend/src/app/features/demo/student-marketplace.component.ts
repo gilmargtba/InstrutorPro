@@ -20,21 +20,23 @@ type Registration = {
   template: `
     <section class="page narrow">
       <div class="demo-flag">DEMO · aceite somente identidades sintéticas</div>
-      <header class="page-head"><div><p class="eyebrow">Marketplace M1</p><h1>Área do aluno demonstrativo</h1><p>Crie uma identidade terminada em <b>&#64;example.invalid</b>. Não informe dados reais.</p></div></header>
+      <header class="page-head"><div><p class="eyebrow">Marketplace M1</p><h1>Criar conta de aluno</h1><p>Crie uma identidade terminada em <b>&#64;example.invalid</b>. Não informe dados reais.</p></div></header>
       @if (!registered) {
         <form class="market-form" (ngSubmit)="register()">
           <label>Nome demonstrativo<input name="name" [(ngModel)]="form.display_name" required></label>
           <label>Usuário<input name="username" [(ngModel)]="form.username" required></label>
           <label>E-mail sintético<input name="email" type="email" [(ngModel)]="form.email" required></label>
           <label>Senha da demonstração<input name="password" type="password" minlength="10" [(ngModel)]="form.password" required></label>
+          <label>Confirmar senha<input name="confirmPassword" type="password" minlength="10" [(ngModel)]="confirmPassword" required></label>
           <div class="two"><label>Cidade<input name="city" [(ngModel)]="form.city" required></label><label>UF<select name="uf" [(ngModel)]="form.uf"><option>RS</option><option>SC</option><option>SP</option><option>RJ</option><option>ES</option></select></label></div>
+          <label>Categoria pretendida<select name="intendedCategory" [(ngModel)]="form.intended_category"><option value="A">Categoria A</option><option value="B">Categoria B</option></select></label>
           <label class="check"><input name="synthetic" type="checkbox" [(ngModel)]="form.synthetic_data_confirmed"> Confirmo que todos os dados são sintéticos.</label>
           <button class="button primary" [disabled]="sending">{{sending ? 'Criando…' : 'Criar aluno DEMO'}}</button>
         </form>
       } @else {
         <form class="market-form" (ngSubmit)="createDemand()">
           <h2>O que você procura?</h2>
-          <div class="two"><label>Categoria<select name="category" [(ngModel)]="demand.category"><option value="B">B</option></select></label><label>Transmissão<select name="transmission" [(ngModel)]="demand.transmission"><option value="MANUAL">Manual</option><option value="AUTOMATIC">Automática</option></select></label></div>
+          <div class="two"><label>Categoria<select name="category" [(ngModel)]="demand.category"><option value="A">A</option><option value="B">B</option></select></label><label>Transmissão<select name="transmission" [(ngModel)]="demand.transmission"><option value="MANUAL">Manual</option><option value="AUTOMATIC">Automática</option><option value="INDIFFERENT">Indiferente</option></select></label></div>
           <label>Região aproximada<input name="region" [(ngModel)]="demand.region" placeholder="Ex.: Centro"></label>
           <label>Disponibilidade<input name="availability" [(ngModel)]="demand.availability" placeholder="Ex.: noites"></label>
           <button class="button primary" [disabled]="sending">Registrar demanda sintética</button>
@@ -56,9 +58,15 @@ export class StudentMarketplaceComponent {
   failed = false;
   message = '';
   form: Registration = { username:'aluno_demo', email:'aluno@example.invalid', password:'DemoSeguro123!', display_name:'Aluno Demo', city:'Porto Alegre', uf:'RS', intended_category:'B', synthetic_data_confirmed:false };
+  confirmPassword = 'DemoSeguro123!';
   demand = { category:'B', city:'Porto Alegre', uf:'RS', region:'Centro', radius_km:10, transmission:'MANUAL', availability:'Noite' };
 
   register() {
+    if (this.form.password !== this.confirmPassword) {
+      this.failed = true;
+      this.message = 'As senhas não coincidem.';
+      return;
+    }
     this.sending = true; this.message = '';
     this.http.post('/demo/marketplace/students/register/', this.form).subscribe({
       next: () => { this.registered = true; this.sending = false; this.failed = false; this.demand.city = this.form.city; this.demand.uf = this.form.uf; this.message = 'Aluno sintético criado. A sessão DEMO está ativa.'; },

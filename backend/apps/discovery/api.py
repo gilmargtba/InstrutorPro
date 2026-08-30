@@ -1,5 +1,6 @@
 from uuid import uuid4
 
+from django.conf import settings
 from django.contrib.gis.geos import Point
 from django.db import transaction
 from drf_spectacular.utils import OpenApiParameter, extend_schema
@@ -124,11 +125,18 @@ class GeocodingView(APIView):
 
 
 class DemoOnboardingInput(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True, min_length=10)
+    prerequisite_accepted = serializers.BooleanField()
     display_name = serializers.CharField(max_length=80)
     city = serializers.CharField(max_length=100)
     uf = serializers.ChoiceField(choices=["RS", "SC", "SP", "RJ", "ES"])
     category = serializers.ChoiceField(choices=["B"])
     vehicle_available = serializers.BooleanField()
+    vehicle_make = serializers.CharField(max_length=60, required=False, allow_blank=True)
+    vehicle_model = serializers.CharField(max_length=60, required=False, allow_blank=True)
+    vehicle_year = serializers.IntegerField(min_value=1990, max_value=2030, required=False)
+    vehicle_transmission = serializers.ChoiceField(choices=["MANUAL", "AUTOMATIC"], required=False)
     transmissions = serializers.ListField(
         child=serializers.ChoiceField(choices=["MANUAL", "AUTOMATIC"]), min_length=1
     )
@@ -142,6 +150,23 @@ class DemoOnboardingInput(serializers.Serializer):
     synthetic_data_confirmed = serializers.BooleanField()
 
     def validate(self, attrs):
+        if not settings.SYNTHETIC_MARKETPLACE_ENABLED:
+            raise serializers.ValidationError("Synthetic marketplace is disabled")
+        if not attrs["email"].endswith("@example.invalid"):
+            raise serializers.ValidationError(
+                {"email": "Use uma identidade sintética terminada em @example.invalid."}
+            )
+        if not attrs["prerequisite_accepted"]:
+            raise serializers.ValidationError(
+                {"prerequisite_accepted": "O aceite do pré-requisito é obrigatório."}
+            )
+        if attrs["vehicle_available"] and not all(
+            attrs.get(field)
+            for field in ("vehicle_make", "vehicle_model", "vehicle_year", "vehicle_transmission")
+        ):
+            raise serializers.ValidationError(
+                {"vehicle_available": "Preencha os dados sintéticos do veículo."}
+            )
         if not attrs["location_authorized"]:
             raise serializers.ValidationError(
                 {
@@ -163,6 +188,7 @@ class DemoOnboardingInput(serializers.Serializer):
 
 class DemoInstructorOnboardingView(APIView):
     permission_classes = [AllowAny]
+    authentication_classes = []
 
     @transaction.atomic
     def post(self, request):
@@ -171,10 +197,10 @@ class DemoInstructorOnboardingView(APIView):
         data = serializer.validated_data
         token = uuid4().hex
         account = Account.objects.create_user(
-            username=f"onboarding_{token}", email=f"onboarding-{token}@example.invalid"
+            username=f"instructor_{token}",
+            email=data["email"].lower(),
+            password=data["password"],
         )
-        account.set_unusable_password()
-        account.save(update_fields=["password"])
         person = Person.objects.create(account=account)
         RoleAssignment.objects.create(
             person=person,
@@ -195,6 +221,27 @@ class DemoInstructorOnboardingView(APIView):
             service_radius_km=data["radius_km"],
             is_demo=True,
         )
+        from apps.marketplace.models import (
+            DataMode,
+            InstructorPrerequisiteAcceptance,
+            InstructorVehicle,
+        )
+
+        InstructorPrerequisiteAcceptance.objects.create(
+            instructor=profile,
+            policy_version="M1-SYNTHETIC-PREREQUISITE-1",
+            data_mode=DataMode.SYNTHETIC,
+        )
+        if data["vehicle_available"]:
+            InstructorVehicle.objects.create(
+                instructor=profile,
+                category=data["category"],
+                make=data["vehicle_make"],
+                model=data["vehicle_model"],
+                year=data["vehicle_year"],
+                transmission=data["vehicle_transmission"],
+                data_mode=DataMode.SYNTHETIC,
+            )
         area = InstructorServiceArea.objects.create(
             profile=profile,
             city=data["city"],
@@ -228,6 +275,7 @@ class DemoInstructorOnboardingView(APIView):
                 "id": str(profile.id),
                 "display_name": profile.display_name,
                 "profile_status": "SUBMITTED",
+                "email": account.email,
                 "message": "Perfil enviado para análise",
                 "timeline": [
                     "Cadastro preenchido",
