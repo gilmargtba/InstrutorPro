@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     "apps.organizations",
     "apps.territories",
     "apps.discovery",
+    "apps.marketplace",
 ]
 
 MIDDLEWARE = [
@@ -132,3 +133,13 @@ AXES_SENSITIVE_PARAMETERS = ["password", "otp_token"]
 
 OTP_ADMIN_HIDE_SENSITIVE_DATA = True
 ADMIN_MFA_REQUIRED = os.getenv("DJANGO_ADMIN_MFA_REQUIRED", "true").lower() == "true"
+
+# Marketplace M1: recursos reais permanecem deny-by-default. O modo sintético é
+# explicitamente separado para demonstração e testes, sem liberar produção real.
+SYNTHETIC_MARKETPLACE_ENABLED = os.getenv("SYNTHETIC_MARKETPLACE_ENABLED", "false").lower() == "true"
+REAL_STUDENT_REGISTRATION_ENABLED = os.getenv("REAL_STUDENT_REGISTRATION_ENABLED", "false").lower() == "true"
+REAL_INSTRUCTOR_REGISTRATION_ENABLED = os.getenv("REAL_INSTRUCTOR_REGISTRATION_ENABLED", "false").lower() == "true"
+REAL_INSTRUCTOR_PUBLICATION_ENABLED = os.getenv("REAL_INSTRUCTOR_PUBLICATION_ENABLED", "false").lower() == "true"
+REAL_STUDENT_DEMAND_ENABLED = os.getenv("REAL_STUDENT_DEMAND_ENABLED", "false").lower() == "true"
+PUBLIC_DEMAND_MAP_ENABLED = os.getenv("PUBLIC_DEMAND_MAP_ENABLED", "false").lower() == "true"
+DEMAND_MAP_MIN_AGGREGATION_COUNT = int(os.getenv("DEMAND_MAP_MIN_AGGREGATION_COUNT", "0"))
