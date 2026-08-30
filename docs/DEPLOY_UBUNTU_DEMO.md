@@ -87,3 +87,29 @@ Não apresente login ou Admin por HTTP fora de uma rede confiável. Quando o dom
 apontar para o servidor, coloque um proxy TLS (Caddy, Nginx/Certbot ou Cloudflare) na
 frente da porta interna, ajuste `CORS_ALLOWED_ORIGINS` para `https://DOMINIO`, defina
 `DJANGO_HTTPS_ENABLED=true` e só habilite HSTS depois de validar HTTPS e renovação.
+
+### Evidência do certificado do servidor M1 — 30/08/2026
+
+O endpoint público `179.199.136.4` foi verificado tecnicamente, sem confiar apenas no
+relato operacional:
+
+- certificado ECDSA da Let's Encrypt, cadeia validada pelo cliente externo (`verify=0`);
+- emissão em `29/08/2026 07:39:12 UTC` e expiração em `04/09/2026 23:39:11 UTC`;
+- identificador protegido: endereço IP `179.199.136.4`;
+- certificado e chave montados no Nginx a partir de
+  `/etc/letsencrypt/live/179.199.136.4/fullchain.pem` e
+  `/etc/letsencrypt/live/179.199.136.4/privkey.pem`;
+- Certbot `v5.4.0` executado pelo serviço Compose `certbot-renew`, preservando os volumes
+  `letsencrypt_config` e `letsencrypt_webroot`;
+- o container avalia renovação a cada 12 horas com `certbot renew --quiet --webroot -w
+  /var/www/certbot`; o gateway Nginx recarrega a configuração a cada 6 horas;
+- `certbot renew --dry-run --webroot -w /var/www/certbot` concluiu às
+  `30/08/2026 06:30:47 UTC` com `all simulated renewals succeeded` e nenhuma falha;
+- HTTP respondeu `301` para HTTPS; frontend, health, readiness e Admin responderam `200`
+  em HTTPS; o cookie CSRF foi emitido com `Secure` e os headers HSTS, nosniff,
+  `Referrer-Policy` e `X-Frame-Options` estavam presentes.
+
+A próxima tentativa é avaliada automaticamente dentro da janela de 12 horas; o Certbot
+decide o momento efetivo conforme a política do certificado curto. Não houve renovação
+forçada, reinstalação ou troca de autoridade. Para este escopo, `BCR-06/CERTIFICADO` está
+`RESOLVED`; os demais controles de produção continuam em seus gates próprios.

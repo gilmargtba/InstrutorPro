@@ -16,6 +16,14 @@ A fase continua **M0**, com `GOV-001/OPEN-001` concluído. Esta consolidação n
 
 ## Últimas atividades concluídas
 
+`BCR-06/CERTIFICADO` resolvido em 30/08/2026: o certificado ECDSA da Let's Encrypt para
+`179.199.136.4`, válido de 29/08/2026 a 04/09/2026, teve cadeia externa validada e renovação
+simulada aprovada pelo Certbot às 06:30:47 UTC. O serviço `certbot-renew` já avalia renovação
+a cada 12 horas, com webroot compartilhado, e o gateway Nginx recarrega a cada 6 horas.
+HTTP→HTTPS, frontend, API, health, readiness, Admin, cookie CSRF `Secure` e headers de
+segurança foram comprovados. Nenhum certificado foi forçado ou reinstalado; os demais
+bloqueadores de produção permanecem independentes.
+
 Verificação de deploy corrigida em 30/08/2026: o readiness interno executado pelo container frontend
 passa a declarar `X-Forwarded-Proto: https`, evitando que o redirecionamento seguro `301` seja tratado
 como indisponibilidade. A exigência de HTTPS permanece ativa e não foi afrouxada.
