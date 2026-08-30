@@ -190,6 +190,12 @@ do instrutor possui pré-requisito e seis etapas, cria conta acessível, veícul
 visível no Django Admin protegido por MFA. Fluxos foram verificados no navegador local e no banco;
 nenhuma flag real foi ativada e nenhum deploy Ubuntu foi realizado.
 
+Busca nacional de instrutores implementada em 30/08/2026: `/aluno/instrutores` apresenta as 27
+UFs, destaca e contabiliza somente UFs com perfis sintéticos atualmente publicáveis segundo a
+policy central e abre `/aluno/instrutores/mapa` com a região-base ao selecionar uma UF ativa.
+Estados sem instrutor permanecem visíveis sem contagem ou navegação. A agregação não expõe
+localização residencial nem inclui perfil submetido, não verificado ou não publicado.
+
 O certificado Let's Encrypt do endpoint `179.199.136.4` teve renovação simulada com sucesso em
 30/08/2026; o mecanismo Docker `certbot-renew` verifica a cada 12 horas e o gateway recarrega a cada
 6 horas. Essa evidência não equivale a domínio registrado nem amplia o gate de produção.

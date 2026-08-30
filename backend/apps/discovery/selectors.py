@@ -1,7 +1,7 @@
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import D
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.utils import timezone
 
 from .models import InstructorProfile
@@ -24,6 +24,15 @@ def published_instructor_profiles():
         )
         .filter(Q(verified_until__isnull=True) | Q(verified_until__gt=now))
         .distinct()
+    )
+
+
+def published_instructor_counts_by_uf():
+    return (
+        published_instructor_profiles()
+        .values("service_area__uf")
+        .annotate(total=Count("id"))
+        .order_by("service_area__uf")
     )
 
 

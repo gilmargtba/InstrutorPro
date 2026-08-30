@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild, inject } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, ViewChild, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute,RouterLink } from '@angular/router';
 
@@ -209,6 +209,7 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
   private readonly api = inject(InstructorSearchProvider);
   private readonly map = inject(LeafletMapProvider);
   private readonly route = inject(ActivatedRoute);
+  private readonly changeDetector = inject(ChangeDetectorRef);
 
   filters: SearchFilters = {
     location: 'Porto Alegre',
@@ -256,6 +257,7 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
             this.loading = false;
             this.drawerOpen = true;
             this.map.render(this.items, null);
+            this.changeDetector.detectChanges();
           },
           error: () => this.fail(),
         });
@@ -265,6 +267,7 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
         this.loading = false;
         this.error = response.status !== 404;
         this.map.render([], null);
+        this.changeDetector.detectChanges();
       },
     });
   }
@@ -307,6 +310,7 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
     this.error = true;
     this.items = [];
     this.map.render([], null);
+    this.changeDetector.detectChanges();
   }
 
   ngOnDestroy() {

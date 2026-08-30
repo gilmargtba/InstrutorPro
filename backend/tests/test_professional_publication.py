@@ -317,6 +317,27 @@ def test_api_excludes_private_location(actor):
 
 
 @pytest.mark.django_db
+def test_national_summary_counts_only_published_instructors(actor):
+    make_profile(actor)
+    make_profile(actor)
+    make_profile(actor, publication_status="UNPUBLISHED")
+    profile, area, *_ = make_profile(actor)
+    area.uf = "SP"
+    area.city = "São Paulo"
+    area.save(update_fields=["uf", "city"])
+
+    response = APIClient().get("/api/v1/instructors/states/")
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "states": [
+            {"uf": "RS", "count": 2, "search_location": "Porto Alegre"},
+            {"uf": "SP", "count": 1, "search_location": "São Paulo"},
+        ]
+    }
+
+
+@pytest.mark.django_db
 @pytest.mark.parametrize(
     "params",
     [

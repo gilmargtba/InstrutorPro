@@ -15,7 +15,7 @@ from apps.people.models import Person, RoleAssignment
 
 from .geocoding import DemoGeocodingProvider, LocationNotFound
 from .models import InstructorProfile, InstructorServiceArea
-from .selectors import search_demo_instructors
+from .selectors import published_instructor_counts_by_uf, search_demo_instructors
 from .services import grant_service_location_authorization, submit_profile
 
 
@@ -46,6 +46,12 @@ class InstructorResult(serializers.Serializer):
 class InstructorSearchResponse(serializers.Serializer):
     count = serializers.IntegerField()
     results = InstructorResult(many=True)
+
+
+class InstructorStateSummary(serializers.Serializer):
+    uf = serializers.CharField()
+    count = serializers.IntegerField()
+    search_location = serializers.CharField()
 
 
 class GeocodingResponse(serializers.Serializer):
@@ -94,6 +100,30 @@ class InstructorSearchView(APIView):
             for row in rows
         ]
         return Response({"count": len(results), "results": results})
+
+
+class InstructorStateSummaryView(APIView):
+    permission_classes = [AllowAny]
+    search_locations = {
+        "RS": "Porto Alegre",
+        "SC": "Florianópolis",
+        "SP": "São Paulo",
+        "RJ": "Rio de Janeiro",
+        "ES": "Vitória",
+    }
+
+    @extend_schema(responses=InstructorStateSummary(many=True))
+    def get(self, request):
+        results = [
+            {
+                "uf": row["service_area__uf"],
+                "count": row["total"],
+                "search_location": self.search_locations[row["service_area__uf"]],
+            }
+            for row in published_instructor_counts_by_uf()
+            if row["service_area__uf"] in self.search_locations
+        ]
+        return Response({"states": results})
 
 
 class GeocodingView(APIView):
