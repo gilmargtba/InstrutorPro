@@ -176,17 +176,22 @@ Revisão jurídico-técnica de privacidade em fontes oficiais vigentes em 22/07/
 
 ## Atividade em execução
 
-Exceção temporária de MFA do painel em implantação no servidor de demonstração; não retomar CODEX
-02C. `GOV-002/003` passaram no recorte M1 aprovado; condições de LGPD/jurídico, `OPEN-007` e a
-reativação/validação do MFA bloqueiam localizações/profissionais reais.
+Marketplace Core M1 autorizado em execução somente com dados sintéticos. A primeira fatia criou
+`StudentProfile`, `StudentDemand`, `InstructorVehicle`, aceite de pré-requisitos e `LessonRequest`,
+com sessão de aluno DEMO, agregação de demanda por limiar configurável, transições auditadas e tela
+funcional em `/aluno/demanda`. As flags de cadastro/publicação/demanda real permanecem `false` por
+padrão. `OPEN-015` não foi resolvido: o valor `3` existe apenas nos exemplos/testes sintéticos.
+
+O certificado Let's Encrypt do endpoint `179.199.136.4` teve renovação simulada com sucesso em
+30/08/2026; o mecanismo Docker `certbot-renew` verifica a cada 12 horas e o gateway recarrega a cada
+6 horas. Essa evidência não equivale a domínio registrado nem amplia o gate de produção.
 
 ## Próxima atividade
 
-Concluir a avaliação administrativa apenas com dados sintéticos e, antes de qualquer produção ou
-dado/profissional real, reativar `DJANGO_ADMIN_MFA_REQUIRED=true` e comprovar login com TOTP. Backup,
-TLS, deploy e infraestrutura no Ubuntu já possuem evidência operacional; a exceção deliberada mantém
-`ADMIN-PROD-01` em `NOT READY`. Não retomar automaticamente inventário/revogação interna de sessões
-(`IAM-003`/CODEX 02C).
+Completar a fatia autorizada do Marketplace Core M1 com integração do onboarding/veículo, painel de
+solicitações do instrutor, clusters nacionais de instrutores, agregados hierárquicos de demanda e
+testes frontend/E2E proporcionais. Depois, apresentar evidências e plano de implantação e parar para
+autorização humana. Não fazer deploy, não ativar flags reais e não retomar `IAM-003`/CODEX 02C.
 
 ## Decisões abertas
 
