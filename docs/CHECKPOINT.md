@@ -16,7 +16,7 @@ A fase continua **M0**, com `GOV-001/OPEN-001` concluído. Esta consolidação n
 
 ## Últimas atividades concluídas
 
-Complemento do dossiê sintético concluído em 31/08/2026: credencial de instrutor registra UF,
+Implementação do complemento do dossiê sintético concluída em 31/08/2026: credencial de instrutor registra UF,
 identificador privado, emissão, validade, fonte, resultado, revisor, motivo e auditoria. Foto de
 perfil é evidência independente, entra em quarentena com autorização de publicação e notice
 versionado separados, e somente pode ser aprovada por revisor autorizado distinto. O Admin usa
@@ -24,6 +24,11 @@ acesso privado auditado; busca/lista expõem a foto apenas quando foto e publica
 aprovadas, e exibem claims derivados somente de evidência limpa, aprovada e vigente. A fixture
 visual é uma pessoa inteiramente sintética gerada para demonstração. Upload, revisão e publicação
 de dados reais, base legal/notice definitivo e integrações oficiais continuam bloqueados.
+Onboarding, etapa documental, mapa/lista e perfil público foram comprovados visualmente no
+navegador. O aceite visual do backoffice permanece **PENDENTE**: a sessão sintética disponível não
+possui autenticação administrativa/MFA, e permissões temporárias de modelo não contornaram esse
+controle; elas foram integralmente revogadas após o teste. Portanto, o requisito visual completo do
+item 13 ainda não deve ser considerado aceito.
 
 `BCR-06/CERTIFICADO` resolvido em 30/08/2026: o certificado ECDSA da Let's Encrypt para
 `179.199.136.4`, válido de 29/08/2026 a 04/09/2026, teve cadeia externa validada e renovação
