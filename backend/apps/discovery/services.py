@@ -193,14 +193,17 @@ def decide_publication(*, actor, profile, decision, reason, request_id=None):
     before = {"profile_status": p.profile_status, "publication_status": p.publication_status}
     verification = p.verification_history.order_by("-created_at").first()
     if decision == "APPROVE":
+        from apps.marketplace.documents import documents_satisfy_active_requirements
+
         if (
             p.profile_status != "UNDER_REVIEW"
             or p.verification_status != "VERIFIED"
             or (p.verified_until and p.verified_until <= timezone.now())
             or not p.service_area.location_authorized
+            or not documents_satisfy_active_requirements(p)
         ):
             raise InvalidWorkflowTransition(
-                "Revisão, verificação válida e localização autorizada são obrigatórias"
+                "Revisão, verificação válida, dossiê e localização autorizada são obrigatórios"
             )
         p.profile_status = "APPROVED"
         p.publication_status = "APPROVED"

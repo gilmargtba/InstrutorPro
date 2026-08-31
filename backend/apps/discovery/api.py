@@ -3,6 +3,7 @@ from uuid import uuid4
 from django.conf import settings
 from django.contrib.gis.geos import Point
 from django.db import transaction
+from django.utils import timezone
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import serializers, status
 from rest_framework.permissions import AllowAny
@@ -178,6 +179,9 @@ class DemoOnboardingInput(serializers.Serializer):
     credential_uf = serializers.ChoiceField(choices=["RS", "SC", "SP", "RJ", "ES"])
     credential_validity = serializers.CharField(max_length=30)
     synthetic_data_confirmed = serializers.BooleanField()
+    credential_file = serializers.FileField(required=False, write_only=True)
+    course_file = serializers.FileField(required=False, write_only=True)
+    vehicle_file = serializers.FileField(required=False, write_only=True)
 
     def validate(self, attrs):
         if not settings.SYNTHETIC_MARKETPLACE_ENABLED:
@@ -251,8 +255,10 @@ class DemoInstructorOnboardingView(APIView):
             service_radius_km=data["radius_km"],
             is_demo=True,
         )
+        from apps.marketplace.documents import upload_synthetic_document
         from apps.marketplace.models import (
             DataMode,
+            DocumentRequirement,
             InstructorPrerequisiteAcceptance,
             InstructorVehicle,
         )
@@ -262,8 +268,9 @@ class DemoInstructorOnboardingView(APIView):
             policy_version="M1-SYNTHETIC-PREREQUISITE-1",
             data_mode=DataMode.SYNTHETIC,
         )
+        vehicle = None
         if data["vehicle_available"]:
-            InstructorVehicle.objects.create(
+            vehicle = InstructorVehicle.objects.create(
                 instructor=profile,
                 category=data["category"],
                 make=data["vehicle_make"],
@@ -289,6 +296,37 @@ class DemoInstructorOnboardingView(APIView):
             reason="DEMO_EXPLICIT_LOCATION_CONSENT",
             request_id=request.headers.get("X-Request-ID"),
         )
+        uploads = (
+            ("credential_file", DocumentRequirement.DocumentType.INSTRUCTOR_AUTHORIZATION, None),
+            ("course_file", DocumentRequirement.DocumentType.INSTRUCTOR_COURSE, None),
+            ("vehicle_file", DocumentRequirement.DocumentType.VEHICLE_EVIDENCE, vehicle),
+        )
+        document_ids = []
+        for field, document_type, related_vehicle in uploads:
+            upload = data.get(field)
+            if not upload:
+                continue
+            requirement, _ = DocumentRequirement.objects.get_or_create(
+                uf=data["uf"],
+                category=data["category"],
+                provider_type="INSTRUCTOR",
+                rule_version="M1-SYNTHETIC-DOSSIER-1",
+                document_type=document_type,
+                defaults={
+                    "label": DocumentRequirement.DocumentType(document_type).label,
+                    "required": False,
+                    "requires_validity": False,
+                    "active_from": timezone.localdate(),
+                },
+            )
+            document = upload_synthetic_document(
+                actor=account,
+                instructor=profile,
+                requirement=requirement,
+                upload=upload,
+                vehicle=related_vehicle,
+            )
+            document_ids.append(str(document.id))
         submit_profile(
             actor=account, profile=profile, request_id=request.headers.get("X-Request-ID")
         )
@@ -298,7 +336,11 @@ class DemoInstructorOnboardingView(APIView):
             target_type="discovery.InstructorProfile",
             target_id=profile.id,
             reason_code="SYNTHETIC_DEMO_ONBOARDING",
-            metadata={"credential": "visual_only", "synthetic": True},
+            metadata={
+                "credential": "synthetic_fixture",
+                "synthetic": True,
+                "document_ids": document_ids,
+            },
         )
         return Response(
             {

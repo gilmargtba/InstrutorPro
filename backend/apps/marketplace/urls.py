@@ -3,6 +3,7 @@ from django.urls import path
 from .api import (
     DemandAggregateView,
     DemandListCreateView,
+    InstructorDocumentDownloadView,
     LessonRequestListCreateView,
     LessonRequestTransitionView,
     SessionLoginView,
@@ -12,6 +13,11 @@ from .api import (
 )
 
 urlpatterns = [
+    path(
+        "marketplace/instructor-documents/<uuid:pk>/download/",
+        InstructorDocumentDownloadView.as_view(),
+        name="instructor-document-download",
+    ),
     path("demo/marketplace/students/register/", StudentRegistrationView.as_view()),
     path("demo/marketplace/session/logout/", SessionLogoutView.as_view()),
     path("demo/marketplace/session/login/", SessionLoginView.as_view()),

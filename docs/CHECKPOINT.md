@@ -1,8 +1,8 @@
 # Checkpoint do Projeto
 
-- Atualizado em: **2026-08-30**
-- Versão documental: **3.3**
-- Código-fonte: **CODEX 02E e configuração administrativa GOV-004 concluídos; fundações anteriores preservadas**
+- Atualizado em: **2026-08-31**
+- Versão documental: **3.4**
+- Código-fonte: **dossiê sintético de instrutor/veículo implementado; upload real bloqueado**
 
 ## Consolidação de produto em 2026-08-19
 
@@ -175,6 +175,18 @@ Auditoria de todos os artefatos do `docs/MANIFEST.json`: hierarquia e responsabi
 Revisão jurídico-técnica de privacidade em fontes oficiais vigentes em 22/07/2026: inventário e bases refinados; aceite separado de consentimento; encarregado/LIA/RIPD, cookies, direitos, transferência internacional, Marco Civil, ECA Digital, incidente e decisão automatizada convertidos em controles; `ADR-017–020` e `OPEN-014` registrados. Nenhum parecer ou gate de Legal/Privacy foi presumido como aprovado.
 
 ## Atividade em execução
+
+Dossiê M1 de instrutor e veículo implementado em 31/08/2026 no recorte autorizado:
+`DocumentRequirement` versiona UF/categoria/provedor/vigência; `InstructorDocument` preserva
+versões, hash, validade, quarentena privada, revisão independente e auditoria; veículo separa
+propriedade declarada de verificação. O onboarding aceita somente fixtures sintéticas com prefixo
+`fixture-`, formatos PDF/PNG/JPEG, assinatura de conteúdo válida e até 5 MB. Download exige titular
+ou permissão explícita e nunca existe rota pública de mídia. Requisitos obrigatórios vigentes passam
+a bloquear aprovação/publicação quando não houver documento limpo, aprovado e válido.
+`PracticalTrainingRequirement` parametriza carga mínima por território/categoria/processo/versão;
+`PlatformLesson` mantém estado da plataforma separado de eventual registro oficial externo, sem
+afirmar homologação. Upload real, storage/antimalware de produção, Detran/Senatran/Gov.br e
+publicação real continuam desabilitados. A migration foi criada, sem aplicação ou deploy remoto.
 
 Marketplace Core M1 autorizado em execução somente com dados sintéticos. A primeira fatia criou
 `StudentProfile`, `StudentDemand`, `InstructorVehicle`, aceite de pré-requisitos e `LessonRequest`,

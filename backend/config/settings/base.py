@@ -143,3 +143,12 @@ REAL_INSTRUCTOR_PUBLICATION_ENABLED = os.getenv("REAL_INSTRUCTOR_PUBLICATION_ENA
 REAL_STUDENT_DEMAND_ENABLED = os.getenv("REAL_STUDENT_DEMAND_ENABLED", "false").lower() == "true"
 PUBLIC_DEMAND_MAP_ENABLED = os.getenv("PUBLIC_DEMAND_MAP_ENABLED", "false").lower() == "true"
 DEMAND_MAP_MIN_AGGREGATION_COUNT = int(os.getenv("DEMAND_MAP_MIN_AGGREGATION_COUNT", "0"))
+
+# Dossiê M1: o diretório não é publicado pelo Django/Nginx. A ingestão real segue
+# fechada até homologação de storage privado, antimalware e controles LGPD.
+MEDIA_ROOT = Path(os.getenv("PRIVATE_DOCUMENT_ROOT", BASE_DIR / "private_documents"))
+SYNTHETIC_DOCUMENT_UPLOAD_ENABLED = (
+    os.getenv("SYNTHETIC_DOCUMENT_UPLOAD_ENABLED", "false").lower() == "true"
+)
+REAL_DOCUMENT_UPLOAD_ENABLED = False
+INSTRUCTOR_DOCUMENT_MAX_BYTES = int(os.getenv("INSTRUCTOR_DOCUMENT_MAX_BYTES", "5242880"))

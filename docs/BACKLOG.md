@@ -261,6 +261,9 @@ Fonte oficial das unidades implementáveis. Prioridade: `P0` bloqueia a sequênc
 
 ### CRD-002 — Implementar requisitos versionados (`P1`)
 
+**Parcial sintético em 31/08/2026:** modelo, vigência, unicidade e Admin implementados sem semear
+requisito regulatório real. A matriz real e seus conflitos continuam dependências do fechamento.
+
 - **Objetivo/contexto:** materializar `GOV-002` sem constantes em views.
 - **Dependências:** `CRD-001`, matriz aprovada.
 - **Arquivos/módulos:** DocumentRequirement model/selectors/admin/tests.
@@ -269,6 +272,11 @@ Fonte oficial das unidades implementáveis. Prioridade: `P0` bloqueia a sequênc
 - **Concluído quando:** aplicação resolve exatamente a matriz aplicável.
 
 ### CRD-003 — Implementar pipeline privado de documentos (`P1`)
+
+**Parcial sintético em 31/08/2026:** fixtures passam por extensão, assinatura de conteúdo, tamanho,
+hash, nome interno aleatório, quarentena privada, revisão, expiração, download autorizado e
+auditoria. Promoção para storage de produção, scanner real, falhas externas e arquivos reais seguem
+bloqueados e não satisfazem o critério final deste card.
 
 - **Objetivo/contexto:** receber evidência sem exposição/malware.
 - **Dependências:** `CRD-002`, storage/scan aprovados, `AUD-001`.

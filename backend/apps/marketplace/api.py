@@ -2,6 +2,8 @@ from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.db import transaction
 from django.db.models import Count
+from django.http import FileResponse
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -13,12 +15,45 @@ from apps.discovery.models import InstructorProfile
 from apps.people.models import Person, RoleAssignment
 from apps.territories.models import FederativeUnit
 
-from .models import DataMode, LessonRequest, StudentDemand, StudentProfile
+from .documents import can_review_document
+from .models import DataMode, InstructorDocument, LessonRequest, StudentDemand, StudentProfile
 from .services import transition_lesson_request
 
 
 def _synthetic_enabled():
     return settings.SYNTHETIC_MARKETPLACE_ENABLED
+
+
+class InstructorDocumentDownloadView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        document = get_object_or_404(
+            InstructorDocument.objects.select_related("instructor__person__account"), pk=pk
+        )
+        if request.user != document.instructor.person.account and not can_review_document(
+            request.user
+        ):
+            return Response(
+                {"code": "forbidden", "detail": "Acesso ao documento negado."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        AuditEvent.objects.create(
+            actor=request.user,
+            action="marketplace.instructor_document.downloaded",
+            target_type="InstructorDocument",
+            target_id=document.id,
+            metadata={"data_mode": document.data_mode, "version": document.version},
+        )
+        response = FileResponse(
+            document.file.open("rb"),
+            as_attachment=True,
+            filename=document.original_name,
+            content_type=document.mime_type,
+        )
+        response["Cache-Control"] = "private, no-store"
+        response["X-Content-Type-Options"] = "nosniff"
+        return response
 
 
 class StudentRegistrationSerializer(serializers.Serializer):

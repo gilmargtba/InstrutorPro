@@ -191,6 +191,20 @@ REVOKED
 
 Depende de requisito documental aplicável e aplicação do instrutor. O arquivo percorre quarentena, validação e storage privado antes da revisão.
 
+No recorte M1 sintético, os estados persistidos são `PENDING`, `UNDER_REVIEW`, `APPROVED`,
+`REJECTED` e `EXPIRED`; `scan_status` permanece separado. A aprovação exige fixture limpa, válida e
+revisor diferente do titular. O caminho interno é aleatório, o nome original não compõe a chave de
+storage e o acesso ocorre somente por download autenticado e auditado. Arquivos reais permanecem
+fechados até homologação do storage privado, scanner e controles LGPD.
+
+### PracticalTrainingRequirement / PlatformLesson
+
+A carga mínima prática é configuração versionada por UF, categoria, tipo de processo e vigência;
+nenhuma quantidade é inferida a partir de número de solicitações/aulas. `PlatformLesson` registra
+somente agenda/conclusão na plataforma. `official_record_status` é dimensão independente e começa
+em `NOT_INTEGRATED`; portanto uma aula concluída na plataforma não é homologação nem registro
+oficial.
+
 ### Vehicle
 
 Proprietário declarado, placa/Renavam protegidos, marca/modelo, ano, transmissão, adaptações e status.
