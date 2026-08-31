@@ -275,7 +275,9 @@ requisito regulatório real. A matriz real e seus conflitos continuam dependênc
 
 **Parcial sintético em 31/08/2026:** fixtures passam por extensão, assinatura de conteúdo, tamanho,
 hash, nome interno aleatório, quarentena privada, revisão, expiração, download autorizado e
-auditoria. Promoção para storage de produção, scanner real, falhas externas e arquivos reais seguem
+auditoria. Credencial inclui UF, identificador privado, emissão, validade e fonte da revisão. Foto
+de perfil usa evidência e estados próprios, autorização/notice separados e acesso privado auditado.
+Promoção para storage de produção, scanner real, falhas externas e arquivos reais seguem
 bloqueados e não satisfazem o critério final deste card.
 
 - **Objetivo/contexto:** receber evidência sem exposição/malware.
@@ -295,6 +297,11 @@ bloqueados e não satisfazem o critério final deste card.
 - **Concluído quando:** veículo válido é consultável pela policy sem expor identificadores.
 
 ### CRD-005 — Implementar backoffice de revisão (`P1`)
+
+**Parcial sintético em 31/08/2026:** Django Admin aplica serviços de domínio para aprovar/rejeitar
+documentos e aprovar/rejeitar/solicitar substituição de foto, com permissão explícita, proibição de
+self-review, motivo, ator, horário e auditoria. Fila dedicada, MFA de produção e operação com dados
+reais continuam pendentes e o card não está concluído.
 
 - **Objetivo/contexto:** decidir documentos/aplicação com segregação e motivo.
 - **Dependências:** `CRD-001–004`, `IAM-004`, `AUD-001`.

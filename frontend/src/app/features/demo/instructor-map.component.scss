@@ -273,6 +273,8 @@ h1 span { color: var(--teal); }
 .result-cards article:hover,
 .result-cards article.selected { border-color: #70bdb3; box-shadow: 0 .6rem 1.3rem rgba(20, 73, 78, .1); transform: translateY(-2px); }
 .result-avatar { display: grid; width: 2.8rem; aspect-ratio: 1; place-items: center; border-radius: 50%; color: #fff; background: linear-gradient(145deg, var(--teal), #2ba391); font-weight: 900; }
+.result-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
+.verified { display: block; color: #087f71; font-size: .76rem; font-style: normal; font-weight: 800; }
 .result-copy { display: flex; min-width: 0; flex-direction: column; gap: .22rem; }
 .result-copy strong { overflow: hidden; color: var(--ink); text-overflow: ellipsis; white-space: nowrap; }
 .result-copy span,

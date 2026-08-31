@@ -1,9 +1,11 @@
 import os
 from datetime import timedelta
 from decimal import Decimal
+from pathlib import Path
 
 from django.contrib.auth.models import Permission
 from django.contrib.gis.geos import Point
+from django.core.files import File
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
@@ -15,6 +17,12 @@ from apps.discovery.models import (
     InstructorServiceArea,
     LocationPublicationAuthorization,
     ProfessionalVerification,
+)
+from apps.marketplace.models import (
+    DataMode,
+    DocumentRequirement,
+    InstructorDocument,
+    ProfilePhoto,
 )
 from apps.people.models import Person, RoleAssignment
 
@@ -230,8 +238,14 @@ class Command(BaseCommand):
                 profile.demo_price = Decimal(price)
                 profile.save(
                     update_fields=[
-                        "display_name", "bio", "categories", "transmission_options",
-                        "vehicle_available", "service_radius_km", "demo_rating", "demo_price",
+                        "display_name",
+                        "bio",
+                        "categories",
+                        "transmission_options",
+                        "vehicle_available",
+                        "service_radius_km",
+                        "demo_rating",
+                        "demo_price",
                     ]
                 )
             area, area_created = InstructorServiceArea.objects.get_or_create(
@@ -252,7 +266,13 @@ class Command(BaseCommand):
                 area.private_location = None
                 area.radius_km = 10
                 area.save(
-                    update_fields=["city", "uf", "public_service_location", "private_location", "radius_km"]
+                    update_fields=[
+                        "city",
+                        "uf",
+                        "public_service_location",
+                        "private_location",
+                        "radius_km",
+                    ]
                 )
             if not area.authorization_history.filter(revoked_at__isnull=True).exists():
                 LocationPublicationAuthorization.objects.create(
@@ -272,6 +292,89 @@ class Command(BaseCommand):
                     actor=reviewer,
                     reason="SYNTHETIC_FIXTURE",
                 )
+            if published and not profile.profile_photos.filter(status="APPROVED").exists():
+                fixture_path = (
+                    Path(__file__).resolve().parents[3]
+                    / "marketplace"
+                    / "fixtures"
+                    / "fixture-instructor-profile.png"
+                )
+                with fixture_path.open("rb") as fixture:
+                    photo = ProfilePhoto.objects.create(
+                        instructor=profile,
+                        file=File(fixture, name="fixture-instructor-profile.png"),
+                        original_name="fixture-instructor-profile.png",
+                        mime_type="image/png",
+                        size_bytes=fixture_path.stat().st_size,
+                        sha256="synthetic-seed-fixture",
+                        status=ProfilePhoto.Status.APPROVED,
+                        publication_authorized_at=now,
+                        publication_notice_version="M1-SYNTHETIC-PHOTO-NOTICE-1",
+                        data_mode=DataMode.SYNTHETIC,
+                        reviewed_by=reviewer,
+                        reviewed_at=now,
+                        review_reason="SYNTHETIC_FIXTURE",
+                    )
+                AuditEvent.objects.create(
+                    actor=reviewer,
+                    action="marketplace.profile_photo.seeded_approved",
+                    target_type="ProfilePhoto",
+                    target_id=photo.id,
+                    reason_code="SYNTHETIC_FIXTURE",
+                    metadata={"synthetic": True},
+                )
+            if published:
+                requirement, _ = DocumentRequirement.objects.get_or_create(
+                    uf=uf,
+                    category="B",
+                    provider_type="INSTRUCTOR",
+                    rule_version="M1-SYNTHETIC-CREDENTIAL-1",
+                    document_type=DocumentRequirement.DocumentType.INSTRUCTOR_AUTHORIZATION,
+                    defaults={
+                        "label": "Credenciamento DETRAN sintético",
+                        "required": False,
+                        "requires_validity": True,
+                        "active_from": now.date(),
+                    },
+                )
+                if not profile.documents.filter(
+                    requirement=requirement, status=InstructorDocument.Status.APPROVED
+                ).exists():
+                    credential_path = (
+                        Path(__file__).resolve().parents[3]
+                        / "marketplace"
+                        / "fixtures"
+                        / "fixture-credential.pdf"
+                    )
+                    with credential_path.open("rb") as fixture:
+                        credential = InstructorDocument.objects.create(
+                            instructor=profile,
+                            requirement=requirement,
+                            credential_uf=uf,
+                            private_identifier=f"DEMO-{uf}-{profile.id.hex[:6]}",
+                            issued_at=now.date(),
+                            valid_until=(now + timedelta(days=30)).date(),
+                            file=File(fixture, name="fixture-credential.pdf"),
+                            original_name="fixture-credential.pdf",
+                            mime_type="application/pdf",
+                            size_bytes=credential_path.stat().st_size,
+                            sha256="synthetic-credential-fixture",
+                            status=InstructorDocument.Status.APPROVED,
+                            scan_status=InstructorDocument.ScanStatus.CLEAN,
+                            reviewed_by=reviewer,
+                            reviewed_at=now,
+                            review_reason="SYNTHETIC_FIXTURE",
+                            review_source="SYNTHETIC_SEED",
+                            data_mode=DataMode.SYNTHETIC,
+                        )
+                    AuditEvent.objects.create(
+                        actor=reviewer,
+                        action="marketplace.instructor_document.seeded_approved",
+                        target_type="InstructorDocument",
+                        target_id=credential.id,
+                        reason_code="SYNTHETIC_FIXTURE",
+                        metadata={"synthetic": True, "uf": uf},
+                    )
             for action in [
                 "profile_submitted",
                 "profile_review_started",

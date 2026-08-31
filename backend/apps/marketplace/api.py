@@ -16,7 +16,14 @@ from apps.people.models import Person, RoleAssignment
 from apps.territories.models import FederativeUnit
 
 from .documents import can_review_document
-from .models import DataMode, InstructorDocument, LessonRequest, StudentDemand, StudentProfile
+from .models import (
+    DataMode,
+    InstructorDocument,
+    LessonRequest,
+    ProfilePhoto,
+    StudentDemand,
+    StudentProfile,
+)
 from .services import transition_lesson_request
 
 
@@ -51,6 +58,33 @@ class InstructorDocumentDownloadView(APIView):
             filename=document.original_name,
             content_type=document.mime_type,
         )
+        response["Cache-Control"] = "private, no-store"
+        response["X-Content-Type-Options"] = "nosniff"
+        return response
+
+
+class ProfilePhotoPrivateDownloadView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        photo = get_object_or_404(
+            ProfilePhoto.objects.select_related("instructor__person__account"), pk=pk
+        )
+        owner = photo.instructor.person.account
+        can_review = request.user.has_perm("marketplace.review_profile_photo")
+        if request.user != owner and not can_review:
+            return Response(
+                {"code": "forbidden", "detail": "Acesso à foto negado."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        AuditEvent.objects.create(
+            actor=request.user,
+            action="marketplace.profile_photo.downloaded",
+            target_type="ProfilePhoto",
+            target_id=photo.id,
+            metadata={"data_mode": photo.data_mode, "status": photo.status},
+        )
+        response = FileResponse(photo.file.open("rb"), content_type=photo.mime_type)
         response["Cache-Control"] = "private, no-store"
         response["X-Content-Type-Options"] = "nosniff"
         return response

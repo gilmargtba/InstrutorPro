@@ -7,7 +7,7 @@ from django.utils import timezone
 
 from apps.audit.models import AuditEvent
 
-from .models import DataMode, InstructorDocument, InstructorVehicle
+from .models import DataMode, InstructorDocument, InstructorVehicle, ProfilePhoto
 
 
 class DocumentValidationError(ValueError):
@@ -60,7 +60,17 @@ def inspect_document(upload, *, data_mode):
 
 @transaction.atomic
 def upload_synthetic_document(
-    *, actor, instructor, requirement, upload, vehicle=None, valid_until=None, supersedes=None
+    *,
+    actor,
+    instructor,
+    requirement,
+    upload,
+    vehicle=None,
+    credential_uf="",
+    private_identifier="",
+    issued_at=None,
+    valid_until=None,
+    supersedes=None,
 ):
     if actor != instructor.person.account:
         raise DocumentPermissionDenied("Somente o titular pode enviar o próprio documento")
@@ -83,6 +93,9 @@ def upload_synthetic_document(
         size_bytes=upload.size,
         scan_status=InstructorDocument.ScanStatus.CLEAN,
         data_mode=DataMode.SYNTHETIC,
+        credential_uf=credential_uf,
+        private_identifier=private_identifier,
+        issued_at=issued_at,
         valid_until=valid_until,
         supersedes=supersedes,
         version=version,
@@ -113,7 +126,7 @@ def can_review_document(actor):
 
 
 @transaction.atomic
-def review_document(*, actor, document, decision, reason):
+def review_document(*, actor, document, decision, reason, source):
     if not can_review_document(actor):
         raise DocumentPermissionDenied("Permissão explícita de revisão é obrigatória")
     locked = (
@@ -140,7 +153,16 @@ def review_document(*, actor, document, decision, reason):
     locked.reviewed_by = actor
     locked.reviewed_at = timezone.now()
     locked.review_reason = reason
-    locked.save(update_fields=["status", "reviewed_by", "reviewed_at", "review_reason"])
+    locked.review_source = source
+    locked.save(
+        update_fields=[
+            "status",
+            "reviewed_by",
+            "reviewed_at",
+            "review_reason",
+            "review_source",
+        ]
+    )
     if locked.vehicle:
         locked.vehicle.verification_status = decision
         locked.vehicle.save(update_fields=["verification_status"])
@@ -150,7 +172,13 @@ def review_document(*, actor, document, decision, reason):
         target_type="InstructorDocument",
         target_id=locked.id,
         reason_code=reason,
-        metadata={"before": before, "after": decision, "version": locked.version},
+        metadata={
+            "before": before,
+            "after": decision,
+            "version": locked.version,
+            "source": source,
+            "uf": locked.credential_uf or locked.requirement.uf,
+        },
     )
     return locked
 
@@ -177,6 +205,83 @@ def expire_documents(*, actor=None):
             metadata={"valid_until": document.valid_until.isoformat()},
         )
     return len(documents)
+
+
+@transaction.atomic
+def upload_synthetic_profile_photo(
+    *, actor, instructor, upload, publication_authorized, notice_version
+):
+    if actor != instructor.person.account:
+        raise DocumentPermissionDenied("Somente o titular pode enviar a própria foto")
+    if not publication_authorized or not notice_version:
+        raise DocumentValidationError("Autorização e versão do notice são obrigatórias")
+    metadata = inspect_document(upload, data_mode=DataMode.SYNTHETIC)
+    if metadata["mime_type"] not in {"image/png", "image/jpeg"}:
+        raise DocumentValidationError("Foto deve ser PNG ou JPEG")
+    photo = ProfilePhoto.objects.create(
+        instructor=instructor,
+        file=upload,
+        size_bytes=upload.size,
+        publication_authorized_at=timezone.now(),
+        publication_notice_version=notice_version,
+        data_mode=DataMode.SYNTHETIC,
+        **metadata,
+    )
+    AuditEvent.objects.create(
+        actor=actor,
+        action="marketplace.profile_photo.uploaded",
+        target_type="ProfilePhoto",
+        target_id=photo.id,
+        metadata={
+            "publication_authorized": True,
+            "notice_version": notice_version,
+            "data_mode": DataMode.SYNTHETIC,
+        },
+    )
+    return photo
+
+
+@transaction.atomic
+def review_profile_photo(*, actor, photo, decision, reason):
+    if not (
+        actor
+        and actor.is_authenticated
+        and actor.can_operate
+        and actor.has_perm("marketplace.review_profile_photo")
+    ):
+        raise DocumentPermissionDenied("Permissão explícita para revisar foto é obrigatória")
+    locked = (
+        ProfilePhoto.objects.select_for_update()
+        .select_related("instructor__person__account")
+        .get(pk=photo.pk)
+    )
+    if actor == locked.instructor.person.account:
+        raise DocumentPermissionDenied("O titular não pode revisar a própria foto")
+    if locked.status != ProfilePhoto.Status.PENDING:
+        raise DocumentValidationError("Foto não está pendente")
+    if decision not in {
+        ProfilePhoto.Status.APPROVED,
+        ProfilePhoto.Status.REJECTED,
+        ProfilePhoto.Status.REPLACEMENT_REQUESTED,
+    }:
+        raise DocumentValidationError("Decisão de foto inválida")
+    if decision == ProfilePhoto.Status.APPROVED and not locked.publication_authorized_at:
+        raise DocumentValidationError("Foto sem autorização separada para publicação")
+    before = locked.status
+    locked.status = decision
+    locked.reviewed_by = actor
+    locked.reviewed_at = timezone.now()
+    locked.review_reason = reason
+    locked.save(update_fields=["status", "reviewed_by", "reviewed_at", "review_reason"])
+    AuditEvent.objects.create(
+        actor=actor,
+        action="marketplace.profile_photo.reviewed",
+        target_type="ProfilePhoto",
+        target_id=locked.id,
+        reason_code=reason,
+        metadata={"before": before, "after": decision},
+    )
+    return locked
 
 
 def documents_satisfy_active_requirements(profile):

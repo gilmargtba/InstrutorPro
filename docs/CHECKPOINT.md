@@ -1,8 +1,8 @@
 # Checkpoint do Projeto
 
 - Atualizado em: **2026-08-31**
-- Versão documental: **3.4**
-- Código-fonte: **dossiê sintético de instrutor/veículo implementado; upload real bloqueado**
+- Versão documental: **3.5**
+- Código-fonte: **dossiê sintético de instrutor/veículo/foto implementado; upload real bloqueado**
 
 ## Consolidação de produto em 2026-08-19
 
@@ -15,6 +15,15 @@ A fase continua **M0**, com `GOV-001/OPEN-001` concluído. Esta consolidação n
 **INSTRUTORPRO DEMO 01 concluída.** O frontend contém experiência visual navegável e mobile-first apenas com fixtures sintéticas. CODEX 01, 02A e 02B permanecem preservados; CODEX 02C está suspenso e não deve ser retomado sem autorização explícita. Capacidades reguladas, usuários reais, perfis e publicação continuam condicionados aos respectivos gates.
 
 ## Últimas atividades concluídas
+
+Complemento do dossiê sintético concluído em 31/08/2026: credencial de instrutor registra UF,
+identificador privado, emissão, validade, fonte, resultado, revisor, motivo e auditoria. Foto de
+perfil é evidência independente, entra em quarentena com autorização de publicação e notice
+versionado separados, e somente pode ser aprovada por revisor autorizado distinto. O Admin usa
+acesso privado auditado; busca/lista expõem a foto apenas quando foto e publicação sintética estão
+aprovadas, e exibem claims derivados somente de evidência limpa, aprovada e vigente. A fixture
+visual é uma pessoa inteiramente sintética gerada para demonstração. Upload, revisão e publicação
+de dados reais, base legal/notice definitivo e integrações oficiais continuam bloqueados.
 
 `BCR-06/CERTIFICADO` resolvido em 30/08/2026: o certificado ECDSA da Let's Encrypt para
 `179.199.136.4`, válido de 29/08/2026 a 04/09/2026, teve cadeia externa validada e renovação
@@ -176,7 +185,7 @@ Revisão jurídico-técnica de privacidade em fontes oficiais vigentes em 22/07/
 
 ## Atividade em execução
 
-Dossiê M1 de instrutor e veículo implementado em 31/08/2026 no recorte autorizado:
+Dossiê M1 de instrutor, veículo, credencial e foto implementado em 31/08/2026 no recorte autorizado:
 `DocumentRequirement` versiona UF/categoria/provedor/vigência; `InstructorDocument` preserva
 versões, hash, validade, quarentena privada, revisão independente e auditoria; veículo separa
 propriedade declarada de verificação. O onboarding aceita somente fixtures sintéticas com prefixo

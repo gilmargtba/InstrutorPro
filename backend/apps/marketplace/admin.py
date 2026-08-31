@@ -2,7 +2,12 @@ from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
 
-from .documents import DocumentPermissionDenied, DocumentValidationError, review_document
+from .documents import (
+    DocumentPermissionDenied,
+    DocumentValidationError,
+    review_document,
+    review_profile_photo,
+)
 from .models import (
     DocumentRequirement,
     InstructorDocument,
@@ -11,6 +16,7 @@ from .models import (
     LessonRequest,
     PlatformLesson,
     PracticalTrainingRequirement,
+    ProfilePhoto,
     StudentDemand,
     StudentProfile,
 )
@@ -81,7 +87,11 @@ class InstructorDocumentAdmin(admin.ModelAdmin):
         for document in queryset:
             try:
                 review_document(
-                    actor=request.user, document=document, decision=decision, reason=reason
+                    actor=request.user,
+                    document=document,
+                    decision=decision,
+                    reason=reason,
+                    source="ADMIN_MANUAL_REVIEW",
                 )
                 completed += 1
             except (DocumentPermissionDenied, DocumentValidationError) as exc:
@@ -109,6 +119,63 @@ class InstructorVehicleAdmin(admin.ModelAdmin):
         "data_mode",
     )
     list_filter = ("verification_status", "data_mode", "category")
+
+
+@admin.register(ProfilePhoto)
+class ProfilePhotoAdmin(admin.ModelAdmin):
+    list_display = ("instructor", "status", "publication_notice_version", "uploaded_at")
+    list_filter = ("status", "data_mode")
+    readonly_fields = (
+        "secure_preview",
+        "original_name",
+        "mime_type",
+        "size_bytes",
+        "sha256",
+        "publication_authorized_at",
+        "publication_notice_version",
+        "data_mode",
+        "uploaded_at",
+        "reviewed_by",
+        "reviewed_at",
+        "status",
+    )
+    actions = ("approve_photos", "reject_photos", "request_replacement")
+
+    @admin.display(description="Foto privada")
+    def secure_preview(self, obj):
+        if not obj or not obj.pk:
+            return "—"
+        url = reverse("profile-photo-private-download", kwargs={"pk": obj.pk})
+        return format_html(
+            '<a href="{}" target="_blank">Visualizar com autorização e auditoria</a>',
+            url,
+        )
+
+    def _review(self, request, queryset, decision, reason):
+        for photo in queryset:
+            try:
+                review_profile_photo(
+                    actor=request.user, photo=photo, decision=decision, reason=reason
+                )
+            except (DocumentPermissionDenied, DocumentValidationError) as exc:
+                self.message_user(request, str(exc), level="error")
+
+    @admin.action(description="Aprovar fotos selecionadas")
+    def approve_photos(self, request, queryset):
+        self._review(request, queryset, ProfilePhoto.Status.APPROVED, "ADMIN_PHOTO_APPROVED")
+
+    @admin.action(description="Rejeitar fotos selecionadas")
+    def reject_photos(self, request, queryset):
+        self._review(request, queryset, ProfilePhoto.Status.REJECTED, "ADMIN_PHOTO_REJECTED")
+
+    @admin.action(description="Solicitar substituição")
+    def request_replacement(self, request, queryset):
+        self._review(
+            request,
+            queryset,
+            ProfilePhoto.Status.REPLACEMENT_REQUESTED,
+            "ADMIN_PHOTO_REPLACEMENT_REQUESTED",
+        )
 
 
 admin.site.register(InstructorPrerequisiteAcceptance)

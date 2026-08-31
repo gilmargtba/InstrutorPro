@@ -556,3 +556,21 @@ A plataforma suporta os papéis pessoais `STUDENT`, `INSTRUCTOR`, `DOCTOR` e `PS
 Entram no núcleo do domínio: `CountrySubdivision`, `Municipality`, `RegulatoryRule`, `VerificationSource`, `Clinic`, `DoctorProfile`, `PsychologistProfile`, `Credential`, `OfficialVerification`, `PublicationDecision`, `OfficialFlowPolicy`, `StudentDemand`, `DemandMatch`, `DemandAggregate`, `Referral`, `JourneyDefinition` e `StudentJourney`.
 
 O matching inicial é determinístico, versionado e explicável. A verificação oficial e a decisão interna de publicação são fatos distintos. A InstrutorPro não homologa profissional, exame ou conclusão de etapa oficial.
+
+## Complemento M1 — credencial e foto do instrutor
+
+`InstructorDocument` representa evidência privada e versionada. Quando a evidência é credencial do
+instrutor, UF, identificador, emissão e validade permanecem internos; a revisão registra resultado,
+fonte, ator, horário e motivo. `PENDING`, `UNDER_REVIEW`, `APPROVED`, `REJECTED` e `EXPIRED` são fatos
+internos e não equivalem a homologação pelo Detran.
+
+`ProfilePhoto` é independente dos documentos regulatórios. Upload, autorização para uso na
+descoberta pública e ciência do notice são fatos separados. A revisão percorre `PENDING` para
+`APPROVED`, `REJECTED` ou `REPLACEMENT_REQUESTED`, sempre por serviço de domínio e sem self-review.
+Uma foto somente pode sair pela rota pública quando estiver aprovada, possuir autorização e o perfil
+também estiver publicado; antes disso, o acesso é privado, autorizado e auditado.
+
+Claims públicos de verificação são derivados de evidência limpa, aprovada e não vencida. Número de
+credencial, arquivo, endereço residencial, CPF, CNH, placa completa, Renavam e justificativas de
+revisão nunca integram o serializer público. Ausência, pendência, rejeição ou expiração de requisito
+obrigatório bloqueia publicação; credencial isolada nunca concede elegibilidade.

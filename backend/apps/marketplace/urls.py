@@ -6,6 +6,7 @@ from .api import (
     InstructorDocumentDownloadView,
     LessonRequestListCreateView,
     LessonRequestTransitionView,
+    ProfilePhotoPrivateDownloadView,
     SessionLoginView,
     SessionLogoutView,
     SessionMeView,
@@ -13,6 +14,11 @@ from .api import (
 )
 
 urlpatterns = [
+    path(
+        "marketplace/profile-photos/<uuid:pk>/download/",
+        ProfilePhotoPrivateDownloadView.as_view(),
+        name="profile-photo-private-download",
+    ),
     path(
         "marketplace/instructor-documents/<uuid:pk>/download/",
         InstructorDocumentDownloadView.as_view(),

@@ -1,6 +1,6 @@
 {
   "package": "instrutorpro-documentation",
-  "version": "3.4",
+  "version": "3.5",
   "reviewed_on": "2026-08-31",
   "path_base": "repository-root",
   "normative_documents": [
@@ -85,5 +85,5 @@
     "INSTRUCTOR_CANDIDATE",
     "INSTRUCTOR_ACADEMY"
   ],
-  "notes": "Prontidão pré-produção M1 avaliada como NOT READY; CODEX 02E permanece concluído e CODEX 02C suspenso."
+  "notes": "Dossiê sintético inclui credencial estruturada e foto de perfil com autorização e revisão separadas; dados/publicação reais permanecem bloqueados. CODEX 02C continua suspenso."
 }

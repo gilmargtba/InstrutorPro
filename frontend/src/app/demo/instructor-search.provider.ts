@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 
 export interface SearchFilters { location:string; radius:number; category:string; transmission:string; vehicleAvailable:boolean; }
-export interface SearchInstructor { id:string;display_name:string;latitude:number;longitude:number;distance_km:number;categories:string[];transmission:string;vehicle_available:boolean;demo_rating:number;demo_price:number;availability_summary:string;demo:boolean; }
+export interface SearchInstructor { id:string;display_name:string;latitude:number;longitude:number;distance_km:number;categories:string[];transmission:string;vehicle_available:boolean;demo_rating:number;demo_price:number;availability_summary:string;demo:boolean;profile_photo_url:string|null;verified_claims:string[]; }
 interface GeocodeResponse { results:{label:string;latitude:number;longitude:number}[];provider:string }
 interface SearchResponse { count:number;results:SearchInstructor[] }
 export interface InstructorStateSummary { uf:string;count:number;search_location:string }

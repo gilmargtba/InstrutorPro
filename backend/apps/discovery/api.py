@@ -3,6 +3,9 @@ from uuid import uuid4
 from django.conf import settings
 from django.contrib.gis.geos import Point
 from django.db import transaction
+from django.db.models import Q
+from django.http import FileResponse
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import serializers, status
@@ -42,6 +45,8 @@ class InstructorResult(serializers.Serializer):
     demo_price = serializers.FloatField()
     availability_summary = serializers.CharField()
     demo = serializers.BooleanField()
+    profile_photo_url = serializers.CharField(allow_null=True)
+    verified_claims = serializers.ListField(child=serializers.CharField())
 
 
 class InstructorSearchResponse(serializers.Serializer):
@@ -97,10 +102,61 @@ class InstructorSearchView(APIView):
                 "demo_price": float(row.demo_price),
                 "availability_summary": row.availability_summary,
                 "demo": True,
+                "profile_photo_url": self._photo_url(row),
+                "verified_claims": self._verified_claims(row),
             }
             for row in rows
         ]
         return Response({"count": len(results), "results": results})
+
+    @staticmethod
+    def _photo_url(row):
+        photo = (
+            row.profile_photos.filter(status="APPROVED", publication_authorized_at__isnull=False)
+            .order_by("-uploaded_at")
+            .first()
+        )
+        return f"/api/v1/instructors/profile-photos/{photo.id}/" if photo else None
+
+    @staticmethod
+    def _verified_claims(row):
+        from apps.marketplace.models import DocumentRequirement, InstructorDocument
+
+        claims = []
+        approved = row.documents.filter(
+            status=InstructorDocument.Status.APPROVED,
+            scan_status=InstructorDocument.ScanStatus.CLEAN,
+        ).filter(Q(valid_until__isnull=True) | Q(valid_until__gte=timezone.localdate()))
+        approved = approved.select_related("requirement")
+        types = {document.requirement.document_type for document in approved}
+        if DocumentRequirement.DocumentType.INSTRUCTOR_AUTHORIZATION in types:
+            claims.append("CREDENTIAL_VERIFIED")
+        if DocumentRequirement.DocumentType.INSTRUCTOR_COURSE in types:
+            claims.append("COURSE_VERIFIED")
+        if DocumentRequirement.DocumentType.VEHICLE_EVIDENCE in types:
+            claims.append("VEHICLE_VERIFIED")
+        return claims
+
+
+class PublicProfilePhotoView(APIView):
+    permission_classes = [AllowAny]
+    authentication_classes = []
+
+    def get(self, request, pk):
+        from apps.marketplace.models import ProfilePhoto
+
+        photo = get_object_or_404(
+            ProfilePhoto,
+            pk=pk,
+            status=ProfilePhoto.Status.APPROVED,
+            publication_authorized_at__isnull=False,
+            instructor__publication_status="APPROVED",
+            data_mode="SYNTHETIC",
+        )
+        response = FileResponse(photo.file.open("rb"), content_type=photo.mime_type)
+        response["Cache-Control"] = "public, max-age=300"
+        response["X-Content-Type-Options"] = "nosniff"
+        return response
 
 
 class InstructorStateSummaryView(APIView):
@@ -178,7 +234,13 @@ class DemoOnboardingInput(serializers.Serializer):
     credential_type = serializers.ChoiceField(choices=["CREDENCIAL_DEMO"])
     credential_uf = serializers.ChoiceField(choices=["RS", "SC", "SP", "RJ", "ES"])
     credential_validity = serializers.CharField(max_length=30)
+    credential_identifier = serializers.CharField(max_length=80, required=False, allow_blank=True)
+    credential_issued_at = serializers.DateField(required=False, allow_null=True)
+    credential_valid_until = serializers.DateField(required=False, allow_null=True)
     synthetic_data_confirmed = serializers.BooleanField()
+    photo_publication_authorized = serializers.BooleanField(default=False)
+    photo_notice_version = serializers.CharField(max_length=80, required=False, allow_blank=True)
+    profile_photo = serializers.FileField(required=False, write_only=True)
     credential_file = serializers.FileField(required=False, write_only=True)
     course_file = serializers.FileField(required=False, write_only=True)
     vehicle_file = serializers.FileField(required=False, write_only=True)
@@ -216,6 +278,10 @@ class DemoOnboardingInput(serializers.Serializer):
         if attrs["credential_uf"] != attrs["uf"]:
             raise serializers.ValidationError(
                 {"credential_uf": "Na DEMO, a UF da credencial deve coincidir com a área."}
+            )
+        if attrs.get("profile_photo") and not attrs["photo_publication_authorized"]:
+            raise serializers.ValidationError(
+                {"photo_publication_authorized": "A autorização separada da foto é obrigatória."}
             )
         return attrs
 
@@ -255,7 +321,10 @@ class DemoInstructorOnboardingView(APIView):
             service_radius_km=data["radius_km"],
             is_demo=True,
         )
-        from apps.marketplace.documents import upload_synthetic_document
+        from apps.marketplace.documents import (
+            upload_synthetic_document,
+            upload_synthetic_profile_photo,
+        )
         from apps.marketplace.models import (
             DataMode,
             DocumentRequirement,
@@ -325,8 +394,26 @@ class DemoInstructorOnboardingView(APIView):
                 requirement=requirement,
                 upload=upload,
                 vehicle=related_vehicle,
+                credential_uf=data["credential_uf"] if field == "credential_file" else data["uf"],
+                private_identifier=(
+                    data.get("credential_identifier", "") if field == "credential_file" else ""
+                ),
+                issued_at=data.get("credential_issued_at") if field == "credential_file" else None,
+                valid_until=(
+                    data.get("credential_valid_until") if field == "credential_file" else None
+                ),
             )
             document_ids.append(str(document.id))
+        photo_id = None
+        if data.get("profile_photo"):
+            photo = upload_synthetic_profile_photo(
+                actor=account,
+                instructor=profile,
+                upload=data["profile_photo"],
+                publication_authorized=data["photo_publication_authorized"],
+                notice_version=data.get("photo_notice_version", ""),
+            )
+            photo_id = str(photo.id)
         submit_profile(
             actor=account, profile=profile, request_id=request.headers.get("X-Request-ID")
         )
@@ -340,6 +427,7 @@ class DemoInstructorOnboardingView(APIView):
                 "credential": "synthetic_fixture",
                 "synthetic": True,
                 "document_ids": document_ids,
+                "profile_photo_id": photo_id,
             },
         )
         return Response(

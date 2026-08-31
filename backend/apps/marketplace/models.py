@@ -10,6 +10,11 @@ def private_document_path(instance, filename):
     return f"quarantine/{instance.instructor_id}/{uuid.uuid4().hex}{suffix}"
 
 
+def private_profile_photo_path(instance, filename):
+    suffix = Path(filename).suffix.lower()
+    return f"profile-photo-quarantine/{instance.instructor_id}/{uuid.uuid4().hex}{suffix}"
+
+
 class DataMode(models.TextChoices):
     SYNTHETIC = "SYNTHETIC", "Sintético"
     REAL = "REAL", "Real"
@@ -143,6 +148,8 @@ class InstructorDocument(models.Model):
         DocumentRequirement, on_delete=models.PROTECT, related_name="documents"
     )
     issuer = models.CharField(max_length=160, blank=True)
+    credential_uf = models.CharField(max_length=2, blank=True)
+    private_identifier = models.CharField(max_length=160, blank=True)
     issued_at = models.DateField(null=True, blank=True)
     valid_until = models.DateField(null=True, blank=True)
     file = models.FileField(upload_to=private_document_path, max_length=300)
@@ -168,6 +175,7 @@ class InstructorDocument(models.Model):
     )
     reviewed_at = models.DateTimeField(null=True, blank=True)
     review_reason = models.CharField(max_length=240, blank=True)
+    review_source = models.CharField(max_length=240, blank=True)
     data_mode = models.CharField(max_length=12, choices=DataMode.choices)
 
     class Meta:
@@ -181,6 +189,42 @@ class InstructorDocument(models.Model):
                 name="ck_instructor_document_dates",
             )
         ]
+
+
+class ProfilePhoto(models.Model):
+    class Status(models.TextChoices):
+        PENDING = "PENDING", "Pendente"
+        APPROVED = "APPROVED", "Aprovada"
+        REJECTED = "REJECTED", "Rejeitada"
+        REPLACEMENT_REQUESTED = "REPLACEMENT_REQUESTED", "Substituição solicitada"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    instructor = models.ForeignKey(
+        "discovery.InstructorProfile", on_delete=models.PROTECT, related_name="profile_photos"
+    )
+    file = models.FileField(upload_to=private_profile_photo_path, max_length=300)
+    original_name = models.CharField(max_length=180)
+    mime_type = models.CharField(max_length=80)
+    size_bytes = models.PositiveIntegerField()
+    sha256 = models.CharField(max_length=64)
+    status = models.CharField(max_length=24, choices=Status.choices, default=Status.PENDING)
+    publication_authorized_at = models.DateTimeField(null=True, blank=True)
+    publication_notice_version = models.CharField(max_length=80, blank=True)
+    data_mode = models.CharField(max_length=12, choices=DataMode.choices)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    reviewed_by = models.ForeignKey(
+        "accounts.Account",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="reviewed_profile_photos",
+    )
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    review_reason = models.CharField(max_length=240, blank=True)
+
+    class Meta:
+        permissions = [("review_profile_photo", "Can review instructor profile photos")]
+        indexes = [models.Index(fields=["instructor", "status", "uploaded_at"])]
 
 
 class PracticalTrainingRequirement(models.Model):

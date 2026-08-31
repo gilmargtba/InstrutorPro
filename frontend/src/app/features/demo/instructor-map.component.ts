@@ -167,10 +167,11 @@ import { LeafletMapProvider } from '../../demo/map.provider';
                     (keydown.enter)="select(instructor)"
                   >
                     <div class="result-avatar" aria-hidden="true">
-                      {{ initials(instructor.display_name) }}
+                      @if(instructor.profile_photo_url){<img [src]="instructor.profile_photo_url" alt="">}@else { {{ initials(instructor.display_name) }} }
                     </div>
                     <div class="result-copy">
                       <strong>{{ instructor.display_name }}</strong>
+                      @if(instructor.verified_claims.includes('CREDENTIAL_VERIFIED')){<em class="verified"><i class="pi pi-verified"></i> Credenciamento verificado</em>}
                       <span>
                         <i class="pi pi-star-fill"></i> {{ instructor.demo_rating }}
                         <b>·</b> {{ instructor.distance_km }} km
