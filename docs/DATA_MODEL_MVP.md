@@ -1,4 +1,4 @@
-# Modelo de Dados Definitivo do MVP — InstrutorProcnh
+# Modelo de Dados Definitivo do MVP — InstrutorProCNH
 
 ## CODEX 02D
 
@@ -130,7 +130,7 @@ Estados:
 Nunca interpretar `NOT_FOUND` automaticamente como fraude ou inaptidão.
 
 ### PublicationDecision
-Decisão interna da InstrutorProcnh, separada da autorização estatal. Registra sujeito, decisão, motivos, regra/política, autor e data.
+Decisão interna da InstrutorProCNH, separada da autorização estatal. Registra sujeito, decisão, motivos, regra/política, autor e data.
 
 ## 6. Localização, catálogo e descoberta
 
@@ -208,10 +208,10 @@ Agenda recorrente e exceções com timezone IANA.
 Negociação de aula entre aluno e instrutor, com versões imutáveis.
 
 ### Booking
-Reserva confirmada após aceite/hold. Para serviços de saúde oficiais, só existe se a política da UF permitir que a InstrutorProcnh participe do agendamento; caso contrário, registrar apenas encaminhamento informativo quando aprovado.
+Reserva confirmada após aceite/hold. Para serviços de saúde oficiais, só existe se a política da UF permitir que a InstrutorProCNH participe do agendamento; caso contrário, registrar apenas encaminhamento informativo quando aprovado.
 
 ### Referral
-Encaminhamento para clínica/profissional/fluxo oficial quando a InstrutorProcnh não controla o agendamento. Não presume conclusão do exame e não armazena resultado clínico.
+Encaminhamento para clínica/profissional/fluxo oficial quando a InstrutorProCNH não controla o agendamento. Não presume conclusão do exame e não armazena resultado clínico.
 
 ## 9. Pagamento, reputação e suporte
 
@@ -246,7 +246,7 @@ Estado informativo da etapa:
 - `DONE_DECLARED`
 - `NOT_APPLICABLE`
 
-`DONE_DECLARED` significa declaração/registro operacional permitido, não homologação oficial pela InstrutorProcnh.
+`DONE_DECLARED` significa declaração/registro operacional permitido, não homologação oficial pela InstrutorProCNH.
 
 ## 11. Auditoria e LGPD
 

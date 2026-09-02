@@ -24,7 +24,7 @@
 
 ## INSTRUTORPROCNH DEMO 01 — concluída em 24/08/2026
 
-- [x] landing InstrutorProcnh e entradas de aluno/profissional;
+- [x] landing InstrutorProCNH e entradas de aluno/profissional;
 - [x] jornada, serviços, instrutores, solicitação, matching e demanda sintéticos;
 - [x] clínicas/exames sem dados clínicos;
 - [x] dashboard do instrutor e demanda agregada RS/SC/SP/RJ/ES;
@@ -712,7 +712,7 @@ Código/config/documento da fatia, migration quando aplicável, testes, seguran�
 - **PRIV-004** — decisão/RIPD sobre qualquer dado de saúde/acessibilidade antes de coletá-lo.
 - **DOM-HEALTH-001** — modelar ClinicProfile, HealthProfessionalProfile e vínculos.
 - **DOM-JUR-001** — modelar jurisdição, ativação territorial, regras e fontes versionadas.
-- **UX-JOURNEY-001** — adaptar experiência à referência visual da landing InstrutorProcnh: Sou aluno / Sou profissional.
+- **UX-JOURNEY-001** — adaptar experiência à referência visual da landing InstrutorProCNH: Sou aluno / Sou profissional.
 - **DEFER-001** — manter Academia do Instrutor/candidato a instrutor fora do MVP.
 
 ## Backlog v1.6 — fundação do modelo nacional

@@ -1,6 +1,6 @@
 {
   "package": "instrutorpro-documentation",
-  "version": "3.6",
+  "version": "3.7",
   "reviewed_on": "2026-09-02",
   "path_base": "repository-root",
   "normative_documents": [
@@ -85,5 +85,5 @@
     "INSTRUCTOR_CANDIDATE",
     "INSTRUCTOR_ACADEMY"
   ],
-  "notes": "Marca humana alterada para InstrutorProcnh; identificadores técnicos legados foram preservados para compatibilidade. Dados/publicação reais permanecem bloqueados e CODEX 02C continua suspenso."
+  "notes": "Marca pública corrigida para InstrutorProCNH e primeira fatia de landing profissional implementada; identificadores técnicos legados foram preservados. Dados/publicação reais permanecem bloqueados e os fluxos sintéticos continuam isolados."
 }

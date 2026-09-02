@@ -4,7 +4,7 @@ Status: **ESTRUTURA E FORMATO NACIONAL APROVADOS; NENHUMA LINHA REGULATÓRIA OPE
 
 ## Objetivo
 
-Criar uma camada regulatória nacional versionada para a InstrutorProcnh, cobrindo instrutores, clínicas, médicos e psicólogos relacionados à jornada CNH, sem transformar a plataforma em autoridade de credenciamento.
+Criar uma camada regulatória nacional versionada para a InstrutorProCNH, cobrindo instrutores, clínicas, médicos e psicólogos relacionados à jornada CNH, sem transformar a plataforma em autoridade de credenciamento.
 
 ## Escopo territorial
 
@@ -18,7 +18,7 @@ Criar uma camada regulatória nacional versionada para a InstrutorProcnh, cobrin
 
 1. Federal: CONTRAN, SENATRAN, RENACH e legislação federal aplicável.
 2. Estadual: DETRAN/órgão competente, portarias, editais, serviços e listas/consultas oficiais.
-3. InstrutorProcnh: política interna de evidência, revisão, publicação, expiração e auditoria.
+3. InstrutorProCNH: política interna de evidência, revisão, publicação, expiração e auditoria.
 
 ## Matriz a preencher por UF e tipo
 
@@ -189,12 +189,12 @@ Formação/certificação, Academia do Instrutor e pré-análise de candidato a 
 
 ### Resolução CONTRAN 1.020/2025
 
-A Resolução CONTRAN nº 1.020/2025 está em vigor e é a referência federal principal para aprendizagem, habilitação e formação do candidato. Para a InstrutorProcnh, ficam registrados como baseline:
+A Resolução CONTRAN nº 1.020/2025 está em vigor e é a referência federal principal para aprendizagem, habilitação e formação do candidato. Para a InstrutorProCNH, ficam registrados como baseline:
 
 - a jornada de primeira habilitação inclui requerimento, curso teórico, RENACH/biometria, avaliação psicológica, exame de aptidão física e mental, exame teórico, aulas práticas, exame prático, PPD e CNH;
 - compete aos órgãos executivos de trânsito dos Estados e DF autorizar instrutores e credenciar médicos e psicólogos;
 - instrutores podem atuar de forma autônoma ou vinculada, observados os requisitos legais e a autorização competente;
-- regras estaduais podem detalhar cadastro, operação, fiscalização, veículos, sistemas e procedimentos sem transformar a InstrutorProcnh em autoridade pública.
+- regras estaduais podem detalhar cadastro, operação, fiscalização, veículos, sistemas e procedimentos sem transformar a InstrutorProCNH em autoridade pública.
 
 Fonte oficial: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/Resolucao10202025.pdf/@@download/file
 
@@ -221,7 +221,7 @@ A tabela abaixo é uma fotografia regulatória para desenho do produto. `PUBLIC_
 | SP | CLINIC | clínica médica/psicológica deve ser credenciada; portal publica requisitos, documentos e fluxo | Detran-SP — Portal dos Credenciados | `DOCUMENT + MANUAL` | `HUMAN_REVIEW_REQUIRED` |
 | SP | DOCTOR/PSYCHOLOGIST | profissionais especialistas devem ser previamente credenciados para vinculação à clínica | Detran-SP — Portal dos Credenciados | `DOCUMENT + MANUAL` | `HUMAN_REVIEW_REQUIRED` |
 | RJ | INSTRUCTOR | atividade autônoma regulamentada em 2026; autorização/credenciamento é indispensável; processo e publicação oficial documentados | DETRAN-RJ — Orientações para Cadastro / Portarias | `DOCUMENT + OFFICIAL_PUBLICATION + MANUAL` | `HUMAN_REVIEW_REQUIRED` |
-| RJ | CLINIC | DETRAN-RJ mantém consulta pública de Clínicas de Medicina e Psicologia e distribuição de candidatos; na primeira habilitação a clínica é indicada eletronicamente pelo sistema, portanto a InstrutorProcnh não deve prometer livre escolha para o exame oficial | DETRAN-RJ — Consultas Habilitação / Distribuição de Candidatos | `PUBLIC_LIST + MANUAL` | `HUMAN_REVIEW_REQUIRED` |
+| RJ | CLINIC | DETRAN-RJ mantém consulta pública de Clínicas de Medicina e Psicologia e distribuição de candidatos; na primeira habilitação a clínica é indicada eletronicamente pelo sistema, portanto a InstrutorProCNH não deve prometer livre escolha para o exame oficial | DETRAN-RJ — Consultas Habilitação / Distribuição de Candidatos | `PUBLIC_LIST + MANUAL` | `HUMAN_REVIEW_REQUIRED` |
 | RJ | DOCTOR/PSYCHOLOGIST | exame médico e avaliação psicológica são realizados no ecossistema de clínicas credenciadas; o fluxo oficial direciona o candidato à clínica indicada. Publicação individual do profissional exige evidência adicional antes de ativação | DETRAN-RJ | `CLINIC_SOURCE + DOCUMENT + MANUAL` | `RESEARCH_REQUIRED` |
 | ES | INSTRUCTOR | CEIT é a base estadual oficial; Instrução de Serviço N nº 016/2026 regulamenta registro, autorização e monitoramento do instrutor autônomo/vinculado | DETRAN/ES — IS 016/2026 | `DOCUMENT + MANUAL` | `HUMAN_REVIEW_REQUIRED` |
 | ES | CLINIC | existe consulta pública oficial de clínicas por município/bairro no SIT/RENACH2; serviços oficiais do DETRAN/ES remetem à rede credenciada | DETRAN/ES — SIT Consulta Clínicas / Habilitação | `PUBLIC_LIST + MANUAL` | `HUMAN_REVIEW_REQUIRED` |
@@ -260,14 +260,14 @@ A tabela abaixo é uma fotografia regulatória para desenho do produto. `PUBLIC_
 ## Regras de ativação da primeira onda
 
 1. `HUMAN_REVIEW_REQUIRED` não significa `APPROVED` nem `ACTIVE`.
-2. Nenhum profissional é publicado como “credenciado pela InstrutorProcnh”. A UI deve usar linguagem como “credenciamento/autorização verificado em fonte oficial”, com fonte e data quando houver evidência suficiente.
+2. Nenhum profissional é publicado como “credenciado pela InstrutorProCNH”. A UI deve usar linguagem como “credenciamento/autorização verificado em fonte oficial”, com fonte e data quando houver evidência suficiente.
 3. Quando não existir consulta pública confiável, onboarding aceita evidência documental e encaminha para revisão manual.
 4. Fonte oficial indisponível não converte automaticamente um profissional em inválido; o status vira `VERIFICATION_PENDING`/`SOURCE_UNAVAILABLE` conforme política.
-5. A InstrutorProcnh não registra aula oficial, não escreve no RENACH/CEIT e não substitui apps/sistemas exigidos por SENATRAN/DETRAN.
+5. A InstrutorProCNH não registra aula oficial, não escreve no RENACH/CEIT e não substitui apps/sistemas exigidos por SENATRAN/DETRAN.
 6. Preços/taxas oficiais ou de exames nunca ficam hard-coded. São registros versionados com UF, ato, vigência, fonte e data de validação.
 7. A ingestão de listas públicas deve ser aprovada no ROPA/LIA correspondente antes de persistir dados pessoais em lote.
 8. Nenhuma lista pública cria automaticamente conta, perfil comercial, publicação, lead ou contato de marketing.
-9. `ProviderVerification` registra evidência/fato oficial; a decisão interna de publicação é processo separado, versionado, auditável e revogável pela InstrutorProcnh.
+9. `ProviderVerification` registra evidência/fato oficial; a decisão interna de publicação é processo separado, versionado, auditável e revogável pela InstrutorProCNH.
 
 ## Fechamento parcial dos gaps de saúde — 19/08/2026
 
@@ -275,7 +275,7 @@ A tabela abaixo é uma fotografia regulatória para desenho do produto. `PUBLIC_
 
 O DETRAN/RS possui fluxo oficial de credenciamento para médicos e psicólogos. Para o desenho do MVP, registrar que o médico de CFC deve possuir título de especialista em Medicina de Tráfego reconhecido pelo CFM e o psicólogo de CFC título de especialista em Psicologia do Trânsito reconhecido pelo CFP. O portal também referencia a Resolução CONTRAN 927/2022 e mantém processo de credenciamento/renovação/regularidade.
 
-**Regra de produto:** o perfil InstrutorProcnh de médico/psicólogo no RS só recebe selo de verificação após evidência individual suficiente; vínculo com CFC não deve ser inferido apenas pelo nome do estabelecimento.
+**Regra de produto:** o perfil InstrutorProCNH de médico/psicólogo no RS só recebe selo de verificação após evidência individual suficiente; vínculo com CFC não deve ser inferido apenas pelo nome do estabelecimento.
 
 Fontes oficiais:
 - https://www.detran.rs.gov.br/profissionais-processo-de-habilitacao
@@ -285,7 +285,7 @@ Fontes oficiais:
 
 O DETRAN-RJ mantém consulta oficial de Clínicas de Medicina e Psicologia e página de distribuição de candidatos. No fluxo de primeira habilitação, o sistema do DETRAN indica eletronicamente a clínica credenciada ao candidato. Em 2026, o órgão também publicou valores de R$ 90 para exame de aptidão física e mental e R$ 90 para avaliação psicológica; valores devem permanecer versionados e nunca hard-coded.
 
-**Regra de produto crítica:** no RJ, a InstrutorProcnh pode informar/explicar a rede e exibir estabelecimentos públicos quando juridicamente aprovado, mas não pode apresentar a experiência como “escolha qualquer clínica para seu exame oficial” quando o procedimento aplicável utilizar distribuição/indicação pelo DETRAN. O CTA deve orientar o usuário a seguir a clínica designada no processo oficial.
+**Regra de produto crítica:** no RJ, a InstrutorProCNH pode informar/explicar a rede e exibir estabelecimentos públicos quando juridicamente aprovado, mas não pode apresentar a experiência como “escolha qualquer clínica para seu exame oficial” quando o procedimento aplicável utilizar distribuição/indicação pelo DETRAN. O CTA deve orientar o usuário a seguir a clínica designada no processo oficial.
 
 Fontes oficiais:
 - https://www.detran.rj.gov.br/consultas/consultas-hab.html
@@ -305,7 +305,7 @@ Fontes oficiais:
 
 ### SC
 
-O DETRAN/SC mantém listas oficiais separadas de clínicas médicas e clínicas psicológicas credenciadas, além de área pública de credenciados. Isso sustenta `PUBLIC_LIST + MANUAL` para estabelecimento. Antes de sincronização em lote, a InstrutorProcnh deve aprovar campos mínimos, periodicidade e fundamento no ROPA/LIA.
+O DETRAN/SC mantém listas oficiais separadas de clínicas médicas e clínicas psicológicas credenciadas, além de área pública de credenciados. Isso sustenta `PUBLIC_LIST + MANUAL` para estabelecimento. Antes de sincronização em lote, a InstrutorProCNH deve aprovar campos mínimos, periodicidade e fundamento no ROPA/LIA.
 
 Fontes oficiais:
 - https://www.detran.sc.gov.br/enderecos-unidades-e-credenciados/

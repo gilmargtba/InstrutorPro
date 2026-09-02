@@ -493,7 +493,7 @@ Projeção/consulta agregada por célula geográfica/cidade e filtros permitidos
 
 Representa as 27 UFs e a ativação operacional por configuração, sem cidade estruturalmente obrigatória. A decisão territorial de 24/08/2026 estabelece:
 
-- `commercial_status` representa estratégia operacional/comercial da InstrutorProcnh: `PREPARATION`, `FIRST_WAVE`, `ACTIVE`, `PAUSED`;
+- `commercial_status` representa estratégia operacional/comercial da InstrutorProCNH: `PREPARATION`, `FIRST_WAVE`, `ACTIVE`, `PAUSED`;
 - `regulatory_status` representa prontidão interna para uma capacidade regulada: `NOT_REVIEWED`, `RESEARCHING`, `REVIEW_REQUIRED`, `APPROVED`, `SUSPENDED`;
 - `regulatory_status` é contextual, não uma flag global: considera UF, tipo de prestador, serviço/capacidade, vigência, fonte e revisão humana;
 - `commercial_status` nunca concede autorização, verificação ou publicação;
@@ -532,7 +532,7 @@ Vínculo temporal entre clínica e profissional, com papel, vigência, fonte/evi
 
 ### CnhJourney / JourneyStep
 
-Modelo orientativo da jornada do usuário. Etapas e ordem devem ser versionadas por regra vigente; o sistema não declara conclusão oficial perante órgão público. Pode apontar serviços disponíveis para a etapa, preservando separação entre orientação InstrutorProcnh e ato oficial.
+Modelo orientativo da jornada do usuário. Etapas e ordem devem ser versionadas por regra vigente; o sistema não declara conclusão oficial perante órgão público. Pode apontar serviços disponíveis para a etapa, preservando separação entre orientação InstrutorProCNH e ato oficial.
 
 ### Regra de papel
 
@@ -545,7 +545,7 @@ A modelagem futura deve substituir qualquer exclusividade legada `STUDENT`/`INST
 
 ## Fluxo oficial por jurisdição
 
-Serviços de saúde ligados à CNH não podem assumir livre escolha em todas as UFs. O domínio deve suportar `official_flow_mode` (`FREE_CHOICE`, `ASSIGNED_BY_AUTHORITY`, `REFERRED`, `UNKNOWN`) por UF e tipo de serviço. O exemplo inicial mais importante é RJ, onde o processo oficial pode indicar eletronicamente a clínica. O CTA da InstrutorProcnh deve respeitar essa regra.
+Serviços de saúde ligados à CNH não podem assumir livre escolha em todas as UFs. O domínio deve suportar `official_flow_mode` (`FREE_CHOICE`, `ASSIGNED_BY_AUTHORITY`, `REFERRED`, `UNKNOWN`) por UF e tipo de serviço. O exemplo inicial mais importante é RJ, onde o processo oficial pode indicar eletronicamente a clínica. O CTA da InstrutorProCNH deve respeitar essa regra.
 
 ## Extensão nacional do domínio — v1.6
 
@@ -555,7 +555,7 @@ A plataforma suporta os papéis pessoais `STUDENT`, `INSTRUCTOR`, `DOCTOR` e `PS
 
 Entram no núcleo do domínio: `CountrySubdivision`, `Municipality`, `RegulatoryRule`, `VerificationSource`, `Clinic`, `DoctorProfile`, `PsychologistProfile`, `Credential`, `OfficialVerification`, `PublicationDecision`, `OfficialFlowPolicy`, `StudentDemand`, `DemandMatch`, `DemandAggregate`, `Referral`, `JourneyDefinition` e `StudentJourney`.
 
-O matching inicial é determinístico, versionado e explicável. A verificação oficial e a decisão interna de publicação são fatos distintos. A InstrutorProcnh não homologa profissional, exame ou conclusão de etapa oficial.
+O matching inicial é determinístico, versionado e explicável. A verificação oficial e a decisão interna de publicação são fatos distintos. A InstrutorProCNH não homologa profissional, exame ou conclusão de etapa oficial.
 
 ## Complemento M1 — credencial e foto do instrutor
 

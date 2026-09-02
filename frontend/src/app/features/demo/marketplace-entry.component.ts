@@ -19,7 +19,7 @@ export class InstructorEntryComponent { accepted=false; }
 
 @Component({
   selector: 'app-login', imports: [FormsModule, RouterLink],
-  template: `<section class="page narrow"><div class="demo-flag">DEMO · contas sintéticas</div><header class="page-head"><div><p class="eyebrow">Acesso</p><h1>Entrar no InstrutorProcnh</h1></div></header><form class="login" (ngSubmit)="submit()"><label>E-mail<input type="email" name="email" [(ngModel)]="email" required></label><label>Senha<input type="password" name="password" [(ngModel)]="password" required></label><button class="button primary" [disabled]="sending">Entrar</button><a href="#" (click)="$event.preventDefault()">Esqueci minha senha</a><a routerLink="/aluno">Criar conta</a>@if(error){<p>{{error}}</p>}</form></section>`,
+  template: `<section class="page narrow"><div class="demo-flag">DEMO · contas sintéticas</div><header class="page-head"><div><p class="eyebrow">Acesso</p><h1>Entrar no InstrutorProCNH</h1></div></header><form class="login" (ngSubmit)="submit()"><label>E-mail<input type="email" name="email" [(ngModel)]="email" required></label><label>Senha<input type="password" name="password" [(ngModel)]="password" required></label><button class="button primary" [disabled]="sending">Entrar</button><a href="#" (click)="$event.preventDefault()">Esqueci minha senha</a><a routerLink="/aluno">Criar conta</a>@if(error){<p>{{error}}</p>}</form></section>`,
   styles: [`.login{display:grid;gap:1rem;padding:1.5rem;border:1px solid #d6e5e3;border-radius:1rem;background:#fff}.login label{display:grid;gap:.4rem;font-weight:750}.login input{min-height:3rem;padding:.7rem;border:1px solid #bfd5d2;border-radius:.7rem}.login p{color:#9a302c}`]
 })
 export class LoginComponent {

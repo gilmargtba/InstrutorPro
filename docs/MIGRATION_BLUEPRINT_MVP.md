@@ -1,4 +1,4 @@
-# Blueprint de Migrations — MVP InstrutorProcnh
+# Blueprint de Migrations — MVP InstrutorProCNH
 
 Este documento define a ordem de criação do schema. Ele não substitui `DATA_MODEL_MVP.md` nem autoriza implementar fases bloqueadas.
 

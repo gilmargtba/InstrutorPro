@@ -94,7 +94,7 @@ O objetivo estratégico continua sendo densidade local: a plataforma mede desequ
 
 ## Visão consolidada nacional — 19/08/2026
 
-A **InstrutorProcnh** é a plataforma nacional da jornada para a CNH. A experiência parte de uma landing simples — **Sou aluno** / **Sou profissional** — e conecta o usuário aos atores adequados da jornada, sem substituir CONTRAN, SENATRAN, DETRANs ou qualquer autoridade competente.
+A **InstrutorProCNH** é a plataforma nacional da jornada para a CNH. A experiência parte de uma landing simples — **Sou aluno** / **Sou profissional** — e conecta o usuário aos atores adequados da jornada, sem substituir CONTRAN, SENATRAN, DETRANs ou qualquer autoridade competente.
 
 ### Primeira onda operacional
 
@@ -107,7 +107,7 @@ RS, SC, SP, RJ e ES. AM, RO, AC e RR permanecem na matriz regulatória sem ativa
 - clínica relacionada aos exames da CNH;
 - médico credenciado/aplicável;
 - psicólogo credenciado/aplicável;
-- operação/administração InstrutorProcnh.
+- operação/administração InstrutorProCNH.
 
 ### Experiência central
 

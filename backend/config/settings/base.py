@@ -97,7 +97,7 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": ["rest_framework.authentication.SessionAuthentication"],
 }
 SPECTACULAR_SETTINGS = {
-    "TITLE": "InstrutorProcnh API",
+    "TITLE": "InstrutorProCNH API",
     "DESCRIPTION": "Fundação técnica da plataforma nacional da jornada CNH.",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
@@ -136,10 +136,18 @@ ADMIN_MFA_REQUIRED = os.getenv("DJANGO_ADMIN_MFA_REQUIRED", "true").lower() == "
 
 # Marketplace M1: recursos reais permanecem deny-by-default. O modo sintético é
 # explicitamente separado para demonstração e testes, sem liberar produção real.
-SYNTHETIC_MARKETPLACE_ENABLED = os.getenv("SYNTHETIC_MARKETPLACE_ENABLED", "false").lower() == "true"
-REAL_STUDENT_REGISTRATION_ENABLED = os.getenv("REAL_STUDENT_REGISTRATION_ENABLED", "false").lower() == "true"
-REAL_INSTRUCTOR_REGISTRATION_ENABLED = os.getenv("REAL_INSTRUCTOR_REGISTRATION_ENABLED", "false").lower() == "true"
-REAL_INSTRUCTOR_PUBLICATION_ENABLED = os.getenv("REAL_INSTRUCTOR_PUBLICATION_ENABLED", "false").lower() == "true"
+SYNTHETIC_MARKETPLACE_ENABLED = (
+    os.getenv("SYNTHETIC_MARKETPLACE_ENABLED", "false").lower() == "true"
+)
+REAL_STUDENT_REGISTRATION_ENABLED = (
+    os.getenv("REAL_STUDENT_REGISTRATION_ENABLED", "false").lower() == "true"
+)
+REAL_INSTRUCTOR_REGISTRATION_ENABLED = (
+    os.getenv("REAL_INSTRUCTOR_REGISTRATION_ENABLED", "false").lower() == "true"
+)
+REAL_INSTRUCTOR_PUBLICATION_ENABLED = (
+    os.getenv("REAL_INSTRUCTOR_PUBLICATION_ENABLED", "false").lower() == "true"
+)
 REAL_STUDENT_DEMAND_ENABLED = os.getenv("REAL_STUDENT_DEMAND_ENABLED", "false").lower() == "true"
 PUBLIC_DEMAND_MAP_ENABLED = os.getenv("PUBLIC_DEMAND_MAP_ENABLED", "false").lower() == "true"
 DEMAND_MAP_MIN_AGGREGATION_COUNT = int(os.getenv("DEMAND_MAP_MIN_AGGREGATION_COUNT", "0"))
