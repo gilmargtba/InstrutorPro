@@ -234,8 +234,8 @@ A ampliação para clínicas, médicos, psicólogos, mapa nacional e jornada CNH
 2. **Geolocalização minimizada.** Localização exata do aluno é privada e efêmera sempre que possível. Mapa público usa ponto aproximado, área, cidade ou cluster. Mapa de demanda só publica agregados com limiar mínimo e proteção contra combinação de filtros/reidentificação.
 3. **Credenciais e documentos profissionais.** CPF, documentos, números completos não necessários ao público e evidências de credenciamento ficam privados. Perfil público mostra somente atributos necessários à confiança e descoberta.
 4. **Fontes públicas não equivalem a uso irrestrito.** Lista pública de DETRAN/SENATRAN pode servir como evidência de verificação somente após registrar finalidade, base legal, termos/capacidade de acesso, campos mínimos, atualização e política de contato. Dados públicos não autorizam prospecção massiva automática por padrão.
-5. **Clínicas e profissionais como agentes.** A classificação controlador/operador/controlador independente deve ser decidida por operação. Encaminhar aluno a clínica/profissional não transfere automaticamente à InstrutorPro responsabilidade pelo tratamento clínico posterior, nem a elimina; contratos e fluxos reais determinam os papéis.
-6. **Agendamento de exame.** Antes de enviar dados do aluno a clínica/profissional, definir campos mínimos, finalidade, base legal, transparência, retenção, destinatário e responsabilidade por direitos. Dados clínicos não retornam para a InstrutorPro por padrão.
+5. **Clínicas e profissionais como agentes.** A classificação controlador/operador/controlador independente deve ser decidida por operação. Encaminhar aluno a clínica/profissional não transfere automaticamente à InstrutorProcnh responsabilidade pelo tratamento clínico posterior, nem a elimina; contratos e fluxos reais determinam os papéis.
+6. **Agendamento de exame.** Antes de enviar dados do aluno a clínica/profissional, definir campos mínimos, finalidade, base legal, transparência, retenção, destinatário e responsabilidade por direitos. Dados clínicos não retornam para a InstrutorProcnh por padrão.
 7. **Jornada CNH.** O progresso exibido é orientativo. Não coletar prova documental de cada etapa apenas para “completar” a timeline quando não houver necessidade funcional/legal aprovada.
 8. **Consentimento não é base universal.** Marketing, cookies opcionais e finalidades realmente opcionais usam mecanismo separado quando consentimento for a hipótese aprovada; contrato/legítimo interesse/obrigação legal devem ser analisados por finalidade no ROPA.
 9. **Direitos do titular.** Deve existir canal para confirmação, acesso, correção, informação sobre compartilhamentos, oposição/revisão quando aplicável, portabilidade conforme regulamentação e eliminação quando cabível, com autenticação proporcional e propagação a operadores.
@@ -247,7 +247,7 @@ A ampliação para clínicas, médicos, psicólogos, mapa nacional e jornada CNH
 
 ### Gate LGPD para clínicas/médicos/psicólogos
 
-Nenhum dado real é compartilhado com clínica, médico ou psicólogo até existirem: operação no ROPA; base legal aprovada; aviso de privacidade correspondente; matriz de agentes; contrato/termos aplicáveis; minimização de payload; retenção; fluxo de direitos; controles de segurança; teste de autorização; e decisão explícita sobre se a InstrutorPro apenas descobre/encaminha ou também agenda/processa pagamento.
+Nenhum dado real é compartilhado com clínica, médico ou psicólogo até existirem: operação no ROPA; base legal aprovada; aviso de privacidade correspondente; matriz de agentes; contrato/termos aplicáveis; minimização de payload; retenção; fluxo de direitos; controles de segurança; teste de autorização; e decisão explícita sobre se a InstrutorProcnh apenas descobre/encaminha ou também agenda/processa pagamento.
 
 ### Referência regulatória
 
@@ -257,12 +257,12 @@ A ANPD orienta que adequação envolve mapear e registrar operações, identific
 
 A existência de lista, portaria, Diário Oficial ou consulta pública não elimina a incidência da LGPD. Para a primeira onda técnica/comercial (RS, SC, SP, RJ e ES) e para qualquer UF da matriz regulatória, eventual coleta de dados de profissionais a partir de fonte oficial segue estes controles:
 
-1. **Descoberta não é publicação automática.** Um registro encontrado em fonte oficial pode alimentar verificação ou fila interna, mas não cria automaticamente perfil comercial público na InstrutorPro.
+1. **Descoberta não é publicação automática.** Um registro encontrado em fonte oficial pode alimentar verificação ou fila interna, mas não cria automaticamente perfil comercial público na InstrutorProcnh.
 2. **Minimização.** Persistir somente atributos necessários para provar autorização/credenciamento e permitir descoberta segura: tipo profissional, nome profissional quando necessário, UF/município, identificador público estritamente necessário, status, validade quando publicada, fonte e `verified_at`.
 3. **Sem prospecção massiva por padrão.** Telefone, e-mail, endereço residencial e outros contatos obtidos de fonte pública não entram automaticamente em campanhas. Prospecção exige finalidade, base legal, LIA quando aplicável, transparência, oposição e política comercial aprovadas.
-4. **Reivindicação de perfil.** Quando viável, a experiência preferida é `CLAIM_PROFILE`: a InstrutorPro mostra somente o mínimo permitido/necessário e convida o próprio profissional a autenticar, complementar e aceitar os termos antes da publicação comercial completa.
+4. **Reivindicação de perfil.** Quando viável, a experiência preferida é `CLAIM_PROFILE`: a InstrutorProcnh mostra somente o mínimo permitido/necessário e convida o próprio profissional a autenticar, complementar e aceitar os termos antes da publicação comercial completa.
 5. **Proveniência obrigatória.** Todo dado importado/confirmado guarda `source_authority`, `source_url`, `source_checked_at`, `verification_method`, `rule_version` e, quando necessário, hash/evidência sem copiar conteúdo excessivo.
-6. **Correção e contestação.** O profissional pode contestar divergência. A InstrutorPro não altera o registro oficial; corrige/despublica sua própria projeção e orienta o titular a procurar o órgão competente quando a origem do erro for a fonte pública.
+6. **Correção e contestação.** O profissional pode contestar divergência. A InstrutorProcnh não altera o registro oficial; corrige/despublica sua própria projeção e orienta o titular a procurar o órgão competente quando a origem do erro for a fonte pública.
 7. **Expiração/revalidação.** Status oficial não é eterno. Perfis dependentes de credencial têm `next_verification_at`; fonte indisponível gera pendência, não conclusão adversa automática.
 8. **Mapa e localização.** Clínica pode exibir endereço comercial validado. Profissional pessoa física não terá residência ou coordenada privada inferida/exposta; mapa usa local de atendimento declarado/autorizado ou granularidade reduzida.
 

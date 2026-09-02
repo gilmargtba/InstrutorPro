@@ -4,8 +4,8 @@ from django_otp.admin import OTPAdminSite
 
 
 class InstrutorProOTPAdminSite(OTPAdminSite):
-    site_header = "Administração InstrutorPro"
-    site_title = "Admin InstrutorPro"
+    site_header = "Administração InstrutorProcnh"
+    site_title = "Admin InstrutorProcnh"
     index_title = "Painel administrativo"
 
     @property

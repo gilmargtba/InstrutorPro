@@ -97,7 +97,7 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": ["rest_framework.authentication.SessionAuthentication"],
 }
 SPECTACULAR_SETTINGS = {
-    "TITLE": "InstrutorPro API",
+    "TITLE": "InstrutorProcnh API",
     "DESCRIPTION": "Fundação técnica da plataforma nacional da jornada CNH.",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,

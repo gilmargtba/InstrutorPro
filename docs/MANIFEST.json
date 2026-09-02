@@ -1,7 +1,7 @@
 {
   "package": "instrutorpro-documentation",
-  "version": "3.5",
-  "reviewed_on": "2026-08-31",
+  "version": "3.6",
+  "reviewed_on": "2026-09-02",
   "path_base": "repository-root",
   "normative_documents": [
     "README.md",
@@ -55,7 +55,7 @@
       "note": "Provisional brand asset; the product name and visual identity remain open decisions."
     }
   ],
-  "updated_at": "2026-08-31",
+  "updated_at": "2026-09-02",
   "scope": "national-27-ufs",
   "first_wave": [
     "RS",
@@ -85,5 +85,5 @@
     "INSTRUCTOR_CANDIDATE",
     "INSTRUCTOR_ACADEMY"
   ],
-  "notes": "Dossiê sintético inclui credencial estruturada e foto de perfil com autorização e revisão separadas; dados/publicação reais permanecem bloqueados. CODEX 02C continua suspenso."
+  "notes": "Marca humana alterada para InstrutorProcnh; identificadores técnicos legados foram preservados para compatibilidade. Dados/publicação reais permanecem bloqueados e CODEX 02C continua suspenso."
 }

@@ -2,7 +2,7 @@
 
 ## Missão
 
-Construir a InstrutorPro como plataforma nacional da jornada da CNH, conectando alunos a instrutores e, conforme o fluxo oficial aplicável, clínicas, médicos e psicólogos, com marketplace, verificação, contratação e operação segura.
+Construir a InstrutorProcnh como plataforma nacional da jornada da CNH, conectando alunos a instrutores e, conforme o fluxo oficial aplicável, clínicas, médicos e psicólogos, com marketplace, verificação, contratação e operação segura.
 
 ## Objetivo do primeiro ciclo
 

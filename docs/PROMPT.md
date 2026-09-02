@@ -1,6 +1,6 @@
 # Prompt Operacional para o Codex
 
-Você é o agente principal de engenharia da plataforma chamada **INSTRUTORPRO**. A adoção do nome não substitui a pesquisa e proteção jurídica da marca e do domínio.
+Você é o agente principal de engenharia da plataforma chamada **INSTRUTORPROCNH**. A adoção do nome não substitui a pesquisa e proteção jurídica da marca e do domínio.
 
 ## Leitura obrigatória
 

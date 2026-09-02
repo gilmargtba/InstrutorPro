@@ -4,11 +4,11 @@ Status: **SLAs APROVADOS; TABLETOP M1 REPETIDO COM RESULTADO PASS CONDICIONADO A
 
 ## Objetivo
 
-Definir como a InstrutorPro recebe, revisa, decide, reavalia e suspende aplicações de instrutores sem confundir decisão interna com autorização oficial. Esta política não autoriza publicação: depende da matriz `GOV-002` aprovada para a jurisdição e categoria.
+Definir como a InstrutorProcnh recebe, revisa, decide, reavalia e suspende aplicações de instrutores sem confundir decisão interna com autorização oficial. Esta política não autoriza publicação: depende da matriz `GOV-002` aprovada para a jurisdição e categoria.
 
 ## Princípios obrigatórios
 
-1. Autorização/credenciamento oficial vigente é evidência necessária; a InstrutorPro não concede, certifica nem homologa essa condição.
+1. Autorização/credenciamento oficial vigente é evidência necessária; a InstrutorProcnh não concede, certifica nem homologa essa condição.
 2. Deny by default: requisito ausente, conflitante, vencido ou sem fonte aplicável impede aprovação/publicação.
 3. O próprio instrutor, pessoa relacionada ou quem alterou a evidência fora do fluxo não pode revisá-la.
 4. Documento, aplicação, decisão interna, condição oficial e publicação possuem estados separados.
@@ -87,7 +87,7 @@ O código público pode ser acompanhado por texto seguro e versionado. Nota inte
 
 ## Contestação e correção
 
-O titular pode corrigir evidência e contestar decisão. A contestação cria caso separado, preserva a decisão anterior e é analisada por pessoa diferente quando possível. A InstrutorPro corrige sua projeção interna; não altera registro do DETRAN/SENATRAN. O prazo/SLA precisa ser aprovado por Operations/Compliance antes de usuários reais e não será hard-coded.
+O titular pode corrigir evidência e contestar decisão. A contestação cria caso separado, preserva a decisão anterior e é analisada por pessoa diferente quando possível. A InstrutorProcnh corrige sua projeção interna; não altera registro do DETRAN/SENATRAN. O prazo/SLA precisa ser aprovado por Operations/Compliance antes de usuários reais e não será hard-coded.
 
 ## Concorrência, idempotência e falhas
 
@@ -122,7 +122,7 @@ O sistema futuro deverá registrar recebimento, responsável, andamento, decisã
 
 ## Checklist do tabletop obrigatório — executado em 29/08/2026
 
-**Cenário formal:** “Um profissional publicado na InstrutorPro contesta sua suspensão após uma fonte oficial indicar possível irregularidade ou expiração de credencial.”
+**Cenário formal:** “Um profissional publicado na InstrutorProcnh contesta sua suspensão após uma fonte oficial indicar possível irregularidade ou expiração de credencial.”
 
 ### Roteiro
 

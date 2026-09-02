@@ -1,7 +1,7 @@
-# Codex 01 — Fundação Técnica InstrutorPro
+# Codex 01 — Fundação Técnica InstrutorProcnh
 
 ## Objetivo
-Criar somente a fundação executável do monólito modular InstrutorPro. Não implementar marketplace, mapa, matching, pagamentos, integrações governamentais ou fluxos clínicos nesta tarefa.
+Criar somente a fundação executável do monólito modular InstrutorProcnh. Não implementar marketplace, mapa, matching, pagamentos, integrações governamentais ou fluxos clínicos nesta tarefa.
 
 ## Leitura obrigatória antes de alterar arquivos
 1. `README.md`
@@ -35,7 +35,7 @@ Se houver conflito, seguir a hierarquia documental definida no README e não inv
 
 ### Frontend
 - Angular + PrimeNG.
-- shell responsivo inicial inspirado na referência visual aprovada da InstrutorPro, sem copiar código proprietário externo.
+- shell responsivo inicial inspirado na referência visual aprovada da InstrutorProcnh, sem copiar código proprietário externo.
 - rotas públicas mínimas e página placeholder.
 - cliente HTTP preparado para `/api/v1`.
 - tratamento global de erro/loading.

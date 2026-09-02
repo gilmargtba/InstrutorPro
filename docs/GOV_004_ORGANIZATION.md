@@ -4,7 +4,7 @@ Status: **OPERADOR/CONTROLADOR E CANAL M1 IDENTIFICADOS; DEMAIS DADOS PENDENTES*
 
 ## Objetivo
 
-Identificar a pessoa jurídica que operará a InstrutorPro e associar responsáveis reais aos gates antes de produção ou dados reais. Este documento não presume constituição, representação, contrato ou autorização inexistente.
+Identificar a pessoa jurídica que operará a InstrutorProcnh e associar responsáveis reais aos gates antes de produção ou dados reais. Este documento não presume constituição, representação, contrato ou autorização inexistente.
 
 ## Papéis funcionais adotados
 
@@ -62,7 +62,7 @@ permanecem literalmente `PENDING_HUMAN_INPUT`.
 - canal inicial de privacidade e direitos: `focusgtba@gmail.com`;
 - essas declarações ainda não comprovam cadastro, representação, endereço completo,
   CNAE nem designam Encarregado/DPO;
-- nome operacional do produto: `InstrutorPro`, sujeito à validação jurídica de marca/domínio;
+- nome operacional do produto: `InstrutorProcnh`, sujeito à validação jurídica de marca/domínio;
 - arquitetura: monólito modular nacional para 27 UFs;
 - primeira onda técnica/comercial autorizada: RS, SC, SP, RJ e ES; AM, RO, AC e RR permanecem somente na matriz regulatória;
 - nenhuma cidade única limita o domínio;

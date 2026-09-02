@@ -39,7 +39,9 @@ class Command(BaseCommand):
             TOTPDevice.objects.filter(user=account).delete()
             StaticDevice.objects.filter(user=account).delete()
 
-        device = TOTPDevice.objects.create(user=account, name="InstrutorPro Admin", confirmed=True)
+        device = TOTPDevice.objects.create(
+            user=account, name="InstrutorProcnh Admin", confirmed=True
+        )
         recovery = StaticDevice.objects.create(user=account, name="Códigos de recuperação")
         recovery_codes = []
         for _ in range(10):
@@ -65,7 +67,7 @@ class Command(BaseCommand):
         )
         manual_secret = parse_qs(urlparse(device.config_url).query)["secret"][0]
         self.stdout.write("Adicione uma conta TOTP no aplicativo autenticador.")
-        self.stdout.write("Nome da conta: InstrutorPro Admin")
+        self.stdout.write("Nome da conta: InstrutorProcnh Admin")
         self.stdout.write("Chave manual (sensível; não compartilhe):")
         self.stdout.write(manual_secret)
         self.stdout.write("URI alternativa (sensível; não compartilhe):")

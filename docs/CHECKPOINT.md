@@ -1,7 +1,7 @@
 # Checkpoint do Projeto
 
-- Atualizado em: **2026-08-31**
-- Versão documental: **3.5**
+- Atualizado em: **2026-09-02**
+- Versão documental: **3.6**
 - Código-fonte: **dossiê sintético de instrutor/veículo/foto implementado; upload real bloqueado**
 
 ## Consolidação de produto em 2026-08-19
@@ -12,9 +12,16 @@ A fase continua **M0**, com `GOV-001/OPEN-001` concluído. Esta consolidação n
 
 ## Fase atual
 
-**INSTRUTORPRO DEMO 01 concluída.** O frontend contém experiência visual navegável e mobile-first apenas com fixtures sintéticas. CODEX 01, 02A e 02B permanecem preservados; CODEX 02C está suspenso e não deve ser retomado sem autorização explícita. Capacidades reguladas, usuários reais, perfis e publicação continuam condicionados aos respectivos gates.
+**INSTRUTORPROCNH DEMO 01 concluída.** O frontend contém experiência visual navegável e mobile-first apenas com fixtures sintéticas. CODEX 01, 02A e 02B permanecem preservados; CODEX 02C está suspenso e não deve ser retomado sem autorização explícita. Capacidades reguladas, usuários reais, perfis e publicação continuam condicionados aos respectivos gates.
 
 ## Últimas atividades concluídas
+
+Marca humana atualizada em 02/09/2026 de `InstrutorPro` para `InstrutorProcnh`, incluindo novo
+logotipo vetorial, interface, títulos de página, acessibilidade, Admin, nome exibido no MFA,
+OpenAPI e documentação. Identificadores técnicos legados em banco, containers, paths, nomes de
+pacotes/classes e repositório permanecem inalterados para preservar compatibilidade operacional.
+Esta alteração de apresentação não equivale a pesquisa, disponibilidade ou registro jurídico da
+marca; `OPEN-012` continua aplicável.
 
 Implementação do complemento do dossiê sintético concluída em 31/08/2026: credencial de instrutor registra UF,
 identificador privado, emissão, validade, fonte, resultado, revisor, motivo e auditoria. Foto de
@@ -51,7 +58,7 @@ individual real foi adicionada.
 
 Experiência visual da busca de instrutores refinada em 30/08/2026: entrada por cidade/bairro/CEP,
 mapa Leaflet amplo, marcadores identificáveis, filtros, painel de resultados e alternância móvel
-mapa/lista. A interface preserva identidade InstrutorPro, minimização sem GPS automático e dados
+mapa/lista. A interface preserva identidade InstrutorProcnh, minimização sem GPS automático e dados
 exclusivamente sintéticos; não altera elegibilidade, provider de produção, publicação real ou os
 gates de `OPEN-007`.
 
@@ -156,13 +163,13 @@ autorização/revogação da localização; proteção contra alteração direta
 ligadas aos serviços; onboarding Angular mobile-first em cinco etapas e timeline pós-envio.
 O perfil termina enviado e não publicado. CODEX 02C permanece suspenso.
 
-Interface e Admin padronizados para português do Brasil em 24/08/2026. PrimeNG/PrimeUI, que não era usado por componentes da demo e exibia aviso de licença sem chave, foi removido legitimamente; Angular, PrimeIcons, Leaflet e estilos próprios permanecem. Admin recebeu identidade InstrutorPro, nomes e colunas em português e booleanos Sim/Não. Migration `discovery/0003` altera somente metadados de apresentação.
+Interface e Admin padronizados para português do Brasil em 24/08/2026. PrimeNG/PrimeUI, que não era usado por componentes da demo e exibia aviso de licença sem chave, foi removido legitimamente; Angular, PrimeIcons, Leaflet e estilos próprios permanecem. Admin recebeu identidade InstrutorProcnh, nomes e colunas em português e booleanos Sim/Não. Migration `discovery/0003` altera somente metadados de apresentação.
 
 CODEX 02D executado em 24/08/2026 com dados exclusivamente sintéticos: perfil, área pública, autorização, verificação SYNTHETIC, publicação auditada, policy central, Admin protegido e mapa elegível. CODEX 02C permanece suspenso.
 
 MAPA ONLINE 01 executado em 24/08/2026: módulo `discovery`, migration nova, 11 pontos públicos sintéticos nas cinco UFs, geocoder local, busca espacial PostGIS e mapa Leaflet/OpenStreetMap sincronizado com lista e perfil demo. Nenhuma localização automática, pessoa real, elegibilidade, publicação ou CODEX 02C foi implementado.
 
-INSTRUTORPRO DEMO 01 executada em 24/08/2026: landing InstrutorPro, jornada do aluno, descoberta de serviços, mapa/lista e perfil de instrutores fictícios, solicitação visual, matching mock, demanda fictícia, clínicas/exames, entrada profissional, dashboard do instrutor e mapa agregado de demanda. Dados ficam isolados em providers `Demo*`; não houve alteração de backend, migration, login, API, dado real ou integração. Build Angular aprovado, 7 testes frontend aprovados em Chrome Headless e 50 testes backend preservados.
+INSTRUTORPROCNH DEMO 01 executada em 24/08/2026: landing InstrutorProcnh, jornada do aluno, descoberta de serviços, mapa/lista e perfil de instrutores fictícios, solicitação visual, matching mock, demanda fictícia, clínicas/exames, entrada profissional, dashboard do instrutor e mapa agregado de demanda. Dados ficam isolados em providers `Demo*`; não houve alteração de backend, migration, login, API, dado real ou integração. Build Angular aprovado, 7 testes frontend aprovados em Chrome Headless e 50 testes backend preservados.
 
 CODEX 02B executado em 24/08/2026: `Account` recebeu estados `ACTIVE/BLOCKED/DEACTIVATED`, coerência com `is_active`, última mudança e versão; serviços internos autorizados implementam ativação, bloqueio e desativação sem exclusão; lock/versão/constraint resolvem concorrência e desativação é terminal nesta fatia. Migration `accounts/0003_alter_account_options_account_lifecycle_changed_at_and_more.py` aplicada. Foram aprovados 50 testes, sem endpoint público ou dados reais.
 
@@ -180,7 +187,7 @@ Matriz `GOV-002` revalidada e política `GOV-003` criada com estados, segregaç�
 
 Identidade visual fornecida pelo responsável do projeto aplicada em 2026-08-24 ao cabeçalho do frontend e registrada em `docs/img/logo.jpg`; o asset substitui o marcador visual provisório sem alterar escopo funcional ou liberar CODEX 02.
 
-Marca operacional e identificadores técnicos renomeados para **InstrutorPro** em 2026-08-23, incluindo interface, API/OpenAPI, Celery, frontend, documentação, CI e banco local. A pesquisa e proteção jurídica de marca/domínio permanecem abertas em `OPEN-012`.
+Marca operacional e identificadores técnicos renomeados para **InstrutorProcnh** em 2026-08-23, incluindo interface, API/OpenAPI, Celery, frontend, documentação, CI e banco local. A pesquisa e proteção jurídica de marca/domínio permanecem abertas em `OPEN-012`.
 
 Fundação técnica executável criada em 2026-08-23: Django/DRF com conta customizada e `ExternalIdentity` inativa; `AuditEvent` append-only com ator nulo; catálogo territorial idempotente; PostgreSQL/PostGIS, Redis e Celery; API `/api/v1`, health/readiness, request ID, erros estáveis e OpenAPI; shell Angular/PrimeNG responsivo e acessível; Docker Compose e CI. Foram comprovados migrations sem drift, 27 UFs/5 `FIRST_WAVE`, PostGIS 3.5, worker Celery, 6 testes backend, lint/formatação, schema, build frontend e audit npm sem vulnerabilidades conhecidas.
 

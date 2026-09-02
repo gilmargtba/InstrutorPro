@@ -120,7 +120,7 @@ A visão documental inclui marketplace geográfico de duas pontas: mapa/lista de
 
 ## Atualização de escopo — 19/08/2026
 
-A InstrutorPro está definida como **plataforma nacional da jornada CNH**, preparada para as 27 UFs. A primeira onda técnica/comercial autorizada é **RS, SC, SP, RJ e ES**; AM, RO, AC e RR permanecem na matriz regulatória sem ativação automática. O MVP contempla aluno, instrutor já autorizado/credenciado, clínica, médico e psicólogo, com mapa/lista, demanda/matching para instrutores, verificação e jornada orientativa. “Quero me tornar instrutor”/Academia do Instrutor está fora do MVP. Consulte `docs/GOV_002_NATIONAL.md` e o adendo de `docs/LGPD.md`.
+A InstrutorProcnh está definida como **plataforma nacional da jornada CNH**, preparada para as 27 UFs. A primeira onda técnica/comercial autorizada é **RS, SC, SP, RJ e ES**; AM, RO, AC e RR permanecem na matriz regulatória sem ativação automática. O MVP contempla aluno, instrutor já autorizado/credenciado, clínica, médico e psicólogo, com mapa/lista, demanda/matching para instrutores, verificação e jornada orientativa. “Quero me tornar instrutor”/Academia do Instrutor está fora do MVP. Consulte `docs/GOV_002_NATIONAL.md` e o adendo de `docs/LGPD.md`.
 
 
 ## Atualização v1.5
@@ -188,9 +188,9 @@ Para encerrar os serviços sem apagar os volumes:
 docker compose down
 ```
 
-## Demo visual InstrutorPro
+## Demo visual InstrutorProcnh
 
-`INSTRUTORPRO DEMO 01` é uma experiência navegável exclusivamente sintética. Ela não
+`INSTRUTORPROCNH DEMO 01` é uma experiência navegável exclusivamente sintética. Ela não
 representa elegibilidade, publicação regulatória, matching definitivo, contratação,
 pagamento ou integração oficial.
 

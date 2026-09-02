@@ -5,13 +5,13 @@ Status: **SOLICITAÇÕES ENVIADAS; PROPOSTAS PENDENTES** — 29/08/2026.
 ## Escopo e limites
 
 Esta cotação apoia a seleção humana de um serviço externo e independente de
-Encarregado/DPO para o piloto controlado do InstrutorPro em Porto Alegre/RS. Ela não
+Encarregado/DPO para o piloto controlado do InstrutorProcnh em Porto Alegre/RS. Ela não
 seleciona fornecedor, não aceita proposta, não contrata, não autoriza cobrança e não
 libera dados pessoais ou produção.
 
 O contato comercial pode informar apenas:
 
-- projeto: InstrutorPro;
+- projeto: InstrutorProcnh;
 - operador pessoa jurídica: CNPJ `10.280.826/0001-05`;
 - responsável pelo contato: Gilmar Cesar Alves;
 - e-mail de retorno: `focusgtba@gmail.com`;
@@ -46,13 +46,13 @@ compartilhados somente os dados e o resumo delimitados neste documento.
 
 Não houve agendamento, aceite de reunião, proposta, contrato, pagamento ou envio de
 anexo. O formulário da Seusdados informou expectativa comercial de retorno em até 24
-horas; isso é declaração do fornecedor, não SLA aceito pelo InstrutorPro.
+horas; isso é declaração do fornecedor, não SLA aceito pelo InstrutorProcnh.
 
 ## Texto padronizado da solicitação
 
-**Assunto:** Proposta de DPO as a Service — piloto InstrutorPro M1
+**Assunto:** Proposta de DPO as a Service — piloto InstrutorProcnh M1
 
-> Olá. Sou Gilmar Cesar Alves, responsável pelo InstrutorPro. Estamos preparando um
+> Olá. Sou Gilmar Cesar Alves, responsável pelo InstrutorProcnh. Estamos preparando um
 > piloto controlado em Porto Alegre/RS, operado por pessoa jurídica de CNPJ
 > 10.280.826/0001-05. O primeiro recorte prevê um instrutor voluntário previamente
 > verificado e busca anônima por cidade/bairro/CEP, sem pagamentos, GPS automático ou

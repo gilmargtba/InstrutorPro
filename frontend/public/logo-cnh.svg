@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 250" role="img" aria-labelledby="title desc">
+  <title id="title">InstrutorProcnh</title>
+  <desc id="desc">Marca InstrutorProcnh, conectando instrutores ao seu sucesso CNH</desc>
+  <defs>
+    <linearGradient id="wheel" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#123a72"/>
+      <stop offset="1" stop-color="#079294"/>
+    </linearGradient>
+    <linearGradient id="arrow" x1="0" x2="1">
+      <stop offset="0" stop-color="#f04b23"/>
+      <stop offset="1" stop-color="#ffae24"/>
+    </linearGradient>
+  </defs>
+  <rect width="760" height="250" rx="24" fill="#fff"/>
+  <g transform="translate(28 22)">
+    <circle cx="92" cy="82" r="58" fill="none" stroke="url(#wheel)" stroke-width="16"/>
+    <circle cx="92" cy="82" r="13" fill="#123a72"/>
+    <path d="M92 82 57 47M92 82l45-16M92 82v47" fill="none" stroke="#123a72" stroke-linecap="round" stroke-width="10"/>
+    <path d="M29 125C76 119 128 80 165 34" fill="none" stroke="url(#arrow)" stroke-linecap="round" stroke-width="17"/>
+    <path d="m147 31 31-13-9 33Z" fill="#ffae24"/>
+  </g>
+  <text x="220" y="112" fill="#123a72" font-family="Arial, Helvetica, sans-serif" font-size="61" font-weight="700">Instrutor</text>
+  <text x="454" y="112" fill="#f58220" font-family="Arial, Helvetica, sans-serif" font-size="61" font-style="italic" font-weight="800">Pro</text>
+  <text x="558" y="112" fill="#078d90" font-family="Arial, Helvetica, sans-serif" font-size="48" font-weight="800">CNH</text>
+  <path d="M220 132h444" stroke="#f58220" stroke-width="5"/>
+  <text x="220" y="168" fill="#123a72" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700" letter-spacing="1">CONECTANDO INSTRUTORES AO SEU SUCESSO CNH</text>
+</svg>

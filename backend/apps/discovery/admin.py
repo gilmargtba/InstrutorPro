@@ -146,6 +146,6 @@ class WorkflowHistoryAdmin(admin.ModelAdmin):
         return False
 
 
-admin.site.site_header = "Administração InstrutorPro"
-admin.site.site_title = "Admin InstrutorPro"
+admin.site.site_header = "Administração InstrutorProcnh"
+admin.site.site_title = "Admin InstrutorProcnh"
 admin.site.index_title = "Painel administrativo"

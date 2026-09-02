@@ -1,6 +1,6 @@
-INSTRUTORPRO — INSTRUÇÃO INICIAL PARA O CODEX
+INSTRUTORPROCNH — INSTRUÇÃO INICIAL PARA O CODEX
 
-Você está trabalhando no projeto InstrutorPro.
+Você está trabalhando no projeto InstrutorProcnh.
 
 REGRA PRINCIPAL
 Não recrie o projeto do zero e não altere a arquitetura por preferência própria.
@@ -15,7 +15,7 @@ ANTES DE ESCREVER CÓDIGO
 7. Execute SOMENTE o escopo definido em docs/CODEX_01_FOUNDATION.md.
 
 CONTEXTO OBRIGATÓRIO
-A InstrutorPro é uma plataforma nacional para a jornada da CNH, preparada para as 27 UFs.
+A InstrutorProcnh é uma plataforma nacional para a jornada da CNH, preparada para as 27 UFs.
 
 Primeira onda operacional:
 - RS — Rio Grande do Sul
