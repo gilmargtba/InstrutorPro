@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
@@ -7,10 +7,12 @@ type Registration = {
   username: string;
   email: string;
   password: string;
+  password_confirmation: string;
   display_name: string;
   city: string;
   uf: string;
   intended_category: string;
+  preferred_transmission: string;
   synthetic_data_confirmed: boolean;
 };
 
@@ -27,9 +29,10 @@ type Registration = {
           <label>Usuário<input name="username" [(ngModel)]="form.username" required></label>
           <label>E-mail sintético<input name="email" type="email" [(ngModel)]="form.email" required></label>
           <label>Senha da demonstração<input name="password" type="password" minlength="10" [(ngModel)]="form.password" required></label>
-          <label>Confirmar senha<input name="confirmPassword" type="password" minlength="10" [(ngModel)]="confirmPassword" required></label>
+          <label>Confirmar senha<input name="confirmPassword" type="password" minlength="10" [(ngModel)]="form.password_confirmation" required></label>
           <div class="two"><label>Cidade<input name="city" [(ngModel)]="form.city" required></label><label>UF<select name="uf" [(ngModel)]="form.uf"><option>RS</option><option>SC</option><option>SP</option><option>RJ</option><option>ES</option></select></label></div>
           <label>Categoria pretendida<select name="intendedCategory" [(ngModel)]="form.intended_category"><option value="A">Categoria A</option><option value="B">Categoria B</option></select></label>
+          <label>Transmissão preferida<select name="preferredTransmission" [(ngModel)]="form.preferred_transmission"><option value="MANUAL">Manual</option><option value="AUTOMATIC">Automática</option><option value="INDIFFERENT">Indiferente</option></select></label>
           <label class="check"><input name="synthetic" type="checkbox" [(ngModel)]="form.synthetic_data_confirmed"> Confirmo que todos os dados são sintéticos.</label>
           <button class="button primary" [disabled]="sending">{{sending ? 'Criando…' : 'Criar aluno DEMO'}}</button>
         </form>
@@ -53,32 +56,32 @@ type Registration = {
 })
 export class StudentMarketplaceComponent {
   private readonly http = inject(HttpClient);
+  private readonly cdr = inject(ChangeDetectorRef);
   registered = false;
   sending = false;
   failed = false;
   message = '';
-  form: Registration = { username:'aluno_demo', email:'aluno@example.invalid', password:'DemoSeguro123!', display_name:'Aluno Demo', city:'Porto Alegre', uf:'RS', intended_category:'B', synthetic_data_confirmed:false };
-  confirmPassword = 'DemoSeguro123!';
+  form: Registration = { username:'', email:'', password:'', password_confirmation:'', display_name:'', city:'', uf:'RS', intended_category:'B', preferred_transmission:'INDIFFERENT', synthetic_data_confirmed:false };
   demand = { category:'B', city:'Porto Alegre', uf:'RS', region:'Centro', radius_km:10, transmission:'MANUAL', availability:'Noite' };
 
   register() {
-    if (this.form.password !== this.confirmPassword) {
+    if (this.form.password !== this.form.password_confirmation) {
       this.failed = true;
       this.message = 'As senhas não coincidem.';
       return;
     }
     this.sending = true; this.message = '';
     this.http.post('/demo/marketplace/students/register/', this.form).subscribe({
-      next: () => { this.registered = true; this.sending = false; this.failed = false; this.demand.city = this.form.city; this.demand.uf = this.form.uf; this.message = 'Aluno sintético criado. A sessão DEMO está ativa.'; },
-      error: () => { this.sending = false; this.failed = true; this.message = 'Não foi possível criar. Use e-mail @example.invalid, senha com 10 caracteres e dados exclusivamente sintéticos.'; },
+      next: () => { this.registered = true; this.sending = false; this.failed = false; this.demand.city = this.form.city; this.demand.uf = this.form.uf; this.message = 'Aluno sintético criado. A sessão DEMO está ativa.'; this.cdr.markForCheck(); },
+      error: (response) => { this.sending = false; this.failed = true; const details=response.error; this.message=details?.email?.[0]||details?.username?.[0]||details?.password_confirmation?.[0]||'Não foi possível criar. Em DEV/TEST, use e-mail @example.invalid, senha com 10 caracteres e dados exclusivamente sintéticos.'; this.cdr.markForCheck(); },
     });
   }
 
   createDemand() {
     this.sending = true; this.message = '';
     this.http.post('/demo/marketplace/demands/', this.demand).subscribe({
-      next: () => { this.sending = false; this.failed = false; this.message = 'Demanda sintética registrada sem publicar localização individual.'; },
-      error: () => { this.sending = false; this.failed = true; this.message = 'Não foi possível registrar a demanda demonstrativa.'; },
+      next: () => { this.sending = false; this.failed = false; this.message = 'Demanda sintética registrada sem publicar localização individual.'; this.cdr.markForCheck(); },
+      error: () => { this.sending = false; this.failed = true; this.message = 'Não foi possível registrar a demanda demonstrativa.'; this.cdr.markForCheck(); },
     });
   }
 }

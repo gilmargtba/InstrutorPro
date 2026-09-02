@@ -224,13 +224,17 @@ com sessão de aluno DEMO, agregação de demanda por limiar configurável, tran
 funcional em `/aluno/demanda`. As flags de cadastro/publicação/demanda real permanecem `false` por
 padrão. `OPEN-015` não foi resolvido: o valor `3` existe apenas nos exemplos/testes sintéticos.
 
-Correção funcional executada em 30/08/2026: landing e header agora expõem encontrar instrutor,
+Fatia 2 de profissionalização concluída em 02/09/2026: landing e header expõem encontrar instrutor,
 entrar, criar conta, aluno e profissional; cadastro de aluno persiste `Account`, `Person`, papel
-`STUDENT` e `StudentProfile`; login por e-mail cria sessão e direciona à área do papel. O onboarding
-do instrutor possui pré-requisito e seis etapas, cria conta acessível, veículo e aceite sintéticos,
-área de atendimento, perfil `SUBMITTED/UNPUBLISHED` e exibe status `EM ANÁLISE`. O registro permanece
-visível no Django Admin protegido por MFA. Fluxos foram verificados no navegador local e no banco;
-nenhuma flag real foi ativada e nenhum deploy Ubuntu foi realizado.
+`STUDENT`, `StudentProfile`, categoria e transmissão preferida; login por e-mail cria sessão e
+direciona à área do papel. O onboarding do instrutor possui pré-requisito e sete etapas persistentes
+(`Dados`, `Foto`, `Atendimento`, `Veículo`, `Localização`, `Documentos` e `Revisão`), permite sair e
+retomar no passo salvo e registra conta, perfil, veículo, autorização territorial, foto separada e
+documentos privados. A submissão resulta em `SUBMITTED/UNPUBLISHED`, exibe status `EM ANÁLISE` e
+permanece visível no Django Admin protegido por MFA. A integração Angular/Django usa o cookie
+`csrftoken` e o cabeçalho `X-CSRFToken`, sem desativar a proteção CSRF. Fluxos A/B/C foram verificados
+no navegador local com identidades e fixtures sintéticas; nenhuma flag real foi ativada, nenhum dado
+real foi publicado e nenhum deploy Ubuntu foi realizado.
 
 Busca nacional de instrutores implementada em 30/08/2026: `/aluno/instrutores` apresenta as 27
 UFs, destaca e contabiliza somente UFs com perfis sintéticos atualmente publicáveis segundo a
@@ -244,10 +248,10 @@ O certificado Let's Encrypt do endpoint `179.199.136.4` teve renovação simulad
 
 ## Próxima atividade
 
-Completar a fatia autorizada do Marketplace Core M1 com integração do onboarding/veículo, painel de
-solicitações do instrutor, clusters nacionais de instrutores, agregados hierárquicos de demanda e
-testes frontend/E2E proporcionais. Depois, apresentar evidências e plano de implantação e parar para
-autorização humana. Não fazer deploy, não ativar flags reais e não retomar `IAM-003`/CODEX 02C.
+Iniciar somente após autorização aplicável a Fatia 3: mapa real, busca geográfica e perfil público,
+mantendo PostGIS como fonte de verdade, publicação deny-by-default e dados reais bloqueados pelos
+gates existentes. Não fazer deploy, não ativar flags reais e não retomar `IAM-003`/CODEX 02C sem
+autorização humana explícita.
 
 ## Decisões abertas
 

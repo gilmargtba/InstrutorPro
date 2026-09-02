@@ -29,11 +29,37 @@ class StudentProfile(models.Model):
     city = models.CharField(max_length=100)
     uf = models.ForeignKey("territories.FederativeUnit", on_delete=models.PROTECT)
     intended_category = models.CharField(max_length=8, default="B")
+    preferred_transmission = models.CharField(max_length=12, default="INDIFFERENT")
     data_mode = models.CharField(max_length=12, choices=DataMode.choices)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         indexes = [models.Index(fields=["uf", "city", "data_mode"])]
+
+
+class InstructorOnboardingDraft(models.Model):
+    """Progress marker for the synthetic onboarding; domain entities remain source of truth."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    instructor = models.OneToOneField(
+        "discovery.InstructorProfile", on_delete=models.CASCADE, related_name="onboarding_draft"
+    )
+    current_step = models.PositiveSmallIntegerField(default=1)
+    completed_steps = models.JSONField(default=list)
+    region = models.CharField(max_length=100, blank=True)
+    credential_identifier = models.CharField(max_length=160, blank=True)
+    credential_issued_at = models.DateField(null=True, blank=True)
+    credential_valid_until = models.DateField(null=True, blank=True)
+    data_mode = models.CharField(max_length=12, choices=DataMode.choices)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(current_step__gte=1) & Q(current_step__lte=7),
+                name="ck_onboarding_draft_step",
+            )
+        ]
 
 
 class StudentDemand(models.Model):

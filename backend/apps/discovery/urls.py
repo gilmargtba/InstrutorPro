@@ -1,6 +1,8 @@
 from django.urls import path
 
 from .api import (
+    DemoInstructorOnboardingDraftView,
+    DemoInstructorOnboardingSubmitView,
     DemoInstructorOnboardingView,
     GeocodingView,
     InstructorSearchView,
@@ -21,5 +23,15 @@ urlpatterns = [
         "demo/instructor-onboarding/",
         DemoInstructorOnboardingView.as_view(),
         name="demo-instructor-onboarding",
+    ),
+    path(
+        "demo/instructor-onboarding/draft/",
+        DemoInstructorOnboardingDraftView.as_view(),
+        name="demo-instructor-onboarding-draft",
+    ),
+    path(
+        "demo/instructor-onboarding/submit/",
+        DemoInstructorOnboardingSubmitView.as_view(),
+        name="demo-instructor-onboarding-submit",
     ),
 ]

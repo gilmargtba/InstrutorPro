@@ -1,6 +1,7 @@
 from uuid import uuid4
 
 from django.conf import settings
+from django.contrib.auth import login
 from django.contrib.gis.geos import Point
 from django.db import transaction
 from django.db.models import Q
@@ -9,7 +10,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import serializers, status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -447,3 +448,303 @@ class DemoInstructorOnboardingView(APIView):
             },
             status=status.HTTP_201_CREATED,
         )
+
+
+class OnboardingDraftInput(serializers.Serializer):
+    step = serializers.IntegerField(min_value=1, max_value=7)
+    email = serializers.EmailField(required=False)
+    password = serializers.CharField(write_only=True, min_length=10, required=False)
+    prerequisite_accepted = serializers.BooleanField(required=False)
+    display_name = serializers.CharField(max_length=80, required=False)
+    category = serializers.ChoiceField(choices=["B"], required=False)
+    transmissions = serializers.ListField(
+        child=serializers.ChoiceField(choices=["MANUAL", "AUTOMATIC"]), required=False
+    )
+    vehicle_available = serializers.BooleanField(required=False)
+    vehicle_make = serializers.CharField(max_length=60, required=False, allow_blank=True)
+    vehicle_model = serializers.CharField(max_length=60, required=False, allow_blank=True)
+    vehicle_year = serializers.IntegerField(min_value=1990, max_value=2030, required=False)
+    vehicle_transmission = serializers.ChoiceField(choices=["MANUAL", "AUTOMATIC"], required=False)
+    city = serializers.CharField(max_length=100, required=False)
+    uf = serializers.ChoiceField(choices=["RS", "SC", "SP", "RJ", "ES"], required=False)
+    region = serializers.CharField(max_length=100, required=False, allow_blank=True)
+    radius_km = serializers.ChoiceField(choices=[5, 10, 20, 50], required=False)
+    latitude = serializers.FloatField(min_value=-34, max_value=-19, required=False)
+    longitude = serializers.FloatField(min_value=-52, max_value=-39, required=False)
+    location_authorized = serializers.BooleanField(required=False)
+    credential_identifier = serializers.CharField(max_length=80, required=False, allow_blank=True)
+    credential_issued_at = serializers.DateField(required=False, allow_null=True)
+    credential_valid_until = serializers.DateField(required=False, allow_null=True)
+    photo_publication_authorized = serializers.BooleanField(required=False)
+    photo_notice_version = serializers.CharField(max_length=80, required=False, allow_blank=True)
+    profile_photo = serializers.FileField(required=False, write_only=True)
+    credential_file = serializers.FileField(required=False, write_only=True)
+    course_file = serializers.FileField(required=False, write_only=True)
+    vehicle_file = serializers.FileField(required=False, write_only=True)
+
+
+class DemoInstructorOnboardingDraftView(APIView):
+    """Persist each onboarding step into existing domain entities in DEV/TEST only."""
+
+    def get_permissions(self):
+        return [IsAuthenticated()] if self.request.method == "GET" else [AllowAny()]
+
+    def _profile(self, request):
+        person = getattr(request.user, "person", None)
+        return getattr(person, "instructor_profile", None) if person else None
+
+    def get(self, request):
+        profile = self._profile(request)
+        if not profile or not profile.is_demo:
+            return Response({"detail": "Cadastro não encontrado."}, status=404)
+        return Response(self._payload(profile))
+
+    @transaction.atomic
+    def post(self, request):
+        if not settings.SYNTHETIC_MARKETPLACE_ENABLED:
+            return Response({"detail": "Synthetic marketplace is disabled"}, status=403)
+        serializer = OnboardingDraftInput(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        profile = self._profile(request) if request.user.is_authenticated else None
+        if profile is None:
+            profile = self._create_identity(request, data)
+        self._save_step(request, profile, data)
+        return Response(self._payload(profile))
+
+    def _create_identity(self, request, data):
+        required = ["email", "password", "display_name", "prerequisite_accepted"]
+        if any(not data.get(field) for field in required):
+            raise serializers.ValidationError({"detail": "Complete os dados da primeira etapa."})
+        email = data["email"].lower()
+        if not email.endswith("@example.invalid"):
+            raise serializers.ValidationError(
+                {"email": "Use identidade DEV/TEST @example.invalid."}
+            )
+        if Account.objects.filter(email__iexact=email).exists():
+            raise serializers.ValidationError({"email": "Já existe uma conta com este e-mail."})
+        account = Account.objects.create_user(
+            username=f"instructor_{uuid4().hex}", email=email, password=data["password"]
+        )
+        person = Person.objects.create(account=account)
+        RoleAssignment.objects.create(
+            person=person,
+            role=RoleAssignment.Role.INSTRUCTOR,
+            granted_by=account,
+            grant_reason="SYNTHETIC_ONBOARDING_DRAFT",
+        )
+        profile = InstructorProfile.objects.create(
+            person=person,
+            display_name=data["display_name"].strip(),
+            categories=["B"],
+            transmission_options=["MANUAL"],
+            vehicle_available=False,
+            is_demo=True,
+        )
+        from apps.marketplace.models import (
+            DataMode,
+            InstructorOnboardingDraft,
+            InstructorPrerequisiteAcceptance,
+        )
+
+        InstructorPrerequisiteAcceptance.objects.create(
+            instructor=profile,
+            policy_version="M1-SYNTHETIC-PREREQUISITE-1",
+            data_mode=DataMode.SYNTHETIC,
+        )
+        InstructorOnboardingDraft.objects.create(instructor=profile, data_mode=DataMode.SYNTHETIC)
+        login(request, account, backend="django.contrib.auth.backends.ModelBackend")
+        AuditEvent.objects.create(
+            actor=account,
+            action="discovery.synthetic_onboarding.started",
+            target_type="discovery.InstructorProfile",
+            target_id=profile.id,
+        )
+        return profile
+
+    def _save_step(self, request, profile, data):
+        from apps.marketplace.documents import (
+            upload_synthetic_document,
+            upload_synthetic_profile_photo,
+        )
+        from apps.marketplace.models import DataMode, DocumentRequirement, InstructorVehicle
+
+        draft = profile.onboarding_draft
+        step = data["step"]
+        if data.get("display_name"):
+            profile.display_name = data["display_name"].strip()
+        if data.get("category"):
+            profile.categories = [data["category"]]
+        if data.get("transmissions"):
+            profile.transmission_options = list(dict.fromkeys(data["transmissions"]))
+        if "vehicle_available" in data:
+            profile.vehicle_available = data["vehicle_available"]
+        if data.get("radius_km"):
+            profile.service_radius_km = data["radius_km"]
+        profile.save()
+        vehicle = getattr(profile, "vehicle", None)
+        if step >= 4 and data.get("vehicle_available"):
+            vehicle, _ = InstructorVehicle.objects.update_or_create(
+                instructor=profile,
+                defaults={
+                    "category": data.get("category", "B"),
+                    "make": data.get("vehicle_make", ""),
+                    "model": data.get("vehicle_model", ""),
+                    "year": data.get("vehicle_year", 2000),
+                    "transmission": data.get("vehicle_transmission", "MANUAL"),
+                    "data_mode": DataMode.SYNTHETIC,
+                },
+            )
+        if step >= 5 and all(
+            data.get(field) is not None for field in ("city", "uf", "latitude", "longitude")
+        ):
+            area, created = InstructorServiceArea.objects.update_or_create(
+                profile=profile,
+                defaults={
+                    "city": data["city"],
+                    "uf": data["uf"],
+                    "public_service_location": Point(
+                        data["longitude"], data["latitude"], srid=4326
+                    ),
+                    "private_location": None,
+                    "radius_km": data.get("radius_km", 10),
+                },
+            )
+            if created and data.get("location_authorized"):
+                grant_service_location_authorization(
+                    actor=profile.person.account,
+                    service_area=area,
+                    purpose="SYNTHETIC_MARKETPLACE_DISCOVERY",
+                    policy_version="DEMO-ONBOARDING-1",
+                    reason="DEMO_EXPLICIT_LOCATION_CONSENT",
+                    request_id=request.headers.get("X-Request-ID"),
+                )
+        if data.get("profile_photo") and not profile.profile_photos.exists():
+            upload_synthetic_profile_photo(
+                actor=profile.person.account,
+                instructor=profile,
+                upload=data["profile_photo"],
+                publication_authorized=data.get("photo_publication_authorized", False),
+                notice_version=data.get("photo_notice_version", ""),
+            )
+        file_types = {
+            "credential_file": DocumentRequirement.DocumentType.INSTRUCTOR_AUTHORIZATION,
+            "course_file": DocumentRequirement.DocumentType.INSTRUCTOR_COURSE,
+            "vehicle_file": DocumentRequirement.DocumentType.VEHICLE_EVIDENCE,
+        }
+        for field, document_type in file_types.items():
+            upload = data.get(field)
+            if not upload:
+                continue
+            requirement, _ = DocumentRequirement.objects.get_or_create(
+                uf=data.get("uf", "RS"),
+                category=data.get("category", "B"),
+                provider_type="INSTRUCTOR",
+                rule_version="M1-SYNTHETIC-DOSSIER-1",
+                document_type=document_type,
+                defaults={
+                    "label": DocumentRequirement.DocumentType(document_type).label,
+                    "required": False,
+                    "requires_validity": False,
+                    "active_from": timezone.localdate(),
+                },
+            )
+            upload_synthetic_document(
+                actor=profile.person.account,
+                instructor=profile,
+                requirement=requirement,
+                upload=upload,
+                vehicle=vehicle if field == "vehicle_file" else None,
+                credential_uf=data.get("uf", "RS"),
+                private_identifier=data.get("credential_identifier", "")
+                if field == "credential_file"
+                else "",
+                issued_at=data.get("credential_issued_at") if field == "credential_file" else None,
+                valid_until=data.get("credential_valid_until")
+                if field == "credential_file"
+                else None,
+            )
+        draft.current_step = min(step + 1, 7)
+        draft.completed_steps = sorted(set(draft.completed_steps + [step]))
+        draft.region = data.get("region", draft.region)
+        draft.credential_identifier = data.get("credential_identifier", draft.credential_identifier)
+        draft.credential_issued_at = data.get("credential_issued_at", draft.credential_issued_at)
+        draft.credential_valid_until = data.get(
+            "credential_valid_until", draft.credential_valid_until
+        )
+        draft.save()
+        AuditEvent.objects.create(
+            actor=profile.person.account,
+            action="discovery.synthetic_onboarding.step_saved",
+            target_type="discovery.InstructorProfile",
+            target_id=profile.id,
+            metadata={"step": step},
+        )
+
+    @staticmethod
+    def _payload(profile):
+        draft = profile.onboarding_draft
+        area = getattr(profile, "service_area", None)
+        vehicle = getattr(profile, "vehicle", None)
+        return {
+            "id": str(profile.id),
+            "current_step": draft.current_step,
+            "completed_steps": draft.completed_steps,
+            "display_name": profile.display_name,
+            "email": profile.person.account.email,
+            "categories": profile.categories,
+            "transmissions": profile.transmission_options,
+            "vehicle_available": profile.vehicle_available,
+            "vehicle": (
+                {
+                    "make": vehicle.make,
+                    "model": vehicle.model,
+                    "year": vehicle.year,
+                    "transmission": vehicle.transmission,
+                }
+                if vehicle
+                else None
+            ),
+            "service_area": (
+                {
+                    "city": area.city,
+                    "uf": area.uf,
+                    "radius_km": area.radius_km,
+                    "region": draft.region,
+                }
+                if area
+                else None
+            ),
+            "location_authorized": bool(
+                area
+                and area.authorization_history.filter(revoked_at__isnull=True).exists()
+            ),
+            "photo_present": profile.profile_photos.exists(),
+            "document_types": list(
+                profile.documents.values_list("requirement__document_type", flat=True)
+            ),
+            "profile_status": profile.profile_status,
+        }
+
+
+class DemoInstructorOnboardingSubmitView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @transaction.atomic
+    def post(self, request):
+        profile = getattr(getattr(request.user, "person", None), "instructor_profile", None)
+        if not profile or not profile.is_demo:
+            return Response({"detail": "Cadastro não encontrado."}, status=404)
+        if profile.profile_status != InstructorProfile.Status.DRAFT:
+            return Response({"detail": "Cadastro já enviado."}, status=409)
+        submit_profile(
+            actor=request.user, profile=profile, request_id=request.headers.get("X-Request-ID")
+        )
+        AuditEvent.objects.create(
+            actor=request.user,
+            action="discovery.synthetic_onboarding.completed",
+            target_type="discovery.InstructorProfile",
+            target_id=profile.id,
+            metadata={"completed_steps": profile.onboarding_draft.completed_steps},
+        )
+        return Response({"id": str(profile.id), "profile_status": profile.profile_status})

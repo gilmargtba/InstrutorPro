@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.db import transaction
 from django.db.models import Count
 from django.http import FileResponse
+from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -94,10 +95,14 @@ class StudentRegistrationSerializer(serializers.Serializer):
     username = serializers.RegexField(r"^[a-zA-Z0-9_.-]+$", max_length=80)
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True, min_length=10)
+    password_confirmation = serializers.CharField(write_only=True, min_length=10)
     display_name = serializers.CharField(max_length=120)
     city = serializers.CharField(max_length=100)
     uf = serializers.CharField(min_length=2, max_length=2)
     intended_category = serializers.CharField(max_length=8, default="B")
+    preferred_transmission = serializers.ChoiceField(
+        choices=["MANUAL", "AUTOMATIC", "INDIFFERENT"], default="INDIFFERENT"
+    )
     synthetic_data_confirmed = serializers.BooleanField()
 
     def validate(self, attrs):
@@ -107,6 +112,12 @@ class StudentRegistrationSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 "Use only explicit synthetic identities ending in @example.invalid"
             )
+        if attrs["password"] != attrs["password_confirmation"]:
+            raise serializers.ValidationError({"password_confirmation": "As senhas não coincidem."})
+        if Account.objects.filter(email__iexact=attrs["email"]).exists():
+            raise serializers.ValidationError({"email": "Já existe uma conta com este e-mail."})
+        if Account.objects.filter(username__iexact=attrs["username"]).exists():
+            raise serializers.ValidationError({"username": "Este usuário já está em uso."})
         attrs["uf_object"] = FederativeUnit.objects.get(code=attrs["uf"].upper())
         return attrs
 
@@ -116,6 +127,7 @@ class StudentRegistrationSerializer(serializers.Serializer):
         data.pop("uf")
         data.pop("synthetic_data_confirmed")
         password = data.pop("password")
+        data.pop("password_confirmation")
         username, email = data.pop("username"), data.pop("email")
         account = Account.objects.create_user(username=username, email=email, password=password)
         person = Person.objects.create(account=account)
@@ -150,6 +162,7 @@ class StudentRegistrationView(APIView):
             profile.person.account,
             backend="django.contrib.auth.backends.ModelBackend",
         )
+        get_token(request)
         return Response(
             {
                 "id": profile.id,
@@ -190,12 +203,13 @@ class SessionLoginView(APIView):
         if user is None or not user.can_operate:
             return Response({"detail": "Credenciais inválidas"}, status=400)
         login(request, user)
+        get_token(request)
         roles = list(
             RoleAssignment.objects.filter(
                 person__account=user, revoked_at__isnull=True
             ).values_list("role", flat=True)
         )
-        return Response({"account_id": user.id, "roles": roles})
+        return Response({"account_id": user.id, "roles": roles, "is_staff": user.is_staff})
 
 
 class SessionMeView(APIView):
@@ -207,21 +221,47 @@ class SessionMeView(APIView):
                 person__account=request.user, revoked_at__isnull=True
             ).values_list("role", flat=True)
         )
-        payload = {"email": request.user.email, "roles": roles}
+        payload = {"email": request.user.email, "roles": roles, "is_staff": request.user.is_staff}
         person = getattr(request.user, "person", None)
         instructor = getattr(person, "instructor_profile", None) if person else None
         student = getattr(person, "student_profile", None) if person else None
         if instructor:
+            vehicle = getattr(instructor, "vehicle", None)
+            area = getattr(instructor, "service_area", None)
             payload["instructor"] = {
                 "display_name": instructor.display_name,
                 "profile_status": instructor.profile_status,
                 "publication_status": instructor.publication_status,
+                "verification_status": instructor.verification_status,
+                "document_count": instructor.documents.count(),
+                "photo_count": instructor.profile_photos.count(),
+                "vehicle": (
+                    {
+                        "make": vehicle.make,
+                        "model": vehicle.model,
+                        "status": vehicle.verification_status,
+                    }
+                    if vehicle
+                    else None
+                ),
+                "service_area": (
+                    {"city": area.city, "uf": area.uf, "radius_km": instructor.service_radius_km}
+                    if area
+                    else None
+                ),
+                "pending_requests": instructor.lesson_requests.filter(status="PENDING").count(),
             }
         if student:
             payload["student"] = {
                 "display_name": student.display_name,
                 "city": student.city,
                 "uf": student.uf.code,
+                "intended_category": student.intended_category,
+                "preferred_transmission": student.preferred_transmission,
+                "request_count": student.lesson_requests.count(),
+                "upcoming_lesson_count": student.platform_lessons.filter(
+                    status="SCHEDULED"
+                ).count(),
             }
         return Response(payload)
 
