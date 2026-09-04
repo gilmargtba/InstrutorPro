@@ -269,6 +269,13 @@ O certificado Let's Encrypt do endpoint `179.199.136.4` teve renovação simulad
 Fatia 3 encerrada com PASS. Aguardar autorização humana explícita para qualquer Fatia 4, deploy,
 ativação de flags reais ou retomada de `IAM-003`/CODEX 02C.
 
+### Correção operacional da pré-produção — egress do geocodificador
+
+- o backend da composição DEMO passou a participar das redes `private` e `public`;
+- PostgreSQL e Redis permanecem exclusivamente na rede interna e sem portas públicas;
+- a rede pública fornece somente o egress necessário ao provedor MapTiler configurado no backend;
+- nenhuma Fatia 4, flag de dados reais ou nova capacidade de produto foi iniciada.
+
 ## Decisões abertas
 
 | ID       | Classe         | Resumo                                                          | Gate                 |

@@ -52,7 +52,9 @@ services:
       interval: 10s
       timeout: 5s
       retries: 12
-    networks: [private]
+    # Keep data services isolated while permitting calls to approved external
+    # providers such as MapTiler through the egress-capable network.
+    networks: [private, public]
 
   worker:
     build:
