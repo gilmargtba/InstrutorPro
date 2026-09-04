@@ -7,11 +7,15 @@ from .api import (
     GeocodingView,
     InstructorSearchView,
     InstructorStateSummaryView,
+    PublicInstructorProfileView,
     PublicProfilePhotoView,
 )
 
 urlpatterns = [
     path("instructors/search/", InstructorSearchView.as_view(), name="instructor-search"),
+    path(
+        "instructors/<uuid:pk>/", PublicInstructorProfileView.as_view(), name="instructor-profile"
+    ),
     path("instructors/states/", InstructorStateSummaryView.as_view(), name="instructor-states"),
     path(
         "instructors/profile-photos/<uuid:pk>/",

@@ -1,12 +1,14 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, ViewChild, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute,RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { Subject, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
 
 import {
   InstructorSearchProvider,
   SearchFilters,
   SearchInstructor,
+  GeocodingResult,
 } from '../../demo/instructor-search.provider';
 import { LeafletMapProvider } from '../../demo/map.provider';
 
@@ -44,8 +46,10 @@ import { LeafletMapProvider } from '../../demo/map.provider';
                 placeholder="Cidade, bairro ou CEP"
                 autocomplete="postal-code"
                 required
+                (input)="suggest(filters.location)"
               />
             </div>
+            @if (suggestions.length) {<div class="suggestions" role="listbox">@for (place of suggestions; track place.id) {<button type="button" (click)="choose(place)">{{place.label}}</button>}</div>}
           </label>
           <button type="submit" [disabled]="loading">
             @if (loading) {
@@ -60,6 +64,8 @@ import { LeafletMapProvider } from '../../demo/map.provider';
           <i class="pi pi-info-circle"></i>
           Você informa a região. Sua localização precisa não é solicitada nem armazenada.
         </p>
+        <button class="use-location" type="button" (click)="useMyLocation()"><i class="pi pi-crosshairs"></i> Usar minha localização</button>
+        @if(locationMessage){<p class="location-message" role="status">{{locationMessage}}</p>}
       </div>
 
       <div class="map-workspace" id="resultado-busca">
@@ -127,8 +133,10 @@ import { LeafletMapProvider } from '../../demo/map.provider';
           </div>
         } @else if (searched && !items.length) {
           <div class="map-message empty">
-            <span>Nenhum instrutor demonstrativo neste raio.</span>
+            <span>Ainda não encontramos instrutores disponíveis nesta região.</span>
             <button type="button" (click)="increaseRadius()">Aumentar raio</button>
+            <button type="button" (click)="filtersOpen=true">Alterar filtros</button>
+            <button type="button" (click)="backToIntro()">Buscar outra região</button>
             <a routerLink="/aluno/demanda">Informar minha necessidade</a>
           </div>
         }
@@ -185,9 +193,10 @@ import { LeafletMapProvider } from '../../demo/map.provider';
                       <strong>R$ {{ instructor.demo_price }}</strong>
                       <small>por aula</small>
                       <a
-                        [routerLink]="['/aluno/instrutores', 'marina-demo']"
+                        [routerLink]="['/aluno/instrutores', instructor.id]"
                         (click)="$event.stopPropagation()"
                       >Ver perfil</a>
+                      <a [routerLink]="['/aluno/solicitar']" [queryParams]="{instrutor: instructor.id}" (click)="$event.stopPropagation()">Solicitar aula</a>
                     </div>
                   </article>
                 }
@@ -210,6 +219,7 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
   private readonly api = inject(InstructorSearchProvider);
   private readonly map = inject(LeafletMapProvider);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly changeDetector = inject(ChangeDetectorRef);
 
   filters: SearchFilters = {
@@ -227,6 +237,15 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
   filtersOpen = false;
   drawerOpen = true;
   view: 'map' | 'list' = 'map';
+  suggestions: GeocodingResult[] = [];
+  locationMessage = '';
+  private readonly locationQueries = new Subject<string>();
+
+  constructor() {
+    this.locationQueries.pipe(
+      debounceTime(350), distinctUntilChanged(), switchMap(query => this.api.geocode(query, 5))
+    ).subscribe({next: response => this.suggestions=response.results, error:()=>this.suggestions=[]});
+  }
 
   ngAfterViewInit() {
     this.map.mount(this.mapElement.nativeElement, (id) => {
@@ -251,6 +270,9 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
     this.api.geocode(this.filters.location).subscribe({
       next: (geocoding) => {
         const point = geocoding.results[0];
+        this.map.focus(point.latitude, point.longitude, 12);
+        this.suggestions = [];
+        void this.router.navigate([], {queryParams:{local:point.label,uf:point.uf||null,categoria:this.filters.category,raio:this.filters.radius},replaceUrl:true});
         this.api.search(point.latitude, point.longitude, this.filters).subscribe({
           next: (response) => {
             this.items = response.results;
@@ -271,6 +293,19 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
         this.changeDetector.detectChanges();
       },
     });
+  }
+
+  suggest(query:string) { if(query.trim().length >= 3) this.locationQueries.next(query.trim()); else this.suggestions=[]; }
+  choose(place:GeocodingResult) { this.filters.location=place.label;this.suggestions=[];this.search(); }
+  useMyLocation() {
+    this.locationMessage='Localizando…';
+    if(!navigator.geolocation){this.locationMessage='Geolocalização não disponível. Use a busca manual.';return;}
+    navigator.geolocation.getCurrentPosition(position=>{
+      this.locationMessage='Buscando instrutores próximos à localização autorizada.';
+      this.searched=true;this.loading=true;this.map.focus(position.coords.latitude,position.coords.longitude,12);
+      this.api.search(position.coords.latitude,position.coords.longitude,this.filters).subscribe({next:response=>{this.items=response.results;this.loading=false;this.map.render(this.items,null);this.changeDetector.detectChanges()},error:()=>this.fail()});
+    },()=>{this.locationMessage='Localização não autorizada. Você pode continuar pela busca manual.';this.changeDetector.detectChanges();},
+    {enableHighAccuracy:false,timeout:10000,maximumAge:300000});
   }
 
   select(item: SearchInstructor) {

@@ -18,9 +18,13 @@ from apps.accounts.models import Account
 from apps.audit.models import AuditEvent
 from apps.people.models import Person, RoleAssignment
 
-from .geocoding import DemoGeocodingProvider, LocationNotFound
+from .geocoding import LocationNotFound, ProviderUnavailable, get_geocoding_provider
 from .models import InstructorProfile, InstructorServiceArea
-from .selectors import published_instructor_counts_by_uf, search_demo_instructors
+from .selectors import (
+    published_instructor_counts_by_uf,
+    published_instructor_profiles,
+    search_published_instructors,
+)
 from .services import grant_service_location_authorization, submit_profile
 
 
@@ -48,6 +52,8 @@ class InstructorResult(serializers.Serializer):
     demo = serializers.BooleanField()
     profile_photo_url = serializers.CharField(allow_null=True)
     verified_claims = serializers.ListField(child=serializers.CharField())
+    city = serializers.CharField()
+    uf = serializers.CharField()
 
 
 class InstructorSearchResponse(serializers.Serializer):
@@ -88,7 +94,7 @@ class InstructorSearchView(APIView):
     def get(self, request):
         params = SearchParameters(data=request.query_params.dict())
         params.is_valid(raise_exception=True)
-        rows = search_demo_instructors(**params.validated_data)
+        rows = search_published_instructors(**params.validated_data)
         results = [
             {
                 "id": str(row.id),
@@ -102,7 +108,9 @@ class InstructorSearchView(APIView):
                 "demo_rating": float(row.demo_rating),
                 "demo_price": float(row.demo_price),
                 "availability_summary": row.availability_summary,
-                "demo": True,
+                "demo": row.is_demo,
+                "city": row.service_area.city,
+                "uf": row.service_area.uf,
                 "profile_photo_url": self._photo_url(row),
                 "verified_claims": self._verified_claims(row),
             }
@@ -160,15 +168,36 @@ class PublicProfilePhotoView(APIView):
         return response
 
 
+class PublicInstructorProfileView(InstructorSearchView):
+    authentication_classes = []
+
+    def get(self, request, pk):
+        row = get_object_or_404(
+            published_instructor_profiles().select_related("service_area"), pk=pk
+        )
+        return Response(
+            {
+                "id": row.id,
+                "display_name": row.display_name,
+                "bio": row.bio,
+                "categories": row.categories,
+                "transmission_options": row.transmission_options,
+                "vehicle_available": row.vehicle_available,
+                "service_area": {
+                    "city": row.service_area.city,
+                    "uf": row.service_area.uf,
+                    "radius_km": row.service_area.radius_km,
+                },
+                "availability_summary": row.availability_summary,
+                "profile_photo_url": self._photo_url(row),
+                "verified_claims": self._verified_claims(row),
+                "synthetic": row.is_demo,
+            }
+        )
+
+
 class InstructorStateSummaryView(APIView):
     permission_classes = [AllowAny]
-    search_locations = {
-        "RS": "Porto Alegre",
-        "SC": "Florianópolis",
-        "SP": "São Paulo",
-        "RJ": "Rio de Janeiro",
-        "ES": "Vitória",
-    }
 
     @extend_schema(responses=InstructorStateSummary(many=True))
     def get(self, request):
@@ -176,10 +205,9 @@ class InstructorStateSummaryView(APIView):
             {
                 "uf": row["service_area__uf"],
                 "count": row["total"],
-                "search_location": self.search_locations[row["service_area__uf"]],
+                "search_location": row["search_location"],
             }
             for row in published_instructor_counts_by_uf()
-            if row["service_area__uf"] in self.search_locations
         ]
         return Response({"states": results})
 
@@ -198,17 +226,28 @@ class GeocodingView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         try:
-            results = DemoGeocodingProvider().geocode(query)
+            provider = get_geocoding_provider()
+            results = provider.geocode(
+                query, limit=min(int(request.query_params.get("limit", 5)), 10)
+            )
         except LocationNotFound:
             return Response(
                 {
                     "code": "location_not_found",
-                    "detail": "Local não encontrado no catálogo demonstrativo.",
+                    "detail": "Localidade brasileira não encontrada.",
                 },
                 status=status.HTTP_404_NOT_FOUND,
             )
+        except (ProviderUnavailable, ValueError):
+            return Response(
+                {
+                    "code": "provider_unavailable",
+                    "detail": "A busca de localidades está temporariamente indisponível.",
+                },
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
         return Response(
-            {"results": [result.__dict__ for result in results], "provider": "DEMO_LOCAL"}
+            {"results": [result.public_dict() for result in results], "provider": provider.code}
         )
 
 
@@ -716,8 +755,7 @@ class DemoInstructorOnboardingDraftView(APIView):
                 else None
             ),
             "location_authorized": bool(
-                area
-                and area.authorization_history.filter(revoked_at__isnull=True).exists()
+                area and area.authorization_history.filter(revoked_at__isnull=True).exists()
             ),
             "photo_present": profile.profile_photos.exists(),
             "document_types": list(

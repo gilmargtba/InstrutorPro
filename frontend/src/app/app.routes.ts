@@ -1,6 +1,8 @@
 import { Routes } from '@angular/router';
 import { HomeComponent } from './features/home/home.component';
-import { ClinicDemoComponent, DemandDemoComponent, InstructorDashboardComponent, InstructorProfileComponent, JourneyComponent, MatchingComponent, ProfessionalEntryComponent, ServiceDiscoveryComponent, StudentDemandComponent, StudentRequestComponent } from './features/demo/demo-pages.component';
+import { ClinicDemoComponent, DemandDemoComponent, InstructorDashboardComponent, JourneyComponent, MatchingComponent, ProfessionalEntryComponent, ServiceDiscoveryComponent, StudentDemandComponent } from './features/demo/demo-pages.component';
+import { PublicInstructorProfileComponent } from './features/demo/public-instructor-profile.component';
+import { LessonRequestComponent } from './features/demo/lesson-request.component';
 import { InstructorMapComponent } from './features/demo/instructor-map.component';
 import { InstructorNationalMapComponent } from './features/demo/instructor-national-map.component';
 import { InstructorOnboardingComponent } from './features/demo/instructor-onboarding.component';
@@ -17,8 +19,8 @@ export const routes: Routes = [
   { path:'aluno/servicos', component:ServiceDiscoveryComponent, title:'Encontre serviços — InstrutorProCNH' },
   { path:'aluno/instrutores', component:InstructorNationalMapComponent, title:'Instrutores no Brasil — InstrutorProCNH' },
   { path:'aluno/instrutores/mapa', component:InstructorMapComponent, title:'Mapa local de instrutores — InstrutorProCNH' },
-  { path:'aluno/instrutores/:id', component:InstructorProfileComponent, title:'Perfil demonstrativo — InstrutorProCNH' },
-  { path:'aluno/solicitar', component:StudentRequestComponent, title:'Solicitar aula — InstrutorProCNH' },
+  { path:'aluno/instrutores/:id', component:PublicInstructorProfileComponent, title:'Perfil do instrutor — InstrutorProCNH' },
+  { path:'aluno/solicitar', component:LessonRequestComponent, title:'Solicitar aula — InstrutorProCNH' },
   { path:'aluno/matching', component:MatchingComponent, title:'Matching demonstrativo — InstrutorProCNH' },
   { path:'aluno/demanda', component:StudentMarketplaceComponent, title:'Demanda demonstrativa — InstrutorProCNH' },
   { path:'aluno/cadastro-demo', component:StudentMarketplaceComponent, title:'Cadastro do aluno DEMO — InstrutorProCNH' },

@@ -15,14 +15,17 @@ pública em `/api/v1` para criar, alterar, validar ou consultar os dados adminis
 do controlador. Avisos/termos futuros só poderão consumir uma projeção pública mínima e
 aprovada; esta fatia não criou essa projeção.
 
-## Descoberta geoespacial demonstrativa
+## Descoberta geoespacial — Fatia 3
 
-- `GET /api/v1/geocoding/search/?q=Porto%20Alegre`: catálogo sintético local.
+- `GET /api/v1/geocoding/search/?q=Porto%20Alegre%2C%20RS&limit=5`: autocomplete/geocoding brasileiro pelo adapter MapTiler executado no backend; aceita cidade, bairro e CEP, sujeito à capacidade do provider.
 - `GET /api/v1/instructors/search/?latitude=-30.0346&longitude=-51.2177&radius_km=10&category=B`: busca PostGIS; aceita `transmission` e `vehicle_available`.
+- `GET /api/v1/instructors/{uuid}/`: projeção pública mínima do perfil publicável.
 
-A resposta é mínima, marcada `demo=true`, ordenada por distância e nunca contém
+A resposta é mínima, informa `demo` conforme o modo, é ordenada por distância e nunca contém
 `private_location`, endereço, contato, credencial ou elegibilidade. Raios aceitos:
-5, 10, 20 e 50 km.
+5, 10, 20 e 50 km; o total é limitado no servidor. Perfis sintéticos são excluídos
+quando o modo sintético está desligado. Sem o gate real, nenhum perfil real é retornado.
+A consulta não cria `StudentDemand` nem persiste a coordenada pesquisada.
 
 Fonte oficial dos comportamentos HTTP internos. Endpoints são implementados somente na fase indicada pelo plano e publicados no OpenAPI quando existirem; esta lista não autoriza antecipar escopo nem inventar integração externa.
 

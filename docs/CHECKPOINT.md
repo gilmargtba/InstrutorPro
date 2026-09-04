@@ -224,7 +224,7 @@ com sessão de aluno DEMO, agregação de demanda por limiar configurável, tran
 funcional em `/aluno/demanda`. As flags de cadastro/publicação/demanda real permanecem `false` por
 padrão. `OPEN-015` não foi resolvido: o valor `3` existe apenas nos exemplos/testes sintéticos.
 
-Fatia 2 de profissionalização concluída em 02/09/2026: landing e header expõem encontrar instrutor,
+Fatia 2 de profissionalização concluída em 02/09/2026 no commit `54a1e70`: landing e header expõem encontrar instrutor,
 entrar, criar conta, aluno e profissional; cadastro de aluno persiste `Account`, `Person`, papel
 `STUDENT`, `StudentProfile`, categoria e transmissão preferida; login por e-mail cria sessão e
 direciona à área do papel. O onboarding do instrutor possui pré-requisito e sete etapas persistentes
@@ -235,6 +235,24 @@ permanece visível no Django Admin protegido por MFA. A integração Angular/Dja
 `csrftoken` e o cabeçalho `X-CSRFToken`, sem desativar a proteção CSRF. Fluxos A/B/C foram verificados
 no navegador local com identidades e fixtures sintéticas; nenhuma flag real foi ativada, nenhum dado
 real foi publicado e nenhum deploy Ubuntu foi realizado.
+
+Fatia 3 de profissionalização concluída localmente com **PASS** em 04/09/2026: a busca usa o adapter MapTiler
+no backend em vez do catálogo fixo, com chave em ambiente, restrição ao Brasil, autocomplete com
+debounce, cidade/bairro/CEP e falhas explícitas. Leaflet inicia no Brasil, navega à localidade real,
+agrupa marcadores e sincroniza mapa/lista. Geolocalização só ocorre após clique e a busca não cria
+demanda nem persiste coordenada. PostGIS continua fonte de verdade para raio/distância, com limites
+no servidor. A policy separa sintético/real no backend e expõe somente área, foto e verificações
+aprovadas. Perfil público e `LessonRequest` persistente foram conectados por UUID. OPEN-007 segue
+gate contratual de produção; nenhuma flag real foi ativada, a Fatia 4 não foi iniciada e a VPS não
+foi alterada. A chave MapTiler DEV foi configurada somente no `.env` ignorado pelo Git e confirmada
+no processo backend sem exposição do valor. Passaram no provider e no navegador: Goiânia, Porto
+Alegre, São Paulo, CEP formatado, bairro/cidade/UF, mapa nacional e local, estado vazio, distância,
+cartão, perfil público, solicitação, indisponibilidade e remoção de perfil sintético suspenso. A
+geolocalização autorizada e negada passou em Chrome automatizado, mantendo busca manual no caso de
+negação. Suítes backend/frontend, Django check, migrations check, Ruff, build e auditoria de
+dependências de produção passaram. OPEN-007 permanece condicionado exclusivamente aos requisitos
+contratuais de produção; nenhuma flag real foi ativada, a Fatia 4 não foi iniciada e a VPS não foi
+alterada.
 
 Busca nacional de instrutores implementada em 30/08/2026: `/aluno/instrutores` apresenta as 27
 UFs, destaca e contabiliza somente UFs com perfis sintéticos atualmente publicáveis segundo a
@@ -248,10 +266,8 @@ O certificado Let's Encrypt do endpoint `179.199.136.4` teve renovação simulad
 
 ## Próxima atividade
 
-Iniciar somente após autorização aplicável a Fatia 3: mapa real, busca geográfica e perfil público,
-mantendo PostGIS como fonte de verdade, publicação deny-by-default e dados reais bloqueados pelos
-gates existentes. Não fazer deploy, não ativar flags reais e não retomar `IAM-003`/CODEX 02C sem
-autorização humana explícita.
+Fatia 3 encerrada com PASS. Aguardar autorização humana explícita para qualquer Fatia 4, deploy,
+ativação de flags reais ou retomada de `IAM-003`/CODEX 02C.
 
 ## Decisões abertas
 
@@ -262,7 +278,7 @@ autorização humana explícita.
 | OPEN-004 | bloqueante     | responsabilidade, consumo, vínculo, seguro, termos e bases LGPD | usuários reais/M6    |
 | OPEN-005 | bloqueante     | gateway, split/KYC, tributação e política contábil              | C1/M4                |
 | OPEN-006 | parcial        | provider real, contratos, regiões e suboperadores; simuladores liberados para desenvolvimento | provider real/A14/M6 |
-| OPEN-007 | condicional/bloqueante produção | MapTiler escolhido; faltam contrato/DPA, subprocessadores, países, retenção, endpoint e testes | B1/M3 |
+| OPEN-007 | condicional/bloqueante produção | Integração/testes DEV concluídos; faltam contrato/DPA, subprocessadores, países, retenção e aceite do endpoint europeu | B1/M3 |
 | OPEN-008 | bloqueante     | retenção, direitos e papéis de tratamento                       | produção/M6          |
 | OPEN-009 | bloqueante     | SLO, RPO/RTO, suporte, orçamento e limites                      | piloto/M6            |
 | OPEN-010 | bloqueante     | metas, duração, coortes e go/no-go do piloto                    | M7                   |
