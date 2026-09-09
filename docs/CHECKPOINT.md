@@ -276,6 +276,13 @@ ativação de flags reais ou retomada de `IAM-003`/CODEX 02C.
 - a rede pública fornece somente o egress necessário ao provedor MapTiler configurado no backend;
 - nenhuma Fatia 4, flag de dados reais ou nova capacidade de produto foi iniciada.
 
+### Correção operacional da pré-produção — persistência de uploads
+
+- `MEDIA_ROOT` (`/app/private_documents`) passou a usar o volume nomeado
+  `demo_private_documents` nos serviços backend e worker;
+- recriações dos containers deixam de remover fotos e documentos armazenados pela aplicação;
+- o volume não é publicado pelo Nginx; downloads continuam passando pelas views autorizadas.
+
 ## Decisões abertas
 
 | ID       | Classe         | Resumo                                                          | Gate                 |
