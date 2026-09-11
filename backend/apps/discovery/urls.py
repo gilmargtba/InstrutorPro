@@ -9,12 +9,18 @@ from .api import (
     InstructorStateSummaryView,
     PublicInstructorProfileView,
     PublicProfilePhotoView,
+    WhatsAppContactView,
 )
 
 urlpatterns = [
     path("instructors/search/", InstructorSearchView.as_view(), name="instructor-search"),
     path(
         "instructors/<uuid:pk>/", PublicInstructorProfileView.as_view(), name="instructor-profile"
+    ),
+    path(
+        "instructors/<uuid:pk>/whatsapp-contact/",
+        WhatsAppContactView.as_view(),
+        name="instructor-whatsapp-contact",
     ),
     path("instructors/states/", InstructorStateSummaryView.as_view(), name="instructor-states"),
     path(

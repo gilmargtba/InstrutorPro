@@ -2,6 +2,7 @@ import uuid
 from pathlib import Path
 
 from django.contrib.gis.db import models
+from django.core.validators import RegexValidator
 from django.db.models import Q
 
 
@@ -111,6 +112,93 @@ class InstructorVehicle(models.Model):
         default=VerificationStatus.PENDING,
     )
     data_mode = models.CharField(max_length=12, choices=DataMode.choices)
+
+
+class InstructorOffer(models.Model):
+    """Commercial offer; it is not an official training-hours record."""
+
+    class PriceType(models.TextChoices):
+        LESSON = "LESSON", "Aula"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    instructor = models.ForeignKey(
+        "discovery.InstructorProfile", on_delete=models.PROTECT, related_name="offers"
+    )
+    category = models.CharField(max_length=8)
+    price_amount = models.DecimalField(max_digits=8, decimal_places=2)
+    currency = models.CharField(max_length=3, default="BRL")
+    duration_minutes = models.PositiveSmallIntegerField()
+    price_type = models.CharField(
+        max_length=16, choices=PriceType.choices, default=PriceType.LESSON
+    )
+    is_active = models.BooleanField(default=True)
+    data_mode = models.CharField(max_length=12, choices=DataMode.choices)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [models.Index(fields=["instructor", "is_active", "category"])]
+        constraints = [
+            models.CheckConstraint(condition=Q(price_amount__gt=0), name="ck_offer_price_positive"),
+            models.CheckConstraint(
+                condition=Q(duration_minutes__gt=0), name="ck_offer_duration_positive"
+            ),
+            models.CheckConstraint(condition=Q(currency="BRL"), name="ck_offer_currency_brl"),
+        ]
+
+
+class InstructorContactChannel(models.Model):
+    """Private professional contact used only by the audited contact endpoint."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    instructor = models.OneToOneField(
+        "discovery.InstructorProfile", on_delete=models.PROTECT, related_name="contact_channel"
+    )
+    whatsapp_e164 = models.CharField(
+        max_length=14,
+        validators=[
+            RegexValidator(r"^\+55[1-9][0-9]{9,10}$", "Informe um WhatsApp brasileiro válido.")
+        ],
+    )
+    is_active = models.BooleanField(default=True)
+    data_mode = models.CharField(max_length=12, choices=DataMode.choices)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class MarketplaceEvent(models.Model):
+    class Type(models.TextChoices):
+        SEARCH_PERFORMED = "SEARCH_PERFORMED", "Busca realizada"
+        SEARCH_RESULT_IMPRESSION = "SEARCH_RESULT_IMPRESSION", "Impressão na busca"
+        INSTRUCTOR_PROFILE_VIEWED = "INSTRUCTOR_PROFILE_VIEWED", "Perfil visualizado"
+        WHATSAPP_CONTACT_CLICKED = "WHATSAPP_CONTACT_CLICKED", "Clique no WhatsApp"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    event_type = models.CharField(max_length=40, choices=Type.choices)
+    instructor = models.ForeignKey(
+        "discovery.InstructorProfile",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="marketplace_events",
+    )
+    session_hash = models.CharField(max_length=64)
+    dedupe_bucket = models.DateTimeField()
+    source = models.CharField(max_length=40, blank=True)
+    category = models.CharField(max_length=8, blank=True)
+    city = models.CharField(max_length=100, blank=True)
+    uf = models.CharField(max_length=2, blank=True)
+    data_mode = models.CharField(max_length=12, choices=DataMode.choices)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [models.Index(fields=["instructor", "event_type", "created_at"])]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["event_type", "instructor", "session_hash", "dedupe_bucket"],
+                name="uq_marketplace_event_session_bucket",
+                nulls_distinct=False,
+            )
+        ]
 
 
 class DocumentRequirement(models.Model):

@@ -285,6 +285,8 @@ h1 span { color: var(--teal); }
 .result-action strong { color: var(--ink); font-size: .86rem; }
 .result-action small { color: #829398; font-size: .66rem; }
 .result-action a { margin-top: .35rem; color: var(--orange); font-size: .72rem; font-weight: 850; text-decoration: none; }
+.result-action .whatsapp { margin-top: .45rem; border: 0; border-radius: .65rem; padding: .6rem .75rem; background: #167b55; color: #fff; font-size: .72rem; font-weight: 850; cursor: pointer; }
+.contact-error { color: #9a302c; font-weight: 750; }
 
 .map-message {
   position: absolute;

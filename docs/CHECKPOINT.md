@@ -1,8 +1,8 @@
 # Checkpoint do Projeto
 
-- Atualizado em: **2026-09-02**
-- Versão documental: **3.7**
-- Código-fonte: **dossiê sintético de instrutor/veículo/foto implementado; upload real bloqueado**
+- Atualizado em: **2026-09-11**
+- Versão documental: **3.8**
+- Código-fonte: **Fatia 4 marketplace local concluída; dados reais e deploy bloqueados**
 
 ## Consolidação de produto em 2026-08-19
 
@@ -15,6 +15,16 @@ A fase continua **M0**, com `GOV-001/OPEN-001` concluído. Esta consolidação n
 **INSTRUTORPROCNH DEMO 01 concluída.** O frontend contém experiência visual navegável e mobile-first apenas com fixtures sintéticas. CODEX 01, 02A e 02B permanecem preservados; CODEX 02C está suspenso e não deve ser retomado sem autorização explícita. Capacidades reguladas, usuários reais, perfis e publicação continuam condicionados aos respectivos gates.
 
 ## Últimas atividades concluídas
+
+Fatia 4 concluída localmente em 11/09/2026: landing pública, busca por localidade, filtros por
+transmissão/veículo/preço, ordenação por distância/preço, cartão e perfil passaram a usar oferta
+comercial tipada em BRL e duração. Nota fictícia deixou de ser exposta. O contato profissional é
+privado e normalizado; o endpoint auditado registra clique deduplicado por sessão/instrutor/hora e
+retorna somente a URL `wa.me`, sem enviar mensagem automaticamente. Métricas mensais do painel
+derivam de eventos reais da aplicação e mostram zero quando não há evento. A implementação mantém
+somente categoria B e dados sintéticos conforme `OPEN-002`, não implementa pagamentos ou mapa de
+demanda e não altera a VPS. Migration nova, Ruff, 123 testes backend, 14 testes frontend e build
+Angular aprovados; validação funcional local no navegador deve constar na evidência final da fatia.
 
 Profissionalização local iniciada em 02/09/2026: branding público corrigido para
 `InstrutorProCNH`; header e footer deixaram de apresentar a experiência como demo; a landing passou
@@ -266,8 +276,8 @@ O certificado Let's Encrypt do endpoint `179.199.136.4` teve renovação simulad
 
 ## Próxima atividade
 
-Fatia 3 encerrada com PASS. Aguardar autorização humana explícita para qualquer Fatia 4, deploy,
-ativação de flags reais ou retomada de `IAM-003`/CODEX 02C.
+Fatia 4 encerrada localmente. Aguardar autorização humana explícita para deploy, ativação de flags
+reais, pagamentos, expansão além de categoria B ou retomada de `IAM-003`/CODEX 02C.
 
 ### Correção operacional da pré-produção — egress do geocodificador
 

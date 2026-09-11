@@ -207,8 +207,8 @@ npm ci
 npm start
 ```
 
-Fixtures e providers substituíveis ficam em
-`frontend/src/app/demo/demo-data.providers.ts`; a demo não usa API nem persistência.
+Fixtures e providers substituíveis ficam em `frontend/src/app/demo/`; os fluxos de descoberta,
+perfil, oferta comercial, eventos e contato usam a API Django e persistência PostgreSQL.
 
 ### Mapa online sintético
 
@@ -219,13 +219,16 @@ docker compose exec backend python manage.py migrate
 docker compose exec backend python manage.py seed_demo_instructors
 ```
 
-Pesquise `Porto Alegre`, `Florianópolis`, `São Paulo`, `Rio de Janeiro` ou
-`Vitória`. Não há chave nesta demo; o geocoder é local. Provider de produção
-permanece pendente.
+Pesquise cidade, bairro ou CEP brasileiro. O geocoder usa o adapter MapTiler configurado no
+backend; a chave deve ficar somente no `.env` ignorado pelo Git. Provider de produção e dados
+reais permanecem condicionados aos gates registrados no checkpoint.
 
 A busca visual começa por cidade/bairro/CEP informado pelo visitante e abre um mapa amplo com
 marcadores, filtros e painel responsivo de resultados. O fluxo não solicita GPS automático, mantém
-PostGIS como fonte da consulta e exibe somente profissionais e avaliações sintéticos nesta etapa.
+PostGIS como fonte da consulta e exibe somente profissionais publicáveis do modo habilitado.
+Preço e duração vêm de oferta tipada; nenhuma avaliação é exibida enquanto não houver reviews
+reais. O botão de WhatsApp registra o evento no backend e abre uma mensagem pré-preenchida para o
+visitante decidir se deseja enviá-la, sem publicar o número bruto na API.
 
 O painel profissional de demanda usa a malha local das 27 UFs fornecida pelo IBGE. Somente os cinco
 estados ativos na primeira onda visual (`RS`, `SC`, `SP`, `RJ` e `ES`) recebem destaque e contagens;

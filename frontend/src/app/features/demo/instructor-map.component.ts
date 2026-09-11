@@ -19,7 +19,7 @@ import { LeafletMapProvider } from '../../demo/map.provider';
     <section class="search-experience" [class.results-open]="searched">
       <div class="demo-ribbon">
         <i class="pi pi-sparkles"></i>
-        Experiência demonstrativa · profissionais e avaliações sintéticos
+        Experiência demonstrativa · profissionais e ofertas sintéticos
       </div>
 
       <div class="search-hero">
@@ -120,6 +120,22 @@ import { LeafletMapProvider } from '../../demo/map.provider';
                 <option [ngValue]="50">50 km</option>
               </select>
             </label>
+            <label>
+              Preço máximo
+              <select name="maxPrice" [(ngModel)]="filters.maxPrice">
+                <option [ngValue]="null">Qualquer preço</option>
+                <option [ngValue]="80">Até R$ 80</option>
+                <option [ngValue]="100">Até R$ 100</option>
+                <option [ngValue]="150">Até R$ 150</option>
+              </select>
+            </label>
+            <label>
+              Ordenar
+              <select name="ordering" [(ngModel)]="filters.ordering">
+                <option value="distance">Mais próximos</option>
+                <option value="price">Menor preço</option>
+              </select>
+            </label>
             <button type="button" (click)="search()">Aplicar filtros</button>
           </div>
         }
@@ -140,6 +156,7 @@ import { LeafletMapProvider } from '../../demo/map.provider';
             <a routerLink="/aluno/demanda">Informar minha necessidade</a>
           </div>
         }
+        @if(contactError){<p class="contact-error" role="alert">{{contactError}}</p>}
 
         <div class="mobile-tabs" aria-label="Visualização dos resultados">
           <button [class.active]="view === 'map'" (click)="setView('map')">
@@ -158,7 +175,7 @@ import { LeafletMapProvider } from '../../demo/map.provider';
               <span class="drawer-handle" aria-hidden="true"></span>
               <div>
                 <strong>{{ items.length }} instrutores na região</strong>
-                <small>Ordenados por distância · dados sintéticos</small>
+                <small>{{filters.ordering==='price'?'Ordenados por menor preço':'Ordenados por distância'}}</small>
               </div>
               <button type="button" (click)="drawerOpen = !drawerOpen" [attr.aria-expanded]="drawerOpen">
                 <i class="pi" [class.pi-chevron-up]="!drawerOpen" [class.pi-chevron-down]="drawerOpen"></i>
@@ -180,23 +197,23 @@ import { LeafletMapProvider } from '../../demo/map.provider';
                     <div class="result-copy">
                       <strong>{{ instructor.display_name }}</strong>
                       @if(instructor.verified_claims.includes('CREDENTIAL_VERIFIED')){<em class="verified"><i class="pi pi-verified"></i> Credenciamento verificado</em>}
-                      <span>
-                        <i class="pi pi-star-fill"></i> {{ instructor.demo_rating }}
-                        <b>·</b> {{ instructor.distance_km }} km
-                      </span>
+                      <span>{{ instructor.distance_km }} km de você</span>
+                      <small>Novo no InstrutorProCNH</small>
                       <small>
                         Categoria {{ instructor.categories.join(', ') }} ·
                         {{ instructor.transmission === 'MANUAL' ? 'Manual' : 'Automático' }}
                       </small>
+                      @if(instructor.vehicle){<small>{{instructor.vehicle.make}} {{instructor.vehicle.model}} {{instructor.vehicle.year}}</small>}
                     </div>
                     <div class="result-action">
-                      <strong>R$ {{ instructor.demo_price }}</strong>
-                      <small>por aula</small>
+                      @if(instructor.price_from){<small>A partir de</small>}
+                      <strong>R$ {{ instructor.price_amount }}</strong>
+                      <small>{{instructor.duration_minutes}} min por aula</small>
                       <a
                         [routerLink]="['/aluno/instrutores', instructor.id]"
                         (click)="$event.stopPropagation()"
                       >Ver perfil</a>
-                      <a [routerLink]="['/aluno/solicitar']" [queryParams]="{instrutor: instructor.id}" (click)="$event.stopPropagation()">Solicitar aula</a>
+                      <button type="button" class="whatsapp" (click)="$event.stopPropagation(); contact(instructor)"><i class="pi pi-whatsapp"></i> Chamar no WhatsApp</button>
                     </div>
                   </article>
                 }
@@ -228,6 +245,8 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
     category: 'B',
     transmission: '',
     vehicleAvailable: true,
+    maxPrice: null,
+    ordering: 'distance',
   };
   items: SearchInstructor[] = [];
   selected: SearchInstructor | null = null;
@@ -239,6 +258,7 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
   view: 'map' | 'list' = 'map';
   suggestions: GeocodingResult[] = [];
   locationMessage = '';
+  contactError = '';
   private readonly locationQueries = new Subject<string>();
 
   constructor() {
@@ -311,6 +331,14 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
   select(item: SearchInstructor) {
     this.selected = item;
     this.map.select(item.id);
+  }
+
+  contact(item: SearchInstructor) {
+    this.contactError='';
+    this.api.whatsapp(item.id,this.filters.category,'search-card').subscribe({
+      next: response => window.location.assign(response.destination_url),
+      error: () => {this.contactError='Não foi possível abrir o WhatsApp agora.';this.changeDetector.detectChanges();},
+    });
   }
 
   setView(view: 'map' | 'list') {

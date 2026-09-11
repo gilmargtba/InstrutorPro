@@ -28,6 +28,13 @@ from apps.discovery.services import (
     submit_profile,
     verify_professional,
 )
+from apps.marketplace.analytics import normalize_brazilian_whatsapp
+from apps.marketplace.models import (
+    DataMode,
+    InstructorContactChannel,
+    InstructorOffer,
+    MarketplaceEvent,
+)
 from apps.people.models import Person, RoleAssignment
 
 
@@ -66,6 +73,13 @@ def make_profile(actor, **overrides):
     }
     data.update(overrides)
     profile = InstructorProfile.objects.create(**data)
+    InstructorOffer.objects.create(
+        instructor=profile,
+        category="B",
+        price_amount="90.00",
+        duration_minutes=60,
+        data_mode=DataMode.SYNTHETIC,
+    )
     area = InstructorServiceArea.objects.create(
         profile=profile,
         city="Porto Alegre",
@@ -169,6 +183,98 @@ def test_approved_appears_radius_and_filters_work(actor):
     assert not search_demo_instructors(
         latitude=-30.0346, longitude=-51.2177, radius_km=10, category="B", transmission="AUTOMATIC"
     ).exists()
+
+
+@pytest.mark.django_db
+def test_public_marketplace_exposes_offer_but_not_private_contact(actor):
+    profile, *_ = make_profile(actor)
+    InstructorContactChannel.objects.create(
+        instructor=profile,
+        whatsapp_e164="+5551999990001",
+        data_mode=DataMode.SYNTHETIC,
+    )
+    client = APIClient()
+    params = {
+        "latitude": -30.0346,
+        "longitude": -51.2177,
+        "radius_km": 10,
+        "category": "B",
+        "ordering": "price",
+        "max_price": "100.00",
+    }
+    response = client.get("/api/v1/instructors/search/", params)
+    assert response.status_code == 200
+    result = response.json()["results"][0]
+    assert result["price_amount"] == 90.0
+    assert result["duration_minutes"] == 60
+    assert "demo_rating" not in result
+    assert "demo_price" not in result
+    assert "+5551999990001" not in str(response.data)
+    assert (
+        MarketplaceEvent.objects.filter(event_type=MarketplaceEvent.Type.SEARCH_PERFORMED).count()
+        == 1
+    )
+    assert (
+        MarketplaceEvent.objects.filter(
+            event_type=MarketplaceEvent.Type.SEARCH_RESULT_IMPRESSION,
+            instructor=profile,
+        ).count()
+        == 1
+    )
+
+
+@pytest.mark.django_db
+def test_profile_and_whatsapp_events_are_deduplicated_without_exposing_number(actor):
+    profile, *_ = make_profile(actor)
+    InstructorContactChannel.objects.create(
+        instructor=profile,
+        whatsapp_e164="+5551999990001",
+        data_mode=DataMode.SYNTHETIC,
+    )
+    client = APIClient()
+    profile_url = f"/api/v1/instructors/{profile.id}/"
+    assert client.get(profile_url).status_code == 200
+    assert client.get(profile_url).status_code == 200
+    assert (
+        MarketplaceEvent.objects.filter(
+            event_type=MarketplaceEvent.Type.INSTRUCTOR_PROFILE_VIEWED,
+            instructor=profile,
+        ).count()
+        == 1
+    )
+
+    contact_url = f"/api/v1/instructors/{profile.id}/whatsapp-contact/"
+    first = client.post(contact_url, {"category": "B", "source": "public-profile"}, format="json")
+    second = client.post(contact_url, {"category": "B", "source": "public-profile"}, format="json")
+    assert first.status_code == 200
+    assert first.json()["unique_contact"] is True
+    assert second.json()["unique_contact"] is False
+    assert first.json()["destination_url"].startswith("https://wa.me/5551999990001?")
+    assert "whatsapp_e164" not in first.json()
+    assert (
+        MarketplaceEvent.objects.filter(
+            event_type=MarketplaceEvent.Type.WHATSAPP_CONTACT_CLICKED,
+            instructor=profile,
+        ).count()
+        == 1
+    )
+
+
+@pytest.mark.parametrize(
+    ("raw", "normalized"),
+    [
+        ("(51) 99999-0001", "+5551999990001"),
+        ("+55 51 99999-0001", "+5551999990001"),
+    ],
+)
+def test_whatsapp_normalization(raw, normalized):
+    assert normalize_brazilian_whatsapp(raw) == normalized
+
+
+@pytest.mark.parametrize("raw", ["", "123", "00 99999-0001", "51 999-0001"])
+def test_whatsapp_normalization_rejects_invalid_numbers(raw):
+    with pytest.raises(ValueError):
+        normalize_brazilian_whatsapp(raw)
 
 
 @pytest.mark.django_db

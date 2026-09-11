@@ -16,6 +16,12 @@ from rest_framework.views import APIView
 
 from apps.accounts.models import Account
 from apps.audit.models import AuditEvent
+from apps.marketplace.analytics import (
+    normalize_brazilian_whatsapp,
+    record_marketplace_event,
+    whatsapp_destination,
+)
+from apps.marketplace.models import MarketplaceEvent
 from apps.people.models import Person, RoleAssignment
 
 from .geocoding import LocationNotFound, ProviderUnavailable, get_geocoding_provider
@@ -35,6 +41,10 @@ class SearchParameters(serializers.Serializer):
     category = serializers.ChoiceField(choices=["B"])
     transmission = serializers.ChoiceField(choices=["MANUAL", "AUTOMATIC"], required=False)
     vehicle_available = serializers.BooleanField(required=False)
+    max_price = serializers.DecimalField(
+        max_digits=8, decimal_places=2, min_value=1, required=False
+    )
+    ordering = serializers.ChoiceField(choices=["distance", "price"], default="distance")
 
 
 class InstructorResult(serializers.Serializer):
@@ -46,8 +56,10 @@ class InstructorResult(serializers.Serializer):
     categories = serializers.ListField(child=serializers.CharField())
     transmission = serializers.CharField()
     vehicle_available = serializers.BooleanField()
-    demo_rating = serializers.FloatField()
-    demo_price = serializers.FloatField()
+    price_amount = serializers.DecimalField(max_digits=8, decimal_places=2)
+    price_from = serializers.BooleanField()
+    duration_minutes = serializers.IntegerField()
+    vehicle = serializers.DictField(allow_null=True)
     availability_summary = serializers.CharField()
     demo = serializers.BooleanField()
     profile_photo_url = serializers.CharField(allow_null=True)
@@ -59,6 +71,29 @@ class InstructorResult(serializers.Serializer):
 class InstructorSearchResponse(serializers.Serializer):
     count = serializers.IntegerField()
     results = InstructorResult(many=True)
+
+
+class PublicInstructorProfileResponse(serializers.Serializer):
+    id = serializers.UUIDField()
+    display_name = serializers.CharField()
+    bio = serializers.CharField()
+    categories = serializers.ListField(child=serializers.CharField())
+    transmission_options = serializers.ListField(child=serializers.CharField())
+    vehicle_available = serializers.BooleanField()
+    service_area = serializers.DictField()
+    availability_summary = serializers.CharField()
+    profile_photo_url = serializers.CharField(allow_null=True)
+    verified_claims = serializers.ListField(child=serializers.CharField())
+    synthetic = serializers.BooleanField()
+    price_amount = serializers.DecimalField(max_digits=8, decimal_places=2)
+    price_from = serializers.BooleanField()
+    duration_minutes = serializers.IntegerField()
+    vehicle = serializers.DictField(allow_null=True)
+
+
+class WhatsAppContactResponse(serializers.Serializer):
+    destination_url = serializers.URLField()
+    unique_contact = serializers.BooleanField()
 
 
 class InstructorStateSummary(serializers.Serializer):
@@ -87,6 +122,9 @@ class InstructorSearchView(APIView):
                 "category",
                 "transmission",
                 "vehicle_available",
+                "max_price",
+                "ordering",
+                "source",
             ]
         ],
         responses=InstructorSearchResponse,
@@ -105,8 +143,7 @@ class InstructorSearchView(APIView):
                 "categories": row.categories,
                 "transmission": row.transmission_options[0],
                 "vehicle_available": row.vehicle_available,
-                "demo_rating": float(row.demo_rating),
-                "demo_price": float(row.demo_price),
+                **self._commercial_summary(row),
                 "availability_summary": row.availability_summary,
                 "demo": row.is_demo,
                 "city": row.service_area.city,
@@ -116,7 +153,48 @@ class InstructorSearchView(APIView):
             }
             for row in rows
         ]
+        city = results[0]["city"] if results else request.query_params.get("city", "")
+        uf = results[0]["uf"] if results else request.query_params.get("uf", "")
+        record_marketplace_event(
+            request=request,
+            event_type=MarketplaceEvent.Type.SEARCH_PERFORMED,
+            source=request.query_params.get("source", "manual"),
+            category=params.validated_data["category"],
+            city=city,
+            uf=uf,
+        )
+        for row in rows:
+            record_marketplace_event(
+                request=request,
+                event_type=MarketplaceEvent.Type.SEARCH_RESULT_IMPRESSION,
+                instructor=row,
+                source=request.query_params.get("source", "manual"),
+                category=params.validated_data["category"],
+                city=row.service_area.city,
+                uf=row.service_area.uf,
+            )
         return Response({"count": len(results), "results": results})
+
+    @staticmethod
+    def _commercial_summary(row):
+        offers = [offer for offer in row.offers.all() if offer.is_active]
+        offer = min(offers, key=lambda item: item.price_amount)
+        vehicle = getattr(row, "vehicle", None)
+        return {
+            "price_amount": offer.price_amount,
+            "price_from": len(offers) > 1,
+            "duration_minutes": offer.duration_minutes,
+            "vehicle": (
+                {
+                    "make": vehicle.make,
+                    "model": vehicle.model,
+                    "year": vehicle.year,
+                    "transmission": vehicle.transmission,
+                }
+                if vehicle
+                else None
+            ),
+        }
 
     @staticmethod
     def _photo_url(row):
@@ -171,9 +249,24 @@ class PublicProfilePhotoView(APIView):
 class PublicInstructorProfileView(InstructorSearchView):
     authentication_classes = []
 
+    @extend_schema(responses=PublicInstructorProfileResponse)
     def get(self, request, pk):
         row = get_object_or_404(
-            published_instructor_profiles().select_related("service_area"), pk=pk
+            published_instructor_profiles()
+            .filter(offers__is_active=True)
+            .select_related("service_area", "vehicle")
+            .prefetch_related("offers", "profile_photos", "documents__requirement")
+            .distinct(),
+            pk=pk,
+        )
+        record_marketplace_event(
+            request=request,
+            event_type=MarketplaceEvent.Type.INSTRUCTOR_PROFILE_VIEWED,
+            instructor=row,
+            source=request.query_params.get("source", "profile"),
+            category=request.query_params.get("category", row.categories[0]),
+            city=row.service_area.city,
+            uf=row.service_area.uf,
         )
         return Response(
             {
@@ -192,6 +285,41 @@ class PublicInstructorProfileView(InstructorSearchView):
                 "profile_photo_url": self._photo_url(row),
                 "verified_claims": self._verified_claims(row),
                 "synthetic": row.is_demo,
+                **self._commercial_summary(row),
+            }
+        )
+
+
+class WhatsAppContactView(APIView):
+    permission_classes = [AllowAny]
+
+    class Input(serializers.Serializer):
+        category = serializers.ChoiceField(choices=["A", "B"], default="B")
+        source = serializers.CharField(max_length=40, default="profile")
+
+    @extend_schema(request=Input, responses=WhatsAppContactResponse)
+    def post(self, request, pk):
+        serializer = self.Input(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        row = get_object_or_404(
+            published_instructor_profiles().select_related("service_area", "contact_channel"),
+            pk=pk,
+            contact_channel__is_active=True,
+        )
+        category = serializer.validated_data["category"]
+        _, unique = record_marketplace_event(
+            request=request,
+            event_type=MarketplaceEvent.Type.WHATSAPP_CONTACT_CLICKED,
+            instructor=row,
+            source=serializer.validated_data["source"],
+            category=category,
+            city=row.service_area.city,
+            uf=row.service_area.uf,
+        )
+        return Response(
+            {
+                "destination_url": whatsapp_destination(instructor=row, category=category),
+                "unique_contact": unique,
             }
         )
 
@@ -520,6 +648,17 @@ class OnboardingDraftInput(serializers.Serializer):
     credential_file = serializers.FileField(required=False, write_only=True)
     course_file = serializers.FileField(required=False, write_only=True)
     vehicle_file = serializers.FileField(required=False, write_only=True)
+    price_amount = serializers.DecimalField(
+        max_digits=8, decimal_places=2, min_value=1, required=False
+    )
+    duration_minutes = serializers.IntegerField(min_value=30, max_value=240, required=False)
+    whatsapp = serializers.CharField(max_length=30, required=False)
+
+    def validate_whatsapp(self, value):
+        try:
+            return normalize_brazilian_whatsapp(value)
+        except ValueError as exc:
+            raise serializers.ValidationError(str(exc)) from exc
 
 
 class DemoInstructorOnboardingDraftView(APIView):
@@ -606,7 +745,13 @@ class DemoInstructorOnboardingDraftView(APIView):
             upload_synthetic_document,
             upload_synthetic_profile_photo,
         )
-        from apps.marketplace.models import DataMode, DocumentRequirement, InstructorVehicle
+        from apps.marketplace.models import (
+            DataMode,
+            DocumentRequirement,
+            InstructorContactChannel,
+            InstructorOffer,
+            InstructorVehicle,
+        )
 
         draft = profile.onboarding_draft
         step = data["step"]
@@ -621,6 +766,28 @@ class DemoInstructorOnboardingDraftView(APIView):
         if data.get("radius_km"):
             profile.service_radius_km = data["radius_km"]
         profile.save()
+        if data.get("price_amount") and data.get("duration_minutes"):
+            InstructorOffer.objects.update_or_create(
+                instructor=profile,
+                category=data.get("category", profile.categories[0]),
+                price_type=InstructorOffer.PriceType.LESSON,
+                defaults={
+                    "price_amount": data["price_amount"],
+                    "currency": "BRL",
+                    "duration_minutes": data["duration_minutes"],
+                    "is_active": True,
+                    "data_mode": DataMode.SYNTHETIC,
+                },
+            )
+        if data.get("whatsapp"):
+            InstructorContactChannel.objects.update_or_create(
+                instructor=profile,
+                defaults={
+                    "whatsapp_e164": data["whatsapp"],
+                    "is_active": True,
+                    "data_mode": DataMode.SYNTHETIC,
+                },
+            )
         vehicle = getattr(profile, "vehicle", None)
         if step >= 4 and data.get("vehicle_available"):
             vehicle, _ = InstructorVehicle.objects.update_or_create(
@@ -725,6 +892,8 @@ class DemoInstructorOnboardingDraftView(APIView):
         draft = profile.onboarding_draft
         area = getattr(profile, "service_area", None)
         vehicle = getattr(profile, "vehicle", None)
+        offer = profile.offers.filter(is_active=True).order_by("price_amount").first()
+        contact = getattr(profile, "contact_channel", None)
         return {
             "id": str(profile.id),
             "current_step": draft.current_step,
@@ -762,6 +931,16 @@ class DemoInstructorOnboardingDraftView(APIView):
                 profile.documents.values_list("requirement__document_type", flat=True)
             ),
             "profile_status": profile.profile_status,
+            "offer": (
+                {
+                    "price_amount": str(offer.price_amount),
+                    "duration_minutes": offer.duration_minutes,
+                    "currency": offer.currency,
+                }
+                if offer
+                else None
+            ),
+            "whatsapp_configured": bool(contact and contact.is_active),
         }
 
 

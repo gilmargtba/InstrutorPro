@@ -45,7 +45,15 @@ def published_instructor_counts_by_uf():
 
 
 def search_published_instructors(
-    *, latitude, longitude, radius_km, category, transmission=None, vehicle_available=None
+    *,
+    latitude,
+    longitude,
+    radius_km,
+    category,
+    transmission=None,
+    vehicle_available=None,
+    max_price=None,
+    ordering="distance",
 ):
     origin = Point(float(longitude), float(latitude), srid=4326)
     queryset = published_instructor_profiles().filter(
@@ -56,11 +64,20 @@ def search_published_instructors(
         queryset = queryset.filter(transmission_options__contains=[transmission])
     if vehicle_available is not None:
         queryset = queryset.filter(vehicle_available=vehicle_available)
+    queryset = queryset.annotate(
+        minimum_price=Min(
+            "offers__price_amount",
+            filter=Q(offers__is_active=True, offers__category=category),
+        )
+    ).filter(minimum_price__isnull=False)
+    if max_price is not None:
+        queryset = queryset.filter(minimum_price__lte=max_price)
+    order = ("minimum_price", "distance", "id") if ordering == "price" else ("distance", "id")
     return (
         queryset.select_related("service_area")
-        .prefetch_related("profile_photos", "documents__requirement")
+        .prefetch_related("profile_photos", "documents__requirement", "offers")
         .annotate(distance=Distance("service_area__public_service_location", origin))
-        .order_by("distance", "id")[: settings.INSTRUCTOR_SEARCH_MAX_RESULTS]
+        .order_by(*order)[: settings.INSTRUCTOR_SEARCH_MAX_RESULTS]
     )
 
 

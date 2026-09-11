@@ -5,6 +5,7 @@ from django.db.models import Count
 from django.http import FileResponse
 from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from rest_framework import serializers, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -21,6 +22,7 @@ from .models import (
     DataMode,
     InstructorDocument,
     LessonRequest,
+    MarketplaceEvent,
     ProfilePhoto,
     StudentDemand,
     StudentProfile,
@@ -228,6 +230,14 @@ class SessionMeView(APIView):
         if instructor:
             vehicle = getattr(instructor, "vehicle", None)
             area = getattr(instructor, "service_area", None)
+            month_start = timezone.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+            metrics = (
+                instructor.marketplace_events.filter(created_at__gte=month_start)
+                .values("event_type")
+                .annotate(total=Count("id"))
+            )
+            metrics_by_type = {row["event_type"]: row["total"] for row in metrics}
+            offer = instructor.offers.filter(is_active=True).order_by("price_amount").first()
             payload["instructor"] = {
                 "display_name": instructor.display_name,
                 "profile_status": instructor.profile_status,
@@ -250,6 +260,25 @@ class SessionMeView(APIView):
                     else None
                 ),
                 "pending_requests": instructor.lesson_requests.filter(status="PENDING").count(),
+                "offer": (
+                    {
+                        "price_amount": str(offer.price_amount),
+                        "duration_minutes": offer.duration_minutes,
+                    }
+                    if offer
+                    else None
+                ),
+                "metrics": {
+                    "search_impressions": metrics_by_type.get(
+                        MarketplaceEvent.Type.SEARCH_RESULT_IMPRESSION, 0
+                    ),
+                    "profile_views": metrics_by_type.get(
+                        MarketplaceEvent.Type.INSTRUCTOR_PROFILE_VIEWED, 0
+                    ),
+                    "whatsapp_clicks": metrics_by_type.get(
+                        MarketplaceEvent.Type.WHATSAPP_CONTACT_CLICKED, 0
+                    ),
+                },
             }
         if student:
             payload["student"] = {

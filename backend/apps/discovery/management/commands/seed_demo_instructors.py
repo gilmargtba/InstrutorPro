@@ -21,7 +21,10 @@ from apps.discovery.models import (
 from apps.marketplace.models import (
     DataMode,
     DocumentRequirement,
+    InstructorContactChannel,
     InstructorDocument,
+    InstructorOffer,
+    InstructorVehicle,
     ProfilePhoto,
 )
 from apps.people.models import Person, RoleAssignment
@@ -248,6 +251,38 @@ class Command(BaseCommand):
                         "demo_price",
                     ]
                 )
+            InstructorOffer.objects.update_or_create(
+                instructor=profile,
+                category="B",
+                price_type=InstructorOffer.PriceType.LESSON,
+                defaults={
+                    "price_amount": Decimal(price),
+                    "currency": "BRL",
+                    "duration_minutes": 60,
+                    "is_active": True,
+                    "data_mode": DataMode.SYNTHETIC,
+                },
+            )
+            InstructorContactChannel.objects.update_or_create(
+                instructor=profile,
+                defaults={
+                    "whatsapp_e164": "+5551999990001",
+                    "is_active": True,
+                    "data_mode": DataMode.SYNTHETIC,
+                },
+            )
+            InstructorVehicle.objects.update_or_create(
+                instructor=profile,
+                defaults={
+                    "category": "B",
+                    "make": "Chevrolet",
+                    "model": "Onix",
+                    "year": 2024,
+                    "transmission": transmission,
+                    "verification_status": InstructorVehicle.VerificationStatus.APPROVED,
+                    "data_mode": DataMode.SYNTHETIC,
+                },
+            )
             area, area_created = InstructorServiceArea.objects.get_or_create(
                 profile=profile,
                 defaults={

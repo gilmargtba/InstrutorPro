@@ -10,10 +10,13 @@ from .documents import (
 )
 from .models import (
     DocumentRequirement,
+    InstructorContactChannel,
     InstructorDocument,
+    InstructorOffer,
     InstructorPrerequisiteAcceptance,
     InstructorVehicle,
     LessonRequest,
+    MarketplaceEvent,
     PlatformLesson,
     PracticalTrainingRequirement,
     ProfilePhoto,
@@ -181,3 +184,38 @@ class ProfilePhotoAdmin(admin.ModelAdmin):
 admin.site.register(InstructorPrerequisiteAcceptance)
 admin.site.register(PracticalTrainingRequirement)
 admin.site.register(PlatformLesson)
+
+
+@admin.register(InstructorOffer)
+class InstructorOfferAdmin(admin.ModelAdmin):
+    list_display = (
+        "instructor",
+        "category",
+        "price_amount",
+        "currency",
+        "duration_minutes",
+        "is_active",
+    )
+    list_filter = ("category", "currency", "is_active", "data_mode")
+
+
+@admin.register(InstructorContactChannel)
+class InstructorContactChannelAdmin(admin.ModelAdmin):
+    list_display = ("instructor", "is_active", "data_mode", "updated_at")
+    readonly_fields = ("data_mode", "updated_at")
+
+
+@admin.register(MarketplaceEvent)
+class MarketplaceEventAdmin(admin.ModelAdmin):
+    list_display = ("event_type", "instructor", "category", "city", "uf", "created_at")
+    list_filter = ("event_type", "data_mode", "uf")
+    readonly_fields = [field.name for field in MarketplaceEvent._meta.fields]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False

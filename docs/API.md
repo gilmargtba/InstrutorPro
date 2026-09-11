@@ -15,17 +15,22 @@ pública em `/api/v1` para criar, alterar, validar ou consultar os dados adminis
 do controlador. Avisos/termos futuros só poderão consumir uma projeção pública mínima e
 aprovada; esta fatia não criou essa projeção.
 
-## Descoberta geoespacial — Fatia 3
+## Descoberta geoespacial e contato comercial — Fatias 3 e 4
 
 - `GET /api/v1/geocoding/search/?q=Porto%20Alegre%2C%20RS&limit=5`: autocomplete/geocoding brasileiro pelo adapter MapTiler executado no backend; aceita cidade, bairro e CEP, sujeito à capacidade do provider.
-- `GET /api/v1/instructors/search/?latitude=-30.0346&longitude=-51.2177&radius_km=10&category=B`: busca PostGIS; aceita `transmission` e `vehicle_available`.
-- `GET /api/v1/instructors/{uuid}/`: projeção pública mínima do perfil publicável.
+- `GET /api/v1/instructors/search/?latitude=-30.0346&longitude=-51.2177&radius_km=10&category=B`: busca PostGIS; aceita `transmission`, `vehicle_available`, `max_price` e `ordering=distance|price`. Retorna preço decimal em BRL, duração e projeção pública do veículo.
+- `GET /api/v1/instructors/{uuid}/`: projeção pública mínima do perfil publicável, incluindo oferta ativa.
+- `POST /api/v1/instructors/{uuid}/whatsapp-contact/`: registra um clique deduplicado por sessão/instrutor/hora e devolve `destination_url` para `wa.me`; não envia mensagem e não devolve o telefone bruto.
 
-A resposta é mínima, informa `demo` conforme o modo, é ordenada por distância e nunca contém
-`private_location`, endereço, contato, credencial ou elegibilidade. Raios aceitos:
+A resposta é mínima, informa `demo` conforme o modo, é ordenada por distância ou preço e nunca
+contém `private_location`, endereço, telefone bruto, credencial ou elegibilidade. Não expõe nota
+enquanto não houver avaliações reais. Raios aceitos:
 5, 10, 20 e 50 km; o total é limitado no servidor. Perfis sintéticos são excluídos
 quando o modo sintético está desligado. Sem o gate real, nenhum perfil real é retornado.
 A consulta não cria `StudentDemand` nem persiste a coordenada pesquisada.
+Os eventos comerciais persistidos são `SEARCH_PERFORMED`, `SEARCH_RESULT_IMPRESSION`,
+`INSTRUCTOR_PROFILE_VIEWED` e `WHATSAPP_CONTACT_CLICKED`; armazenam somente hash de sessão,
+origem, categoria e localidade agregada, sem fingerprint ou coordenada individual.
 
 Fonte oficial dos comportamentos HTTP internos. Endpoints são implementados somente na fase indicada pelo plano e publicados no OpenAPI quando existirem; esta lista não autoriza antecipar escopo nem inventar integração externa.
 
