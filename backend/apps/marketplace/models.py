@@ -201,6 +201,105 @@ class MarketplaceEvent(models.Model):
         ]
 
 
+class Plan(models.Model):
+    class Status(models.TextChoices):
+        DRAFT = "DRAFT", "Rascunho"
+        ACTIVE = "ACTIVE", "Ativo"
+        ARCHIVED = "ARCHIVED", "Arquivado"
+
+    class BillingInterval(models.TextChoices):
+        NONE = "NONE", "Sem cobrança"
+        MONTHLY = "MONTHLY", "Mensal"
+        YEARLY = "YEARLY", "Anual"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    code = models.CharField(max_length=32, unique=True)
+    name = models.CharField(max_length=80)
+    description = models.TextField(blank=True)
+    status = models.CharField(max_length=16, choices=Status.choices, default=Status.DRAFT)
+    billing_interval = models.CharField(
+        max_length=16, choices=BillingInterval.choices, default=BillingInterval.NONE
+    )
+    price_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    display_order = models.PositiveSmallIntegerField(default=0)
+    is_public = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        permissions = [("manage_saas", "Can manage SaaS plans and subscriptions")]
+        ordering = ["display_order", "code"]
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(price_amount__isnull=True) | Q(price_amount__gte=0),
+                name="ck_plan_price_nonnegative",
+            )
+        ]
+
+    def __str__(self):
+        return self.name
+
+
+class Entitlement(models.Model):
+    code = models.CharField(max_length=48, unique=True)
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+
+class PlanEntitlement(models.Model):
+    plan = models.ForeignKey(Plan, on_delete=models.CASCADE, related_name="plan_entitlements")
+    entitlement = models.ForeignKey(
+        Entitlement, on_delete=models.PROTECT, related_name="plan_entitlements"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["plan", "entitlement"], name="uq_plan_entitlement")
+        ]
+
+
+class Subscription(models.Model):
+    class Status(models.TextChoices):
+        TRIALING = "TRIALING", "Em teste"
+        ACTIVE = "ACTIVE", "Ativa"
+        PAST_DUE = "PAST_DUE", "Em atraso"
+        CANCELLED = "CANCELLED", "Cancelada"
+        EXPIRED = "EXPIRED", "Expirada"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    account = models.ForeignKey(
+        "accounts.Account", on_delete=models.PROTECT, related_name="subscriptions"
+    )
+    plan = models.ForeignKey(Plan, on_delete=models.PROTECT, related_name="subscriptions")
+    status = models.CharField(max_length=16, choices=Status.choices)
+    started_at = models.DateTimeField()
+    trial_ends_at = models.DateTimeField(null=True, blank=True)
+    current_period_start = models.DateTimeField(null=True, blank=True)
+    current_period_end = models.DateTimeField(null=True, blank=True)
+    cancel_at_period_end = models.BooleanField(default=False)
+    cancelled_at = models.DateTimeField(null=True, blank=True)
+    provider = models.CharField(max_length=40, blank=True)
+    provider_customer_id = models.CharField(max_length=160, blank=True)
+    provider_subscription_id = models.CharField(max_length=160, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [models.Index(fields=["account", "status"])]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["account"],
+                condition=Q(status__in=["TRIALING", "ACTIVE", "PAST_DUE"]),
+                name="uq_active_subscription_per_account",
+            )
+        ]
+
+
 class DocumentRequirement(models.Model):
     class DocumentType(models.TextChoices):
         INSTRUCTOR_AUTHORIZATION = "INSTRUCTOR_AUTHORIZATION", "Autorização/credencial de instrutor"

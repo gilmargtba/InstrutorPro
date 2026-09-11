@@ -79,6 +79,11 @@ Valores de timeout, tentativas e rate limit são configuração segura aprovada 
 
 Os seis avisos observados por `manage.py check --deploy` pertencem à configuração local de desenvolvimento e não autorizam seu uso em produção. O ambiente produtivo terá settings separados e deverá comprovar: HTTPS; HSTS com rollout seguro; `DEBUG=False`; chave longa e aleatória fornecida por secret manager/environment; cookies de sessão e CSRF com `Secure`; políticas adequadas de CSRF/sessão; e hosts/origens explicitamente permitidos. A configuração local permanece apropriada para HTTP de desenvolvimento e não será artificialmente tratada como produção.
 
+`config.settings.production` formaliza esse perfil com falha fechada para segredo, banco,
+Redis, hosts/origens, MFA e MapTiler. Ele bloqueia modo/ingestão sintéticos, exige HTTPS e não
+oferece wildcard de host/CORS. O comando `production_readiness` verifica controles técnicos,
+mas declara explicitamente que autorização real não foi concedida.
+
 - HTTPS/HSTS em produção, headers seguros e CORS restrito;
 - validação de tamanho/profundidade/tipo; paginação e timeouts;
 - ORM parametrizado e escaping contextual no frontend;

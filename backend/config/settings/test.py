@@ -5,6 +5,7 @@ os.environ.setdefault("DJANGO_ALLOWED_HOSTS", "testserver,localhost")
 
 from .base import *  # noqa: E402,F403
 
+APP_ENV = "TEST"
 CELERY_TASK_ALWAYS_EAGER = True
 PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
 SYNTHETIC_MARKETPLACE_ENABLED = True

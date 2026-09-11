@@ -25,7 +25,7 @@ export class InstructorEntryComponent { accepted=false; }
 export class LoginComponent {
   private http=inject(HttpClient); private router=inject(Router);
   email=''; password=''; sending=false; error='';
-  submit(){this.sending=true;this.http.post<{roles:string[];is_staff:boolean}>('/demo/marketplace/session/login/',{email:this.email,password:this.password}).subscribe({next:r=>{this.sending=false;const target=r.is_staff?'/admin/':r.roles.includes('INSTRUCTOR')?'/profissional/instrutor':r.roles.includes('STUDENT')?'/aluno/painel':'/';if(target==='/admin/')window.location.assign(target);else void this.router.navigate([target])},error:()=>{this.sending=false;this.error='E-mail ou senha inválidos.'}})}
+  submit(){this.sending=true;this.http.post<{roles:string[];is_staff:boolean}>('/marketplace/session/login/',{email:this.email,password:this.password}).subscribe({next:r=>{this.sending=false;const target=r.is_staff?'/admin/':r.roles.includes('INSTRUCTOR')?'/instrutor':r.roles.includes('STUDENT')?'/aluno/painel':'/';if(target==='/admin/')window.location.assign(target);else void this.router.navigate([target])},error:()=>{this.sending=false;this.error='E-mail ou senha inválidos.'}})}
 }
 
 type StudentSession={display_name:string;city:string;uf:string;intended_category:string;preferred_transmission:string;request_count:number;upcoming_lesson_count:number};

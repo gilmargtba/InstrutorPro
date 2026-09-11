@@ -349,3 +349,11 @@ A resposta de match pode incluir distância aproximada, score e fatores permitid
 ## APIs previstas — jornada nacional
 
 Namespaces planejados, sujeitos aos gates do plano: `/jurisdictions`, `/journey`, `/clinics`, `/health-professionals`, `/verification-sources`, `/regulatory-rules`, além dos endpoints existentes de marketplace/demanda. Endpoints públicos retornam apenas projeções minimizadas; evidências, documentos, coordenadas exatas e identificadores protegidos ficam em endpoints privados com autorização por objeto.
+
+## Fundação SaaS do instrutor
+
+`GET /api/v1/marketplace/instructor/saas-summary/?days=7|30|90` exige sessão e papel
+`INSTRUCTOR`, atribui `FREE` idempotentemente e retorna plano, capacidades e métricas agregadas
+dos eventos do marketplace. `GET /api/v1/marketplace/instructor/advanced-analytics/` comprova
+autorização backend e responde `403 entitlement_required` sem a capacidade. Assinatura nunca
+altera verificação, elegibilidade ou publicação.

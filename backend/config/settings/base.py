@@ -4,6 +4,9 @@ from pathlib import Path
 import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parents[2]
+APP_ENV = os.getenv("APP_ENV", "DEV").upper()
+if APP_ENV not in {"DEV", "TEST", "PRODUCTION"}:
+    raise RuntimeError("APP_ENV must be DEV, TEST or PRODUCTION")
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "")
 if not SECRET_KEY:
@@ -139,6 +142,8 @@ ADMIN_MFA_REQUIRED = os.getenv("DJANGO_ADMIN_MFA_REQUIRED", "true").lower() == "
 SYNTHETIC_MARKETPLACE_ENABLED = (
     os.getenv("SYNTHETIC_MARKETPLACE_ENABLED", "false").lower() == "true"
 )
+if APP_ENV == "PRODUCTION" and SYNTHETIC_MARKETPLACE_ENABLED:
+    raise RuntimeError("Synthetic marketplace cannot be enabled in PRODUCTION")
 REAL_STUDENT_REGISTRATION_ENABLED = (
     os.getenv("REAL_STUDENT_REGISTRATION_ENABLED", "false").lower() == "true"
 )
@@ -156,6 +161,19 @@ MAPTILER_GEOCODING_URL = os.getenv("MAPTILER_GEOCODING_URL", "https://api.maptil
 MAPTILER_MAP_URL = os.getenv("MAPTILER_MAP_URL", "https://api.maptiler.com/maps/streets-v4")
 GEOCODING_TIMEOUT_SECONDS = float(os.getenv("GEOCODING_TIMEOUT_SECONDS", "4"))
 INSTRUCTOR_SEARCH_MAX_RESULTS = int(os.getenv("INSTRUCTOR_SEARCH_MAX_RESULTS", "50"))
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "structured": {
+            "format": '{"level":"{levelname}","logger":"{name}","message":"{message}"}',
+            "style": "{",
+        }
+    },
+    "handlers": {"console": {"class": "logging.StreamHandler", "formatter": "structured"}},
+    "root": {"handlers": ["console"], "level": os.getenv("DJANGO_LOG_LEVEL", "INFO")},
+}
 
 # Dossiê M1: o diretório não é publicado pelo Django/Nginx. A ingestão real segue
 # fechada até homologação de storage privado, antimalware e controles LGPD.

@@ -8,6 +8,8 @@ import { InstructorNationalMapComponent } from './features/demo/instructor-natio
 import { InstructorOnboardingComponent } from './features/demo/instructor-onboarding.component';
 import { StudentMarketplaceComponent } from './features/demo/student-marketplace.component';
 import { InstructorEntryComponent, InstructorPortalComponent, InstructorStatusComponent, LoginComponent, StudentDashboardComponent, StudentEntryComponent } from './features/demo/marketplace-entry.component';
+import { InstructorPerformanceComponent, InstructorPlanComponent, InstructorSaasDashboardComponent, LegalPlaceholderComponent } from './features/professional/saas-pages.component';
+import { environment } from '../environments/environment';
 
 export const routes: Routes = [
   { path:'', component:HomeComponent, title:'InstrutorProCNH — Sua jornada para a CNH' },
@@ -21,15 +23,23 @@ export const routes: Routes = [
   { path:'aluno/instrutores/mapa', component:InstructorMapComponent, title:'Mapa local de instrutores — InstrutorProCNH' },
   { path:'aluno/instrutores/:id', component:PublicInstructorProfileComponent, title:'Perfil do instrutor — InstrutorProCNH' },
   { path:'aluno/solicitar', component:LessonRequestComponent, title:'Solicitar aula — InstrutorProCNH' },
-  { path:'aluno/matching', component:MatchingComponent, title:'Matching demonstrativo — InstrutorProCNH' },
-  { path:'aluno/demanda', component:StudentMarketplaceComponent, title:'Demanda demonstrativa — InstrutorProCNH' },
-  { path:'aluno/cadastro-demo', component:StudentMarketplaceComponent, title:'Cadastro do aluno DEMO — InstrutorProCNH' },
-  { path:'aluno/clinicas', component:ClinicDemoComponent, title:'Clínicas e exames — InstrutorProCNH' },
   { path:'profissional', component:ProfessionalEntryComponent, title:'Área profissional — InstrutorProCNH' },
   { path:'profissional/instrutor/entrada', component:InstructorEntryComponent, title:'Cadastro do instrutor — InstrutorProCNH' },
   { path:'profissional/instrutor', component:InstructorPortalComponent, title:'Painel do instrutor — InstrutorProCNH' },
+  { path:'instrutor', component:InstructorSaasDashboardComponent, title:'Visão geral do instrutor — InstrutorProCNH' },
+  { path:'instrutor/desempenho', component:InstructorPerformanceComponent, title:'Desempenho — InstrutorProCNH' },
+  { path:'instrutor/plano', component:InstructorPlanComponent, title:'Meu plano — InstrutorProCNH' },
+  { path:'privacidade', component:LegalPlaceholderComponent, title:'Privacidade — InstrutorProCNH' },
+  { path:'termos', component:LegalPlaceholderComponent, title:'Termos — InstrutorProCNH' },
+  { path:'contato-privacidade', component:LegalPlaceholderComponent, title:'Contato de privacidade — InstrutorProCNH' },
   { path:'profissional/instrutor/status', component:InstructorStatusComponent, title:'Status do instrutor — InstrutorProCNH' },
   { path:'profissional/instrutor/onboarding', component:InstructorOnboardingComponent, title:'Quero atuar como instrutor — InstrutorProCNH' },
-  { path:'profissional/demanda', component:DemandDemoComponent, title:'Mapa de demanda — InstrutorProCNH' },
+  ...(environment.production ? [] : [
+    { path:'aluno/matching', component:MatchingComponent, title:'Matching demonstrativo — InstrutorProCNH' },
+    { path:'aluno/demanda', component:StudentMarketplaceComponent, title:'Demanda demonstrativa — InstrutorProCNH' },
+    { path:'aluno/cadastro-demo', component:StudentMarketplaceComponent, title:'Cadastro do aluno DEMO — InstrutorProCNH' },
+    { path:'aluno/clinicas', component:ClinicDemoComponent, title:'Clínicas e exames — InstrutorProCNH' },
+    { path:'profissional/demanda', component:DemandDemoComponent, title:'Mapa de demanda — InstrutorProCNH' },
+  ]),
   { path:'**', redirectTo:'' },
 ];

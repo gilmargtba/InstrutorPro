@@ -89,6 +89,11 @@ Pagamento protegido pelo gateway, comprovante, política clara, suporte, agenda,
 
 Agenda própria, link, alunos particulares, pacotes, calendário, lembretes, financeiro e assinatura somente após o piloto provar uso operacional recorrente. Essa fase terá modelo comercial e termos próprios; não herda silenciosamente as regras de comissão do marketplace.
 
+A fundação técnica autorizada na Fatia 5 não antecipa essa comercialização: o aluno continua
+gratuito; o instrutor recebe `FREE` com perfil público, contato por WhatsApp e analytics básicos.
+`PRO` existe apenas como catálogo configurável, sem preço, checkout, cobrança ou efeito sobre
+verificação/publicação. Capacidades são autorizadas centralmente por entitlement.
+
 ## Funis adicionais de aquisição
 
 A plataforma passa a medir três funis relacionados:

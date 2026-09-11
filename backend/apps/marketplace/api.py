@@ -27,6 +27,7 @@ from .models import (
     StudentDemand,
     StudentProfile,
 )
+from .saas import assign_free_plan, current_subscription, has_entitlement, instructor_analytics
 from .services import transition_lesson_request
 
 
@@ -293,6 +294,52 @@ class SessionMeView(APIView):
                 ).count(),
             }
         return Response(payload)
+
+
+def _request_instructor(request):
+    return get_object_or_404(
+        InstructorProfile.objects.select_related("person__account"),
+        person__account=request.user,
+    )
+
+
+class InstructorSaaSSummaryView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        instructor = _request_instructor(request)
+        subscription = current_subscription(request.user) or assign_free_plan(request.user)
+        metrics = instructor_analytics(instructor, int(request.query_params.get("days", 30)))
+        return Response(
+            {
+                "display_name": instructor.display_name,
+                "profile_status": instructor.profile_status,
+                "publication_status": instructor.publication_status,
+                "plan": {
+                    "code": subscription.plan.code,
+                    "name": subscription.plan.name,
+                    "entitlements": list(
+                        subscription.plan.plan_entitlements.order_by(
+                            "entitlement__code"
+                        ).values_list("entitlement__code", flat=True)
+                    ),
+                },
+                "metrics": metrics,
+            }
+        )
+
+
+class InstructorAdvancedAnalyticsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        _request_instructor(request)
+        if not has_entitlement(request.user, "ADVANCED_ANALYTICS"):
+            return Response(
+                {"code": "entitlement_required", "detail": "Recurso não incluído no plano."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        return Response({"status": "prepared"})
 
 
 class DemandSerializer(serializers.ModelSerializer):

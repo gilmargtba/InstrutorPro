@@ -1,6 +1,9 @@
+from django.conf import settings
 from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
+
+from apps.audit.models import AuditEvent
 
 from .documents import (
     DocumentPermissionDenied,
@@ -10,6 +13,7 @@ from .documents import (
 )
 from .models import (
     DocumentRequirement,
+    Entitlement,
     InstructorContactChannel,
     InstructorDocument,
     InstructorOffer,
@@ -17,11 +21,14 @@ from .models import (
     InstructorVehicle,
     LessonRequest,
     MarketplaceEvent,
+    Plan,
+    PlanEntitlement,
     PlatformLesson,
     PracticalTrainingRequirement,
     ProfilePhoto,
     StudentDemand,
     StudentProfile,
+    Subscription,
 )
 
 
@@ -219,3 +226,59 @@ class MarketplaceEventAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+
+class SaaSRestrictedAdmin(admin.ModelAdmin):
+    def has_module_permission(self, request):
+        return request.user.has_perm("marketplace.manage_saas")
+
+    def has_view_permission(self, request, obj=None):
+        return request.user.has_perm("marketplace.manage_saas")
+
+    def has_add_permission(self, request):
+        return settings.APP_ENV != "PRODUCTION" and request.user.has_perm("marketplace.manage_saas")
+
+    def has_change_permission(self, request, obj=None):
+        return settings.APP_ENV != "PRODUCTION" and request.user.has_perm("marketplace.manage_saas")
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(Plan)
+class PlanAdmin(SaaSRestrictedAdmin):
+    list_display = ("code", "name", "status", "billing_interval", "price_amount", "is_public")
+    list_filter = ("status", "billing_interval", "is_public")
+
+
+@admin.register(Entitlement)
+class EntitlementAdmin(SaaSRestrictedAdmin):
+    list_display = ("code", "name")
+
+
+@admin.register(PlanEntitlement)
+class PlanEntitlementAdmin(SaaSRestrictedAdmin):
+    list_display = ("plan", "entitlement", "created_at")
+
+
+@admin.register(Subscription)
+class SubscriptionAdmin(SaaSRestrictedAdmin):
+    list_display = ("account", "plan", "status", "started_at", "current_period_end")
+    list_filter = ("status", "plan")
+
+    def save_model(self, request, obj, form, change):
+        before = None
+        if change:
+            previous = Subscription.objects.get(pk=obj.pk)
+            before = {"plan": previous.plan.code, "status": previous.status}
+        super().save_model(request, obj, form, change)
+        if before and before != {"plan": obj.plan.code, "status": obj.status}:
+            AuditEvent.objects.create(
+                actor=request.user,
+                action="marketplace.subscription.admin_changed",
+                target_type="marketplace.Subscription",
+                target_id=obj.id,
+                request_id=getattr(request, "request_id", None),
+                reason_code="ADMIN_TEST_CHANGE",
+                metadata={"before": before, "after": {"plan": obj.plan.code, "status": obj.status}},
+            )

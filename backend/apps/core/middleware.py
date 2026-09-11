@@ -1,6 +1,8 @@
+import logging
 import uuid
 
 REQUEST_ID_HEADER = "HTTP_X_REQUEST_ID"
+logger = logging.getLogger("instrutorpro.request")
 
 
 class RequestIDMiddleware:
@@ -16,4 +18,11 @@ class RequestIDMiddleware:
         request.request_id = request_id
         response = self.get_response(request)
         response["X-Request-ID"] = request_id
+        logger.info(
+            "request_complete request_id=%s method=%s path=%s status=%s",
+            request_id,
+            request.method,
+            request.path,
+            response.status_code,
+        )
         return response

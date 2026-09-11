@@ -216,6 +216,14 @@ Revisão jurídico-técnica de privacidade em fontes oficiais vigentes em 22/07/
 
 ## Atividade em execução
 
+Fatia 5 — Fundação SaaS + preparação técnica para produção autorizada em 11/09/2026,
+sem cobrança e sem deploy. Foram criados Plan, Subscription, Entitlement e PlanEntitlement,
+FREE idempotente, policy central de capacidades, analytics 7/30/90 a partir de MarketplaceEvent,
+dashboard e página de plano do instrutor, Admin restrito e perfil de settings de produção
+fail-closed. PRO permanece rascunho sem preço; pagamento não altera publicação. A organização
+recebe somente CNPJ e canal de privacidade autorizados e permanece INCOMPLETE. Conteúdo jurídico,
+dados reais, aprovação comercial/legal e deploy continuam bloqueados.
+
 Dossiê M1 de instrutor, veículo, credencial e foto implementado em 31/08/2026 no recorte autorizado:
 `DocumentRequirement` versiona UF/categoria/provedor/vigência; `InstructorDocument` preserva
 versões, hash, validade, quarentena privada, revisão independente e auditoria; veículo separa
