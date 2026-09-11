@@ -13,8 +13,6 @@ import { environment } from '../environments/environment';
 
 export const routes: Routes = [
   { path:'', component:HomeComponent, title:'InstrutorProCNH — Sua jornada para a CNH' },
-  { path:'aluno', component:StudentEntryComponent, title:'Aluno — InstrutorProCNH' },
-  { path:'cadastro/aluno', component:StudentMarketplaceComponent, title:'Criar conta de aluno — InstrutorProCNH' },
   { path:'entrar', component:LoginComponent, title:'Entrar — InstrutorProCNH' },
   { path:'aluno/jornada', component:JourneyComponent, title:'Minha Jornada CNH — InstrutorProCNH' },
   { path:'aluno/painel', component:StudentDashboardComponent, title:'Painel do aluno — InstrutorProCNH' },
@@ -24,8 +22,6 @@ export const routes: Routes = [
   { path:'aluno/instrutores/:id', component:PublicInstructorProfileComponent, title:'Perfil do instrutor — InstrutorProCNH' },
   { path:'aluno/solicitar', component:LessonRequestComponent, title:'Solicitar aula — InstrutorProCNH' },
   { path:'profissional', component:ProfessionalEntryComponent, title:'Área profissional — InstrutorProCNH' },
-  { path:'profissional/instrutor/entrada', component:InstructorEntryComponent, title:'Cadastro do instrutor — InstrutorProCNH' },
-  { path:'profissional/instrutor', component:InstructorPortalComponent, title:'Painel do instrutor — InstrutorProCNH' },
   { path:'instrutor', component:InstructorSaasDashboardComponent, title:'Visão geral do instrutor — InstrutorProCNH' },
   { path:'instrutor/desempenho', component:InstructorPerformanceComponent, title:'Desempenho — InstrutorProCNH' },
   { path:'instrutor/plano', component:InstructorPlanComponent, title:'Meu plano — InstrutorProCNH' },
@@ -33,8 +29,12 @@ export const routes: Routes = [
   { path:'termos', component:LegalPlaceholderComponent, title:'Termos — InstrutorProCNH' },
   { path:'contato-privacidade', component:LegalPlaceholderComponent, title:'Contato de privacidade — InstrutorProCNH' },
   { path:'profissional/instrutor/status', component:InstructorStatusComponent, title:'Status do instrutor — InstrutorProCNH' },
-  { path:'profissional/instrutor/onboarding', component:InstructorOnboardingComponent, title:'Quero atuar como instrutor — InstrutorProCNH' },
   ...(environment.production ? [] : [
+    { path:'aluno', component:StudentEntryComponent, title:'Aluno — InstrutorProCNH' },
+    { path:'cadastro/aluno', component:StudentMarketplaceComponent, title:'Criar conta de aluno — InstrutorProCNH' },
+    { path:'profissional/instrutor/entrada', component:InstructorEntryComponent, title:'Cadastro do instrutor — InstrutorProCNH' },
+    { path:'profissional/instrutor', component:InstructorPortalComponent, title:'Painel do instrutor — InstrutorProCNH' },
+    { path:'profissional/instrutor/onboarding', component:InstructorOnboardingComponent, title:'Quero atuar como instrutor — InstrutorProCNH' },
     { path:'aluno/matching', component:MatchingComponent, title:'Matching demonstrativo — InstrutorProCNH' },
     { path:'aluno/demanda', component:StudentMarketplaceComponent, title:'Demanda demonstrativa — InstrutorProCNH' },
     { path:'aluno/cadastro-demo', component:StudentMarketplaceComponent, title:'Cadastro do aluno DEMO — InstrutorProCNH' },
