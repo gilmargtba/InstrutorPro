@@ -4,6 +4,17 @@
 - Versão documental: **3.8**
 - Código-fonte: **Fatia 4 marketplace local concluída; dados reais e deploy bloqueados**
 
+## Integração operacional preservada no gateway (11/09/2026)
+
+- O gateway do InstrutorPro compartilha a rede Docker externa
+  `gestor-reposicao_gestor_private` com alias `gestor_reposicao_api`.
+- As rotas preexistentes `/gestao`, `/api/v1/licenses` e `/api/v1/sync` continuam encaminhadas ao
+  Gestor Reposição sem publicar banco ou Redis.
+- A conexão foi validada ao vivo sem recriar containers: Instrutor respondeu `200`, Gestor `307` e
+  Licenses `404`, sem `502`.
+- O deploy depende de a rede externa do Gestor já existir na VPS; essa dependência deve ser
+  validada antes de recriar o gateway.
+
 ## Consolidação de produto em 2026-08-19
 
 Foram incorporados à documentação, sem liberar código nem remover gates existentes: mapa/lista de instrutores, demanda declarada por alunos, agregados geográficos de demanda, matching determinístico, captação de instrutores autorizados, funil de candidatos, registro de verificação oficial por fonte documentada/manual e Academia do Instrutor como hub orientativo. Novas decisões `ADR-021–026`, questões `OPEN-015–019` e riscos `R-026–030` foram registrados.

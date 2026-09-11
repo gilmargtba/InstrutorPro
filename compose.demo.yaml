@@ -116,7 +116,11 @@ services:
       - /bin/sh
       - -c
       - "(while sleep 21600; do nginx -s reload; done) & exec nginx -g 'daemon off;'"
-    networks: [public]
+    networks:
+      public:
+      gestor_private:
+        aliases:
+          - gestor_reposicao_api
 
   certbot-renew:
     image: certbot/certbot:v5.4.0
@@ -143,3 +147,6 @@ networks:
   public:
   private:
     internal: true
+  gestor_private:
+    external: true
+    name: gestor-reposicao_gestor_private
