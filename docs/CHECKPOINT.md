@@ -293,6 +293,15 @@ reais, pagamentos, expansão além de categoria B ou retomada de `IAM-003`/CODEX
 - recriações dos containers deixam de remover fotos e documentos armazenados pela aplicação;
 - o volume não é publicado pelo Nginx; downloads continuam passando pelas views autorizadas.
 
+### Correção operacional da pré-produção — tiles do mapa
+
+- a camada Leaflet deixou de consumir diretamente os servidores comunitários de tiles do
+  OpenStreetMap, após bloqueio HTTP 403 por política de uso;
+- tiles rasterizados passaram a ser obtidos do MapTiler por endpoint controlado do backend, com
+  validação de coordenadas, timeout, resposta estável de indisponibilidade e cache público de uma hora;
+- `MAPTILER_API_KEY` permanece somente no servidor e não é enviada ao navegador;
+- a atribuição pública preserva os créditos de MapTiler e OpenStreetMap.
+
 ## Decisões abertas
 
 | ID       | Classe         | Resumo                                                          | Gate                 |

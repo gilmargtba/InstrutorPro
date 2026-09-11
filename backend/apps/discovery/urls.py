@@ -7,6 +7,7 @@ from .api import (
     GeocodingView,
     InstructorSearchView,
     InstructorStateSummaryView,
+    MapTileView,
     PublicInstructorProfileView,
     PublicProfilePhotoView,
     WhatsAppContactView,
@@ -29,6 +30,7 @@ urlpatterns = [
         name="public-profile-photo",
     ),
     path("geocoding/search/", GeocodingView.as_view(), name="geocoding-search"),
+    path("map/tiles/<int:zoom>/<int:x>/<int:y>.png", MapTileView.as_view(), name="map-tile"),
     path(
         "demo/instructor-onboarding/",
         DemoInstructorOnboardingView.as_view(),

@@ -5,7 +5,7 @@ from django.contrib.auth import login
 from django.contrib.gis.geos import Point
 from django.db import transaction
 from django.db.models import Q
-from django.http import FileResponse
+from django.http import FileResponse, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from drf_spectacular.utils import OpenApiParameter, extend_schema
@@ -25,6 +25,7 @@ from apps.marketplace.models import MarketplaceEvent
 from apps.people.models import Person, RoleAssignment
 
 from .geocoding import LocationNotFound, ProviderUnavailable, get_geocoding_provider
+from .map_tiles import MapTileUnavailable, fetch_map_tile
 from .models import InstructorProfile, InstructorServiceArea
 from .selectors import (
     published_instructor_counts_by_uf,
@@ -105,6 +106,23 @@ class InstructorStateSummary(serializers.Serializer):
 class GeocodingResponse(serializers.Serializer):
     results = serializers.ListField(child=serializers.DictField())
     provider = serializers.CharField()
+
+
+class MapTileView(APIView):
+    permission_classes = [AllowAny]
+    authentication_classes = []
+
+    def get(self, request, zoom, x, y):
+        try:
+            body, content_type = fetch_map_tile(zoom=zoom, x=x, y=y)
+        except ValueError:
+            return Response({"detail": "Invalid tile coordinates."}, status=400)
+        except MapTileUnavailable:
+            return Response({"detail": "Map tile provider unavailable."}, status=502)
+        response = HttpResponse(body, content_type=content_type)
+        response["Cache-Control"] = "public, max-age=3600"
+        response["X-Content-Type-Options"] = "nosniff"
+        return response
 
 
 class InstructorSearchView(APIView):
