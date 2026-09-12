@@ -6,14 +6,17 @@
 
 ## Integração operacional preservada no gateway (11/09/2026)
 
-- O gateway do InstrutorPro compartilha a rede Docker externa
-  `gestor-reposicao_gestor_private` com alias `gestor_reposicao_api`.
+- O gateway permanece somente na rede `instrutorpro_public`. A API do Gestor já está conectada
+  a essa rede com alias `gestor_reposicao_api`; o alias pertence à API, nunca ao gateway.
 - As rotas preexistentes `/gestao`, `/api/v1/licenses` e `/api/v1/sync` continuam encaminhadas ao
   Gestor Reposição sem publicar banco ou Redis.
 - A conexão foi validada ao vivo sem recriar containers: Instrutor respondeu `200`, Gestor `307` e
   Licenses `404`, sem `502`.
-- O deploy depende de a rede externa do Gestor já existir na VPS; essa dependência deve ser
-  validada antes de recriar o gateway.
+- Antes de recriar o gateway, validar que a API do Gestor continua na rede compartilhada com
+  esse alias. A persistência da conexão da API deve ser conferida no projeto do Gestor.
+- Inspeção posterior confirmou API `172.18.0.5`, gateway `172.18.0.4` e `EXTRA_HOSTS=[]`.
+  A ligação adicional do gateway à rede privada do Gestor era desnecessária e foi removida do
+  Compose; nenhuma alteração em containers em execução foi feita nesta correção local.
 
 ## Consolidação de produto em 2026-08-19
 
