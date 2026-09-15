@@ -15,8 +15,15 @@
 - Teste isolado com Nginx 1.28, certificados fictícios e upstreams mock em
   `scripts/test-gateway-domain.sh`: PASS (sintaxe, IP/domínio, rotas mock, ACME,
   redirects com query e reload). Nunca executar esse script no gateway ativo.
-- Aplicação na VPS, TLS externo, allowlists Django e PRODUCTION/MapTiler permanecem
-  pendentes. Nenhum serviço da VPS, migration, segredo ou flag real foi alterado.
+- Gateway aplicado na VPS em 15/09/2026 após autorização humana para recriar somente
+  `instrutorpro-gateway-1`; nenhum outro container, migration, segredo ou flag real foi alterado.
+  O bind mount recebeu SHA-256 `0e51f07db4e56b5d7e5fe3dd6e1ea0985c559fc07d6a2fe2629fcf501254ded7`
+  e `nginx -t` passou antes da ativação.
+- Validação externa sem bypass TLS: domínio `200`, www `301` para o domínio canônico,
+  caminho/query preservados, Gestor `307`, licenses `404` (conectividade, não aceite
+  funcional), IP `200` e Gestor pelo IP `307`; todos com `ssl_verify_result=0`.
+- Allowlists Django e ambiente PRODUCTION/MapTiler permanecem pendentes. A breve janela
+  autorizada de recriação não foi medida e não deve ser declarada como zero downtime.
 
 ## Integração operacional preservada no gateway (11/09/2026)
 
