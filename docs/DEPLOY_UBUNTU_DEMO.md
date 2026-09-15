@@ -83,6 +83,26 @@ roll-forward. Restauração de backup deve ser ensaiada antes do piloto.
 
 ## HTTPS
 
+### Domínio controlado — preparação de 14/09/2026
+
+A configuração do gateway requer também o certificado separado
+`/etc/letsencrypt/live/instrutorprocnh.com.br/{fullchain,privkey}.pem`, cobrindo domínio
+e www. Não aplicar sem esses arquivos. Os blocos do IP e as rotas do Gestor são preservados.
+HTTP dos dois nomes e HTTPS de www redirecionam ao domínio canônico com caminho/query;
+o desafio ACME HTTP continua disponível. Isso não configura Django como PRODUCTION.
+
+Antes de aplicar, confirmar árvore VPS limpa, SHA aprovado, certificados e backup do
+arquivo ativo fora do Git. Não executar deploy-demo.sh, build, Compose up/down ou migrations
+para esta troca. Git pode substituir o inode de um bind mount: comparar o arquivo no host
+com a configuração dentro do gateway. Se divergirem, aplicar o conteúdo aprovado ao arquivo
+já montado preservando o inode, sem recriar containers. Validar `nginx -t` antes de
+`nginx -s reload`. Em falha, restaurar somente o conteúdo do backup e validar novamente.
+
+Depois testar TLS externamente sem bypass, www, IP, Gestor e allowlists Django
+hosts/CSRF/CORS. Renovação automática futura e certificado curto do IP têm gates independentes.
+Teste isolado: `scripts/test-gateway-domain.sh` em container descartável Nginx 1.28 Alpine,
+sem portas publicadas. Usa certificados fictícios e upstreams mock; nunca executar no gateway ativo.
+
 Não apresente login ou Admin por HTTP fora de uma rede confiável. Quando o domínio
 apontar para o servidor, coloque um proxy TLS (Caddy, Nginx/Certbot ou Cloudflare) na
 frente da porta interna, ajuste `CORS_ALLOWED_ORIGINS` para `https://DOMINIO`, defina

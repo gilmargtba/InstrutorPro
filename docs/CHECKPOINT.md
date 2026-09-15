@@ -1,8 +1,22 @@
 # Checkpoint do Projeto
 
-- Atualizado em: **2026-09-11**
+- Atualizado em: **2026-09-14**
 - Versão documental: **3.8**
 - Código-fonte: **Fatia 4 marketplace local concluída; dados reais e deploy bloqueados**
+
+## Fatia 6 — domínio preparado localmente (14/09/2026)
+
+- Autorização humana limitada: configurar HTTPS e www preservando IP e Gestor.
+- Certificado separado da VPS para domínio e www válido até 13/12/2026. O segundo
+  dry-run passou para ambos; a primeira falha "No such challenge" não teve causa determinada.
+  Execução automática futura ainda não comprovada.
+- Virtual hosts novos mantêm intactos os blocos do IP; ACME HTTP, Admin limitado e rotas
+  do Gestor preservados. www redireciona com caminho/query para o domínio canônico.
+- Teste isolado com Nginx 1.28, certificados fictícios e upstreams mock em
+  `scripts/test-gateway-domain.sh`: PASS (sintaxe, IP/domínio, rotas mock, ACME,
+  redirects com query e reload). Nunca executar esse script no gateway ativo.
+- Aplicação na VPS, TLS externo, allowlists Django e PRODUCTION/MapTiler permanecem
+  pendentes. Nenhum serviço da VPS, migration, segredo ou flag real foi alterado.
 
 ## Integração operacional preservada no gateway (11/09/2026)
 
