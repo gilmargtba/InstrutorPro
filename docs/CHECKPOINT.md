@@ -24,6 +24,16 @@
   funcional), IP `200` e Gestor pelo IP `307`; todos com `ssl_verify_result=0`.
 - Allowlists Django e ambiente PRODUCTION/MapTiler permanecem pendentes. A breve janela
   autorizada de recriação não foi medida e não deve ser declarada como zero downtime.
+- Perfil `compose.production.yaml`, exemplo fail-closed e validador técnico foram preparados
+  localmente em 16/09/2026. Mantêm volumes existentes, settings PRODUCTION, MFA e HTTPS;
+  dados sintéticos e todas as flags reais ficam desligados. A chave MapTiler de produção e
+  demais segredos devem ser inseridos diretamente pelo operador na VPS. O perfil ainda não
+  foi aplicado e não constitui autorização para dados reais.
+- Validação local: Compose config passou; 11 testes SaaS/produção passaram; o validador
+  rejeitou placeholders e, com valores exclusivamente fictícios, concluiu os 12 gates técnicos
+  com PASS e `REAL_PRODUCTION_AUTHORIZATION=NOT_GRANTED`. `check --deploy` manteve 12 avisos
+  OpenAPI já conhecidos e HSTS preload deliberadamente desligado. A validação também encontrou
+  e corrigiu o escaping do formatter JSON de logs, que antes impedia a inicialização do Django.
 
 ## Integração operacional preservada no gateway (11/09/2026)
 

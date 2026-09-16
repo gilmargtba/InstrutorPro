@@ -167,7 +167,7 @@ LOGGING = {
     "disable_existing_loggers": False,
     "formatters": {
         "structured": {
-            "format": '{"level":"{levelname}","logger":"{name}","message":"{message}"}',
+            "format": '{{"level":"{levelname}","logger":"{name}","message":"{message}"}}',
             "style": "{",
         }
     },

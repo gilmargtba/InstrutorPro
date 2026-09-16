@@ -13,6 +13,16 @@ somente em rede privada, sem publicação de `5432` ou `6379`.
 O gate técnico combina `manage.py check --deploy` e `manage.py production_readiness`.
 Um resultado positivo não aprova dados reais, conteúdo jurídico nem operação comercial.
 
+Use `compose.production.yaml` exclusivamente com `.env.production`, criado a partir de
+`.env.production.example`. O arquivo real é ignorado pelo Git. A composição preserva os
+volumes existentes da VPS para permitir uma transição controlada; ela não deve ser iniciada
+antes de backup atual, confirmação do SHA autorizado e validação da configuração.
+
+Depois de inserir os segredos diretamente na VPS, incluindo uma chave MapTiler própria e
+restrita de produção, execute `./scripts/validate-production-config.sh`. A validação não
+imprime os segredos, não inicia o stack persistente e não concede autorização para dados
+reais. Todas as flags de cadastro, publicação e demanda permanecem desligadas.
+
 ## Backup e restauração
 
 - executar backup PostgreSQL criptografado em storage segregado, com identidade mínima e
