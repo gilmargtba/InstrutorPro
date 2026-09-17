@@ -14,13 +14,16 @@ from rest_framework.views import APIView
 from apps.accounts.models import Account
 from apps.audit.models import AuditEvent
 from apps.discovery.models import InstructorProfile
+from apps.discovery.services import invalidate_after_owner_sensitive_edit
 from apps.people.models import Person, RoleAssignment
 from apps.territories.models import FederativeUnit
 
 from .documents import can_review_document
 from .models import (
     DataMode,
+    InstructorContactChannel,
     InstructorDocument,
+    InstructorVehicle,
     LessonRequest,
     MarketplaceEvent,
     ProfilePhoto,
@@ -294,6 +297,216 @@ class SessionMeView(APIView):
                 ).count(),
             }
         return Response(payload)
+
+
+class OwnAccountInput(serializers.Serializer):
+    student_display_name = serializers.CharField(max_length=120, required=False)
+    instructor_display_name = serializers.CharField(max_length=120, required=False)
+    phone = serializers.RegexField(r"^\+?[0-9]{10,14}$", required=False, allow_blank=True)
+    birth_date = serializers.DateField(required=False, allow_null=True)
+    student_city = serializers.CharField(max_length=100, required=False)
+    student_uf = serializers.CharField(min_length=2, max_length=2, required=False)
+    intended_category = serializers.CharField(max_length=8, required=False)
+    preferred_transmission = serializers.ChoiceField(
+        choices=["MANUAL", "AUTOMATIC", "INDIFFERENT"], required=False
+    )
+    bio = serializers.CharField(max_length=2000, required=False, allow_blank=True)
+    categories = serializers.ListField(
+        child=serializers.CharField(max_length=8), required=False, allow_empty=False
+    )
+    transmission_options = serializers.ListField(
+        child=serializers.ChoiceField(choices=["MANUAL", "AUTOMATIC"]),
+        required=False,
+        allow_empty=False,
+    )
+    whatsapp = serializers.RegexField(r"^\+55[1-9][0-9]{9,10}$", required=False)
+    price_amount = serializers.DecimalField(
+        max_digits=8, decimal_places=2, min_value=1, required=False
+    )
+    duration_minutes = serializers.IntegerField(min_value=30, max_value=240, required=False)
+    vehicle = serializers.DictField(required=False)
+
+    def validate(self, attrs):
+        unknown = set(self.initial_data) - set(self.fields)
+        if unknown:
+            raise serializers.ValidationError(
+                {name: "Este campo não pode ser alterado." for name in sorted(unknown)}
+            )
+        return attrs
+
+    def validate_vehicle(self, value):
+        allowed = {"category", "make", "model", "year", "transmission", "ownership_type"}
+        unknown = set(value) - allowed
+        if unknown:
+            raise serializers.ValidationError(
+                f"Campos não permitidos: {', '.join(sorted(unknown))}"
+            )
+        return value
+
+
+def _own_account_payload(user):
+    person = user.person
+    student = getattr(person, "student_profile", None)
+    instructor = getattr(person, "instructor_profile", None)
+    payload = {
+        "email": user.email,
+        "email_editable": False,
+        "phone": person.phone,
+        "birth_date": person.birth_date,
+        "roles": list(
+            person.role_assignments.filter(revoked_at__isnull=True).values_list("role", flat=True)
+        ),
+    }
+    if student:
+        payload["student"] = {
+            "display_name": student.display_name,
+            "city": student.city,
+            "uf": student.uf.code,
+            "intended_category": student.intended_category,
+            "preferred_transmission": student.preferred_transmission,
+        }
+    if instructor:
+        area = getattr(instructor, "service_area", None)
+        contact = getattr(instructor, "contact_channel", None)
+        vehicle = getattr(instructor, "vehicle", None)
+        offer = instructor.offers.filter(is_active=True).order_by("created_at").first()
+        payload["instructor"] = {
+            "display_name": instructor.display_name,
+            "bio": instructor.bio,
+            "categories": instructor.categories,
+            "transmission_options": instructor.transmission_options,
+            "profile_status": instructor.profile_status,
+            "verification_status": instructor.verification_status,
+            "publication_status": instructor.publication_status,
+            "whatsapp": contact.whatsapp_e164 if contact else "",
+            "price_amount": str(offer.price_amount) if offer else "",
+            "duration_minutes": offer.duration_minutes if offer else None,
+            "city": area.city if area else "",
+            "uf": area.uf if area else "",
+            "vehicle": (
+                {
+                    "category": vehicle.category,
+                    "make": vehicle.make,
+                    "model": vehicle.model,
+                    "year": vehicle.year,
+                    "transmission": vehicle.transmission,
+                    "ownership_type": vehicle.ownership_type,
+                    "verification_status": vehicle.verification_status,
+                }
+                if vehicle
+                else None
+            ),
+        }
+    return payload
+
+
+class OwnAccountView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return Response(_own_account_payload(request.user))
+
+    @transaction.atomic
+    def patch(self, request):
+        serializer = OwnAccountInput(data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        person = Person.objects.select_for_update().get(account=request.user)
+        before = _own_account_payload(request.user)
+        person_fields = []
+        for field in ("phone", "birth_date"):
+            if field in data:
+                setattr(person, field, data[field])
+                person_fields.append(field)
+        if person_fields:
+            person.save(update_fields=person_fields)
+
+        student = getattr(person, "student_profile", None)
+        if student:
+            student_fields = []
+            student_mapping = {
+                "student_display_name": "display_name",
+                "student_city": "city",
+                "intended_category": "intended_category",
+                "preferred_transmission": "preferred_transmission",
+            }
+            for input_field, model_field in student_mapping.items():
+                if input_field in data:
+                    setattr(student, model_field, data[input_field])
+                    student_fields.append(model_field)
+            if "student_uf" in data:
+                student.uf = FederativeUnit.objects.get(code=data["student_uf"].upper())
+                student_fields.append("uf")
+            if student_fields:
+                student.save(update_fields=student_fields)
+
+        instructor = getattr(person, "instructor_profile", None)
+        sensitive = set()
+        if instructor:
+            profile_fields = []
+            instructor_mapping = {
+                "instructor_display_name": "display_name",
+                "bio": "bio",
+                "categories": "categories",
+                "transmission_options": "transmission_options",
+            }
+            for input_field, model_field in instructor_mapping.items():
+                if input_field in data:
+                    if getattr(instructor, model_field) != data[input_field] and model_field in {
+                        "categories",
+                        "transmission_options",
+                    }:
+                        sensitive.add(model_field)
+                    setattr(instructor, model_field, data[input_field])
+                    profile_fields.append(model_field)
+            if profile_fields:
+                instructor.save(update_fields=profile_fields)
+            if "whatsapp" in data:
+                InstructorContactChannel.objects.update_or_create(
+                    instructor=instructor,
+                    defaults={
+                        "whatsapp_e164": data["whatsapp"],
+                        "data_mode": DataMode.SYNTHETIC if instructor.is_demo else DataMode.REAL,
+                    },
+                )
+            if "price_amount" in data or "duration_minutes" in data:
+                offer = instructor.offers.filter(is_active=True).order_by("created_at").first()
+                if offer:
+                    if "price_amount" in data:
+                        offer.price_amount = data["price_amount"]
+                    if "duration_minutes" in data:
+                        offer.duration_minutes = data["duration_minutes"]
+                    offer.save(update_fields=["price_amount", "duration_minutes", "updated_at"])
+            if "vehicle" in data:
+                vehicle = InstructorVehicle.objects.select_for_update().get(instructor=instructor)
+                for field, value in data["vehicle"].items():
+                    if getattr(vehicle, field) != value:
+                        setattr(vehicle, field, value)
+                        sensitive.add(f"vehicle.{field}")
+                vehicle.verification_status = InstructorVehicle.VerificationStatus.PENDING
+                vehicle.save()
+            if sensitive:
+                instructor = invalidate_after_owner_sensitive_edit(
+                    actor=request.user,
+                    profile=instructor,
+                    changed_fields=sensitive,
+                    request_id=getattr(request, "request_id", None),
+                )
+
+        after = _own_account_payload(request.user)
+        AuditEvent.objects.create(
+            actor=request.user,
+            action="account.own_data.updated",
+            target_type="accounts.Account",
+            target_id=request.user.id,
+            request_id=getattr(request, "request_id", None),
+            metadata={
+                "changed_fields": sorted(data),
+                "before": {key: before.get(key) for key in ("phone", "birth_date")},
+                "after": {key: after.get(key) for key in ("phone", "birth_date")},
+            },
+        )
+        return Response(after)
 
 
 def _request_instructor(request):

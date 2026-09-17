@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     "apps.audit",
     "apps.people",
     "apps.organizations",
+    "apps.privacy",
     "apps.territories",
     "apps.discovery",
     "apps.marketplace",

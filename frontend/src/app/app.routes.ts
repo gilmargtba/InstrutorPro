@@ -10,6 +10,7 @@ import { StudentMarketplaceComponent } from './features/demo/student-marketplace
 import { InstructorEntryComponent, InstructorPortalComponent, InstructorStatusComponent, LoginComponent, StudentDashboardComponent, StudentEntryComponent } from './features/demo/marketplace-entry.component';
 import { InstructorPerformanceComponent, InstructorPlanComponent, InstructorSaasDashboardComponent, LegalPlaceholderComponent } from './features/professional/saas-pages.component';
 import { environment } from '../environments/environment';
+import { AccountPrivacyComponent, MyAccountComponent, PrivacyPolicyComponent } from './features/account/account-privacy.component';
 
 export const routes: Routes = [
   { path:'', component:HomeComponent, title:'InstrutorProCNH — Sua jornada para a CNH' },
@@ -25,7 +26,9 @@ export const routes: Routes = [
   { path:'instrutor', component:InstructorSaasDashboardComponent, title:'Visão geral do instrutor — InstrutorProCNH' },
   { path:'instrutor/desempenho', component:InstructorPerformanceComponent, title:'Desempenho — InstrutorProCNH' },
   { path:'instrutor/plano', component:InstructorPlanComponent, title:'Meu plano — InstrutorProCNH' },
-  { path:'privacidade', component:LegalPlaceholderComponent, title:'Privacidade — InstrutorProCNH' },
+  { path:'privacidade', component:PrivacyPolicyComponent, title:'Política de Privacidade — InstrutorProCNH' },
+  { path:'minha-conta', component:MyAccountComponent, title:'Meus dados — InstrutorProCNH' },
+  { path:'minha-conta/privacidade', component:AccountPrivacyComponent, title:'Privacidade e meus dados — InstrutorProCNH' },
   { path:'termos', component:LegalPlaceholderComponent, title:'Termos — InstrutorProCNH' },
   { path:'contato-privacidade', component:LegalPlaceholderComponent, title:'Contato de privacidade — InstrutorProCNH' },
   { path:'profissional/instrutor/status', component:InstructorStatusComponent, title:'Status do instrutor — InstrutorProCNH' },

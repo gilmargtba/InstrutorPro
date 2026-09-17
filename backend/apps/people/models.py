@@ -9,6 +9,8 @@ class Person(models.Model):
     account = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="person"
     )
+    phone = models.CharField(max_length=20, blank=True)
+    birth_date = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

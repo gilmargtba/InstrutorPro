@@ -36,6 +36,19 @@ Fonte oficial dos comportamentos HTTP internos. Endpoints são implementados som
 
 Base: `/api/v1`.
 
+## Conta própria e privacidade — Fatia 7
+
+- `GET/PATCH /account/me/`: retorna a projeção da própria conta e aceita somente campos cadastrais
+  e comerciais autorizados. Campos desconhecidos ou críticos são rejeitados. E-mail é somente
+  leitura até existir revalidação. Alterações profissionais sensíveis invalidam verificação e
+  publicação pelo serviço de domínio.
+- `GET/POST /privacy/requests/`: lista somente pedidos do titular autenticado e registra uma nova
+  solicitação para análise. `DELETION` não elimina a conta de forma síncrona.
+- `GET /privacy/notice/`: projeção pública mínima da versão vigente e dos dados confirmados do canal
+  de privacidade.
+
+Nenhum desses contratos libera dados reais ou substitui os gates jurídicos e operacionais.
+
 ## Convenções
 
 - JSON UTF-8; arquivo usa fluxo de upload explicitamente documentado;

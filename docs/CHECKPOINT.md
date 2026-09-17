@@ -1,8 +1,25 @@
 # Checkpoint do Projeto
 
 - Atualizado em: **2026-09-16**
-- Versão documental: **3.9**
-- Código-fonte: **Fatia 6 validada na DEMO; perfil PRODUCTION preparado localmente; dados reais bloqueados**
+- Versão documental: **4.0**
+- Código-fonte: **Fatia 7 implementada localmente; dados reais e PRODUCTION continuam bloqueados**
+
+## Fatia 7 — Meus dados e privacidade (16/09/2026)
+
+- Área autenticada permite ao titular consultar e alterar somente dados cadastrais e comerciais
+  explicitamente permitidos. E-mail, papéis, plano e estados críticos permanecem fora do contrato.
+- Alteração de categoria, transmissão ou veículo do instrutor falha fechada: invalida a verificação,
+  retira a publicação e cria nova pendência e auditoria pelo serviço de domínio.
+- Solicitações de acesso, correção, exclusão, portabilidade, revogação de consentimento e informação
+  são registradas em `PrivacyRequest`; pedido de exclusão não apaga automaticamente conta, auditoria
+  ou evidência sujeita a retenção.
+- Política pública versionada identifica apenas `InstrutorProCNH`, CNPJ confirmado
+  `10.280.826/0001-05` e canal `focusgtba@gmail.com`; razão social, endereço, representante e
+  encarregado não confirmados não foram inventados.
+- Admin de contas e pessoas usa busca mínima, estados críticos somente leitura e auditoria das
+  alterações permitidas. Identidades externas e papéis não podem ser editados por esse backoffice.
+- Esta implementação não concede autorização para usuários ou dados reais. `OPEN-004`,
+  `OPEN-007`, `OPEN-008`, políticas/contratos e demais gates de produção continuam bloqueantes.
 
 ## Fatia 6 — domínio preparado localmente (14/09/2026)
 

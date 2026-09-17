@@ -77,6 +77,62 @@ def _save(instance, fields):
 
 
 @transaction.atomic
+def invalidate_after_owner_sensitive_edit(*, actor, profile, changed_fields, request_id=None):
+    """Fail closed when owner edits data used by verification/publication."""
+    p = InstructorProfile.objects.select_for_update().get(pk=profile.pk)
+    if actor != p.person.account:
+        raise WorkflowPermissionDenied("Somente a própria conta pode alterar o perfil")
+    before = {
+        "profile_status": p.profile_status,
+        "verification_status": p.verification_status,
+        "publication_status": p.publication_status,
+    }
+    p.profile_status = InstructorProfile.Status.UNDER_REVIEW
+    p.verification_status = InstructorProfile.VerificationStatus.PENDING
+    p.verified_until = None
+    p.publication_status = InstructorProfile.PublicationStatus.UNPUBLISHED
+    _save(
+        p,
+        ["profile_status", "verification_status", "verified_until", "publication_status"],
+    )
+    ProfessionalVerification.objects.create(
+        profile=p,
+        provider="OWNER_EDIT",
+        status=ProfessionalVerification.Status.PENDING,
+        actor=actor,
+        reason="OWNER_SENSITIVE_DATA_CHANGED",
+    )
+    if before["publication_status"] != p.publication_status:
+        PublicationDecision.objects.create(
+            profile=p,
+            decision=PublicationDecision.Decision.UNPUBLISH,
+            actor=actor,
+            reason="OWNER_SENSITIVE_DATA_CHANGED",
+            before=before,
+            after={
+                "profile_status": p.profile_status,
+                "verification_status": p.verification_status,
+                "publication_status": p.publication_status,
+            },
+        )
+    _audit(
+        actor,
+        "owner_sensitive_edit_invalidated",
+        p,
+        before,
+        {
+            "profile_status": p.profile_status,
+            "verification_status": p.verification_status,
+            "publication_status": p.publication_status,
+        },
+        "OWNER_SENSITIVE_DATA_CHANGED",
+        request_id,
+        changed_fields=sorted(changed_fields),
+    )
+    return p
+
+
+@transaction.atomic
 def submit_profile(*, actor, profile, reason="DEMO_ONBOARDING_SUBMISSION", request_id=None):
     p = InstructorProfile.objects.select_for_update().get(pk=profile.pk)
     if actor != p.person.account or not p.is_demo:

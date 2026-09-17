@@ -9,6 +9,7 @@ from .api import (
     InstructorSaaSSummaryView,
     LessonRequestListCreateView,
     LessonRequestTransitionView,
+    OwnAccountView,
     ProfilePhotoPrivateDownloadView,
     SessionLoginView,
     SessionLogoutView,
@@ -22,6 +23,7 @@ urlpatterns = [
     path("marketplace/session/login/", SessionLoginView.as_view()),
     path("marketplace/session/logout/", SessionLogoutView.as_view()),
     path("marketplace/session/me/", SessionMeView.as_view()),
+    path("account/me/", OwnAccountView.as_view(), name="own-account"),
     path(
         "marketplace/profile-photos/<uuid:pk>/download/",
         ProfilePhotoPrivateDownloadView.as_view(),

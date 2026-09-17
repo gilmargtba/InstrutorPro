@@ -1,5 +1,21 @@
 # LGPD e Privacidade
 
+## Fatia 7 — capacidade técnica local
+
+Foi implementado um canal autenticado para o titular registrar e acompanhar solicitações de
+acesso, correção, exclusão, portabilidade, revogação de consentimento específico e informações.
+O registro é auditado, não executa exclusão física automática e preserva a análise de obrigação
+legal, segurança, fraude e exercício regular de direitos. A política pública tem versão própria e
+publica somente a identidade confirmada: InstrutorProCNH, CNPJ `10.280.826/0001-05` e
+`focusgtba@gmail.com`. Dados não confirmados de razão social, endereço, representante e encarregado
+permanecem omitidos.
+
+A área “Meus dados” aplica minimização e autorização por proprietário. E-mail sem fluxo de
+revalidação, papéis, elegibilidade, verificação, publicação, ciclo da conta e plano não são
+editáveis. Mudança de dado profissional usado na elegibilidade retira a publicação e reabre
+verificação. Esses controles são preparação técnica e não fecham `OPEN-004/007/008/014`, não
+autorizam produção nem substituem os documentos jurídicos e operacionais pendentes.
+
 ## CODEX 02D
 
 Autorização da localização guarda finalidade, versão, timestamp e revogação. A policy exige autorização vigente; localização privada não é serializada e fica nula nas fixtures.
