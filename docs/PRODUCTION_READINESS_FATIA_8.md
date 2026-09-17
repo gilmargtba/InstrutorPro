@@ -25,13 +25,27 @@ habilitada.
 | HTTPS raiz | PASS externo | HTTP 200 e verificação TLS bem-sucedida |
 | Redirecionamento `www` | PASS externo | HTTP 301 para `https://instrutorprocnh.com.br/` |
 | Página `/privacidade` | PASS externo | HTTP 200 e verificação TLS bem-sucedida |
-| Configuração `.env.production` na VPS | BLOCKED | inspeção autenticada da VPS pendente |
-| Backup íntegro e restauração isolada | BLOCKED | backup/validação na VPS pendentes; procedimento abaixo |
-| MapTiler exclusivo de produção | BLOCKED | chave, restrições, contrato/DPA e teste na VPS pendentes (`OPEN-007`) |
+| Configuração `.env.production` na VPS | PASS técnico | arquivo em modo `600`, sem placeholders e validação fail-closed aprovada |
+| Backup íntegro | PASS técnico | dump custom de 192302 bytes validado por `pg_restore --list`, com SHA-256 registrado |
+| Restauração isolada | BLOCKED | ensaio de restauração ainda não executado (`OPEN-009`) |
+| MapTiler técnico | PASS condicional | geocoding e tile retornaram 200; chave compartilhada com DEMO por limite do plano |
+| MapTiler contratual | BLOCKED | chave dedicada, contrato/DPA, subprocessadores e retenção pendentes (`OPEN-007`) |
 | Dados jurídicos da organização | BLOCKED | não serão inventados; comprovação, endereço, representação e DPO pendentes |
 | Usuários e dados reais | BLOCKED | `OPEN-004`, `OPEN-008` e `OPEN-009`; autorização não concedida |
 | Upload real/antimalware | BLOCKED | armazenamento privado existe, scanner real não foi homologado |
 | Pagamentos | N/A | fora desta fatia e bloqueados por `OPEN-005` |
+
+## Resultado do deploy técnico em 17/09/2026
+
+- `TECHNICAL_PRODUCTION_READINESS=PASS`;
+- `PRODUCTION_CONFIG_VALIDATION=PASS`;
+- migrations pendentes: nenhuma;
+- backend, PostgreSQL e Redis saudáveis; frontend, worker, scheduler e gateway ativos;
+- raiz HTTPS `200`, `www` `301` para o domínio canônico e validação TLS sem erro;
+- `/privacidade`, `/api/v1/readiness/`, geocoding MapTiler e tile MapTiler retornaram `200`;
+- a chave MapTiler foi compartilhada conscientemente com DEMO devido ao limite de uma chave ativa
+  do plano atual; isso basta para homologação técnica, não fecha `OPEN-007`;
+- estado preservado: `REAL_PRODUCTION_AUTHORIZATION=NOT_GRANTED`.
 
 ## Inventário seguro na VPS
 

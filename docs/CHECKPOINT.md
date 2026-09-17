@@ -438,6 +438,12 @@ Marketplace (M3) somente após M2 aceito. Google é gate opcional M2.1. Pagament
 - deploy técnico, backup/restore na VPS e MapTiler exclusivo de produção ainda exigem evidência
   operacional; usuários e dados reais permanecem bloqueados por `OPEN-004/007/008/009`;
 - estado obrigatório: `REAL_PRODUCTION_AUTHORIZATION=NOT_GRANTED`.
+- deploy técnico de produção concluído em 17/09/2026: serviços saudáveis, nenhuma migration
+  pendente, HTTPS/redirect/privacidade/readiness/geocoding/tile aprovados externamente;
+- backup custom validado com 192302 bytes e SHA-256 registrado; restauração isolada permanece
+  pendente e bloqueia o fechamento de `OPEN-009`;
+- MapTiler usa temporariamente a mesma chave de DEMO por limite do plano; a integração técnica
+  passou, mas chave dedicada e obrigações contratuais continuam em `OPEN-007`.
 
 ## Regra de retomada
 
