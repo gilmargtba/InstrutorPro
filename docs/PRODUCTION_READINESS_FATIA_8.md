@@ -27,7 +27,7 @@ habilitada.
 | Página `/privacidade` | PASS externo | HTTP 200 e verificação TLS bem-sucedida |
 | Configuração `.env.production` na VPS | PASS técnico | arquivo em modo `600`, sem placeholders e validação fail-closed aprovada |
 | Backup íntegro | PASS técnico | dump custom de 192302 bytes validado por `pg_restore --list`, com SHA-256 registrado |
-| Restauração isolada | BLOCKED | ensaio de restauração ainda não executado (`OPEN-009`) |
+| Restauração isolada | PASS técnico | 48 tabelas, 55 migrations e PostGIS 3.5.2 validados; banco temporário removido |
 | MapTiler técnico | PASS condicional | geocoding e tile retornaram 200; chave compartilhada com DEMO por limite do plano |
 | MapTiler contratual | BLOCKED | chave dedicada, contrato/DPA, subprocessadores e retenção pendentes (`OPEN-007`) |
 | Dados jurídicos da organização | BLOCKED | não serão inventados; comprovação, endereço, representação e DPO pendentes |
@@ -45,6 +45,9 @@ habilitada.
 - `/privacidade`, `/api/v1/readiness/`, geocoding MapTiler e tile MapTiler retornaram `200`;
 - a chave MapTiler foi compartilhada conscientemente com DEMO devido ao limite de uma chave ativa
   do plano atual; isso basta para homologação técnica, não fecha `OPEN-007`;
+- o backup foi restaurado no banco isolado `instrutorpro_restore_drill_20260917`, com 48 tabelas,
+  55 migrations e PostGIS 3.5.2; o banco temporário foi removido após a validação e o banco ativo
+  não foi tocado;
 - estado preservado: `REAL_PRODUCTION_AUTHORIZATION=NOT_GRANTED`.
 
 ## Inventário seguro na VPS
