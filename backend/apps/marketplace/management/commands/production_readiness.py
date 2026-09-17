@@ -1,6 +1,8 @@
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
+from apps.marketplace.capabilities import CAPABILITIES, configuration_errors, enabled
+
 
 class Command(BaseCommand):
     help = "Fail-closed technical production configuration check (not business/legal approval)."
@@ -23,11 +25,7 @@ class Command(BaseCommand):
             and settings.CSRF_COOKIE_SECURE,
             "SYNTHETIC": not settings.SYNTHETIC_MARKETPLACE_ENABLED
             and not settings.SYNTHETIC_DOCUMENT_UPLOAD_ENABLED,
-            "REAL_CAPABILITIES_DISABLED": not settings.REAL_STUDENT_REGISTRATION_ENABLED
-            and not settings.REAL_INSTRUCTOR_REGISTRATION_ENABLED
-            and not settings.REAL_INSTRUCTOR_PUBLICATION_ENABLED
-            and not settings.REAL_STUDENT_DEMAND_ENABLED
-            and not settings.REAL_DOCUMENT_UPLOAD_ENABLED,
+            "REAL_CAPABILITY_CONFIGURATION": not configuration_errors(),
             "ADMIN_MFA": settings.ADMIN_MFA_REQUIRED,
             "MAPTILER": bool(settings.MAPTILER_API_KEY),
             "DATABASE": bool(settings.DATABASES["default"].get("NAME")),
@@ -39,4 +37,6 @@ class Command(BaseCommand):
         if failures:
             raise CommandError("Technical production readiness failed: " + ", ".join(failures))
         self.stdout.write(self.style.SUCCESS("TECHNICAL_PRODUCTION_READINESS=PASS"))
-        self.stdout.write("REAL_PRODUCTION_AUTHORIZATION=NOT_GRANTED")
+        self.stdout.write(f"REAL_PRODUCTION_AUTHORIZATION={settings.REAL_PRODUCTION_AUTHORIZATION}")
+        for name in CAPABILITIES:
+            self.stdout.write(f"{name}={'ENABLED' if enabled(name) else 'BLOCKED'}")

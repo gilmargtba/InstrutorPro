@@ -39,6 +39,8 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 SYNTHETIC_MARKETPLACE_ENABLED = False
 SYNTHETIC_DOCUMENT_UPLOAD_ENABLED = False
+# As capacidades granulares são lidas do ambiente e validadas pelo gate de
+# autorização. Os aliases legados continuam fechados para impedir bypass.
 REAL_STUDENT_REGISTRATION_ENABLED = False
 REAL_INSTRUCTOR_REGISTRATION_ENABLED = False
 REAL_INSTRUCTOR_PUBLICATION_ENABLED = False

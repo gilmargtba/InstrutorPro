@@ -145,6 +145,27 @@ SYNTHETIC_MARKETPLACE_ENABLED = (
 )
 if APP_ENV == "PRODUCTION" and SYNTHETIC_MARKETPLACE_ENABLED:
     raise RuntimeError("Synthetic marketplace cannot be enabled in PRODUCTION")
+REAL_PRODUCTION_AUTHORIZATION = os.getenv("REAL_PRODUCTION_AUTHORIZATION", "NOT_GRANTED")
+
+
+def _env_flag(name):
+    return os.getenv(name, "false").lower() == "true"
+
+
+REAL_ACCOUNT_REGISTRATION = _env_flag("REAL_ACCOUNT_REGISTRATION")
+REAL_PERSONAL_DATA = _env_flag("REAL_PERSONAL_DATA")
+REAL_STUDENT_USE = _env_flag("REAL_STUDENT_USE")
+REAL_MARKETPLACE_SEARCH = _env_flag("REAL_MARKETPLACE_SEARCH")
+REAL_WHATSAPP_CONTACT = _env_flag("REAL_WHATSAPP_CONTACT")
+REAL_MARKETPLACE_ANALYTICS = _env_flag("REAL_MARKETPLACE_ANALYTICS")
+REAL_INSTRUCTOR_REGISTRATION = _env_flag("REAL_INSTRUCTOR_REGISTRATION")
+REAL_DOCUMENT_UPLOADS = False
+REAL_AUTOMATIC_PUBLICATION = False
+REAL_PAYMENTS = False
+REAL_PRO_BILLING = False
+
+# Aliases legados permanecem deny-by-default e serão removidos após os fluxos reais
+# passarem a consultar exclusivamente a matriz granular.
 REAL_STUDENT_REGISTRATION_ENABLED = (
     os.getenv("REAL_STUDENT_REGISTRATION_ENABLED", "false").lower() == "true"
 )

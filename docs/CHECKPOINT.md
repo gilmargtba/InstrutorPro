@@ -452,3 +452,18 @@ Marketplace (M3) somente após M2 aceito. Google é gate opcional M2.1. Pagament
 2. Executar somente o próximo gate documental liberado (`GOV-002/003/004`) ou, após autorização humana explícita, a primeira fatia delimitada do CODEX 02.
 3. Scaffold/fundação pode seguir somente conforme `CODEX_01_FOUNDATION.md`; não liberar capacidades reguladas, usuários reais ou publicação antes dos respectivos gates.
 4. Ao concluir uma tarefa: validar, atualizar fontes/checkpoint, revisar diff e criar commit convencional.
+
+### Fatia 8B — fundação do piloto controlado (17/09/2026)
+
+- implementados os estados `NOT_GRANTED`, `CONTROLLED_PILOT` e `FULL_PRODUCTION` sem
+  autorizar este último;
+- adicionada matriz granular fail-closed para cadastro, dados pessoais, uso por aluno,
+  cadastro de instrutor, busca, WhatsApp e analytics;
+- documentos, publicação automática, pagamentos e cobrança PRO são proibidos em
+  `CONTROLLED_PILOT`, mesmo diante de configuração acidental;
+- nenhuma capability real foi habilitada ou implantada: o cadastro real está bloqueado
+  especificamente pela ausência de Termos de Uso publicados/versionados e de registro de
+  aceite conforme exigido pela própria Fatia 8B; `OPEN-004/008/009/010` permanecem abertos;
+- validação local: Ruff aprovado, 7 testes focados e suíte backend completa com 151 testes
+  aprovados; nenhuma migration necessária;
+- relatório e matriz: `docs/CONTROLLED_PILOT_FATIA_8B.md`.
