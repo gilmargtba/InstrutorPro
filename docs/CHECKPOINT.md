@@ -1,8 +1,8 @@
 # Checkpoint do Projeto
 
-- Atualizado em: **2026-09-14**
-- Versão documental: **3.8**
-- Código-fonte: **Fatia 4 marketplace local concluída; dados reais e deploy bloqueados**
+- Atualizado em: **2026-09-16**
+- Versão documental: **3.9**
+- Código-fonte: **Fatia 6 validada na DEMO; perfil PRODUCTION preparado localmente; dados reais bloqueados**
 
 ## Fatia 6 — domínio preparado localmente (14/09/2026)
 
@@ -22,8 +22,14 @@
 - Validação externa sem bypass TLS: domínio `200`, www `301` para o domínio canônico,
   caminho/query preservados, Gestor `307`, licenses `404` (conectividade, não aceite
   funcional), IP `200` e Gestor pelo IP `307`; todos com `ssl_verify_result=0`.
-- Allowlists Django e ambiente PRODUCTION/MapTiler permanecem pendentes. A breve janela
-  autorizada de recriação não foi medida e não deve ser declarada como zero downtime.
+- As allowlists Django da composição DEMO foram atualizadas na VPS em 16/09/2026 para
+  domínio, www e IP após backup protegido de `.env.demo`. Somente
+  `instrutorpro-backend-1` foi recriado, com autorização humana; nenhum outro serviço ou
+  volume foi alterado. A janela não foi medida e não deve ser declarada como zero downtime.
+- Após a recriação, readiness, geocodificação de Porto Alegre e tile MapTiler responderam
+  `200`; o backend confirmou domínio/www em `ALLOWED_HOSTS`, origens HTTPS em CORS/CSRF e
+  chave MapTiler configurada sem expor seu valor. Essa evidência valida a DEMO técnica e
+  não comprova requisitos contratuais do provider nem autoriza dados reais.
 - Perfil `compose.production.yaml`, exemplo fail-closed e validador técnico foram preparados
   localmente em 16/09/2026. Mantêm volumes existentes, settings PRODUCTION, MFA e HTTPS;
   dados sintéticos e todas as flags reais ficam desligados. A chave MapTiler de produção e
