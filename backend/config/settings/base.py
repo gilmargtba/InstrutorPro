@@ -182,5 +182,6 @@ MEDIA_ROOT = Path(os.getenv("PRIVATE_DOCUMENT_ROOT", BASE_DIR / "private_documen
 SYNTHETIC_DOCUMENT_UPLOAD_ENABLED = (
     os.getenv("SYNTHETIC_DOCUMENT_UPLOAD_ENABLED", "false").lower() == "true"
 )
+# Deliberately not environment-configurable until private storage and malware scanning are approved.
 REAL_DOCUMENT_UPLOAD_ENABLED = False
 INSTRUCTOR_DOCUMENT_MAX_BYTES = int(os.getenv("INSTRUCTOR_DOCUMENT_MAX_BYTES", "5242880"))

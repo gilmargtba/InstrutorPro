@@ -428,6 +428,17 @@ Pessoa cria conta, verifica contatos, aceita termos e recebe `INSTRUCTOR` confor
 
 Marketplace (M3) somente após M2 aceito. Google é gate opcional M2.1. Pagamento só após `OPEN-005`; piloto só após M6 e checklist de `PILOT.md`.
 
+### Fatia 8 — prontidão técnica sem autorização de dados reais
+
+- adicionada validação fail-closed para todas as capacidades `REAL_*`, inclusive upload documental;
+- criada rotina de backup PostgreSQL em formato custom, com validação por `pg_restore --list`,
+  SHA-256, permissão `600` e armazenamento fora do repositório;
+- criado inventário seguro da VPS que não imprime segredos e exige `.env.production` em modo `600`;
+- DNS, HTTPS, redirecionamento de `www` e `/privacidade` foram verificados externamente;
+- deploy técnico, backup/restore na VPS e MapTiler exclusivo de produção ainda exigem evidência
+  operacional; usuários e dados reais permanecem bloqueados por `OPEN-004/007/008/009`;
+- estado obrigatório: `REAL_PRODUCTION_AUTHORIZATION=NOT_GRANTED`.
+
 ## Regra de retomada
 
 1. Ler `README.md`, `DECISIONS.md`, `IMPLEMENTATION_PLAN.md`, `BACKLOG.md` e este arquivo.

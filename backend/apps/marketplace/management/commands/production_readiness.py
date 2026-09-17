@@ -23,6 +23,11 @@ class Command(BaseCommand):
             and settings.CSRF_COOKIE_SECURE,
             "SYNTHETIC": not settings.SYNTHETIC_MARKETPLACE_ENABLED
             and not settings.SYNTHETIC_DOCUMENT_UPLOAD_ENABLED,
+            "REAL_CAPABILITIES_DISABLED": not settings.REAL_STUDENT_REGISTRATION_ENABLED
+            and not settings.REAL_INSTRUCTOR_REGISTRATION_ENABLED
+            and not settings.REAL_INSTRUCTOR_PUBLICATION_ENABLED
+            and not settings.REAL_STUDENT_DEMAND_ENABLED
+            and not settings.REAL_DOCUMENT_UPLOAD_ENABLED,
             "ADMIN_MFA": settings.ADMIN_MFA_REQUIRED,
             "MAPTILER": bool(settings.MAPTILER_API_KEY),
             "DATABASE": bool(settings.DATABASES["default"].get("NAME")),
