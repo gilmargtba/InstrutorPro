@@ -11,6 +11,7 @@ import { InstructorEntryComponent, InstructorPortalComponent, InstructorStatusCo
 import { InstructorPerformanceComponent, InstructorPlanComponent, InstructorSaasDashboardComponent, LegalPlaceholderComponent } from './features/professional/saas-pages.component';
 import { environment } from '../environments/environment';
 import { AccountPrivacyComponent, MyAccountComponent, PrivacyPolicyComponent } from './features/account/account-privacy.component';
+import { LegalTermsComponent } from './features/account/legal-terms.component';
 
 export const routes: Routes = [
   { path:'', component:HomeComponent, title:'InstrutorProCNH — Sua jornada para a CNH' },
@@ -29,7 +30,9 @@ export const routes: Routes = [
   { path:'privacidade', component:PrivacyPolicyComponent, title:'Política de Privacidade — InstrutorProCNH' },
   { path:'minha-conta', component:MyAccountComponent, title:'Meus dados — InstrutorProCNH' },
   { path:'minha-conta/privacidade', component:AccountPrivacyComponent, title:'Privacidade e meus dados — InstrutorProCNH' },
-  { path:'termos', component:LegalPlaceholderComponent, title:'Termos — InstrutorProCNH' },
+  { path:'termos', redirectTo:'termos/aluno', pathMatch:'full' },
+  { path:'termos/aluno', component:LegalTermsComponent, data:{audience:'student'}, title:'Termos do Aluno — InstrutorProCNH' },
+  { path:'termos/instrutor', component:LegalTermsComponent, data:{audience:'instructor'}, title:'Termos do Instrutor — InstrutorProCNH' },
   { path:'contato-privacidade', component:LegalPlaceholderComponent, title:'Contato de privacidade — InstrutorProCNH' },
   { path:'profissional/instrutor/status', component:InstructorStatusComponent, title:'Status do instrutor — InstrutorProCNH' },
   ...(environment.production ? [] : [

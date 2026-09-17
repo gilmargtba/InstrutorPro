@@ -192,6 +192,18 @@ PATCH  /student/profile
 
 Aceite obrigatório registra contrato/termo exato em `LegalAcceptanceRecord`; concessão e retirada opcionais registram `ConsentRecord` por finalidade. Nenhuma rota de aceite concede consentimento, e retirada não desfaz tratamento anterior lícito nem impede finalidade sustentada por outra base informada.
 
+### Termos públicos e aceite versionado
+
+- `GET /api/v1/legal/documents/student/` e `GET /api/v1/legal/documents/instructor/`
+  são públicos e retornam somente a versão vigente, data de vigência, conteúdo, SHA-256 e canal
+  de contato;
+- `POST /api/v1/legal/acceptances/` exige sessão autenticada, audiência, aceite explícito dos
+  Termos e ciência explícita da Política de Privacidade vigente;
+- o registro referencia as duas versões exatas, é idempotente para a mesma combinação e não
+  cria `ConsentRecord`;
+- `GET /api/v1/legal/acceptances/` retorna exclusivamente o histórico da própria conta;
+- documento publicado e registro de aceite são imutáveis; alteração material cria nova versão.
+
 O contrato futuro de papéis deverá permitir concessões idempotentes de `STUDENT`, `INSTRUCTOR`, `DOCTOR` e `PSYCHOLOGIST` conforme policy explícita de compatibilidade. Combinação incompatível retorna erro estável sem remover papéis existentes. Cada endpoint protegido exige papel, perfil, verificação e autorização próprios; papel coincidente não concede publicação nem capacidade transitiva. Administração de `Clinic` usa recurso organizacional `ClinicMembership`, não papel pessoal `CLINIC`. O path e payload definitivos serão estabilizados antes da implementação; o antigo contrato singular `POST /me/business-role` está substituído.
 
 ## Credenciamento do instrutor — A12–A17

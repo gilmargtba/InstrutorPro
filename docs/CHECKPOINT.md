@@ -467,3 +467,20 @@ Marketplace (M3) somente após M2 aceito. Google é gate opcional M2.1. Pagament
 - validação local: Ruff aprovado, 7 testes focados e suíte backend completa com 151 testes
   aprovados; nenhuma migration necessária;
 - relatório e matriz: `docs/CONTROLLED_PILOT_FATIA_8B.md`.
+
+### Fatia 8C — Termos e aceite versionado (17/09/2026)
+
+- publicados no banco os Termos de Uso 1.0 separados para aluno e instrutor, com título,
+  audiência, vigência, conteúdo integral fornecido, estado e SHA-256;
+- criadas páginas públicas `/termos/aluno` e `/termos/instrutor`, além de APIs públicas dos
+  documentos vigentes;
+- `LegalAcceptanceRecord` referencia conta, versão exata dos Termos, Política de Privacidade
+  vigente, instante e request ID; o aceite é idempotente, auditado e separado de consentimento;
+- conteúdo publicado e aceite são imutáveis; alteração material requer nova versão;
+- histórico é restrito à própria conta e o Admin não pode editar ou excluir aceites;
+- migrations sem deriva, Ruff aprovado, frontend compilado e suíte backend com 157 testes
+  aprovados;
+- nenhuma capability real foi ativada ou implantada. O anexo recebido termina truncado no item
+  7, antes dos critérios completos de integração com cadastro/deploy; essa autorização ausente
+  não foi presumida. `FULL_PRODUCTION`, documentos, pagamentos, PRO e publicação automática
+  continuam bloqueados.

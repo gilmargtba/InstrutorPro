@@ -3,7 +3,35 @@ from django.utils import timezone
 
 from apps.audit.models import AuditEvent
 
-from .models import PrivacyNotice, PrivacyRequest
+from .models import LegalAcceptanceRecord, LegalDocument, PrivacyNotice, PrivacyRequest
+
+
+@admin.register(LegalDocument)
+class LegalDocumentAdmin(admin.ModelAdmin):
+    list_display = ("title", "audience", "version", "effective_at", "is_active")
+    list_filter = ("audience", "is_active")
+    readonly_fields = ("content_sha256", "created_at")
+
+
+@admin.register(LegalAcceptanceRecord)
+class LegalAcceptanceRecordAdmin(admin.ModelAdmin):
+    list_display = ("account", "terms_document", "privacy_notice", "accepted_at")
+    readonly_fields = (
+        "account",
+        "terms_document",
+        "privacy_notice",
+        "accepted_at",
+        "request_id",
+    )
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 @admin.register(PrivacyNotice)
