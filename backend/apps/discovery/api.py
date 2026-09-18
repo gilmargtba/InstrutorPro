@@ -10,6 +10,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import serializers, status
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -21,7 +22,8 @@ from apps.marketplace.analytics import (
     record_marketplace_event,
     whatsapp_destination,
 )
-from apps.marketplace.models import MarketplaceEvent
+from apps.marketplace.capabilities import enabled
+from apps.marketplace.models import DataMode, MarketplaceEvent
 from apps.people.models import Person, RoleAssignment
 
 from .geocoding import LocationNotFound, ProviderUnavailable, get_geocoding_provider
@@ -195,7 +197,12 @@ class InstructorSearchView(APIView):
 
     @staticmethod
     def _commercial_summary(row):
-        offers = [offer for offer in row.offers.all() if offer.is_active]
+        expected_mode = DataMode.SYNTHETIC if row.is_demo else DataMode.REAL
+        offers = [
+            offer
+            for offer in row.offers.all()
+            if offer.is_active and offer.data_mode == expected_mode
+        ]
         offer = min(offers, key=lambda item: item.price_amount)
         vehicle = getattr(row, "vehicle", None)
         return {
@@ -271,7 +278,14 @@ class PublicInstructorProfileView(InstructorSearchView):
     def get(self, request, pk):
         row = get_object_or_404(
             published_instructor_profiles()
-            .filter(offers__is_active=True)
+            .filter(
+                offers__is_active=True,
+                offers__data_mode=(
+                    DataMode.SYNTHETIC
+                    if settings.SYNTHETIC_MARKETPLACE_ENABLED
+                    else DataMode.REAL
+                ),
+            )
             .select_related("service_area", "vehicle")
             .prefetch_related("offers", "profile_photos", "documents__requirement")
             .distinct(),
@@ -323,7 +337,14 @@ class WhatsAppContactView(APIView):
             published_instructor_profiles().select_related("service_area", "contact_channel"),
             pk=pk,
             contact_channel__is_active=True,
+            contact_channel__data_mode=(
+                DataMode.SYNTHETIC
+                if settings.SYNTHETIC_MARKETPLACE_ENABLED
+                else DataMode.REAL
+            ),
         )
+        if not row.is_demo and not enabled("REAL_WHATSAPP_CONTACT"):
+            raise PermissionDenied("Contato real por WhatsApp não está autorizado.")
         category = serializer.validated_data["category"]
         _, unique = record_marketplace_event(
             request=request,

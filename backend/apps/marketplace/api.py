@@ -7,6 +7,7 @@ from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import serializers, status
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -16,8 +17,10 @@ from apps.audit.models import AuditEvent
 from apps.discovery.models import InstructorProfile
 from apps.discovery.services import invalidate_after_owner_sensitive_edit
 from apps.people.models import Person, RoleAssignment
+from apps.privacy.models import LegalAcceptanceRecord, LegalDocument, PrivacyNotice
 from apps.territories.models import FederativeUnit
 
+from .capabilities import enabled
 from .documents import can_review_document
 from .models import (
     DataMode,
@@ -36,6 +39,135 @@ from .services import transition_lesson_request
 
 def _synthetic_enabled():
     return settings.SYNTHETIC_MARKETPLACE_ENABLED
+
+
+class RealRegistrationSerializer(serializers.Serializer):
+    role = serializers.ChoiceField(choices=["STUDENT", "INSTRUCTOR"])
+    username = serializers.RegexField(r"^[a-zA-Z0-9_.-]+$", max_length=80)
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True, min_length=10)
+    password_confirmation = serializers.CharField(write_only=True, min_length=10)
+    display_name = serializers.CharField(max_length=120)
+    birth_date = serializers.DateField()
+    city = serializers.CharField(max_length=100, required=False)
+    uf = serializers.CharField(min_length=2, max_length=2, required=False)
+    terms_version = serializers.CharField(max_length=40)
+    privacy_version = serializers.CharField(max_length=40)
+    terms_accepted = serializers.BooleanField()
+    privacy_acknowledged = serializers.BooleanField()
+
+    def validate(self, attrs):
+        role = attrs["role"]
+        required_capabilities = ["REAL_ACCOUNT_REGISTRATION", "REAL_PERSONAL_DATA"]
+        required_capabilities.append(
+            "REAL_STUDENT_USE" if role == "STUDENT" else "REAL_INSTRUCTOR_REGISTRATION"
+        )
+        if not all(enabled(name) for name in required_capabilities):
+            raise PermissionDenied("Cadastro real não está autorizado para esta audiência.")
+        if not attrs["terms_accepted"] or not attrs["privacy_acknowledged"]:
+            raise serializers.ValidationError("Os aceites obrigatórios devem ser confirmados.")
+        if attrs["password"] != attrs["password_confirmation"]:
+            raise serializers.ValidationError({"password_confirmation": "As senhas não coincidem."})
+        today = timezone.localdate()
+        age = today.year - attrs["birth_date"].year - (
+            (today.month, today.day) < (attrs["birth_date"].month, attrs["birth_date"].day)
+        )
+        if age < 18:
+            raise serializers.ValidationError(
+                {"birth_date": "Cadastro restrito a maiores de 18 anos."}
+            )
+        if Account.objects.filter(email__iexact=attrs["email"]).exists():
+            raise serializers.ValidationError({"email": "Já existe uma conta com este e-mail."})
+        if Account.objects.filter(username__iexact=attrs["username"]).exists():
+            raise serializers.ValidationError({"username": "Este usuário já está em uso."})
+        if role == "STUDENT" and (not attrs.get("city") or not attrs.get("uf")):
+            raise serializers.ValidationError("Cidade e UF são obrigatórias para aluno.")
+        audience = (
+            LegalDocument.Audience.STUDENT
+            if role == "STUDENT"
+            else LegalDocument.Audience.INSTRUCTOR
+        )
+        terms = LegalDocument.objects.filter(
+            document_type=LegalDocument.Type.TERMS,
+            audience=audience,
+            version=attrs["terms_version"],
+            is_active=True,
+            effective_at__lte=timezone.now(),
+        ).first()
+        privacy = PrivacyNotice.objects.filter(
+            version=attrs["privacy_version"],
+            is_current=True,
+            published_at__lte=timezone.now(),
+        ).first()
+        if not terms or not privacy:
+            raise serializers.ValidationError("As versões jurídicas informadas não estão vigentes.")
+        attrs["terms_document"] = terms
+        attrs["privacy_notice"] = privacy
+        if role == "STUDENT":
+            try:
+                attrs["uf_object"] = FederativeUnit.objects.get(code=attrs["uf"].upper())
+            except FederativeUnit.DoesNotExist as exc:
+                raise serializers.ValidationError({"uf": "UF inválida."}) from exc
+        return attrs
+
+
+class RealRegistrationView(APIView):
+    permission_classes = [AllowAny]
+    authentication_classes = []
+
+    @transaction.atomic
+    def post(self, request):
+        serializer = RealRegistrationSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        account = Account.objects.create_user(
+            username=data["username"], email=data["email"], password=data["password"]
+        )
+        person = Person.objects.create(account=account, birth_date=data["birth_date"])
+        RoleAssignment.objects.create(
+            person=person, role=data["role"], grant_reason="CONTROLLED_PILOT_REGISTRATION"
+        )
+        if data["role"] == "STUDENT":
+            StudentProfile.objects.create(
+                person=person,
+                display_name=data["display_name"],
+                city=data["city"],
+                uf=data["uf_object"],
+                data_mode=DataMode.REAL,
+            )
+        else:
+            InstructorProfile.objects.create(
+                person=person,
+                display_name=data["display_name"],
+                categories=["B"],
+                transmission_options=[],
+                is_demo=False,
+            )
+        acceptance = LegalAcceptanceRecord.objects.create(
+            account=account,
+            terms_document=data["terms_document"],
+            privacy_notice=data["privacy_notice"],
+            request_id=getattr(request, "request_id", None),
+        )
+        AuditEvent.objects.create(
+            actor=account,
+            action="marketplace.real_account.registered",
+            target_type="accounts.Account",
+            target_id=account.id,
+            request_id=getattr(request, "request_id", None),
+            metadata={
+                "role": data["role"],
+                "terms_version": data["terms_document"].version,
+                "privacy_version": data["privacy_notice"].version,
+                "acceptance_id": str(acceptance.id),
+            },
+        )
+        login(request, account, backend="django.contrib.auth.backends.ModelBackend")
+        get_token(request)
+        return Response(
+            {"id": account.id, "role": data["role"], "acceptance_id": acceptance.id},
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class InstructorDocumentDownloadView(APIView):

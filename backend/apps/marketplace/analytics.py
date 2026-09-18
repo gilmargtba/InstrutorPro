@@ -4,6 +4,7 @@ from urllib.parse import quote
 from django.conf import settings
 from django.utils import timezone
 
+from .capabilities import enabled
 from .models import DataMode, MarketplaceEvent
 
 
@@ -26,6 +27,11 @@ def anonymous_session_hash(request) -> str:
 def record_marketplace_event(
     *, request, event_type, instructor=None, source="", category="", city="", uf=""
 ):
+    is_real = not settings.SYNTHETIC_MARKETPLACE_ENABLED and (
+        instructor is None or not instructor.is_demo
+    )
+    if is_real and not enabled("REAL_MARKETPLACE_ANALYTICS"):
+        return None, False
     now = timezone.now()
     bucket = now.replace(minute=0, second=0, microsecond=0)
     event, created = MarketplaceEvent.objects.get_or_create(

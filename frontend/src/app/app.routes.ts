@@ -12,6 +12,7 @@ import { InstructorPerformanceComponent, InstructorPlanComponent, InstructorSaas
 import { environment } from '../environments/environment';
 import { AccountPrivacyComponent, MyAccountComponent, PrivacyPolicyComponent } from './features/account/account-privacy.component';
 import { LegalTermsComponent } from './features/account/legal-terms.component';
+import { RealRegistrationComponent } from './features/account/real-registration.component';
 
 export const routes: Routes = [
   { path:'', component:HomeComponent, title:'InstrutorProCNH — Sua jornada para a CNH' },
@@ -33,11 +34,12 @@ export const routes: Routes = [
   { path:'termos', redirectTo:'termos/aluno', pathMatch:'full' },
   { path:'termos/aluno', component:LegalTermsComponent, data:{audience:'student'}, title:'Termos do Aluno — InstrutorProCNH' },
   { path:'termos/instrutor', component:LegalTermsComponent, data:{audience:'instructor'}, title:'Termos do Instrutor — InstrutorProCNH' },
+  { path:'cadastro/aluno', component:RealRegistrationComponent, data:{role:'STUDENT'}, title:'Criar conta de aluno — InstrutorProCNH' },
+  { path:'cadastro/instrutor', component:RealRegistrationComponent, data:{role:'INSTRUCTOR'}, title:'Criar conta de instrutor — InstrutorProCNH' },
   { path:'contato-privacidade', component:LegalPlaceholderComponent, title:'Contato de privacidade — InstrutorProCNH' },
   { path:'profissional/instrutor/status', component:InstructorStatusComponent, title:'Status do instrutor — InstrutorProCNH' },
   ...(environment.production ? [] : [
     { path:'aluno', component:StudentEntryComponent, title:'Aluno — InstrutorProCNH' },
-    { path:'cadastro/aluno', component:StudentMarketplaceComponent, title:'Criar conta de aluno — InstrutorProCNH' },
     { path:'profissional/instrutor/entrada', component:InstructorEntryComponent, title:'Cadastro do instrutor — InstrutorProCNH' },
     { path:'profissional/instrutor', component:InstructorPortalComponent, title:'Painel do instrutor — InstrutorProCNH' },
     { path:'profissional/instrutor/onboarding', component:InstructorOnboardingComponent, title:'Quero atuar como instrutor — InstrutorProCNH' },

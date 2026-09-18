@@ -204,6 +204,17 @@ Aceite obrigatório registra contrato/termo exato em `LegalAcceptanceRecord`; co
 - `GET /api/v1/legal/acceptances/` retorna exclusivamente o histórico da própria conta;
 - documento publicado e registro de aceite são imutáveis; alteração material cria nova versão.
 
+### Cadastro transacional do piloto controlado
+
+- `POST /api/v1/marketplace/accounts/register/` recebe audiência, dados mínimos, versões exatas,
+  aceite explícito dos Termos e ciência da Política;
+- o backend confere as versões vigentes e cria conta, pessoa, papel, perfil, aceite e auditoria na
+  mesma transação; qualquer falha desfaz o conjunto completo;
+- a operação exige `CONTROLLED_PILOT` e as capabilities de cadastro, dados pessoais e audiência;
+  com os gates desligados responde de forma fechada e não cria conta;
+- instrutor real nasce não verificado e não publicado. A rota não recebe documento profissional,
+  decisão de verificação, decisão de publicação, papel adicional nem estado crítico do cliente.
+
 O contrato futuro de papéis deverá permitir concessões idempotentes de `STUDENT`, `INSTRUCTOR`, `DOCTOR` e `PSYCHOLOGIST` conforme policy explícita de compatibilidade. Combinação incompatível retorna erro estável sem remover papéis existentes. Cada endpoint protegido exige papel, perfil, verificação e autorização próprios; papel coincidente não concede publicação nem capacidade transitiva. Administração de `Clinic` usa recurso organizacional `ClinicMembership`, não papel pessoal `CLINIC`. O path e payload definitivos serão estabilizados antes da implementação; o antigo contrato singular `POST /me/business-role` está substituído.
 
 ## Credenciamento do instrutor — A12–A17

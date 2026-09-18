@@ -484,3 +484,15 @@ Marketplace (M3) somente após M2 aceito. Google é gate opcional M2.1. Pagament
   7, antes dos critérios completos de integração com cadastro/deploy; essa autorização ausente
   não foi presumida. `FULL_PRODUCTION`, documentos, pagamentos, PRO e publicação automática
   continuam bloqueados.
+
+### Fatia 8D — integração local do cadastro real (18/09/2026)
+
+- cadastro de aluno e instrutor foi ligado aos Termos e à Política vigentes numa única transação;
+  falha de validação ou persistência do aceite desfaz conta, pessoa, papel e perfil;
+- as rotas públicas de cadastro e o selector real foram preparados com separação explícita entre
+  ofertas/contatos `SYNTHETIC` e `REAL`; analytics e WhatsApp reais falham fechados por capability;
+- perfis de instrutor nascem `UNPUBLISHED/NOT_STARTED`; upload documental e publicação automática
+  permanecem desabilitados;
+- a matriz `CONTROLLED_PILOT_RETENTION_FATIA_8D.md` classifica `OPEN-008` como **PARTIAL** porque
+  bases, papéis, exceções e prazos pós-encerramento ainda exigem decisão jurídica formal;
+- por consequência, nenhuma capability real foi habilitada e nenhum deploy da Fatia 8D foi feito.
