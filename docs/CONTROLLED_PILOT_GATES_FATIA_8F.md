@@ -3,7 +3,7 @@
 - Versão: `1.0`
 - Avaliação: `18/09/2026`
 - Escopo: Porto Alegre/RS, categoria B, sem pagamentos, documentos ou publicação automática
-- Estado: propostas objetivas aguardando decisão do proprietário; nenhuma capability ativada
+- Estado: aprovação parcial do proprietário registrada; nenhuma capability ativada
 
 Este documento refina somente o `CONTROLLED_PILOT`. Não é parecer jurídico, não altera
 `FULL_PRODUCTION` e não substitui aprovação expressa do proprietário ou revisão de fornecedor.
@@ -47,16 +47,16 @@ jurídica. Aceite de Termos não é consentimento universal.
 | busca manual | responder consulta por cidade/bairro/CEP | procedimentos preliminares solicitados pelo titular | não | `OPERATIONALLY_DEFINED`; provider pendente |
 | localização | usar entrada manual; GPS somente por ação explícita, sem persistência precisa | procedimentos preliminares; consentimento apenas se futura finalidade opcional realmente exigir | não no desenho atual | `OPERATIONALLY_DEFINED` |
 | link WhatsApp | abrir serviço externo por ação do usuário | procedimentos preliminares solicitados | não | `OPERATIONALLY_DEFINED`; aviso externo pendente |
-| analytics mínimo | medir quatro eventos do piloto | legítimo interesse | sim | LIA-8F-01 `PASS`, condicionada à aprovação de 90 dias |
+| analytics mínimo | medir quatro eventos do piloto | legítimo interesse | sim | LIA-8F-01 `OWNER_APPROVED` em 18/09/2026 |
 | registro legal de acesso | obrigação de guarda aplicável | cumprimento de obrigação legal/regulatória | não | `OPERATIONALLY_DEFINED` |
-| telemetria adicional de auditoria/segurança | prevenção, detecção e responsabilização | legítimo interesse | sim | LIA-8F-02 `PASS`, com minimização e oposição quando aplicável |
+| telemetria adicional de auditoria/segurança | prevenção, detecção e responsabilização | legítimo interesse | sim | LIA-8F-02 `OWNER_APPROVED` em 18/09/2026 |
 | PrivacyRequest | atender e comprovar direitos | obrigação legal/regulatória e exercício regular de direitos | não | `OPERATIONALLY_DEFINED` |
 | Verification | revisão administrativa solicitada, sem arquivo | execução de contrato e exercício regular de direitos | não | `OPERATIONALLY_DEFINED` |
 | PublicationDecision | controlar publicação manual e contestável | execução de contrato e exercício regular de direitos | não | `OPERATIONALLY_DEFINED` |
 
 ## 3. Testes de balanceamento
 
-### LIA-8F-01 — analytics mínimo do marketplace: `PASS`
+### LIA-8F-01 — analytics mínimo do marketplace: `OWNER_APPROVED`
 
 - finalidade/interesse: medir funcionamento e erros do piloto, não publicidade ou perfilização;
 - necessidade: somente `SEARCH_PERFORMED`, `SEARCH_RESULT_IMPRESSION`,
@@ -68,10 +68,10 @@ jurídica. Aceite de Termos não é consentimento universal.
 - salvaguardas: sem telefone, CPF, endereço, conteúdo, documento, GPS preciso ou fingerprint;
   deduplicação, acesso restrito, 90 dias propostos e posterior anonimização/eliminação;
 - oposição: `PrivacyRequest` e interrupção de analytics não essencial quando tecnicamente aplicável;
-- conclusão: interesse não prevalece sem as salvaguardas; com elas, teste interno `PASS`. A janela
-  de 90 dias ainda requer aprovação do proprietário.
+- conclusão: interesse não prevalece sem as salvaguardas; com elas, teste interno `PASS`. O
+  proprietário aprovou os quatro eventos e a janela operacional de 90 dias em 18/09/2026.
 
-### LIA-8F-02 — telemetria adicional de auditoria/segurança: `PASS`
+### LIA-8F-02 — telemetria adicional de auditoria/segurança: `OWNER_APPROVED`
 
 - finalidade/interesse: detectar abuso, investigar incidente e demonstrar ação administrativa;
 - necessidade: metadados mínimos de ator, ação, resultado, objeto, request ID e instante;
@@ -81,11 +81,13 @@ jurídica. Aceite de Termos não é consentimento universal.
 - direitos/liberdades: acesso restrito, explicação e contestação; nenhuma decisão final automática;
 - salvaguardas: minimização, integridade append-only, segregação, legal hold justificado e descarte;
 - oposição: aplicável à telemetria facultativa, sem suprimir guarda obrigatória ou evidência válida;
-- conclusão: `PASS` interno no recorte mínimo. Expansão de finalidade exige nova LIA.
+- conclusão: `PASS` interno no recorte mínimo e `OWNER_APPROVED` em 18/09/2026. Expansão de
+  finalidade exige nova LIA.
 
 ## 4. RIPD
 
-`RIPD_STATUS=NOT_REQUIRED_FOR_CURRENT_SCOPE` como avaliação operacional, não dispensa geral.
+`RIPD_STATUS=NOT_REQUIRED_FOR_CURRENT_SCOPE`, aprovado pelo proprietário em 18/09/2026 como
+avaliação operacional, não dispensa permanente.
 
 O piloto proposto tem no máximo 13 adultos, uma cidade/categoria, não usa dados sensíveis,
 crianças, biometria, documentos, pagamentos, GPS persistente, tracking contínuo ou decisão
@@ -110,7 +112,7 @@ Os prazos são decisões operacionais conservadoras, não “prazos exigidos pel
 | `AUDIT_EVIDENCE` | durante piloto | fim do piloto restringe acesso | `RETAIN` somente para segurança/defesa; demais `DELETE`/`ANONYMIZE` | prazo final pendente; legal hold deve ter justificativa e owner | jurídica antes de descarte definitivo |
 | `LEGAL_ACCEPTANCE` | relação ativa | encerramento bloqueia uso comum | `RETAIN` com acesso restrito | provar versão/aceite; prazo final pendente | jurídica para prazo final |
 | `PRIVACY_REQUEST` | tramitação | encerramento do pedido | `RETAIN` com acesso restrito | demonstrar atendimento; prazo final pendente | jurídica para prazo final |
-| `MARKETPLACE_ANALYTICS` | janela móvel do piloto | 90 dias após evento | `ANONYMIZE` irreversivelmente ou `DELETE` | proposta operacional do piloto | aprovação do proprietário |
+| `MARKETPLACE_ANALYTICS` | janela móvel do piloto | 90 dias após evento | `ANONYMIZE` irreversivelmente ou `DELETE` | decisão operacional aprovada em 18/09/2026 | implementação e teste do descarte |
 | `PROFESSIONAL_VERIFICATION` | enquanto decisão/vigência aplicável | despublicação, revogação ou fim da relação | `RETAIN` evidência mínima; excluir excesso | defesa/contestação, sem documento | jurídica para prazo final |
 
 Encerramento usa `PrivacyRequest` e registra `DELETE`, `ANONYMIZE`,
@@ -119,14 +121,15 @@ ser restaurados para reativar dado eliminado fora de uma recuperação autorizad
 
 ## 6. WhatsApp e MapTiler
 
-### WhatsApp: `FOLLOW_UP`
+### WhatsApp: `OWNER_APPROVED`
 
 A plataforma trata somente o clique/intenção, identificador da oferta e metadados mínimos. O
 telefone profissional é usado para formar o link, mas não entra no evento analítico; conteúdo,
 áudio, imagem e conversa não são lidos ou armazenados. Após o clique, há interação externa por
 escolha do usuário. A revisão do serviço externo e um aviso contextual são follow-up para este
-link simples, não blocker do cadastro. Tornam-se blocker se houver SDK, API, mensageria integrada,
-sincronização de contatos ou ingestão de conversa.
+link simples foi aprovado pelo proprietário em 18/09/2026, preservadas essas limitações. Nova
+revisão torna-se blocker se houver SDK, API, mensageria integrada, sincronização de contatos ou
+ingestão de conversa.
 
 ### MapTiler: `PENDING_VENDOR_REVIEW`
 
@@ -155,8 +158,8 @@ sincronização de contatos ou ingestão de conversa.
 | orçamento empresarial/HA | fora do recorte sem pagamentos | `REQUIRED_FULL_PRODUCTION` |
 | dashboard adicional | útil, não condiciona primeira conta se logs/readiness existem | `OPTIONAL` |
 
-`OPEN-009_CONTROLLED_PILOT=AWAITING_OWNER_APPROVAL`. O restore já foi ensaiado na Fatia 8, mas
-deve ser repetido imediatamente antes da ativação para satisfazer a proposta.
+O proprietário aprovou o perfil em 18/09/2026. `OPEN-009_CONTROLLED_PILOT=BLOCKED_TECHNICAL`
+somente até repetir e documentar o restore imediatamente antes da ativação.
 
 ## 8. OPEN-010 — plano proposto
 
@@ -172,41 +175,42 @@ deve ser repetido imediatamente antes da ativação para satisfazer a proposta.
   `PrivacyRequest`; clique não é venda;
 - revisão: `GO`, `ITERATE` ou `NO_GO` após 30 dias, sem expansão automática ou meta comercial.
 
-`OPEN-010_CONTROLLED_PILOT=AWAITING_OWNER_APPROVAL`.
+O proprietário aprovou integralmente este recorte em 18/09/2026.
+`OPEN-010_CONTROLLED_PILOT=PASS`.
 
-## 9. Decisões que Gilmar precisa aprovar
+## 9. Registro da aprovação parcial do proprietário
 
 | Decisão | Proposta | Risco | Impacto se não aprovar |
 | --- | --- | --- | --- |
-| enquadramento/DPO | fornecer os seis dados empresariais e decidir se substitui `ADR-019/052` após classificação | moderado | conta/dados reais continuam bloqueados |
-| idade | piloto exclusivo para maiores de 18 anos | baixo | cadastro real continua bloqueado |
-| analytics | quatro eventos mínimos, retenção de 90 dias e LIA-8F-01 | baixo/moderado | analytics real continua bloqueado |
-| auditoria | aceitar LIA-8F-02 para telemetria mínima não coberta por obrigação | baixo/moderado | evidência adicional fica bloqueada |
-| retenção | aprovar a política operacional da seção 5, mantendo prazos finais jurídicos pendentes | moderado | `OPEN-008_CONTROLLED_PILOT` não passa |
-| operação | best effort, RPO 24h, RTO 8h, backup diário, contato e restore prévio | moderado | `OPEN-009_CONTROLLED_PILOT` não passa |
-| plano/coorte | 30 dias, 10 alunos, 3 instrutores, Porto Alegre/RS, categoria B | baixo/moderado | `OPEN-010_CONTROLLED_PILOT` não passa |
-| RIPD | aceitar `NOT_REQUIRED_FOR_CURRENT_SCOPE` e gatilhos de reavaliação | moderado | política interna anterior continua bloqueando o piloto |
-| WhatsApp | aceitar link externo com aviso contextual, sem integração/analytics de telefone | baixo | contato WhatsApp real continua bloqueado |
-| MapTiler | concluir revisão dos documentos listados ou aprovar fallback sem o fornecedor | moderado | busca real via MapTiler continua bloqueada |
+| enquadramento/DPO | fornecer os seis dados empresariais e decidir se substitui `ADR-019/052` após classificação | moderado | `PENDING_CLASSIFICATION`; conta/dados reais continuam bloqueados |
+| idade | piloto exclusivo para maiores de 18 anos | baixo | `OWNER_APPROVED` em 18/09/2026 |
+| analytics | quatro eventos mínimos, retenção de 90 dias e LIA-8F-01 | baixo/moderado | `OWNER_APPROVED`; falta implementar/testar descarte |
+| auditoria | aceitar LIA-8F-02 para telemetria mínima não coberta por obrigação | baixo/moderado | `OWNER_APPROVED` em 18/09/2026 |
+| retenção | aprovar a política operacional completa da seção 5, além da decisão específica de analytics | moderado | ainda pendente; `OPEN-008_CONTROLLED_PILOT` não passa |
+| operação | best effort, RPO 24h, RTO 8h, backup diário, contato e restore prévio | moderado | `OWNER_APPROVED`; restore pré-ativação pendente |
+| plano/coorte | 30 dias, 10 alunos, 3 instrutores, Porto Alegre/RS, categoria B | baixo/moderado | `OWNER_APPROVED` em 18/09/2026 |
+| RIPD | aceitar `NOT_REQUIRED_FOR_CURRENT_SCOPE` e gatilhos de reavaliação | moderado | `OWNER_APPROVED` em 18/09/2026 |
+| WhatsApp | aceitar link externo com aviso contextual, sem integração/analytics de telefone | baixo | `OWNER_APPROVED` em 18/09/2026 |
+| MapTiler | concluir revisão dos documentos listados ou aprovar fallback sem o fornecedor | moderado | `PENDING_VENDOR_REVIEW` |
 
 ## 10. Estado dos gates e capabilities
 
 - `OPEN-008_CONTROLLED_PILOT=AWAITING_OWNER_APPROVAL`;
-- `OPEN-009_CONTROLLED_PILOT=AWAITING_OWNER_APPROVAL`;
-- `OPEN-010_CONTROLLED_PILOT=AWAITING_OWNER_APPROVAL`;
+- `OPEN-009_CONTROLLED_PILOT=BLOCKED_TECHNICAL` até o restore pré-ativação;
+- `OPEN-010_CONTROLLED_PILOT=PASS`;
 - `OPEN-008_FULL_PRODUCTION=BLOCKED_EXTERNAL`;
 - `OPEN-009_FULL_PRODUCTION=AWAITING_OWNER_APPROVAL`;
 - `OPEN-010_FULL_PRODUCTION=AWAITING_OWNER_APPROVAL`.
 
 | Capability | Status | Último blocker |
 | --- | --- | --- |
-| `REAL_ACCOUNT_REGISTRATION` | `AWAITING_OWNER_APPROVAL` | classificação DPO/política interna e idade mínima |
-| `REAL_PERSONAL_DATA` | `AWAITING_OWNER_APPROVAL` | política operacional de retenção |
-| `REAL_STUDENT_USE` | `AWAITING_OWNER_APPROVAL` | coorte/plano e dependências de conta/dados |
-| `REAL_INSTRUCTOR_REGISTRATION` | `AWAITING_OWNER_APPROVAL` | coorte/plano, retenção e governança do perfil |
-| `REAL_MARKETPLACE_SEARCH` | `BLOCKED_EXTERNAL` | revisão MapTiler ou decisão de fallback |
-| `REAL_WHATSAPP_CONTACT` | `AWAITING_OWNER_APPROVAL` | aviso de serviço externo e decisão do link simples |
-| `REAL_MARKETPLACE_ANALYTICS` | `AWAITING_OWNER_APPROVAL` | retenção de 90 dias e LIA-8F-01 |
+| `REAL_ACCOUNT_REGISTRATION` | `PENDING_CLASSIFICATION` | enquadramento DPO/política interna; idade já aprovada |
+| `REAL_PERSONAL_DATA` | `AWAITING_OWNER_APPROVAL` | política operacional completa de retenção |
+| `REAL_STUDENT_USE` | `BLOCKED_UPSTREAM` | depende de conta e dados pessoais; plano já aprovado |
+| `REAL_INSTRUCTOR_REGISTRATION` | `BLOCKED_UPSTREAM` | depende de conta/dados e retenção; coorte já aprovada |
+| `REAL_MARKETPLACE_SEARCH` | `PENDING_VENDOR_REVIEW` | MapTiler ou decisão de fallback |
+| `REAL_WHATSAPP_CONTACT` | `BLOCKED_UPSTREAM` | fluxo externo aprovado; depende de perfil real habilitado |
+| `REAL_MARKETPLACE_ANALYTICS` | `BLOCKED_TECHNICAL` | implementar e testar anonimização/eliminação após 90 dias |
 | `REAL_DOCUMENT_UPLOADS` | `BLOCKED` | fora do piloto |
 | `REAL_AUTOMATIC_PUBLICATION` | `BLOCKED` | fora do piloto |
 | `REAL_PAYMENTS` | `BLOCKED` | fora do piloto e `OPEN-005` |

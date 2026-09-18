@@ -8,6 +8,10 @@ Fonte oficial do piloto. A funcionalidade é definitiva; cidade, duração, orç
 > abaixo e somente entra em vigor após as decisões listadas em
 > `CONTROLLED_PILOT_GATES_FATIA_8F.md`.
 
+Em 18/09/2026, o proprietário aprovou duração, coorte, território, categoria, idade mínima,
+limites funcionais e operação best effort dessa proposta. O início continua condicionado aos
+gates restantes e ao teste de restauração pré-ativação; a aprovação não autoriza deploy.
+
 ## Objetivo e pergunta de decisão
 
 Validar se, em uma região limitada, há oferta elegível suficiente, alunos convertem e repetem, a margem de contribuição é defensável e segurança/suporte/conciliação permanecem controláveis. Resultado: `GO`, `ITERATE` ou `NO_GO`, nunca expansão automática.

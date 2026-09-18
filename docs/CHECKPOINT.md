@@ -536,3 +536,11 @@ Marketplace (M3) somente após M2 aceito. Google é gate opcional M2.1. Pagament
 - MapTiler permanece `PENDING_VENDOR_REVIEW` e bloqueia somente a busca real que dependa dele;
   WhatsApp como link externo é follow-up, não integração presumida;
 - nenhuma capability foi ativada e nenhum deploy/VPS foi executado.
+- aprovação parcial do proprietário registrada em 18/09/2026: idade 18+, analytics por 90 dias,
+  LIA-8F-01/02, best effort com RPO 24h/RTO 8h/backup diário, piloto de 30 dias com coorte 10+3,
+  RIPD não requerido no escopo atual e fluxo externo WhatsApp;
+- `OPEN-010_CONTROLLED_PILOT=PASS`; `OPEN-009_CONTROLLED_PILOT=BLOCKED_TECHNICAL` até restore
+  pré-ativação; `OPEN-008_CONTROLLED_PILOT=AWAITING_OWNER_APPROVAL` pela retenção completa e
+  `DPO_STATUS=PENDING_CLASSIFICATION`. MapTiler segue `PENDING_VENDOR_REVIEW`;
+- a retenção de analytics aprovada ainda exige implementação/teste de descarte em 90 dias.
+  Nenhuma capability foi habilitada e nenhum deploy foi autorizado.

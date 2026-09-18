@@ -235,6 +235,13 @@ por padrão. As LIAs internas ficam restritas a analytics mínimo e telemetria a
 sensíveis, GPS persistente ou decisão automatizada significativa. `DPO_STATUS` permanece
 `PENDING_CLASSIFICATION`, pois a dispensa de pequeno porte exige comprovação de enquadramento.
 
+Em 18/09/2026, o proprietário aprovou para o piloto: idade mínima de 18 anos; LIA-8F-01 e os
+quatro eventos mínimos com retenção de 90 dias; LIA-8F-02 para telemetria mínima; RIPD
+`NOT_REQUIRED_FOR_CURRENT_SCOPE` com reavaliação material obrigatória; e o redirecionamento
+externo ao WhatsApp sem telefone ou conteúdo em analytics. DPO continua `PENDING_CLASSIFICATION`
+e MapTiler continua `PENDING_VENDOR_REVIEW`. A política completa de retenção ainda aguarda
+aprovação; a decisão de 90 dias vale somente para analytics do marketplace.
+
 Revisão ocorre no mínimo em cada marco e quando mudar finalidade, dado, público, fornecedor, país, norma, incidente, decisão automatizada ou risco. O monitor regulatório acompanha em especial direitos dos titulares, ECA Digital/aferição etária e regras de plataformas digitais publicadas após esta revisão.
 
 ## Gate de prontidão LGPD
