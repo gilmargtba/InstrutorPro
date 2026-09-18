@@ -1,9 +1,9 @@
 # Tratamentos de dados do piloto controlado — Fatia 8E
 
-Versão: `1.0`  
-Data de avaliação: `18/09/2026`  
-Escopo: `CONTROLLED_PILOT` em Porto Alegre/RS  
-Resultado: `OPEN-008_CONTROLLED_PILOT=BLOCKED` e `OPEN-008_FULL_PRODUCTION=BLOCKED`
+- Versão: `1.0`
+- Data de avaliação: `18/09/2026`
+- Escopo: `CONTROLLED_PILOT` em Porto Alegre/RS
+- Resultado: `OPEN-008_CONTROLLED_PILOT=BLOCKED` e `OPEN-008_FULL_PRODUCTION=BLOCKED`
 
 Este registro operacional complementa `LGPD.md` e a matriz de retenção da Fatia 8D. Ele não é
 parecer jurídico, não aprova base legal e não amplia `SCOPE.md`, `DECISIONS.md` ou `PILOT.md`.
