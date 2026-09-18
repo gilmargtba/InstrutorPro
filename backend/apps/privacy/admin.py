@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.db.models import Count
 from django.utils import timezone
 
 from apps.audit.models import AuditEvent
@@ -8,9 +9,23 @@ from .models import LegalAcceptanceRecord, LegalDocument, PrivacyNotice, Privacy
 
 @admin.register(LegalDocument)
 class LegalDocumentAdmin(admin.ModelAdmin):
-    list_display = ("title", "audience", "version", "effective_at", "is_active")
+    list_display = (
+        "title",
+        "audience",
+        "version",
+        "effective_at",
+        "is_active",
+        "acceptance_count",
+    )
     list_filter = ("audience", "is_active")
     readonly_fields = ("content_sha256", "created_at")
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).annotate(_acceptance_count=Count("acceptances"))
+
+    @admin.display(description="Aceites", ordering="_acceptance_count")
+    def acceptance_count(self, obj):
+        return obj._acceptance_count
 
 
 @admin.register(LegalAcceptanceRecord)

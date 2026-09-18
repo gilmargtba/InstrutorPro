@@ -1,10 +1,14 @@
 import hashlib
 
 import pytest
+from django.contrib import admin
+from django.test import RequestFactory
+from django.utils import timezone
 from rest_framework.test import APIClient
 
 from apps.accounts.models import Account
 from apps.audit.models import AuditEvent
+from apps.privacy.admin import LegalAcceptanceRecordAdmin, LegalDocumentAdmin
 from apps.privacy.models import LegalAcceptanceRecord, LegalDocument, PrivacyNotice
 
 
@@ -113,3 +117,65 @@ def test_published_terms_content_cannot_be_rewritten():
 
     with pytest.raises(ValueError, match="create a new version"):
         terms.save()
+
+
+@pytest.mark.django_db
+def test_missing_current_terms_fails_closed():
+    LegalDocument.objects.filter(audience="STUDENT").update(is_active=False)
+    user = account("legal-missing")
+
+    response = authenticated(user).post(
+        "/api/v1/legal/acceptances/",
+        {"audience": "STUDENT", "accept_terms": True, "acknowledge_privacy": True},
+        format="json",
+    )
+
+    assert response.status_code == 409
+    assert not LegalAcceptanceRecord.objects.filter(account=user).exists()
+
+
+@pytest.mark.django_db
+def test_new_terms_version_requires_and_preserves_new_acceptance():
+    user = account("legal-versioned")
+    client = authenticated(user)
+    payload = {"audience": "STUDENT", "accept_terms": True, "acknowledge_privacy": True}
+    assert client.post("/api/v1/legal/acceptances/", payload, format="json").status_code == 201
+    old = LegalDocument.objects.get(audience="STUDENT", version="1.0")
+    old.is_active = False
+    old.save(update_fields=["is_active", "content_sha256"])
+    new = LegalDocument.objects.create(
+        document_type="TERMS",
+        audience="STUDENT",
+        version="1.1",
+        title="Termos de Uso — Aluno — InstrutorProCNH",
+        content=old.content + "\n\nNova versão.",
+        effective_at=timezone.now(),
+        is_active=True,
+    )
+
+    assert client.post("/api/v1/legal/acceptances/", payload, format="json").status_code == 201
+    versions = set(
+        LegalAcceptanceRecord.objects.filter(account=user).values_list(
+            "terms_document__version", flat=True
+        )
+    )
+    assert versions == {"1.0", "1.1"}
+    assert new.acceptances.filter(account=user).exists()
+
+
+@pytest.mark.django_db
+def test_admin_cannot_change_or_delete_acceptance_and_counts_documents():
+    administrator = account("legal-admin")
+    user = account("legal-admin-user")
+    terms = LegalDocument.objects.get(audience="STUDENT", is_active=True)
+    privacy = PrivacyNotice.objects.get(is_current=True)
+    LegalAcceptanceRecord.objects.create(account=user, terms_document=terms, privacy_notice=privacy)
+    request = RequestFactory().get("/admin/privacy/")
+    request.user = administrator
+    acceptance_admin = LegalAcceptanceRecordAdmin(LegalAcceptanceRecord, admin.site)
+    document_admin = LegalDocumentAdmin(LegalDocument, admin.site)
+
+    assert not acceptance_admin.has_change_permission(request)
+    assert not acceptance_admin.has_delete_permission(request)
+    document = document_admin.get_queryset(request).get(pk=terms.pk)
+    assert document_admin.acceptance_count(document) == 1

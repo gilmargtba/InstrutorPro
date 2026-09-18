@@ -478,7 +478,7 @@ Marketplace (M3) somente após M2 aceito. Google é gate opcional M2.1. Pagament
   vigente, instante e request ID; o aceite é idempotente, auditado e separado de consentimento;
 - conteúdo publicado e aceite são imutáveis; alteração material requer nova versão;
 - histórico é restrito à própria conta e o Admin não pode editar ou excluir aceites;
-- migrations sem deriva, Ruff aprovado, frontend compilado e suíte backend com 157 testes
+- migrations sem deriva, Ruff aprovado, frontend compilado e suíte backend com 161 testes
   aprovados;
 - nenhuma capability real foi ativada ou implantada. O anexo recebido termina truncado no item
   7, antes dos critérios completos de integração com cadastro/deploy; essa autorização ausente
