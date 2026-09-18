@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.gis.geos import Point
 from django.db import transaction
 from django.db.models import Count
 from django.http import FileResponse
@@ -14,8 +15,11 @@ from rest_framework.views import APIView
 
 from apps.accounts.models import Account
 from apps.audit.models import AuditEvent
-from apps.discovery.models import InstructorProfile
-from apps.discovery.services import invalidate_after_owner_sensitive_edit
+from apps.discovery.models import InstructorProfile, InstructorServiceArea
+from apps.discovery.services import (
+    grant_service_location_authorization,
+    invalidate_after_owner_sensitive_edit,
+)
 from apps.people.models import Person, RoleAssignment
 from apps.privacy.models import LegalAcceptanceRecord, LegalDocument, PrivacyNotice
 from apps.territories.models import FederativeUnit
@@ -457,6 +461,12 @@ class OwnAccountInput(serializers.Serializer):
         max_digits=8, decimal_places=2, min_value=1, required=False
     )
     duration_minutes = serializers.IntegerField(min_value=30, max_value=240, required=False)
+    instructor_city = serializers.CharField(max_length=100, required=False)
+    instructor_uf = serializers.CharField(min_length=2, max_length=2, required=False)
+    service_latitude = serializers.FloatField(min_value=-90, max_value=90, required=False)
+    service_longitude = serializers.FloatField(min_value=-180, max_value=180, required=False)
+    service_radius_km = serializers.ChoiceField(choices=[5, 10, 20, 50], required=False)
+    service_location_authorized = serializers.BooleanField(required=False)
     vehicle = serializers.DictField(required=False)
 
     def validate(self, attrs):
@@ -621,6 +631,65 @@ class OwnAccountView(APIView):
                         "data_mode": DataMode.SYNTHETIC if instructor.is_demo else DataMode.REAL,
                     },
                 )
+            service_fields = {
+                "instructor_city",
+                "instructor_uf",
+                "service_latitude",
+                "service_longitude",
+                "service_radius_km",
+                "service_location_authorized",
+            }
+            if service_fields.intersection(data):
+                area = InstructorServiceArea.objects.select_for_update().filter(
+                    profile=instructor
+                ).first()
+                required = {
+                    "instructor_city",
+                    "instructor_uf",
+                    "service_latitude",
+                    "service_longitude",
+                }
+                if not area and (missing := required - set(data)):
+                    raise serializers.ValidationError(
+                        {"service_area": f"Campos obrigatórios: {', '.join(sorted(missing))}"}
+                    )
+                point = None
+                if "service_latitude" in data or "service_longitude" in data:
+                    if "service_latitude" not in data or "service_longitude" not in data:
+                        raise serializers.ValidationError(
+                            "Latitude e longitude públicas devem ser informadas juntas."
+                        )
+                    point = Point(
+                        data["service_longitude"], data["service_latitude"], srid=4326
+                    )
+                if area:
+                    area.city = data.get("instructor_city", area.city)
+                    area.uf = data.get("instructor_uf", area.uf).upper()
+                    area.radius_km = data.get("service_radius_km", area.radius_km)
+                    if point:
+                        area.public_service_location = point
+                    area.save(
+                        update_fields=["city", "uf", "radius_km", "public_service_location"]
+                    )
+                else:
+                    area = InstructorServiceArea.objects.create(
+                        profile=instructor,
+                        city=data["instructor_city"],
+                        uf=data["instructor_uf"].upper(),
+                        public_service_location=point,
+                        private_location=None,
+                        radius_km=data.get("service_radius_km", 10),
+                        location_authorized=False,
+                    )
+                if data.get("service_location_authorized") and not area.location_authorized:
+                    grant_service_location_authorization(
+                        actor=request.user,
+                        service_area=area,
+                        purpose="CONTROLLED_PILOT_MARKETPLACE_DISCOVERY",
+                        policy_version="PILOT-1",
+                        reason="OWNER_EXPLICIT_AUTHORIZATION",
+                        request_id=getattr(request, "request_id", None),
+                    )
             if "price_amount" in data or "duration_minutes" in data:
                 offer = instructor.offers.filter(is_active=True).order_by("created_at").first()
                 if offer:

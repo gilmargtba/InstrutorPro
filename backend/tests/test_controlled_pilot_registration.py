@@ -106,6 +106,12 @@ def test_real_instructor_can_save_non_documental_onboarding_without_self_publica
             "whatsapp": "+5551999990001",
             "price_amount": "95.00",
             "duration_minutes": 60,
+            "instructor_city": "Porto Alegre",
+            "instructor_uf": "RS",
+            "service_latitude": -30.0346,
+            "service_longitude": -51.2177,
+            "service_radius_km": 10,
+            "service_location_authorized": True,
             "vehicle": {
                 "category": "B",
                 "make": "Marca",
@@ -121,6 +127,8 @@ def test_real_instructor_can_save_non_documental_onboarding_without_self_publica
     profile = InstructorProfile.objects.get(person__account__email="real-instructor@example.com")
     assert profile.offers.get().data_mode == DataMode.REAL
     assert profile.vehicle.data_mode == DataMode.REAL
+    assert profile.service_area.private_location is None
+    assert profile.service_area.location_authorized is True
     assert profile.profile_status == "DRAFT"
     assert profile.verification_status == "NOT_STARTED"
     assert profile.publication_status == "UNPUBLISHED"
