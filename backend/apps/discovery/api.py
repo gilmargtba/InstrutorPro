@@ -281,9 +281,7 @@ class PublicInstructorProfileView(InstructorSearchView):
             .filter(
                 offers__is_active=True,
                 offers__data_mode=(
-                    DataMode.SYNTHETIC
-                    if settings.SYNTHETIC_MARKETPLACE_ENABLED
-                    else DataMode.REAL
+                    DataMode.SYNTHETIC if settings.SYNTHETIC_MARKETPLACE_ENABLED else DataMode.REAL
                 ),
             )
             .select_related("service_area", "vehicle")
@@ -338,9 +336,7 @@ class WhatsAppContactView(APIView):
             pk=pk,
             contact_channel__is_active=True,
             contact_channel__data_mode=(
-                DataMode.SYNTHETIC
-                if settings.SYNTHETIC_MARKETPLACE_ENABLED
-                else DataMode.REAL
+                DataMode.SYNTHETIC if settings.SYNTHETIC_MARKETPLACE_ENABLED else DataMode.REAL
             ),
         )
         if not row.is_demo and not enabled("REAL_WHATSAPP_CONTACT"):

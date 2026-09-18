@@ -38,7 +38,8 @@
   "supporting_documents": [
     "docs/GLOSSARY.md",
     "docs/REFERENCES.md",
-    "docs/DPO_M1_RFQ.md"
+    "docs/DPO_M1_RFQ.md",
+    "docs/CONTROLLED_PILOT_DATA_PROCESSING_FATIA_8E.md"
   ],
   "governance_files": [
     "docs/MANIFEST.json"

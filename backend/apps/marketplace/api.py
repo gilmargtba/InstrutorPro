@@ -74,8 +74,10 @@ class RealRegistrationSerializer(serializers.Serializer):
         if attrs["password"] != attrs["password_confirmation"]:
             raise serializers.ValidationError({"password_confirmation": "As senhas não coincidem."})
         today = timezone.localdate()
-        age = today.year - attrs["birth_date"].year - (
-            (today.month, today.day) < (attrs["birth_date"].month, attrs["birth_date"].day)
+        age = (
+            today.year
+            - attrs["birth_date"].year
+            - ((today.month, today.day) < (attrs["birth_date"].month, attrs["birth_date"].day))
         )
         if age < 18:
             raise serializers.ValidationError(
@@ -569,9 +571,7 @@ class OwnAccountView(APIView):
             student
             and student.data_mode == DataMode.REAL
             and not settings.SYNTHETIC_MARKETPLACE_ENABLED
-            and not all(
-                enabled(name) for name in ("REAL_PERSONAL_DATA", "REAL_STUDENT_USE")
-            )
+            and not all(enabled(name) for name in ("REAL_PERSONAL_DATA", "REAL_STUDENT_USE"))
         ):
             raise PermissionDenied("Edição de dados reais do aluno não está autorizada.")
         if student:
@@ -598,8 +598,7 @@ class OwnAccountView(APIView):
             and not instructor.is_demo
             and not settings.SYNTHETIC_MARKETPLACE_ENABLED
             and not all(
-                enabled(name)
-                for name in ("REAL_PERSONAL_DATA", "REAL_INSTRUCTOR_REGISTRATION")
+                enabled(name) for name in ("REAL_PERSONAL_DATA", "REAL_INSTRUCTOR_REGISTRATION")
             )
         ):
             raise PermissionDenied("Edição de dados reais do instrutor não está autorizada.")
@@ -640,9 +639,11 @@ class OwnAccountView(APIView):
                 "service_location_authorized",
             }
             if service_fields.intersection(data):
-                area = InstructorServiceArea.objects.select_for_update().filter(
-                    profile=instructor
-                ).first()
+                area = (
+                    InstructorServiceArea.objects.select_for_update()
+                    .filter(profile=instructor)
+                    .first()
+                )
                 required = {
                     "instructor_city",
                     "instructor_uf",
@@ -659,18 +660,14 @@ class OwnAccountView(APIView):
                         raise serializers.ValidationError(
                             "Latitude e longitude públicas devem ser informadas juntas."
                         )
-                    point = Point(
-                        data["service_longitude"], data["service_latitude"], srid=4326
-                    )
+                    point = Point(data["service_longitude"], data["service_latitude"], srid=4326)
                 if area:
                     area.city = data.get("instructor_city", area.city)
                     area.uf = data.get("instructor_uf", area.uf).upper()
                     area.radius_km = data.get("service_radius_km", area.radius_km)
                     if point:
                         area.public_service_location = point
-                    area.save(
-                        update_fields=["city", "uf", "radius_km", "public_service_location"]
-                    )
+                    area.save(update_fields=["city", "uf", "radius_km", "public_service_location"])
                 else:
                     area = InstructorServiceArea.objects.create(
                         profile=instructor,
@@ -711,9 +708,11 @@ class OwnAccountView(APIView):
                         "Preço e duração são obrigatórios para criar a primeira oferta."
                     )
             if "vehicle" in data:
-                vehicle = InstructorVehicle.objects.select_for_update().filter(
-                    instructor=instructor
-                ).first()
+                vehicle = (
+                    InstructorVehicle.objects.select_for_update()
+                    .filter(instructor=instructor)
+                    .first()
+                )
                 if vehicle:
                     for field, value in data["vehicle"].items():
                         if getattr(vehicle, field) != value:
@@ -738,8 +737,7 @@ class OwnAccountView(APIView):
                 instructor.profile_status != InstructorProfile.Status.DRAFT
                 or instructor.verification_status
                 != InstructorProfile.VerificationStatus.NOT_STARTED
-                or instructor.publication_status
-                != InstructorProfile.PublicationStatus.UNPUBLISHED
+                or instructor.publication_status != InstructorProfile.PublicationStatus.UNPUBLISHED
             ):
                 instructor = invalidate_after_owner_sensitive_edit(
                     actor=request.user,

@@ -94,9 +94,12 @@ def test_real_instructor_registration_is_unpublished_and_uses_instructor_terms()
 @override_settings(**PILOT)
 def test_real_instructor_can_save_non_documental_onboarding_without_self_publication():
     client = APIClient()
-    assert client.post(
-        "/api/v1/marketplace/accounts/register/", payload("INSTRUCTOR"), format="json"
-    ).status_code == 201
+    assert (
+        client.post(
+            "/api/v1/marketplace/accounts/register/", payload("INSTRUCTOR"), format="json"
+        ).status_code
+        == 201
+    )
 
     response = client.patch(
         "/api/v1/account/me/",
@@ -150,9 +153,7 @@ def test_real_registration_fails_closed_for_missing_or_invalid_legal_evidence(fi
     data = payload()
     data[field] = value
 
-    response = APIClient().post(
-        "/api/v1/marketplace/accounts/register/", data, format="json"
-    )
+    response = APIClient().post("/api/v1/marketplace/accounts/register/", data, format="json")
 
     assert response.status_code == 400
     assert not Account.objects.filter(email=data["email"]).exists()
@@ -161,10 +162,13 @@ def test_real_registration_fails_closed_for_missing_or_invalid_legal_evidence(fi
 @pytest.mark.django_db
 @override_settings(**PILOT)
 def test_acceptance_failure_rolls_back_account_person_and_role():
-    with patch(
-        "apps.marketplace.api.LegalAcceptanceRecord.objects.create",
-        side_effect=RuntimeError("acceptance persistence failed"),
-    ), pytest.raises(RuntimeError):
+    with (
+        patch(
+            "apps.marketplace.api.LegalAcceptanceRecord.objects.create",
+            side_effect=RuntimeError("acceptance persistence failed"),
+        ),
+        pytest.raises(RuntimeError),
+    ):
         APIClient().post("/api/v1/marketplace/accounts/register/", payload(), format="json")
 
     assert not Account.objects.filter(email="real-student@example.com").exists()

@@ -218,6 +218,15 @@ Operador informa a plataforma sem demora e fornece o necessário. Comunicação 
 
 LIA é obrigatória por decisão do projeto antes de usar legítimo interesse. RIPD é elaborado antes de tratamento de alto risco, dado sensível, geolocalização precisa/escala, nova aferição de idade, biometria, perfilização/decisão relevante ou quando solicitado pela ANPD. O relatório descreve necessidade/proporcionalidade, fluxo, riscos aos titulares, salvaguardas, risco residual, aprovadores e revisão; não é checklist retroativo.
 
+### Avaliação operacional do piloto — Fatia 8E
+
+`CONTROLLED_PILOT_DATA_PROCESSING_FATIA_8E.md` versiona o ROPA operacional limitado do piloto,
+incluindo fornecedor, minimização, início, encerramento, destinação e exceções. A InstrutorProCNH
+foi registrada como controladora das finalidades próprias; papéis de fornecedores permanecem
+`PENDING_CONTRACT_REVIEW`, sem DPA presumido. O documento não supera `ADR-019/052`: como LIA/RIPD,
+encarregado formal, fornecedores e retenções indispensáveis continuam pendentes,
+`OPEN-008_CONTROLLED_PILOT` e `OPEN-008_FULL_PRODUCTION` permanecem `BLOCKED`.
+
 Revisão ocorre no mínimo em cada marco e quando mudar finalidade, dado, público, fornecedor, país, norma, incidente, decisão automatizada ou risco. O monitor regulatório acompanha em especial direitos dos titulares, ECA Digital/aferição etária e regras de plataformas digitais publicadas após esta revisão.
 
 ## Gate de prontidão LGPD

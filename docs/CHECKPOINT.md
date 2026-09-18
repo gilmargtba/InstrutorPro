@@ -503,3 +503,20 @@ Marketplace (M3) somente após M2 aceito. Google é gate opcional M2.1. Pagament
   nenhum arquivo documental é retido e a publicação automática continua proibida;
 - o ciclo real de WhatsApp/analytics possui teste de deduplicação, não retorna o telefone bruto em
   campo próprio e não persiste conteúdo de conversa.
+
+### Fatia 8E — fechamento operacional do OPEN-008 (18/09/2026)
+
+- criada a matriz versionada `CONTROLLED_PILOT_DATA_PROCESSING_FATIA_8E.md`, cobrindo os dez
+  processos exigidos, minimização, fornecedor, base proposta, retenção, encerramento e exceções;
+- a organização operadora foi registrada como controladora das finalidades próprias, sem presumir
+  papel ou DPA de hospedagem, MapTiler, WhatsApp ou provedor do canal de privacidade;
+- `OPEN-008_CONTROLLED_PILOT=BLOCKED` e `OPEN-008_FULL_PRODUCTION=BLOCKED`: tratamentos necessários
+  ainda dependem de LIA/RIPD, encarregado formal, revisão dos providers e retenções aprovadas;
+- `OPEN-009` e `OPEN-010` também continuam gates independentes do piloto. Nenhuma capability
+  `REAL_*` foi habilitada, nenhuma VPS foi alterada e nenhum cadastro real foi executado.
+- validação local: 173 testes backend aprovados; Ruff format/check aprovados após formatação
+  mecânica de três arquivos da Fatia 8D; Django check e migration check aprovados; build Angular
+  aprovado com aviso preexistente de budget no mapa. O comando de readiness executado no ambiente
+  local de desenvolvimento falhou corretamente em `APP_ENV`, `DEBUG`, `SECRET_KEY`, `CSRF`,
+  `HTTPS` e `SYNTHETIC`; a configuração real da VPS não foi inspecionada porque o gate de deploy
+  não foi alcançado.
