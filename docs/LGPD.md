@@ -227,6 +227,14 @@ foi registrada como controladora das finalidades próprias; papéis de fornecedo
 encarregado formal, fornecedores e retenções indispensáveis continuam pendentes,
 `OPEN-008_CONTROLLED_PILOT` e `OPEN-008_FULL_PRODUCTION` permanecem `BLOCKED`.
 
+A Fatia 8F, registrada em `CONTROLLED_PILOT_GATES_FATIA_8F.md`, reavalia essa conclusão sem
+retroagir sobre a evidência da 8E: o gate do piloto passa a `AWAITING_OWNER_APPROVAL`. Conta,
+perfil, busca solicitada, WhatsApp externo, direitos e decisão manual não usam legítimo interesse
+por padrão. As LIAs internas ficam restritas a analytics mínimo e telemetria adicional. O RIPD é
+`NOT_REQUIRED_FOR_CURRENT_SCOPE` enquanto o recorte permanecer pequeno, adulto, sem dados
+sensíveis, GPS persistente ou decisão automatizada significativa. `DPO_STATUS` permanece
+`PENDING_CLASSIFICATION`, pois a dispensa de pequeno porte exige comprovação de enquadramento.
+
 Revisão ocorre no mínimo em cada marco e quando mudar finalidade, dado, público, fornecedor, país, norma, incidente, decisão automatizada ou risco. O monitor regulatório acompanha em especial direitos dos titulares, ECA Digital/aferição etária e regras de plataformas digitais publicadas após esta revisão.
 
 ## Gate de prontidão LGPD

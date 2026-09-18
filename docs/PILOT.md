@@ -2,6 +2,12 @@
 
 Fonte oficial do piloto. A funcionalidade é definitiva; cidade, duração, orçamento, limites e thresholds numéricos continuam bloqueantes porque a documentação não contém evidência para escolhê-los. Esses campos são congelados em `PIL-001`, antes do primeiro usuário real.
 
+> Proposta ainda não aprovada: a Fatia 8F define um `CONTROLLED_PILOT` pré-transacional de 30
+> dias, até 10 alunos e 3 instrutores adultos, Porto Alegre/RS, categoria B, sem pagamentos,
+> documentos ou publicação automática. Esse recorte não é o piloto transacional completo descrito
+> abaixo e somente entra em vigor após as decisões listadas em
+> `CONTROLLED_PILOT_GATES_FATIA_8F.md`.
+
 ## Objetivo e pergunta de decisão
 
 Validar se, em uma região limitada, há oferta elegível suficiente, alunos convertem e repetem, a margem de contribuição é defensável e segurança/suporte/conciliação permanecem controláveis. Resultado: `GO`, `ITERATE` ou `NO_GO`, nunca expansão automática.

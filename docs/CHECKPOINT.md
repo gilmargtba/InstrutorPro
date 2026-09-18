@@ -520,3 +520,19 @@ Marketplace (M3) somente após M2 aceito. Google é gate opcional M2.1. Pagament
   local de desenvolvimento falhou corretamente em `APP_ENV`, `DEBUG`, `SECRET_KEY`, `CSRF`,
   `HTTPS` e `SYNTHETIC`; a configuração real da VPS não foi inspecionada porque o gate de deploy
   não foi alcançado.
+
+### Fatia 8F — propostas objetivas dos gates do piloto (18/09/2026)
+
+- `CONTROLLED_PILOT_GATES_FATIA_8F.md` separa obrigação, boa prática, decisão do proprietário,
+  requisito de produção e blocker externo;
+- `DPO_STATUS=PENDING_CLASSIFICATION`: o canal existe, mas faltam enquadramento, receita, grupo
+  econômico, avaliação de alto risco e responsável pela comprovação; `ADR-019/052` não foi
+  substituída sem aprovação humana;
+- LIA deixa de ser exigida genericamente e fica limitada a analytics mínimo e telemetria
+  adicional, com dois testes internos `PASS`; RIPD fica `NOT_REQUIRED_FOR_CURRENT_SCOPE` no desenho
+  pequeno, adulto e sem tratamento de alto risco identificado;
+- retenção, operação best effort e coorte de 30 dias/10 alunos/3 instrutores foram propostas, não
+  aprovadas. `OPEN-008/009/010_CONTROLLED_PILOT=AWAITING_OWNER_APPROVAL`;
+- MapTiler permanece `PENDING_VENDOR_REVIEW` e bloqueia somente a busca real que dependa dele;
+  WhatsApp como link externo é follow-up, não integração presumida;
+- nenhuma capability foi ativada e nenhum deploy/VPS foi executado.
