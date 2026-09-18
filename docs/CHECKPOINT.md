@@ -496,3 +496,10 @@ Marketplace (M3) somente após M2 aceito. Google é gate opcional M2.1. Pagament
 - a matriz `CONTROLLED_PILOT_RETENTION_FATIA_8D.md` classifica `OPEN-008` como **PARTIAL** porque
   bases, papéis, exceções e prazos pós-encerramento ainda exigem decisão jurídica formal;
 - por consequência, nenhuma capability real foi habilitada e nenhum deploy da Fatia 8D foi feito.
+- o onboarding cadastral real passou a criar oferta e veículo em modo `REAL`, sem aceitar estado de
+  verificação/publicação pelo cliente e sem solicitar documentos profissionais;
+- a verificação manual real exige autoridade, método e operador, grava proveniência mínima em
+  `ProfessionalVerification` e permite publicação somente por serviço administrativo auditado;
+  nenhum arquivo documental é retido e a publicação automática continua proibida;
+- o ciclo real de WhatsApp/analytics possui teste de deduplicação, não retorna o telefone bruto em
+  campo próprio e não persiste conteúdo de conversa.

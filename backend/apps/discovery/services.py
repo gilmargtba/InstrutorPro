@@ -5,6 +5,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from apps.audit.models import AuditEvent
+from apps.marketplace.capabilities import enabled
 
 from .models import (
     InstructorProfile,
@@ -135,8 +136,10 @@ def invalidate_after_owner_sensitive_edit(*, actor, profile, changed_fields, req
 @transaction.atomic
 def submit_profile(*, actor, profile, reason="DEMO_ONBOARDING_SUBMISSION", request_id=None):
     p = InstructorProfile.objects.select_for_update().get(pk=profile.pk)
-    if actor != p.person.account or not p.is_demo:
-        raise WorkflowPermissionDenied("Somente a própria conta DEMO pode enviar o perfil")
+    if actor != p.person.account:
+        raise WorkflowPermissionDenied("Somente a própria conta pode enviar o perfil")
+    if not p.is_demo and not enabled("REAL_INSTRUCTOR_REGISTRATION"):
+        raise WorkflowPermissionDenied("Onboarding real não está autorizado")
     if p.profile_status != "DRAFT":
         raise InvalidWorkflowTransition("Somente perfil em rascunho pode ser enviado")
     before = {"profile_status": p.profile_status}
@@ -178,13 +181,23 @@ def start_review(*, actor, profile, reason="ADMIN_DEMO_REVIEW", request_id=None)
 
 @transaction.atomic
 def verify_professional(
-    *, actor, profile, reason="ADMIN_DEMO_VERIFICATION", request_id=None, valid_days=30
+    *,
+    actor,
+    profile,
+    reason="ADMIN_DEMO_VERIFICATION",
+    request_id=None,
+    valid_days=30,
+    authority="",
+    method="",
+    provenance_reference="",
 ):
     _manager(actor)
     p = InstructorProfile.objects.select_for_update().get(pk=profile.pk)
     if p.profile_status != "UNDER_REVIEW" or p.verification_status != "PENDING":
+        raise InvalidWorkflowTransition("Verificação exige perfil em revisão e pendente")
+    if not p.is_demo and (not authority.strip() or not method.strip()):
         raise InvalidWorkflowTransition(
-            "Verificação DEMO exige perfil em revisão e verificação pendente"
+            "Verificação real exige autoridade e método, sem anexar documento"
         )
     now = timezone.now()
     until = now + timedelta(days=valid_days)
@@ -194,7 +207,10 @@ def verify_professional(
     _save(p, ["verification_status", "verified_until"])
     record = ProfessionalVerification.objects.create(
         profile=p,
-        provider="SYNTHETIC",
+        provider="SYNTHETIC" if p.is_demo else "MANUAL_NO_FILE",
+        authority=authority.strip(),
+        method=method.strip(),
+        provenance_reference=provenance_reference.strip(),
         status="VERIFIED",
         verified_at=now,
         verified_until=until,
@@ -210,6 +226,9 @@ def verify_professional(
         reason,
         request_id,
         verification_id=str(record.id),
+        authority=record.authority,
+        method=record.method,
+        provenance_reference=record.provenance_reference,
     )
     return record
 
@@ -251,15 +270,29 @@ def decide_publication(*, actor, profile, decision, reason, request_id=None):
     if decision == "APPROVE":
         from apps.marketplace.documents import documents_satisfy_active_requirements
 
+        verification_evidence_valid = bool(
+            verification
+            and verification.status == ProfessionalVerification.Status.VERIFIED
+            and (
+                p.is_demo
+                or (
+                    verification.provider == "MANUAL_NO_FILE"
+                    and verification.authority
+                    and verification.method
+                )
+            )
+        )
+        dossier_valid = documents_satisfy_active_requirements(p) if p.is_demo else True
         if (
             p.profile_status != "UNDER_REVIEW"
             or p.verification_status != "VERIFIED"
             or (p.verified_until and p.verified_until <= timezone.now())
             or not p.service_area.location_authorized
-            or not documents_satisfy_active_requirements(p)
+            or not verification_evidence_valid
+            or not dossier_valid
         ):
             raise InvalidWorkflowTransition(
-                "Revisão, verificação válida, dossiê e localização autorizada são obrigatórios"
+                "Revisão, verificação válida e localização autorizada são obrigatórias"
             )
         p.profile_status = "APPROVED"
         p.publication_status = "APPROVED"

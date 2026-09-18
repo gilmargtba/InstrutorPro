@@ -10,12 +10,19 @@ from rest_framework.test import APIClient
 from apps.accounts.models import Account
 from apps.discovery.models import InstructorProfile, InstructorServiceArea
 from apps.discovery.selectors import search_published_instructors
-from apps.marketplace.models import DataMode, InstructorOffer, StudentProfile
+from apps.marketplace.models import (
+    DataMode,
+    InstructorContactChannel,
+    InstructorOffer,
+    MarketplaceEvent,
+    StudentProfile,
+)
 from apps.people.models import RoleAssignment
 from apps.privacy.models import LegalAcceptanceRecord
 from apps.territories.models import Country, FederativeUnit
 
 PILOT = {
+    "SYNTHETIC_MARKETPLACE_ENABLED": False,
     "REAL_PRODUCTION_AUTHORIZATION": "CONTROLLED_PILOT",
     "REAL_ACCOUNT_REGISTRATION": True,
     "REAL_PERSONAL_DATA": True,
@@ -81,6 +88,43 @@ def test_real_instructor_registration_is_unpublished_and_uses_instructor_terms()
     assert profile.verification_status == "NOT_STARTED"
     acceptance = LegalAcceptanceRecord.objects.get(account=account)
     assert acceptance.terms_document.audience == "INSTRUCTOR"
+
+
+@pytest.mark.django_db
+@override_settings(**PILOT)
+def test_real_instructor_can_save_non_documental_onboarding_without_self_publication():
+    client = APIClient()
+    assert client.post(
+        "/api/v1/marketplace/accounts/register/", payload("INSTRUCTOR"), format="json"
+    ).status_code == 201
+
+    response = client.patch(
+        "/api/v1/account/me/",
+        {
+            "bio": "Atendimento categoria B.",
+            "transmission_options": ["MANUAL"],
+            "whatsapp": "+5551999990001",
+            "price_amount": "95.00",
+            "duration_minutes": 60,
+            "vehicle": {
+                "category": "B",
+                "make": "Marca",
+                "model": "Modelo",
+                "year": 2024,
+                "transmission": "MANUAL",
+            },
+        },
+        format="json",
+    )
+
+    assert response.status_code == 200
+    profile = InstructorProfile.objects.get(person__account__email="real-instructor@example.com")
+    assert profile.offers.get().data_mode == DataMode.REAL
+    assert profile.vehicle.data_mode == DataMode.REAL
+    assert profile.profile_status == "DRAFT"
+    assert profile.verification_status == "NOT_STARTED"
+    assert profile.publication_status == "UNPUBLISHED"
+    assert not profile.documents.exists()
 
 
 @pytest.mark.django_db
@@ -152,6 +196,40 @@ def test_real_selector_excludes_synthetic_and_requires_approved_real_offer():
     assert [profile.id for profile in results] == [real.id]
     assert synthetic.id not in [profile.id for profile in results]
     assert pending.id not in [profile.id for profile in results]
+
+
+@pytest.mark.django_db
+@override_settings(
+    SYNTHETIC_MARKETPLACE_ENABLED=False,
+    REAL_PRODUCTION_AUTHORIZATION="CONTROLLED_PILOT",
+    REAL_MARKETPLACE_SEARCH=True,
+    REAL_WHATSAPP_CONTACT=True,
+    REAL_MARKETPLACE_ANALYTICS=True,
+)
+def test_real_whatsapp_records_minimized_deduplicated_analytics():
+    profile = _published_profile("real-contact", is_demo=False, data_mode=DataMode.REAL)
+    InstructorContactChannel.objects.create(
+        instructor=profile,
+        whatsapp_e164="+5551999990001",
+        data_mode=DataMode.REAL,
+    )
+    client = APIClient()
+    url = f"/api/v1/instructors/{profile.id}/whatsapp-contact/"
+
+    first = client.post(url, {"category": "B", "source": "public-profile"}, format="json")
+    second = client.post(url, {"category": "B", "source": "public-profile"}, format="json")
+
+    assert first.status_code == 200
+    assert first.json()["unique_contact"] is True
+    assert second.json()["unique_contact"] is False
+    assert "whatsapp_e164" not in first.json()
+    event = MarketplaceEvent.objects.get(
+        event_type=MarketplaceEvent.Type.WHATSAPP_CONTACT_CLICKED,
+        instructor=profile,
+    )
+    assert event.data_mode == DataMode.REAL
+    assert "Olá" not in str(event.__dict__)
+    assert "+5551999990001" not in str(event.__dict__)
 
 
 def _published_profile(username, *, is_demo, data_mode, publication_status="APPROVED"):

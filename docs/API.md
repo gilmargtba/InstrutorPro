@@ -214,6 +214,11 @@ Aceite obrigatório registra contrato/termo exato em `LegalAcceptanceRecord`; co
   com os gates desligados responde de forma fechada e não cria conta;
 - instrutor real nasce não verificado e não publicado. A rota não recebe documento profissional,
   decisão de verificação, decisão de publicação, papel adicional nem estado crítico do cliente.
+- `PATCH /api/v1/account/me/` permite ao titular real completar dados não documentais, WhatsApp,
+  primeira oferta e veículo quando as capabilities correspondentes estiverem ativas; campos de
+  papel, verificação e publicação são rejeitados por mass assignment;
+- a verificação administrativa real não recebe arquivo: registra operador, autoridade, método e
+  referência mínima permitida. A publicação permanece uma decisão manual separada e auditada.
 
 O contrato futuro de papéis deverá permitir concessões idempotentes de `STUDENT`, `INSTRUCTOR`, `DOCTOR` e `PSYCHOLOGIST` conforme policy explícita de compatibilidade. Combinação incompatível retorna erro estável sem remover papéis existentes. Cada endpoint protegido exige papel, perfil, verificação e autorização próprios; papel coincidente não concede publicação nem capacidade transitiva. Administração de `Clinic` usa recurso organizacional `ClinicMembership`, não papel pessoal `CLINIC`. O path e payload definitivos serão estabilizados antes da implementação; o antigo contrato singular `POST /me/business-role` está substituído.
 

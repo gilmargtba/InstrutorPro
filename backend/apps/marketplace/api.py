@@ -26,6 +26,7 @@ from .models import (
     DataMode,
     InstructorContactChannel,
     InstructorDocument,
+    InstructorOffer,
     InstructorVehicle,
     LessonRequest,
     MarketplaceEvent,
@@ -554,6 +555,15 @@ class OwnAccountView(APIView):
             person.save(update_fields=person_fields)
 
         student = getattr(person, "student_profile", None)
+        if (
+            student
+            and student.data_mode == DataMode.REAL
+            and not settings.SYNTHETIC_MARKETPLACE_ENABLED
+            and not all(
+                enabled(name) for name in ("REAL_PERSONAL_DATA", "REAL_STUDENT_USE")
+            )
+        ):
+            raise PermissionDenied("Edição de dados reais do aluno não está autorizada.")
         if student:
             student_fields = []
             student_mapping = {
@@ -573,6 +583,16 @@ class OwnAccountView(APIView):
                 student.save(update_fields=student_fields)
 
         instructor = getattr(person, "instructor_profile", None)
+        if (
+            instructor
+            and not instructor.is_demo
+            and not settings.SYNTHETIC_MARKETPLACE_ENABLED
+            and not all(
+                enabled(name)
+                for name in ("REAL_PERSONAL_DATA", "REAL_INSTRUCTOR_REGISTRATION")
+            )
+        ):
+            raise PermissionDenied("Edição de dados reais do instrutor não está autorizada.")
         sensitive = set()
         if instructor:
             profile_fields = []
@@ -609,15 +629,49 @@ class OwnAccountView(APIView):
                     if "duration_minutes" in data:
                         offer.duration_minutes = data["duration_minutes"]
                     offer.save(update_fields=["price_amount", "duration_minutes", "updated_at"])
+                elif "price_amount" in data and "duration_minutes" in data:
+                    InstructorOffer.objects.create(
+                        instructor=instructor,
+                        category=instructor.categories[0],
+                        price_amount=data["price_amount"],
+                        duration_minutes=data["duration_minutes"],
+                        data_mode=DataMode.SYNTHETIC if instructor.is_demo else DataMode.REAL,
+                    )
+                else:
+                    raise serializers.ValidationError(
+                        "Preço e duração são obrigatórios para criar a primeira oferta."
+                    )
             if "vehicle" in data:
-                vehicle = InstructorVehicle.objects.select_for_update().get(instructor=instructor)
-                for field, value in data["vehicle"].items():
-                    if getattr(vehicle, field) != value:
-                        setattr(vehicle, field, value)
-                        sensitive.add(f"vehicle.{field}")
-                vehicle.verification_status = InstructorVehicle.VerificationStatus.PENDING
-                vehicle.save()
-            if sensitive:
+                vehicle = InstructorVehicle.objects.select_for_update().filter(
+                    instructor=instructor
+                ).first()
+                if vehicle:
+                    for field, value in data["vehicle"].items():
+                        if getattr(vehicle, field) != value:
+                            setattr(vehicle, field, value)
+                            sensitive.add(f"vehicle.{field}")
+                    vehicle.verification_status = InstructorVehicle.VerificationStatus.PENDING
+                    vehicle.save()
+                else:
+                    required = {"category", "make", "model", "year", "transmission"}
+                    missing = required - set(data["vehicle"])
+                    if missing:
+                        raise serializers.ValidationError(
+                            {"vehicle": f"Campos obrigatórios: {', '.join(sorted(missing))}"}
+                        )
+                    InstructorVehicle.objects.create(
+                        instructor=instructor,
+                        data_mode=DataMode.SYNTHETIC if instructor.is_demo else DataMode.REAL,
+                        **data["vehicle"],
+                    )
+                    sensitive.add("vehicle")
+            if sensitive and (
+                instructor.profile_status != InstructorProfile.Status.DRAFT
+                or instructor.verification_status
+                != InstructorProfile.VerificationStatus.NOT_STARTED
+                or instructor.publication_status
+                != InstructorProfile.PublicationStatus.UNPUBLISHED
+            ):
                 instructor = invalidate_after_owner_sensitive_edit(
                     actor=request.user,
                     profile=instructor,
@@ -634,8 +688,18 @@ class OwnAccountView(APIView):
             request_id=getattr(request, "request_id", None),
             metadata={
                 "changed_fields": sorted(data),
-                "before": {key: before.get(key) for key in ("phone", "birth_date")},
-                "after": {key: after.get(key) for key in ("phone", "birth_date")},
+                "before": {
+                    "phone": before.get("phone"),
+                    "birth_date": before["birth_date"].isoformat()
+                    if before.get("birth_date")
+                    else None,
+                },
+                "after": {
+                    "phone": after.get("phone"),
+                    "birth_date": after["birth_date"].isoformat()
+                    if after.get("birth_date")
+                    else None,
+                },
             },
         )
         return Response(after)

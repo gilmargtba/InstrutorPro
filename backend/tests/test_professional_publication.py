@@ -4,6 +4,7 @@ import pytest
 from django.contrib import admin
 from django.contrib.auth.models import Permission
 from django.contrib.gis.geos import Point
+from django.test import override_settings
 from django.utils import timezone
 from rest_framework.test import APIClient
 
@@ -352,6 +353,44 @@ def test_complete_workflow_and_audit(actor):
         ).count()
         == 5
     )
+
+
+@pytest.mark.django_db
+@override_settings(
+    REAL_PRODUCTION_AUTHORIZATION="CONTROLLED_PILOT",
+    REAL_INSTRUCTOR_REGISTRATION=True,
+)
+def test_real_manual_verification_requires_provenance_and_no_document_upload(actor):
+    profile, *_ = make_profile(
+        actor,
+        is_demo=False,
+        profile_status="DRAFT",
+        verification_status="NOT_STARTED",
+        verified_until=None,
+        publication_status="UNPUBLISHED",
+    )
+    profile.offers.update(data_mode=DataMode.REAL)
+
+    submit_profile(actor=profile.person.account, profile=profile, reason="PILOT_SUBMISSION")
+    start_review(actor=actor, profile=profile, reason="PILOT_REVIEW")
+    with pytest.raises(InvalidWorkflowTransition, match="autoridade e método"):
+        verify_professional(actor=actor, profile=profile, reason="PILOT_VERIFY")
+
+    verification = verify_professional(
+        actor=actor,
+        profile=profile,
+        reason="PILOT_VERIFY",
+        authority="DETRAN-RS",
+        method="MANUAL_VISUAL_NO_RETENTION",
+        provenance_reference="operator-check-001",
+    )
+    approve_publication(actor=actor, profile=profile, reason="PILOT_APPROVE")
+    profile.refresh_from_db()
+
+    assert verification.provider == "MANUAL_NO_FILE"
+    assert verification.authority == "DETRAN-RS"
+    assert profile.publication_status == "APPROVED"
+    assert not profile.documents.exists()
 
 
 @pytest.mark.django_db

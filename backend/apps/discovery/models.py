@@ -190,6 +190,9 @@ class ProfessionalVerification(models.Model):
         InstructorProfile, on_delete=models.PROTECT, related_name="verification_history"
     )
     provider = models.CharField(max_length=30, default="SYNTHETIC")
+    authority = models.CharField(max_length=80, blank=True)
+    method = models.CharField(max_length=40, blank=True)
+    provenance_reference = models.CharField(max_length=160, blank=True)
     status = models.CharField(max_length=20, choices=Status.choices)
     verified_at = models.DateTimeField(null=True, blank=True)
     verified_until = models.DateTimeField(null=True, blank=True)
