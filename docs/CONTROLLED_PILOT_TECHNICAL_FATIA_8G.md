@@ -120,4 +120,3 @@ hold documentado, acesso restrito e revisão.
    anonimização ao final e exceções documentadas.
 3. Confirmar que `LEGAL_ACCEPTANCE` e `PRIVACY_REQUEST` continuam sem prazo numérico até revisão
    jurídica específica; nenhuma aprovação operacional deve inventar prazo legal para elas.
-
