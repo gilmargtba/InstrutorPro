@@ -240,7 +240,10 @@ quatro eventos mínimos com retenção de 90 dias; LIA-8F-02 para telemetria mí
 `NOT_REQUIRED_FOR_CURRENT_SCOPE` com reavaliação material obrigatória; e o redirecionamento
 externo ao WhatsApp sem telefone ou conteúdo em analytics. DPO continua `PENDING_CLASSIFICATION`
 e MapTiler continua `PENDING_VENDOR_REVIEW`. A política completa de retenção ainda aguarda
-aprovação; a decisão de 90 dias vale somente para analytics do marketplace.
+aprovação; a decisão de 90 dias vale somente para analytics do marketplace. A Fatia 8G implementa
+essa decisão por exclusão definitiva diária e em lotes somente dos quatro eventos aprovados; o
+limite exato de 90 dias permanece e nenhum registro jurídico, de privacidade, verificação,
+publicação, auditoria ou segurança entra nesse descarte.
 
 Revisão ocorre no mínimo em cada marco e quando mudar finalidade, dado, público, fornecedor, país, norma, incidente, decisão automatizada ou risco. O monitor regulatório acompanha em especial direitos dos titulares, ECA Digital/aferição etária e regras de plataformas digitais publicadas após esta revisão.
 

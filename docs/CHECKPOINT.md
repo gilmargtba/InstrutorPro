@@ -544,3 +544,21 @@ Marketplace (M3) somente após M2 aceito. Google é gate opcional M2.1. Pagament
   `DPO_STATUS=PENDING_CLASSIFICATION`. MapTiler segue `PENDING_VENDOR_REVIEW`;
 - a retenção de analytics aprovada ainda exige implementação/teste de descarte em 90 dias.
   Nenhuma capability foi habilitada e nenhum deploy foi autorizado.
+
+### Fatia 8G — retenção técnica e preparação pré-deploy (18/09/2026)
+
+- implementada exclusão definitiva, diária e em lotes dos quatro eventos aprovados de analytics
+  quando têm mais de 90 dias; o limite exato permanece até se tornar estritamente mais antigo;
+- o Celery Beat existente agenda a tarefa e o management command suporta dry-run, contagens,
+  lotes transacionais, idempotência e auditoria agregada sem PII, inclusive em falha parcial;
+- `OPEN-009_CONTROLLED_PILOT=READY_FOR_PREDEPLOY_RESTORE_TEST`: procedimento isolado, checks e
+  evidências estão definidos; nenhuma VPS foi acessada e a execução continua obrigatória antes da
+  ativação;
+- o fluxo MapTiler é backend-only, mas envia consulta textual e área do tile ao fornecedor; PostGIS
+  pesquisa sem nova chamada depois de receber coordenadas. Como não há resolver/tile local,
+  `FALLBACK_REQUIRES_IMPLEMENTATION` e o fornecedor segue `PENDING_VENDOR_REVIEW`;
+- prazos de 90 dias para perfis/conta e 180 dias para auditoria/verificação/publicação são apenas
+  propostas ao proprietário; aceites e pedidos de privacidade continuam
+  `PENDING_LEGAL_REVIEW`; `DPO_STATUS=PENDING_CLASSIFICATION`;
+- nenhuma capability real foi ativada, nenhum dado pessoal real foi usado e nenhum deploy foi
+  executado.

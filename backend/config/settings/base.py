@@ -112,6 +112,12 @@ CELERY_BROKER_URL = REDIS_URL
 CELERY_RESULT_BACKEND = REDIS_URL
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 300
+CELERY_BEAT_SCHEDULE = {
+    "marketplace-analytics-retention-daily": {
+        "task": "marketplace.enforce_analytics_retention",
+        "schedule": 86400.0,
+    }
+}
 
 CORS_ALLOWED_ORIGINS = [item for item in os.getenv("CORS_ALLOWED_ORIGINS", "").split(",") if item]
 CORS_ALLOW_CREDENTIALS = True

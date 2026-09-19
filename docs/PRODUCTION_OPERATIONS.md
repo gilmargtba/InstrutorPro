@@ -36,3 +36,7 @@ reais. Todas as flags de cadastro, publicação e demanda permanecem desligadas.
 
 Retenção definitiva, destino, responsáveis e periodicidade permanecem pendentes de
 aprovação operacional, jurídica e de privacidade.
+
+O procedimento executável e os critérios de evidência do restore pré-deploy do piloto estão em
+`CONTROLLED_PILOT_TECHNICAL_FATIA_8G.md`. Enquanto a execução na VPS não for autorizada, o estado é
+`READY_FOR_PREDEPLOY_RESTORE_TEST`, nunca autorização para iniciar containers ou usar dados reais.
