@@ -240,7 +240,7 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
   private readonly changeDetector = inject(ChangeDetectorRef);
 
   filters: SearchFilters = {
-    location: 'Porto Alegre',
+    location: '',
     radius: 10,
     category: 'B',
     transmission: '',

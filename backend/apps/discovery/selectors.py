@@ -6,6 +6,7 @@ from django.db.models import Count, Min, Q
 from django.utils import timezone
 
 from apps.marketplace.capabilities import enabled
+from apps.territories.policies import approved_instructor_publication_ufs
 
 from .models import InstructorProfile
 
@@ -17,21 +18,22 @@ def published_instructor_profiles():
     )
     if not settings.SYNTHETIC_MARKETPLACE_ENABLED and not enabled("REAL_MARKETPLACE_SEARCH"):
         return InstructorProfile.objects.none()
-    return (
-        InstructorProfile.objects.filter(
-            **data_filter,
-            profile_status="APPROVED",
-            verification_status="VERIFIED",
-            publication_status="APPROVED",
-            person__account__lifecycle_status="ACTIVE",
-            person__account__is_active=True,
-            person__role_assignments__role="INSTRUCTOR",
-            person__role_assignments__revoked_at__isnull=True,
-            service_area__location_authorized=True,
+    queryset = InstructorProfile.objects.filter(
+        **data_filter,
+        profile_status="APPROVED",
+        verification_status="VERIFIED",
+        publication_status="APPROVED",
+        person__account__lifecycle_status="ACTIVE",
+        person__account__is_active=True,
+        person__role_assignments__role="INSTRUCTOR",
+        person__role_assignments__revoked_at__isnull=True,
+        service_area__location_authorized=True,
+    ).filter(Q(verified_until__isnull=True) | Q(verified_until__gt=now))
+    if not settings.SYNTHETIC_MARKETPLACE_ENABLED:
+        queryset = queryset.filter(
+            service_area__uf__in=approved_instructor_publication_ufs().values("code")
         )
-        .filter(Q(verified_until__isnull=True) | Q(verified_until__gt=now))
-        .distinct()
-    )
+    return queryset.distinct()
 
 
 def published_instructor_counts_by_uf():

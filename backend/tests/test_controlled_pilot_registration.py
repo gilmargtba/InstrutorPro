@@ -3,6 +3,7 @@ from unittest.mock import patch
 
 import pytest
 from django.contrib.gis.geos import Point
+from django.core.management import call_command
 from django.test import override_settings
 from django.utils import timezone
 from rest_framework.test import APIClient
@@ -19,7 +20,11 @@ from apps.marketplace.models import (
 )
 from apps.people.models import RoleAssignment
 from apps.privacy.models import LegalAcceptanceRecord
-from apps.territories.models import Country, FederativeUnit
+from apps.territories.models import FederativeUnit, RegulatoryReadiness
+from apps.territories.policies import (
+    INSTRUCTOR_PROVIDER_TYPE,
+    INSTRUCTOR_PUBLICATION_CAPABILITY,
+)
 
 PILOT = {
     "SYNTHETIC_MARKETPLACE_ENABLED": False,
@@ -51,9 +56,12 @@ def payload(role="STUDENT"):
 
 @pytest.fixture(autouse=True)
 def territory(db):
-    country = Country.objects.create(code="BR", name="Brasil")
-    FederativeUnit.objects.create(
-        country=country, code="RS", name="Rio Grande do Sul", ibge_code="43"
+    call_command("seed_territories", verbosity=0)
+    RegulatoryReadiness.objects.create(
+        federative_unit=FederativeUnit.objects.get(code="RS"),
+        provider_type=INSTRUCTOR_PROVIDER_TYPE,
+        capability=INSTRUCTOR_PUBLICATION_CAPABILITY,
+        status=RegulatoryReadiness.Status.APPROVED,
     )
 
 
@@ -141,6 +149,74 @@ def test_real_instructor_can_save_non_documental_onboarding_without_self_publica
 @pytest.mark.django_db
 @override_settings(**PILOT)
 @pytest.mark.parametrize(
+    ("city", "uf", "latitude", "longitude"),
+    [
+        ("Porto Alegre", "RS", -30.0346, -51.2177),
+        ("São Paulo", "SP", -23.5505, -46.6333),
+        ("Rio de Janeiro", "RJ", -22.9068, -43.1729),
+        ("Goiânia", "GO", -16.6869, -49.2648),
+        ("Florianópolis", "SC", -27.5949, -48.5482),
+        ("Vitória", "ES", -20.3155, -40.3128),
+        ("Manaus", "AM", -3.1190, -60.0217),
+    ],
+)
+def test_real_instructor_onboarding_accepts_representative_national_service_areas(
+    city, uf, latitude, longitude
+):
+    client = APIClient()
+    assert (
+        client.post(
+            "/api/v1/marketplace/accounts/register/", payload("INSTRUCTOR"), format="json"
+        ).status_code
+        == 201
+    )
+
+    response = client.patch(
+        "/api/v1/account/me/",
+        {
+            "instructor_city": city,
+            "instructor_uf": uf,
+            "service_latitude": latitude,
+            "service_longitude": longitude,
+            "service_radius_km": 20,
+            "service_location_authorized": True,
+        },
+        format="json",
+    )
+
+    assert response.status_code == 200
+    area = InstructorServiceArea.objects.get(profile__person__account__username="real-instructor")
+    assert (area.city, area.uf) == (city, uf)
+    assert area.private_location is None
+    assert area.profile.publication_status == "UNPUBLISHED"
+
+
+@pytest.mark.django_db
+@override_settings(**PILOT)
+def test_real_instructor_onboarding_rejects_unknown_uf():
+    client = APIClient()
+    assert (
+        client.post(
+            "/api/v1/marketplace/accounts/register/", payload("INSTRUCTOR"), format="json"
+        ).status_code
+        == 201
+    )
+    response = client.patch(
+        "/api/v1/account/me/",
+        {
+            "instructor_city": "Cidade inválida",
+            "instructor_uf": "XX",
+            "service_latitude": -15,
+            "service_longitude": -47,
+        },
+        format="json",
+    )
+    assert response.status_code == 400
+
+
+@pytest.mark.django_db
+@override_settings(**PILOT)
+@pytest.mark.parametrize(
     "field,value",
     [
         ("terms_accepted", False),
@@ -215,6 +291,28 @@ def test_real_selector_excludes_synthetic_and_requires_approved_real_offer():
     SYNTHETIC_MARKETPLACE_ENABLED=False,
     REAL_PRODUCTION_AUTHORIZATION="CONTROLLED_PILOT",
     REAL_MARKETPLACE_SEARCH=True,
+)
+def test_real_selector_blocks_publication_in_uf_without_explicit_readiness():
+    go = _published_profile(
+        "selector-go",
+        is_demo=False,
+        data_mode=DataMode.REAL,
+        city="Goiânia",
+        uf="GO",
+        latitude=-16.6869,
+        longitude=-49.2648,
+    )
+    results = search_published_instructors(
+        latitude=-16.6869, longitude=-49.2648, radius_km=10, category="B"
+    )
+    assert go not in list(results)
+
+
+@pytest.mark.django_db
+@override_settings(
+    SYNTHETIC_MARKETPLACE_ENABLED=False,
+    REAL_PRODUCTION_AUTHORIZATION="CONTROLLED_PILOT",
+    REAL_MARKETPLACE_SEARCH=True,
     REAL_WHATSAPP_CONTACT=True,
     REAL_MARKETPLACE_ANALYTICS=True,
 )
@@ -244,7 +342,17 @@ def test_real_whatsapp_records_minimized_deduplicated_analytics():
     assert "+5551999990001" not in str(event.__dict__)
 
 
-def _published_profile(username, *, is_demo, data_mode, publication_status="APPROVED"):
+def _published_profile(
+    username,
+    *,
+    is_demo,
+    data_mode,
+    publication_status="APPROVED",
+    city="Porto Alegre",
+    uf="RS",
+    latitude=-30.0346,
+    longitude=-51.2177,
+):
     account = Account.objects.create_user(
         username=username, email=f"{username}@example.com", password="test-password"
     )
@@ -267,9 +375,9 @@ def _published_profile(username, *, is_demo, data_mode, publication_status="APPR
     )
     InstructorServiceArea.objects.create(
         profile=profile,
-        city="Porto Alegre",
-        uf="RS",
-        public_service_location=Point(-51.2177, -30.0346, srid=4326),
+        city=city,
+        uf=uf,
+        public_service_location=Point(longitude, latitude, srid=4326),
         radius_km=10,
         location_authorized=True,
     )

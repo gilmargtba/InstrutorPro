@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { BRAZIL_UFS } from '../../shared/brazil-ufs';
 
 @Component({
   selector: 'app-real-registration',
@@ -12,7 +13,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
     <label>Usuário<input name="username" [(ngModel)]="form.username" required></label>
     <label>E-mail<input name="email" [(ngModel)]="form.email" type="email" required></label>
     <label>Data de nascimento<input name="birth" [(ngModel)]="form.birth_date" type="date" required></label>
-    @if(role==='STUDENT'){<label>Cidade<input name="city" [(ngModel)]="form.city" required></label><label>UF<input name="uf" [(ngModel)]="form.uf" maxlength="2" required></label>}
+    @if(role==='STUDENT'){<label>Cidade<input name="city" [(ngModel)]="form.city" required></label><label>UF<select name="uf" [(ngModel)]="form.uf" required><option value="">Selecione</option>@for(uf of ufs; track uf){<option [value]="uf">{{uf}}</option>}</select></label>}
     <label>Senha<input name="password" [(ngModel)]="form.password" type="password" minlength="10" required></label>
     <label>Confirmar senha<input name="confirmation" [(ngModel)]="form.password_confirmation" type="password" minlength="10" required></label>
     <label class="check"><input name="terms" [(ngModel)]="form.terms_accepted" type="checkbox" required> Li e aceito os <a [routerLink]="termsPath" target="_blank">Termos de Uso</a>.</label>
@@ -23,6 +24,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
   styles:[`.account-form{display:grid;gap:1rem}.account-form label{display:grid;gap:.35rem;font-weight:700}.account-form input{padding:.75rem;border:1px solid #bad4d1;border-radius:.7rem}.check{grid-template-columns:auto 1fr;align-items:start}.check input{margin-top:.25rem}`]
 })
 export class RealRegistrationComponent {
+  readonly ufs = BRAZIL_UFS;
   private http=inject(HttpClient); private route=inject(ActivatedRoute); private router=inject(Router);
   role=this.route.snapshot.data['role'] as 'STUDENT'|'INSTRUCTOR';
   termsPath=this.role==='STUDENT'?'/termos/aluno':'/termos/instrutor';

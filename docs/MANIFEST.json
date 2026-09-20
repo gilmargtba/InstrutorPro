@@ -41,7 +41,8 @@
     "docs/DPO_M1_RFQ.md",
     "docs/CONTROLLED_PILOT_DATA_PROCESSING_FATIA_8E.md",
     "docs/CONTROLLED_PILOT_GATES_FATIA_8F.md",
-    "docs/CONTROLLED_PILOT_TECHNICAL_FATIA_8G.md"
+    "docs/CONTROLLED_PILOT_TECHNICAL_FATIA_8G.md",
+    "docs/CONTROLLED_PILOT_NATIONAL_SCOPE_FATIA_8H.md"
   ],
   "governance_files": [
     "docs/MANIFEST.json"

@@ -562,3 +562,16 @@ Marketplace (M3) somente após M2 aceito. Google é gate opcional M2.1. Pagament
   `PENDING_LEGAL_REVIEW`; `DPO_STATUS=PENDING_CLASSIFICATION`;
 - nenhuma capability real foi ativada, nenhum dado pessoal real foi usado e nenhum deploy foi
   executado.
+
+### Fatia 8H — cadastro e busca nacionais (20/09/2026)
+
+- cadastro/onboarding e área pública de atendimento foram validados nas 27 UFs, com evidência
+  representativa em sete capitais de diferentes regiões;
+- a busca deixou de iniciar artificialmente em Porto Alegre e continua baseada em PostGIS;
+- publicação e selector público real agora exigem prontidão territorial explícita, vigente e
+  aprovada; nenhuma UF é aprovada automaticamente;
+- a interface de cadastro de aluno usa o catálogo fechado das 27 UFs e a API rejeita códigos
+  inexistentes para aluno e instrutor;
+- `PREDEPLOY_DECISION=NO_GO`: DPO/enquadramento, retenções jurídicas e revisão MapTiler continuam
+  pendentes. Nenhuma capability foi ativada e nenhum deploy foi executado;
+- matriz e evidências: `docs/CONTROLLED_PILOT_NATIONAL_SCOPE_FATIA_8H.md`.

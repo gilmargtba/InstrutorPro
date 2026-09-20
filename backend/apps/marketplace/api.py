@@ -477,6 +477,14 @@ class OwnAccountInput(serializers.Serializer):
             raise serializers.ValidationError(
                 {name: "Este campo não pode ser alterado." for name in sorted(unknown)}
             )
+        for field in ("student_uf", "instructor_uf"):
+            if field in attrs:
+                code = attrs[field].upper()
+                if not FederativeUnit.objects.filter(code=code).exists():
+                    raise serializers.ValidationError(
+                        {field: "UF não cadastrada no catálogo nacional."}
+                    )
+                attrs[field] = code
         return attrs
 
     def validate_vehicle(self, value):
@@ -528,6 +536,10 @@ def _own_account_payload(user):
             "duration_minutes": offer.duration_minutes if offer else None,
             "city": area.city if area else "",
             "uf": area.uf if area else "",
+            "service_latitude": area.public_service_location.y if area else None,
+            "service_longitude": area.public_service_location.x if area else None,
+            "service_radius_km": area.radius_km if area else None,
+            "service_location_authorized": area.location_authorized if area else False,
             "vehicle": (
                 {
                     "category": vehicle.category,

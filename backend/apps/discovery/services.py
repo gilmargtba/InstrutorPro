@@ -269,6 +269,14 @@ def decide_publication(*, actor, profile, decision, reason, request_id=None):
     verification = p.verification_history.order_by("-created_at").first()
     if decision == "APPROVE":
         from apps.marketplace.documents import documents_satisfy_active_requirements
+        from apps.territories.policies import instructor_publication_is_allowed
+
+        if not p.is_demo:
+            area = getattr(p, "service_area", None)
+            if not area or not instructor_publication_is_allowed(area.uf):
+                raise InvalidWorkflowTransition(
+                    "Publicação real bloqueada: a UF não possui autorização regulatória vigente"
+                )
 
         verification_evidence_valid = bool(
             verification
