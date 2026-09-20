@@ -575,3 +575,18 @@ Marketplace (M3) somente após M2 aceito. Google é gate opcional M2.1. Pagament
 - `PREDEPLOY_DECISION=NO_GO`: DPO/enquadramento, retenções jurídicas e revisão MapTiler continuam
   pendentes. Nenhuma capability foi ativada e nenhum deploy foi executado;
 - matriz e evidências: `docs/CONTROLLED_PILOT_NATIONAL_SCOPE_FATIA_8H.md`.
+
+### Fatia 8I — prova de restauração e decisão de pre-deploy (20/09/2026)
+
+- validações locais passaram: 192 testes backend, 30 testes focados nacionais/retention, Ruff,
+  Django check, migration check e build Angular de produção;
+- inventário da VPS confirmou serviços saudáveis, PostgreSQL 17.5/PostGIS 3.5.2, Redis `PONG`,
+  banco/cache sem portas públicas e 87 GB livres;
+- backup custom de 213586 bytes passou em `pg_restore --list` e SHA-256; restauração isolada em
+  banco temporário levou 3 segundos e validou 54 tabelas, 59 migrations e PostGIS 3.5.2;
+- o banco temporário foi removido, o banco ativo não foi tocado e o backup foi preservado;
+- `OPEN-009_CONTROLLED_PILOT=PASS`, porém `PREDEPLOY_DECISION=NO_GO`: `OPEN-004` e
+  `OPEN-008_CONTROLLED_PILOT=BLOCKED`, `DPO_STATUS=PENDING_CLASSIFICATION` e MapTiler pendente para
+  busca real;
+- nenhuma capability, flag, migration ou serviço da VPS foi alterado. Evidência completa em
+  `docs/CONTROLLED_PILOT_RELEASE_FATIA_8I.md`.

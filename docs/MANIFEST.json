@@ -1,7 +1,7 @@
 {
   "package": "instrutorpro-documentation",
-  "version": "3.7",
-  "reviewed_on": "2026-09-02",
+  "version": "3.8",
+  "reviewed_on": "2026-09-20",
   "path_base": "repository-root",
   "normative_documents": [
     "README.md",
@@ -42,7 +42,8 @@
     "docs/CONTROLLED_PILOT_DATA_PROCESSING_FATIA_8E.md",
     "docs/CONTROLLED_PILOT_GATES_FATIA_8F.md",
     "docs/CONTROLLED_PILOT_TECHNICAL_FATIA_8G.md",
-    "docs/CONTROLLED_PILOT_NATIONAL_SCOPE_FATIA_8H.md"
+    "docs/CONTROLLED_PILOT_NATIONAL_SCOPE_FATIA_8H.md",
+    "docs/CONTROLLED_PILOT_RELEASE_FATIA_8I.md"
   ],
   "governance_files": [
     "docs/MANIFEST.json"
@@ -59,7 +60,7 @@
       "note": "Provisional brand asset; the product name and visual identity remain open decisions."
     }
   ],
-  "updated_at": "2026-09-02",
+  "updated_at": "2026-09-20",
   "scope": "national-27-ufs",
   "first_wave": [
     "RS",
