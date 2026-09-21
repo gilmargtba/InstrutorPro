@@ -96,3 +96,10 @@ credenciamento, verificação, elegibilidade, publicação ou homologação de a
   instrutor `NOT_STARTED/UNPUBLISHED`;
 - validação final: 27 testes focados e 205 testes backend `PASS`; Ruff, Django check e migration
   check `PASS`; Angular production build `PASS` e 22 testes frontend `PASS`.
+- consulta sanitizada na VPS confirmou `ACCOUNT_ALREADY_EXISTS=NO`, seis contagens relacionadas
+  zeradas e `SIGNUP_TRANSACTION=ROLLED_BACK`; as quatro capabilities necessárias estavam
+  efetivamente carregadas no backend;
+- frontend corrigido implantado no commit `c8057be`, sem recriar backend, PostgreSQL, Redis,
+  volumes ou certificados; gateway apenas recarregado e `/cadastro/instrutor` respondeu HTTP 200.
+
+`FIRST_REAL_INSTRUCTOR_READY=YES`

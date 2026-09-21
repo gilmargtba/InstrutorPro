@@ -638,3 +638,6 @@ Marketplace (M3) somente após M2 aceito. Google é gate opcional M2.1. Pagament
 - regressão do incidente ampliada para senha/data inválidas, aceites ausentes, e-mail duplicado e
   rollback integral: 27 testes focados e suíte backend com 205 testes aprovados; Ruff, Django e
   migrations sem falhas ou deriva.
+- verificação sanitizada em produção confirmou ausência da conta e rollback integral da tentativa;
+  frontend corrigido implantado no commit `c8057be`, sem tocar banco/Redis/volumes/certificados,
+  com rota de cadastro HTTP 200. O proprietário pode repetir o cadastro real.
