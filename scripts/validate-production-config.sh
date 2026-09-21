@@ -21,4 +21,5 @@ docker compose --env-file "$env_file" -f compose.production.yaml run --rm --no-d
     python manage.py production_readiness
 
 echo PRODUCTION_CONFIG_VALIDATION=PASS
-echo REAL_PRODUCTION_AUTHORIZATION=NOT_GRANTED
+authorization=$(sed -n 's/^REAL_PRODUCTION_AUTHORIZATION=//p' "$env_file" | tail -n 1)
+echo "REAL_PRODUCTION_AUTHORIZATION=${authorization:-NOT_GRANTED}"

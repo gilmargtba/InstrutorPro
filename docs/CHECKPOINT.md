@@ -625,6 +625,7 @@ Marketplace (M3) somente após M2 aceito. Google é gate opcional M2.1. Pagament
   `/demo/`; ambos foram corrigidos sem liberar documentos, busca, contato ou publicação;
 - o fluxo autorizado usa `CONTROLLED_PILOT` com conta, dados pessoais e cadastro de instrutor;
   Termos/Política permanecem transacionais e o perfil nasce não verificado/não publicado;
+- o validador operacional passa a reportar o marcador de autorização carregado, sem valor fixo;
 - cadastro/onboarding aceita as 27 UFs; prontidão territorial continua gate independente de
   publicação e MapTiler não participa do cadastro;
 - validação local: 21 testes focados e 199 backend aprovados, Ruff, Django/migrations, build Angular

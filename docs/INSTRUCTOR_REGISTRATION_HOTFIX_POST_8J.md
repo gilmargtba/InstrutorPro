@@ -29,6 +29,8 @@ Data: 20/09/2026 (America/Sao_Paulo).
   automaticamente;
 - o exemplo de produção registra a decisão autorizada:
   `CONTROLLED_PILOT` com conta, dados pessoais e cadastro de instrutor habilitados.
+- o validador de produção reporta o marcador de autorização efetivamente carregado do arquivo,
+  evitando registrar `NOT_GRANTED` de forma fixa após a ativação controlada.
 
 ## Invariantes preservadas
 
