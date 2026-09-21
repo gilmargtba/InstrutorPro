@@ -648,3 +648,5 @@ Marketplace (M3) somente após M2 aceito. Google é gate opcional M2.1. Pagament
   backend existente, que preenche um centro público aproximado somente quando o resultado pertence
   à mesma UF; latitude/longitude ficam somente leitura e residência não é solicitada. Build Angular
   aprovado e 25 testes frontend passaram.
+- a ação da tela de status agora abre o editor real do perfil, e o onboarding recarrega todos os
+  campos persistidos antes da edição sem reenviar estados internos de verificação do veículo.

@@ -43,7 +43,8 @@ Data: 20–21/09/2026 (America/Sao_Paulo).
 - `REAL_MARKETPLACE_SEARCH`, `REAL_WHATSAPP_CONTACT`, `REAL_MARKETPLACE_ANALYTICS`,
   `REAL_DOCUMENT_UPLOADS`, `REAL_AUTOMATIC_PUBLICATION`, `REAL_PAYMENTS` e
   `REAL_PRO_BILLING` permanecem falsas;
-- MapTiler não participa da criação de conta nem do onboarding.
+- MapTiler não participa da criação de conta; no onboarding, recebe somente cidade/UF para resolver
+  um centro público aproximado, sem endereço residencial e sem bloquear a conta já criada.
 
 ## Validação local
 
@@ -77,6 +78,17 @@ credenciamento, verificação, elegibilidade, publicação ou homologação de a
 - nenhum usuário ou identidade fictícia foi criado no smoke.
 
 `FIRST_REAL_INSTRUCTOR_READY=YES`
+
+## Edição segura do perfil já cadastrado
+
+- a tela de status deixou de direcionar o instrutor ao painel legado e agora oferece a ação
+  explícita `Editar perfil`, que abre o onboarding real autenticado;
+- o formulário de edição hidrata apresentação, categorias, transmissão, WhatsApp profissional,
+  oferta, veículo e área pública aproximada já persistidos antes de permitir novo envio;
+- campos internos de verificação do veículo não retornam no `PATCH`, preservando o contrato de
+  escrita e evitando alteração de estado pelo cliente;
+- a edição continua sem publicar ou verificar automaticamente o instrutor e respeita as
+  invalidações de segurança existentes para alterações sensíveis.
 
 ## Correção adicional de campos opcionais
 

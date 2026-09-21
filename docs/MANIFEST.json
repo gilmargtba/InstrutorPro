@@ -1,6 +1,6 @@
 {
   "package": "instrutorpro-documentation",
-  "version": "3.17",
+  "version": "3.18",
   "reviewed_on": "2026-09-21",
   "path_base": "repository-root",
   "normative_documents": [
@@ -64,7 +64,7 @@
       "note": "Provisional brand asset; the product name and visual identity remain open decisions."
     }
   ],
-  "updated_at": "2026-09-20",
+  "updated_at": "2026-09-21",
   "scope": "national-27-ufs",
   "first_wave": [
     "RS",

@@ -31,4 +31,10 @@ describe('RealInstructorOnboardingComponent',()=>{
     http.expectOne(req=>req.url==='/geocoding/search/'&&req.params.get('q')==='Goiatuba, GO, Brasil').flush({provider:'maptiler',results:[{id:'municipality.2',label:'Outra cidade',latitude:-23,longitude:-46,place_type:'municipality',city:'Outra',uf:'SP',bbox:null}]});
     expect(component.form.service_latitude).toBeNull();expect(component.locationMessage()).toContain('não encontrada');
   });
+  it('loads every editable field from the saved instructor profile',()=>{
+    const component=TestBed.createComponent(RealInstructorOnboardingComponent).componentInstance;
+    const http=TestBed.inject(HttpTestingController);
+    http.expectOne('/account/me/').flush({instructor:{display_name:'Instrutora Piloto',bio:'Experiência profissional',categories:['B'],transmission_options:['AUTOMATIC'],whatsapp:'+5564999990001',price_amount:'120.00',duration_minutes:90,city:'Goiatuba',uf:'GO',service_latitude:-18.0125,service_longitude:-49.3547,service_radius_km:20,service_location_authorized:true,vehicle:{category:'B',make:'Marca',model:'Modelo',year:2024,transmission:'AUTOMATIC',ownership_type:'OWNED',verification_status:'PENDING'}}});
+    expect(component.category).toBe('B');expect(component.transmission).toBe('AUTOMATIC');expect(component.form.bio).toBe('Experiência profissional');expect(component.form.whatsapp).toBe('+5564999990001');expect(component.form.price_amount).toBe(120);expect(component.form.instructor_city).toBe('Goiatuba');expect(component.form.instructor_uf).toBe('GO');expect(component.form.service_latitude).toBe(-18.0125);expect(component.form.service_location_authorized).toBeTrue();expect(component.form.vehicle).toEqual({category:'B',make:'Marca',model:'Modelo',year:2024,transmission:'AUTOMATIC',ownership_type:'OWNED'});expect(component.form.vehicle.verification_status).toBeUndefined();expect(component.locationMessage()).toContain('Goiatuba/GO');
+  });
 });
