@@ -1,6 +1,6 @@
 {
   "package": "instrutorpro-documentation",
-  "version": "3.8",
+  "version": "3.9",
   "reviewed_on": "2026-09-20",
   "path_base": "repository-root",
   "normative_documents": [
@@ -43,7 +43,9 @@
     "docs/CONTROLLED_PILOT_GATES_FATIA_8F.md",
     "docs/CONTROLLED_PILOT_TECHNICAL_FATIA_8G.md",
     "docs/CONTROLLED_PILOT_NATIONAL_SCOPE_FATIA_8H.md",
-    "docs/CONTROLLED_PILOT_RELEASE_FATIA_8I.md"
+    "docs/CONTROLLED_PILOT_RELEASE_FATIA_8I.md",
+    "docs/PAYMENT_PROVIDER_REQUIREMENTS.md",
+    "docs/PAYMENT_GATEWAY_SETUP.md"
   ],
   "governance_files": [
     "docs/MANIFEST.json"

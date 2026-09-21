@@ -590,3 +590,18 @@ Marketplace (M3) somente após M2 aceito. Google é gate opcional M2.1. Pagament
   busca real;
 - nenhuma capability, flag, migration ou serviço da VPS foi alterado. Evidência completa em
   `docs/CONTROLLED_PILOT_RELEASE_FATIA_8I.md`.
+
+### Fatia 8J — deploy independente e fundação de pagamentos (20/09/2026)
+
+- deploy do código e ativação de capabilities reais passam a ser decisões independentes;
+- criada a fundação de pagamentos com customer, order, transaction e recibo de webhook separados
+  de `Subscription`, valores em menor unidade e estados explícitos;
+- porta `PaymentProvider` e fake determinístico permitem testar idempotência, assinatura, eventos
+  duplicados, transições e entitlement sem dinheiro ou rede real;
+- endpoint de webhook verifica assinatura antes de interpretar, deduplica pelo ID externo, valida
+  valor/transição e não registra payload ou segredo em auditoria;
+- frontend PRO já permanece em “EM BREVE”, sem preço, checkout ou coleta de cartão;
+- nenhum fornecedor foi escolhido; requisitos e credenciais futuras foram documentados em
+  `PAYMENT_PROVIDER_REQUIREMENTS.md` e `PAYMENT_GATEWAY_SETUP.md`;
+- `REAL_PAYMENTS=false` e `REAL_PRO_BILLING=false` continuam fixos em produção. Implementação não
+  fecha `OPEN-005` nem autoriza cobrança.

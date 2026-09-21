@@ -302,6 +302,12 @@ POST /admin/payments/{payment_id}/refunds
 
 Browser/redirect não confirma pagamento. Endpoint de webhook recebe corpo bruto, verifica assinatura antes de interpretar, persiste `WebhookReceipt` idempotente e responde rapidamente. Toda mutação financeira confirmada gera `LedgerTransaction` balanceada; reembolso, chargeback e ajuste criam reversão/compensação vinculada.
 
+A fundação não financeira da Fatia 8J expõe o equivalente
+`POST /api/v1/payments/webhook/{provider}/`. Sem adaptador selecionado, assinatura válida e
+configuração autorizada, responde `WEBHOOK_REJECTED`; o fake só pode ser resolvido em `TEST`.
+Essa preparação não cria checkout público, não movimenta dinheiro e não substitui os contratos
+financeiros/ledger exigidos antes da ativação real.
+
 ## Execução, disputa, suporte e reputação — D1–D3
 
 ```http

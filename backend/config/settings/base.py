@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "apps.territories",
     "apps.discovery",
     "apps.marketplace",
+    "apps.payments",
 ]
 
 MIDDLEWARE = [
@@ -169,6 +170,10 @@ REAL_DOCUMENT_UPLOADS = False
 REAL_AUTOMATIC_PUBLICATION = False
 REAL_PAYMENTS = False
 REAL_PRO_BILLING = False
+PAYMENT_PROVIDER = os.getenv("PAYMENT_PROVIDER", "")
+PAYMENT_ENVIRONMENT = os.getenv("PAYMENT_ENVIRONMENT", "sandbox")
+PAYMENT_API_KEY = os.getenv("PAYMENT_API_KEY", "")
+PAYMENT_WEBHOOK_SECRET = os.getenv("PAYMENT_WEBHOOK_SECRET", "")
 
 # Aliases legados permanecem deny-by-default e serão removidos após os fluxos reais
 # passarem a consultar exclusivamente a matriz granular.
