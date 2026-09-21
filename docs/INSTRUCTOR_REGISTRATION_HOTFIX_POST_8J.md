@@ -77,3 +77,12 @@ credenciamento, verificação, elegibilidade, publicação ou homologação de a
 - nenhum usuário ou identidade fictícia foi criado no smoke.
 
 `FIRST_REAL_INSTRUCTOR_READY=YES`
+
+## Correção de feedback do formulário
+
+- a primeira tentativa real do proprietário retornou HTTP 400 porque senha e confirmação tinham
+  menos de 10 caracteres; nenhuma conta foi persistida;
+- a interface agora informa previamente o mínimo de 10 caracteres, impede envio do formulário
+  inválido e apresenta os detalhes de validação devolvidos pela API em vez da mensagem genérica;
+- reprodução segura com domínio `example.invalid`: HTTP 400 com erro específico de comprimento;
+- Angular production build: `PASS`; testes frontend: 22 `PASS`.

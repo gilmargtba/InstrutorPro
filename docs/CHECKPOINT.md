@@ -633,3 +633,5 @@ Marketplace (M3) somente após M2 aceito. Google é gate opcional M2.1. Pagament
 - deploy concluído em 21/09/2026 no commit `b640bfb`: serviços saudáveis, rotas jurídica e de
   cadastro HTTP 200, capabilities autorizadas carregadas, nenhuma identidade fictícia criada e
   `FIRST_REAL_INSTRUCTOR_READY=YES`.
+- tentativa real identificou senha com menos de 10 caracteres; o frontend passou a bloquear esse
+  envio e exibir o detalhe retornado pela API. Build aprovado e suíte frontend com 22 testes.
