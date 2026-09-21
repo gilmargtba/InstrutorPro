@@ -644,3 +644,7 @@ Marketplace (M3) somente após M2 aceito. Google é gate opcional M2.1. Pagament
 - segunda tentativa revelou `city` e `uf` vazios enviados para instrutor embora fossem opcionais;
   contrato corrigido nos dois lados sem relaxar a obrigatoriedade para aluno. Validação local:
   28 testes focados, 206 backend e 23 frontend aprovados, com build e checks aprovados.
+- onboarding de instrutor deixou de exigir coordenadas manuais: cidade e UF acionam a busca
+  backend existente, que preenche um centro público aproximado somente quando o resultado pertence
+  à mesma UF; latitude/longitude ficam somente leitura e residência não é solicitada. Build Angular
+  aprovado e 25 testes frontend passaram.
