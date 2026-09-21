@@ -313,6 +313,12 @@ No `MAPA ONLINE 01`, todos os pontos são sintéticos. O schema separa
 `private_location` de `public_service_location`, o seed mantém o campo privado
 nulo e a API não o serializa. Não há geolocalização do navegador e o geocoder
 local não transmite texto. Isso não fecha `OPEN-007` para produção.
+
+No onboarding do piloto controlado, a referência pública opcional é enviada ao MapTiler somente
+por adapter backend, combinada com cidade/UF, e não integra o `PATCH`, perfil, auditoria ou histórico
+de negócio. Não há geolocalização do navegador. O ponto público autorizado é reduzido para duas
+casas decimais antes da persistência; a interface proíbe residência e restringe o ajuste do mapa à
+região previamente encontrada.
 9. **Dados de saúde do candidato.** Busca por clínica/médico/psicólogo, clique, agendamento e etapa da jornada não devem ser usados para inferir diagnóstico, condição de saúde ou perfil sensível. Resultado de exame/laudo não é coletado no MVP.
 10. **Scraping e automação.** Nenhum crawler autenticado, quebra de CAPTCHA, contorno de rate limit ou uso de endpoint não documentado é requisito do produto. Automação só entra após revisão de termos, finalidade, segurança, proporcionalidade e capacidade técnica da fonte.
 

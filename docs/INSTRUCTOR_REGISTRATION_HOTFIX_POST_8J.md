@@ -94,6 +94,11 @@ credenciamento, verificação, elegibilidade, publicação ou homologação de a
   Brasil` é reconhecido como `GO` sem aceitar silenciosamente uma cidade de outra UF.
 - validação da correção: 6 testes focados e 208 testes backend `PASS`; Ruff, Django check e
   migration check sem falhas ou deriva.
+- o instrutor pode buscar um bairro ou ponto público e ajustar um marcador aproximado no mapa,
+  sempre após uma busca válida na mesma cidade/UF; o texto da busca não integra o `PATCH` nem é
+  persistido, e o backend reduz latitude/longitude públicas para duas casas decimais.
+- validação: 34 testes focados e 208 testes backend, 28 testes frontend e build Angular de
+  produção `PASS`; Ruff, Django check e migration check aprovados.
 
 ## Correção adicional de campos opcionais
 

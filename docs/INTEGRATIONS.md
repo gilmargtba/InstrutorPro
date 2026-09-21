@@ -109,7 +109,7 @@ Scanner indisponível falha fechado. Bucket/container não permite listagem púb
 
 ## Mapas e localização
 
-Busca por proximidade, área e ponto de encontro com precisão mínima. Termos do provedor devem permitir cache/armazenamento pretendido. Endereço residencial não é ponto público; logs não recebem coordenadas exatas. Se o provedor cair, a API retorna degradação explícita ou usa filtro geográfico já persistido, nunca distância fabricada.
+Busca por proximidade, área e ponto de encontro com precisão mínima. Termos do provedor devem permitir cache/armazenamento pretendido. Endereço residencial não é ponto público; logs não recebem coordenadas exatas. No onboarding, bairro ou referência pública segue pelo adapter backend sem persistência do texto, e latitude/longitude públicas são reduzidas para duas casas decimais antes de salvar. Se o provedor cair, a API retorna degradação explícita ou usa filtro geográfico já persistido, nunca distância fabricada.
 
 ## Google OIDC
 

@@ -672,7 +672,11 @@ class OwnAccountView(APIView):
                         raise serializers.ValidationError(
                             "Latitude e longitude públicas devem ser informadas juntas."
                         )
-                    point = Point(data["service_longitude"], data["service_latitude"], srid=4326)
+                    point = Point(
+                        round(data["service_longitude"], 2),
+                        round(data["service_latitude"], 2),
+                        srid=4326,
+                    )
                 if area:
                     area.city = data.get("instructor_city", area.city)
                     area.uf = data.get("instructor_uf", area.uf).upper()

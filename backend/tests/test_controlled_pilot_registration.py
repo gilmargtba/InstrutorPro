@@ -242,6 +242,8 @@ def test_real_instructor_can_save_non_documental_onboarding_without_self_publica
     assert profile.offers.get().data_mode == DataMode.REAL
     assert profile.vehicle.data_mode == DataMode.REAL
     assert profile.service_area.private_location is None
+    assert profile.service_area.public_service_location.y == pytest.approx(-30.03)
+    assert profile.service_area.public_service_location.x == pytest.approx(-51.22)
     assert profile.service_area.location_authorized is True
     assert profile.profile_status == "DRAFT"
     assert profile.verification_status == "NOT_STARTED"

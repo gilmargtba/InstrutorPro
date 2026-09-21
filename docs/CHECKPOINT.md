@@ -653,3 +653,7 @@ Marketplace (M3) somente após M2 aceito. Google é gate opcional M2.1. Pagament
 - geocodificação de cidade/UF passou a inferir a sigla pelos nomes oficiais das 27 UFs quando o
   MapTiler não fornece `short_code`, corrigindo a rejeição indevida de Goiatuba/GO; 6 testes
   focados e 208 testes backend passaram, com Ruff, Django e migrations aprovados.
+- onboarding permite escolher bairro/ponto público ou ajustar marcador no mapa sem armazenar o
+  texto pesquisado; coordenadas públicas são aproximadas no backend para duas casas decimais.
+  Validação: 34 testes focados, 208 backend e 28 frontend, além de build Angular, Ruff, Django e
+  migrations aprovados.
