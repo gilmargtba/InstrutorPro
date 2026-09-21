@@ -104,6 +104,21 @@ def test_real_instructor_registration_is_unpublished_and_uses_instructor_terms()
 
 @pytest.mark.django_db
 @override_settings(**PILOT)
+def test_real_instructor_registration_accepts_blank_optional_student_location_fields():
+    data = payload("INSTRUCTOR")
+    data["city"] = ""
+    data["uf"] = ""
+
+    response = APIClient().post("/api/v1/marketplace/accounts/register/", data, format="json")
+
+    assert response.status_code == 201
+    profile = InstructorProfile.objects.get(person__account__email=data["email"])
+    assert profile.verification_status == "NOT_STARTED"
+    assert profile.publication_status == "UNPUBLISHED"
+
+
+@pytest.mark.django_db
+@override_settings(**PILOT)
 @pytest.mark.parametrize(
     ("field", "value", "detail_field"),
     [

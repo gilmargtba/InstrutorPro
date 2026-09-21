@@ -641,3 +641,6 @@ Marketplace (M3) somente após M2 aceito. Google é gate opcional M2.1. Pagament
 - verificação sanitizada em produção confirmou ausência da conta e rollback integral da tentativa;
   frontend corrigido implantado no commit `c8057be`, sem tocar banco/Redis/volumes/certificados,
   com rota de cadastro HTTP 200. O proprietário pode repetir o cadastro real.
+- segunda tentativa revelou `city` e `uf` vazios enviados para instrutor embora fossem opcionais;
+  contrato corrigido nos dois lados sem relaxar a obrigatoriedade para aluno. Validação local:
+  28 testes focados, 206 backend e 23 frontend aprovados, com build e checks aprovados.

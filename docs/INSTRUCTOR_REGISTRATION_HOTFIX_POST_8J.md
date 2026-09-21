@@ -78,6 +78,18 @@ credenciamento, verificação, elegibilidade, publicação ou homologação de a
 
 `FIRST_REAL_INSTRUCTOR_READY=YES`
 
+## Correção adicional de campos opcionais
+
+- a tentativa seguinte revelou dois erros “Este campo não pode estar em branco” para `city` e
+  `uf`: o formulário de instrutor enviava esses campos exclusivos do cadastro de aluno como
+  strings vazias;
+- o frontend agora omite `city` e `uf` no cadastro de instrutor, e o serializer aceita vazio nos
+  campos opcionais; para aluno, a validação de domínio continua exigindo ambos;
+- mensagens de validação agora incluem o nome seguro do campo, evitando erros duplicados sem
+  contexto;
+- validação: 28 testes focados e 206 testes backend `PASS`; Ruff, Django e migrations `PASS`;
+  Angular production build `PASS` e 23 testes frontend `PASS`.
+
 ## Correção de feedback do formulário
 
 - a primeira tentativa real do proprietário retornou HTTP 400 porque senha e confirmação tinham
