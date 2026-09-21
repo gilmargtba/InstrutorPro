@@ -47,6 +47,54 @@ def test_maptiler_parses_real_structured_locality_and_limits_to_brazil(settings)
     assert "country=br" in called_url and "test-secret" in called_url
 
 
+def test_maptiler_infers_uf_from_full_region_name_when_short_code_is_absent(settings):
+    settings.MAPTILER_API_KEY = "test-secret"
+    payload = {
+        "features": [
+            {
+                "id": "municipality.76654",
+                "text": "Goiatuba",
+                "place_name": "Goiatuba, Goiás, Brasil",
+                "place_type": ["municipality"],
+                "center": [-49.36405934393406, -18.015457559680755],
+                "context": [{"id": "region.52", "text": "Goiás"}],
+            }
+        ]
+    }
+    response = io.BytesIO(json.dumps(payload).encode())
+    response.__enter__ = lambda value: value
+    response.__exit__ = lambda *args: None
+    with patch("apps.discovery.geocoding.urlopen", return_value=response):
+        result = MapTilerGeocodingProvider().geocode("Goiatuba, GO, Brasil")[0]
+    assert (result.city, result.uf, result.latitude, result.longitude) == (
+        "Goiatuba",
+        "GO",
+        -18.015457559680755,
+        -49.36405934393406,
+    )
+
+
+def test_maptiler_infers_uf_from_label_when_region_context_is_absent(settings):
+    settings.MAPTILER_API_KEY = "test-secret"
+    payload = {
+        "features": [
+            {
+                "id": "municipality.76654",
+                "text": "Goiatuba",
+                "place_name": "Goiatuba, Goiás, Brasil",
+                "place_type": ["municipality"],
+                "center": [-49.36405934393406, -18.015457559680755],
+            }
+        ]
+    }
+    response = io.BytesIO(json.dumps(payload).encode())
+    response.__enter__ = lambda value: value
+    response.__exit__ = lambda *args: None
+    with patch("apps.discovery.geocoding.urlopen", return_value=response):
+        result = MapTilerGeocodingProvider().geocode("Goiatuba, GO, Brasil")[0]
+    assert result.uf == "GO"
+
+
 @pytest.mark.parametrize(
     ("query", "encoded_cep"),
     [("88000-000", "88000-000"), ("88000000", "88000-000")],

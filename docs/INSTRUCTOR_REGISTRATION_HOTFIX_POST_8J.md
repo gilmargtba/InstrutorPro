@@ -89,6 +89,11 @@ credenciamento, verificação, elegibilidade, publicação ou homologação de a
   escrita e evitando alteração de estado pelo cliente;
 - a edição continua sem publicar ou verificar automaticamente o instrutor e respeita as
   invalidações de segurança existentes para alterações sensíveis.
+- o adaptador de geocodificação converte os nomes oficiais das 27 UFs para siglas quando o
+  provedor omite `properties.short_code`; assim, um resultado válido como `Goiatuba, Goiás,
+  Brasil` é reconhecido como `GO` sem aceitar silenciosamente uma cidade de outra UF.
+- validação da correção: 6 testes focados e 208 testes backend `PASS`; Ruff, Django check e
+  migration check sem falhas ou deriva.
 
 ## Correção adicional de campos opcionais
 

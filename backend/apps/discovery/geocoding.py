@@ -1,11 +1,54 @@
 import json
 import re
+import unicodedata
 from dataclasses import asdict, dataclass
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlencode
 from urllib.request import Request, urlopen
 
 from django.conf import settings
+
+
+def _normalized_region_name(value: str) -> str:
+    return "".join(
+        character
+        for character in unicodedata.normalize("NFKD", value).casefold()
+        if not unicodedata.combining(character)
+    ).strip()
+
+
+_BRAZIL_STATE_CODES = {
+    _normalized_region_name(name): code
+    for name, code in {
+        "Acre": "AC",
+        "Alagoas": "AL",
+        "Amapá": "AP",
+        "Amazonas": "AM",
+        "Bahia": "BA",
+        "Ceará": "CE",
+        "Distrito Federal": "DF",
+        "Espírito Santo": "ES",
+        "Goiás": "GO",
+        "Maranhão": "MA",
+        "Mato Grosso": "MT",
+        "Mato Grosso do Sul": "MS",
+        "Minas Gerais": "MG",
+        "Pará": "PA",
+        "Paraíba": "PB",
+        "Paraná": "PR",
+        "Pernambuco": "PE",
+        "Piauí": "PI",
+        "Rio de Janeiro": "RJ",
+        "Rio Grande do Norte": "RN",
+        "Rio Grande do Sul": "RS",
+        "Rondônia": "RO",
+        "Roraima": "RR",
+        "Santa Catarina": "SC",
+        "São Paulo": "SP",
+        "Sergipe": "SE",
+        "Tocantins": "TO",
+    }.items()
+}
 
 
 class GeocodingError(Exception):
@@ -96,10 +139,23 @@ class MapTilerGeocodingProvider(GeocodingProvider):
             short = item.get("properties", {}).get("short_code", "")
             if short.upper().startswith("BR-"):
                 uf = short.split("-")[-1].upper()
+            if not uf and item_id.startswith("region."):
+                region_name = item.get("text") or item.get("place_name", "").split(",")[0]
+                uf = _BRAZIL_STATE_CODES.get(_normalized_region_name(region_name), "")
+        label = feature.get("place_name") or feature.get("text", "")
+        if not uf:
+            uf = next(
+                (
+                    code
+                    for part in label.split(",")
+                    if (code := _BRAZIL_STATE_CODES.get(_normalized_region_name(part)))
+                ),
+                "",
+            )
         raw_bbox = feature.get("bbox")
         return GeocodingResult(
             str(feature.get("id", "")),
-            feature.get("place_name") or feature.get("text", ""),
+            label,
             float(center[1]),
             float(center[0]),
             (feature.get("place_type") or ["place"])[0],

@@ -650,3 +650,6 @@ Marketplace (M3) somente após M2 aceito. Google é gate opcional M2.1. Pagament
   aprovado e 25 testes frontend passaram.
 - a ação da tela de status agora abre o editor real do perfil, e o onboarding recarrega todos os
   campos persistidos antes da edição sem reenviar estados internos de verificação do veículo.
+- geocodificação de cidade/UF passou a inferir a sigla pelos nomes oficiais das 27 UFs quando o
+  MapTiler não fornece `short_code`, corrigindo a rejeição indevida de Goiatuba/GO; 6 testes
+  focados e 208 testes backend passaram, com Ruff, Django e migrations aprovados.
