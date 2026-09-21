@@ -605,3 +605,14 @@ Marketplace (M3) somente após M2 aceito. Google é gate opcional M2.1. Pagament
   `PAYMENT_PROVIDER_REQUIREMENTS.md` e `PAYMENT_GATEWAY_SETUP.md`;
 - `REAL_PAYMENTS=false` e `REAL_PRO_BILLING=false` continuam fixos em produção. Implementação não
   fecha `OPEN-005` nem autoriza cobrança.
+- CI do commit `7e67b892e5194f26f6760f480ba7343eb4a70a34` passou com 198 testes backend,
+  Ruff, Django/migrations e build Angular; o GDAL requerido pelo stack GIS foi instalado no job;
+- backup e SHA-256 foram reconfirmados antes do deploy; a VPS foi atualizada por fast-forward do
+  commit `5c354dc` para `7e67b89`, preservando banco, Redis, volumes, gateway e certificados;
+- foram aplicadas as migrations `discovery.0005`, `payments.0001`, `privacy.0002` e
+  `privacy.0003`; backend terminou saudável, demais serviços ativos e logs recentes sem erros;
+- smoke externo confirmou frontend, health, readiness, Política e Termos com HTTP 200 e webhook
+  sem assinatura com HTTP 401;
+- `APPLICATION_DEPLOYED=YES`, `REAL_MARKETPLACE_ENABLED=NO` e
+  `PAYMENT_INFRASTRUCTURE_READY=YES`; todas as capabilities reais e comerciais permanecem falsas.
+  Evidência completa em `docs/APPLICATION_DEPLOYMENT_FATIA_8J.md`.
