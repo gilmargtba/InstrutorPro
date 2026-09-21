@@ -10,6 +10,8 @@ from .api import (
     LessonRequestListCreateView,
     LessonRequestTransitionView,
     OwnAccountView,
+    PasswordResetConfirmView,
+    PasswordResetRequestView,
     ProfilePhotoPrivateDownloadView,
     RealRegistrationView,
     SessionLoginView,
@@ -25,6 +27,8 @@ urlpatterns = [
     path("marketplace/session/logout/", SessionLogoutView.as_view()),
     path("marketplace/session/me/", SessionMeView.as_view()),
     path("marketplace/accounts/register/", RealRegistrationView.as_view()),
+    path("marketplace/password-reset/request/", PasswordResetRequestView.as_view()),
+    path("marketplace/password-reset/confirm/", PasswordResetConfirmView.as_view()),
     path("account/me/", OwnAccountView.as_view(), name="own-account"),
     path(
         "marketplace/profile-photos/<uuid:pk>/download/",

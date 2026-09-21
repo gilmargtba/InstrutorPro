@@ -45,6 +45,14 @@ describe('RealInstructorOnboardingComponent',()=>{
     const component=TestBed.createComponent(RealInstructorOnboardingComponent).componentInstance;
     const http=TestBed.inject(HttpTestingController);
     http.expectOne('/account/me/').flush({instructor:{display_name:'Instrutora Piloto',bio:'Experiência profissional',categories:['B'],transmission_options:['AUTOMATIC'],whatsapp:'+5564999990001',price_amount:'120.00',duration_minutes:90,city:'Goiatuba',uf:'GO',service_latitude:-18.0125,service_longitude:-49.3547,service_radius_km:20,service_location_authorized:true,vehicle:{category:'B',make:'Marca',model:'Modelo',year:2024,transmission:'AUTOMATIC',ownership_type:'OWNED',verification_status:'PENDING'}}});
-    expect(component.category).toBe('B');expect(component.transmission).toBe('AUTOMATIC');expect(component.form.bio).toBe('Experiência profissional');expect(component.form.whatsapp).toBe('+5564999990001');expect(component.form.price_amount).toBe(120);expect(component.form.instructor_city).toBe('Goiatuba');expect(component.form.instructor_uf).toBe('GO');expect(component.form.service_latitude).toBe(-18.0125);expect(component.form.service_location_authorized).toBeTrue();expect(component.form.vehicle).toEqual({category:'B',make:'Marca',model:'Modelo',year:2024,transmission:'AUTOMATIC',ownership_type:'OWNED'});expect(component.form.vehicle.verification_status).toBeUndefined();expect(component.locationMessage()).toContain('Goiatuba/GO');
+    expect(component.categories).toEqual(['B']);expect(component.transmission).toBe('AUTOMATIC');expect(component.form.bio).toBe('Experiência profissional');expect(component.form.whatsapp).toBe('+5564999990001');expect(component.form.price_amount).toBe(120);expect(component.form.instructor_city).toBe('Goiatuba');expect(component.form.instructor_uf).toBe('GO');expect(component.form.service_latitude).toBe(-18.0125);expect(component.form.service_location_authorized).toBeTrue();expect(component.form.vehicle).toEqual({category:'B',make:'Marca',model:'Modelo',year:2024,transmission:'AUTOMATIC',ownership_type:'OWNED'});expect(component.form.vehicle.verification_status).toBeUndefined();expect(component.locationMessage()).toContain('Goiatuba/GO');
+  });
+  it('saves structured city and UF when geocoding is unavailable',()=>{
+    const component=TestBed.createComponent(RealInstructorOnboardingComponent).componentInstance;
+    const http=TestBed.inject(HttpTestingController);
+    http.expectOne('/account/me/').flush({instructor:{display_name:'Instrutora Nacional'}});
+    component.form.whatsapp='+5568999990001';component.form.price_amount=100;component.form.instructor_city='Rio Branco';component.form.instructor_uf='AC';component.form.vehicle.make='Marca';component.form.vehicle.model='Modelo';
+    component.submit();
+    const request=http.expectOne('/account/me/');expect(request.request.body.instructor_city).toBe('Rio Branco');expect(request.request.body.instructor_uf).toBe('AC');expect(request.request.body.service_latitude).toBeUndefined();expect(request.request.body.service_location_authorized).toBeFalse();request.flush({});
   });
 });

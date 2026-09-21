@@ -6,6 +6,17 @@ NOT_GRANTED = "NOT_GRANTED"
 CONTROLLED_PILOT = "CONTROLLED_PILOT"
 FULL_PRODUCTION = "FULL_PRODUCTION"
 AUTHORIZATION_STATES = {NOT_GRANTED, CONTROLLED_PILOT, FULL_PRODUCTION}
+INSTRUCTOR_REGISTRATION_DISABLED = "DISABLED"
+INSTRUCTOR_REGISTRATION_PRODUCTION = "PRODUCTION"
+INSTRUCTOR_REGISTRATION_STATES = {
+    INSTRUCTOR_REGISTRATION_DISABLED,
+    INSTRUCTOR_REGISTRATION_PRODUCTION,
+}
+INSTRUCTOR_REGISTRATION_CAPABILITIES = {
+    "REAL_ACCOUNT_REGISTRATION",
+    "REAL_PERSONAL_DATA",
+    "REAL_INSTRUCTOR_REGISTRATION",
+}
 
 
 @dataclass(frozen=True)
@@ -37,7 +48,16 @@ def configured(name: str) -> bool:
     return bool(getattr(settings, CAPABILITIES[name].setting, False))
 
 
+def instructor_registration_mode() -> str:
+    return getattr(settings, "INSTRUCTOR_REGISTRATION_MODE", INSTRUCTOR_REGISTRATION_DISABLED)
+
+
 def enabled(name: str) -> bool:
+    if (
+        name in INSTRUCTOR_REGISTRATION_CAPABILITIES
+        and instructor_registration_mode() == INSTRUCTOR_REGISTRATION_PRODUCTION
+    ):
+        return configured(name)
     state = authorization_state()
     capability = CAPABILITIES[name]
     if state == NOT_GRANTED:
@@ -49,10 +69,22 @@ def enabled(name: str) -> bool:
 
 def configuration_errors() -> list[str]:
     state = authorization_state()
+    registration_mode = instructor_registration_mode()
     errors = []
     if state not in AUTHORIZATION_STATES:
         return ["REAL_PRODUCTION_AUTHORIZATION_INVALID"]
-    if state == NOT_GRANTED and any(configured(name) for name in CAPABILITIES):
+    if registration_mode not in INSTRUCTOR_REGISTRATION_STATES:
+        errors.append("INSTRUCTOR_REGISTRATION_MODE_INVALID")
+    if registration_mode == INSTRUCTOR_REGISTRATION_PRODUCTION:
+        errors.extend(
+            f"{name}_REQUIRED_FOR_INSTRUCTOR_PRODUCTION"
+            for name in sorted(INSTRUCTOR_REGISTRATION_CAPABILITIES)
+            if not configured(name)
+        )
+    globally_authorized = set(CAPABILITIES)
+    if registration_mode == INSTRUCTOR_REGISTRATION_PRODUCTION:
+        globally_authorized -= INSTRUCTOR_REGISTRATION_CAPABILITIES
+    if state == NOT_GRANTED and any(configured(name) for name in globally_authorized):
         errors.append("CAPABILITY_ENABLED_WITHOUT_AUTHORIZATION")
     if state == CONTROLLED_PILOT:
         errors.extend(

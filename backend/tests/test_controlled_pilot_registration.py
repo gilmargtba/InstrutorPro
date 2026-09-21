@@ -216,6 +216,7 @@ def test_real_instructor_can_save_non_documental_onboarding_without_self_publica
         "/api/v1/account/me/",
         {
             "bio": "Atendimento categoria B.",
+            "categories": ["B"],
             "transmission_options": ["MANUAL"],
             "whatsapp": "+5551999990001",
             "price_amount": "95.00",

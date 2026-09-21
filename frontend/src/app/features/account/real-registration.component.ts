@@ -7,7 +7,7 @@ import { BRAZIL_UFS } from '../../shared/brazil-ufs';
 @Component({
   selector: 'app-real-registration',
   imports: [FormsModule, RouterLink],
-  template: `<section class="page narrow"><p class="eyebrow">Piloto controlado</p><h1>Criar conta de {{role==='STUDENT'?'aluno':'instrutor'}}</h1>
+  template: `<section class="page narrow"><p class="eyebrow">Cadastro profissional</p><h1>Criar conta de {{role==='STUDENT'?'aluno':'instrutor'}}</h1>
   <form #registrationForm="ngForm" class="account-form" (ngSubmit)="submit(registrationForm.valid)">
     <label>Nome<input name="name" [(ngModel)]="form.display_name" required maxlength="120"></label>
     <label>Usuário<input name="username" [(ngModel)]="form.username" required></label>
@@ -37,5 +37,5 @@ export class RealRegistrationComponent {
   }
   private ready(){this.versionsReady.set(!!this.form.terms_version&&!!this.form.privacy_version)}
   submit(valid:boolean|null=true){if(!valid){this.message.set('Revise os campos: a senha deve ter pelo menos 10 caracteres.');return}this.sending.set(true);this.message.set('');const request={...this.form};if(this.role==='INSTRUCTOR'){delete request.city;delete request.uf}this.http.post('/marketplace/accounts/register/',request).subscribe({next:()=>this.router.navigateByUrl(this.role==='INSTRUCTOR'?'/profissional/instrutor/onboarding':'/minha-conta'),error:e=>{this.sending.set(false);this.message.set(this.errorMessage(e))}})}
-  private errorMessage(error:any){const payload=error?.error?.error;const details=payload?.details;if(details&&typeof details==='object'){const labels:Record<string,string>={display_name:'Nome',username:'Usuário',email:'E-mail',birth_date:'Data de nascimento',password:'Senha',password_confirmation:'Confirmação de senha',terms_accepted:'Termos de Uso',privacy_acknowledged:'Política de Privacidade',city:'Cidade',uf:'UF'};const messages=Object.entries(details).flatMap(([field,values])=>(Array.isArray(values)?values:[values]).filter(value=>typeof value==='string').map(value=>`${labels[field]||'Cadastro'}: ${value}`));if(messages.length)return messages.join(' ')}return payload?.message||error?.error?.detail||'Serviço de cadastro temporariamente indisponível. Tente novamente.'}
+  private errorMessage(error:any){const payload=error?.error?.error;const details=payload?.details;if(details&&typeof details==='object'){const labels:Record<string,string>={display_name:'Nome',username:'Usuário',email:'E-mail',birth_date:'Data de nascimento',password:'Senha',password_confirmation:'Confirmação de senha',terms_accepted:'Termos de Uso',privacy_acknowledged:'Política de Privacidade',city:'Cidade',uf:'UF'};const messages=Object.entries(details).flatMap(([field,values])=>(Array.isArray(values)?values:[values]).filter(value=>typeof value==='string').map(value=>`${labels[field]||'Cadastro'}: ${value}`));if(messages.length)return messages.join(' ')}return payload?.message||error?.error?.detail||'Não foi possível concluir o cadastro agora. Tente novamente.'}
 }

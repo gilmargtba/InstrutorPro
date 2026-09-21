@@ -208,14 +208,17 @@ Aceite obrigatório registra contrato/termo exato em `LegalAcceptanceRecord`; co
 - `GET /api/v1/legal/acceptances/` retorna exclusivamente o histórico da própria conta;
 - documento publicado e registro de aceite são imutáveis; alteração material cria nova versão.
 
-### Cadastro transacional do piloto controlado
+### Cadastro transacional de instrutor em produção por capability
 
 - `POST /api/v1/marketplace/accounts/register/` recebe audiência, dados mínimos, versões exatas,
   aceite explícito dos Termos e ciência da Política;
 - o backend confere as versões vigentes e cria conta, pessoa, papel, perfil, aceite e auditoria na
   mesma transação; qualquer falha desfaz o conjunto completo;
-- a operação exige `CONTROLLED_PILOT` e as capabilities de cadastro, dados pessoais e audiência;
-  com os gates desligados responde de forma fechada e não cria conta;
+- para instrutor, a operação exige `INSTRUCTOR_REGISTRATION_MODE=PRODUCTION` e as capabilities
+  `REAL_ACCOUNT_REGISTRATION`, `REAL_PERSONAL_DATA` e `REAL_INSTRUCTOR_REGISTRATION`; ela não
+  depende do marcador global das demais funcionalidades;
+- aluno continua sujeito ao gate independente `REAL_STUDENT_USE`; com os gates da audiência
+  desligados, a API responde de forma fechada e não cria conta;
 - instrutor real nasce não verificado e não publicado. A rota não recebe documento profissional,
   decisão de verificação, decisão de publicação, papel adicional nem estado crítico do cliente.
 - `PATCH /api/v1/account/me/` permite ao titular real completar dados não documentais, WhatsApp,
@@ -223,6 +226,10 @@ Aceite obrigatório registra contrato/termo exato em `LegalAcceptanceRecord`; co
   papel, verificação e publicação são rejeitados por mass assignment;
 - a verificação administrativa real não recebe arquivo: registra operador, autoridade, método e
   referência mínima permitida. A publicação permanece uma decisão manual separada e auditada.
+- `POST /api/v1/marketplace/password-reset/request/` responde genericamente para impedir enumeração
+  e envia token de uso único pelo backend transacional configurado;
+- `POST /api/v1/marketplace/password-reset/confirm/` exige token válido e senha com no mínimo dez
+  caracteres. Solicitação, confirmação, cadastro e login possuem rate limit próprio.
 
 O contrato futuro de papéis deverá permitir concessões idempotentes de `STUDENT`, `INSTRUCTOR`, `DOCTOR` e `PSYCHOLOGIST` conforme policy explícita de compatibilidade. Combinação incompatível retorna erro estável sem remover papéis existentes. Cada endpoint protegido exige papel, perfil, verificação e autorização próprios; papel coincidente não concede publicação nem capacidade transitiva. Administração de `Clinic` usa recurso organizacional `ClinicMembership`, não papel pessoal `CLINIC`. O path e payload definitivos serão estabilizados antes da implementação; o antigo contrato singular `POST /me/business-role` está substituído.
 

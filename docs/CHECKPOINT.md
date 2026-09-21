@@ -1,8 +1,29 @@
 # Checkpoint do Projeto
 
-- Atualizado em: **2026-09-16**
-- Versão documental: **4.0**
-- Código-fonte: **Fatia 7 implementada localmente; dados reais e PRODUCTION continuam bloqueados**
+- Atualizado em: **2026-09-21**
+- Versão documental: **4.1**
+- Código-fonte: **Fatia 8L em validação; cadastro real de instrutor separado das demais capabilities**
+
+## Fatia 8L — cadastro nacional de instrutor em produção (21/09/2026)
+
+- decisão do proprietário separa o cadastro real de instrutor do antigo marcador global de piloto:
+  `INSTRUCTOR_REGISTRATION_MODE=PRODUCTION` autoriza somente conta, dados pessoais e onboarding;
+- `REAL_PRODUCTION_AUTHORIZATION` pode permanecer `NOT_GRANTED`, mantendo busca, contato,
+  analytics, documentos, publicação automática, pagamentos e Pro bloqueados;
+- conta nasce ativa; perfil nasce `NOT_STARTED` para verificação e `UNPUBLISHED` para publicação;
+  nenhuma UF recebe `RegulatoryReadiness` por consequência do cadastro;
+- onboarding aceita as 27 UFs, categorias A–E, transmissão, WhatsApp, oferta, veículo e área pública.
+  Cidade/UF são persistidas mesmo sem MapTiler; coordenada e autorização pública ficam opcionais;
+- upload real de documento/foto continua bloqueado até storage privado e antimalware homologados;
+- recuperação segura de senha foi implementada com resposta antienumeração, token de uso único,
+  senha mínima de dez caracteres, auditoria e rate limit. Sem SMTP real o endpoint falha fechado
+  antes de gerar token; a prontidão exige configuração transacional confirmada na VPS;
+- pendências jurídicas de DPO e retenção permanecem registradas e não são apresentadas como `PASS`.
+  Analytics conserva descarte aprovado em 90 dias; prazos ainda não decididos não foram inventados;
+- especificação e matriz operacional: `docs/INSTRUCTOR_REGISTRATION_PRODUCTION_FATIA_8L.md`.
+- validação local: backend `219 passed`; cenários dirigidos `10 passed`; Angular `31 SUCCESS`;
+  build de produção, Ruff, Django check e migration check passaram. Deploy/smoke ainda dependem da
+  inspeção segura da VPS e da confirmação de e-mail transacional.
 
 ## Fatia 7 — Meus dados e privacidade (16/09/2026)
 

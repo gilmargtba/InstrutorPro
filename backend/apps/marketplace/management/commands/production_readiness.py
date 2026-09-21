@@ -1,7 +1,12 @@
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
-from apps.marketplace.capabilities import CAPABILITIES, configuration_errors, enabled
+from apps.marketplace.capabilities import (
+    CAPABILITIES,
+    configuration_errors,
+    enabled,
+    instructor_registration_mode,
+)
 
 
 class Command(BaseCommand):
@@ -27,7 +32,11 @@ class Command(BaseCommand):
             and not settings.SYNTHETIC_DOCUMENT_UPLOAD_ENABLED,
             "REAL_CAPABILITY_CONFIGURATION": not configuration_errors(),
             "ADMIN_MFA": settings.ADMIN_MFA_REQUIRED,
-            "MAPTILER": bool(settings.MAPTILER_API_KEY),
+            "MAPTILER": bool(settings.MAPTILER_API_KEY) or not enabled("REAL_MARKETPLACE_SEARCH"),
+            "EMAIL_TRANSACTIONAL": settings.EMAIL_BACKEND
+            != "django.core.mail.backends.console.EmailBackend"
+            and bool(settings.EMAIL_HOST)
+            and bool(settings.DEFAULT_FROM_EMAIL),
             "DATABASE": bool(settings.DATABASES["default"].get("NAME")),
             "PRIVATE_STORAGE": "private" in str(settings.MEDIA_ROOT).lower(),
         }
@@ -37,6 +46,7 @@ class Command(BaseCommand):
         if failures:
             raise CommandError("Technical production readiness failed: " + ", ".join(failures))
         self.stdout.write(self.style.SUCCESS("TECHNICAL_PRODUCTION_READINESS=PASS"))
+        self.stdout.write(f"INSTRUCTOR_REGISTRATION_MODE={instructor_registration_mode()}")
         self.stdout.write(f"REAL_PRODUCTION_AUTHORIZATION={settings.REAL_PRODUCTION_AUTHORIZATION}")
         for name in CAPABILITIES:
             self.stdout.write(f"{name}={'ENABLED' if enabled(name) else 'BLOCKED'}")

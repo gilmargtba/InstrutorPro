@@ -14,10 +14,13 @@ import { AccountPrivacyComponent, MyAccountComponent, PrivacyPolicyComponent } f
 import { LegalTermsComponent } from './features/account/legal-terms.component';
 import { RealRegistrationComponent } from './features/account/real-registration.component';
 import { RealInstructorOnboardingComponent } from './features/account/real-instructor-onboarding.component';
+import { PasswordResetConfirmComponent, PasswordResetRequestComponent } from './features/account/password-reset.component';
 
 export const routes: Routes = [
   { path:'', component:HomeComponent, title:'InstrutorProCNH — Sua jornada para a CNH' },
   { path:'entrar', component:LoginComponent, title:'Entrar — InstrutorProCNH' },
+  { path:'recuperar-senha', component:PasswordResetRequestComponent, title:'Recuperar senha — InstrutorProCNH' },
+  { path:'redefinir-senha', component:PasswordResetConfirmComponent, title:'Redefinir senha — InstrutorProCNH' },
   { path:'aluno/jornada', component:JourneyComponent, title:'Minha Jornada CNH — InstrutorProCNH' },
   { path:'aluno/painel', component:StudentDashboardComponent, title:'Painel do aluno — InstrutorProCNH' },
   { path:'aluno/servicos', component:ServiceDiscoveryComponent, title:'Encontre serviços — InstrutorProCNH' },

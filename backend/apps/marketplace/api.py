@@ -1,16 +1,23 @@
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth.tokens import default_token_generator
 from django.contrib.gis.geos import Point
+from django.core.mail import send_mail
 from django.db import transaction
 from django.db.models import Count
 from django.http import FileResponse
 from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.utils.encoding import force_bytes, force_str
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import serializers, status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 
 from apps.accounts.models import Account
@@ -44,6 +51,18 @@ from .services import transition_lesson_request
 
 def _synthetic_enabled():
     return settings.SYNTHETIC_MARKETPLACE_ENABLED
+
+
+def _transactional_email_configured():
+    backend = settings.EMAIL_BACKEND
+    if backend in {
+        "django.core.mail.backends.console.EmailBackend",
+        "django.core.mail.backends.dummy.EmailBackend",
+    }:
+        return False
+    if backend == "django.core.mail.backends.smtp.EmailBackend" and not settings.EMAIL_HOST:
+        return False
+    return bool(settings.DEFAULT_FROM_EMAIL)
 
 
 class RealRegistrationSerializer(serializers.Serializer):
@@ -121,7 +140,13 @@ class RealRegistrationSerializer(serializers.Serializer):
 class RealRegistrationView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "registration"
 
+    @extend_schema(
+        request=RealRegistrationSerializer,
+        responses={201: OpenApiResponse(description="Conta real criada com aceites versionados.")},
+    )
     @transaction.atomic
     def post(self, request):
         serializer = RealRegistrationSerializer(data=request.data)
@@ -132,7 +157,7 @@ class RealRegistrationView(APIView):
         )
         person = Person.objects.create(account=account, birth_date=data["birth_date"])
         RoleAssignment.objects.create(
-            person=person, role=data["role"], grant_reason="CONTROLLED_PILOT_REGISTRATION"
+            person=person, role=data["role"], grant_reason="PRODUCTION_SELF_REGISTRATION"
         )
         if data["role"] == "STUDENT":
             StudentProfile.objects.create(
@@ -146,7 +171,7 @@ class RealRegistrationView(APIView):
             InstructorProfile.objects.create(
                 person=person,
                 display_name=data["display_name"],
-                categories=["B"],
+                categories=[],
                 transmission_options=[],
                 is_demo=False,
             )
@@ -332,6 +357,8 @@ class SessionLoginSerializer(serializers.Serializer):
 class SessionLoginView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "login"
 
     def post(self, request):
         serializer = SessionLoginSerializer(data=request.data)
@@ -355,6 +382,110 @@ class SessionLoginView(APIView):
             ).values_list("role", flat=True)
         )
         return Response({"account_id": user.id, "roles": roles, "is_staff": user.is_staff})
+
+
+class PasswordResetRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+
+class PasswordResetRequestView(APIView):
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "password_reset"
+
+    @extend_schema(
+        request=PasswordResetRequestSerializer,
+        responses={
+            202: OpenApiResponse(description="Solicitação processada sem enumerar contas."),
+            503: OpenApiResponse(description="E-mail transacional indisponível."),
+        },
+    )
+    def post(self, request):
+        serializer = PasswordResetRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        if not _transactional_email_configured():
+            return Response(
+                {"detail": "Recuperação de senha temporariamente indisponível."},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+        account = Account.objects.filter(
+            email__iexact=serializer.validated_data["email"], is_active=True
+        ).first()
+        if account:
+            uid = urlsafe_base64_encode(force_bytes(account.pk))
+            token = default_token_generator.make_token(account)
+            reset_url = f"{settings.FRONTEND_PUBLIC_URL}/redefinir-senha?uid={uid}&token={token}"
+            send_mail(
+                "Redefina sua senha — InstrutorProCNH",
+                "Recebemos um pedido para redefinir sua senha. "
+                f"Use este link: {reset_url}\n\n"
+                "Se você não fez o pedido, ignore esta mensagem.",
+                settings.DEFAULT_FROM_EMAIL,
+                [account.email],
+                fail_silently=False,
+            )
+            AuditEvent.objects.create(
+                actor=account,
+                action="accounts.password_reset.requested",
+                target_type="accounts.Account",
+                target_id=account.id,
+                request_id=getattr(request, "request_id", None),
+            )
+        return Response(
+            {"detail": "Se existir uma conta ativa para esse e-mail, enviaremos as instruções."},
+            status=status.HTTP_202_ACCEPTED,
+        )
+
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    uid = serializers.CharField()
+    token = serializers.CharField()
+    password = serializers.CharField(write_only=True, min_length=10)
+    password_confirmation = serializers.CharField(write_only=True, min_length=10)
+
+    def validate(self, attrs):
+        if attrs["password"] != attrs["password_confirmation"]:
+            raise serializers.ValidationError({"password_confirmation": "As senhas não coincidem."})
+        try:
+            account_id = force_str(urlsafe_base64_decode(attrs["uid"]))
+            account = Account.objects.get(pk=account_id, is_active=True)
+        except (ValueError, TypeError, OverflowError, Account.DoesNotExist) as exc:
+            raise serializers.ValidationError("Link de redefinição inválido ou expirado.") from exc
+        if not default_token_generator.check_token(account, attrs["token"]):
+            raise serializers.ValidationError("Link de redefinição inválido ou expirado.")
+        validate_password(attrs["password"], user=account)
+        attrs["account"] = account
+        return attrs
+
+
+class PasswordResetConfirmView(APIView):
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "password_reset"
+
+    @extend_schema(
+        request=PasswordResetConfirmSerializer,
+        responses={200: OpenApiResponse(description="Senha redefinida com sucesso.")},
+    )
+    @transaction.atomic
+    def post(self, request):
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        account = Account.objects.select_for_update().get(
+            pk=serializer.validated_data["account"].pk
+        )
+        account.set_password(serializer.validated_data["password"])
+        account.save(update_fields=["password"])
+        AuditEvent.objects.create(
+            actor=account,
+            action="accounts.password_reset.completed",
+            target_type="accounts.Account",
+            target_id=account.id,
+            request_id=getattr(request, "request_id", None),
+        )
+        return Response({"detail": "Senha redefinida com sucesso."})
 
 
 class SessionMeView(APIView):
@@ -485,6 +616,12 @@ class OwnAccountInput(serializers.Serializer):
                         {field: "UF não cadastrada no catálogo nacional."}
                     )
                 attrs[field] = code
+        if "categories" in attrs:
+            invalid = set(attrs["categories"]) - {"A", "B", "C", "D", "E"}
+            if invalid:
+                raise serializers.ValidationError(
+                    {"categories": "Categorias permitidas: A, B, C, D e E."}
+                )
         return attrs
 
     def validate_vehicle(self, value):
@@ -494,6 +631,10 @@ class OwnAccountInput(serializers.Serializer):
             raise serializers.ValidationError(
                 f"Campos não permitidos: {', '.join(sorted(unknown))}"
             )
+        if value.get("category") not in {"A", "B", "C", "D", "E"}:
+            raise serializers.ValidationError("Categoria permitida: A, B, C, D ou E.")
+        if value.get("transmission") not in {"MANUAL", "AUTOMATIC"}:
+            raise serializers.ValidationError("Transmissão permitida: manual ou automática.")
         return value
 
 
@@ -560,9 +701,14 @@ def _own_account_payload(user):
 class OwnAccountView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(responses={200: OpenApiResponse(description="Dados da própria conta.")})
     def get(self, request):
         return Response(_own_account_payload(request.user))
 
+    @extend_schema(
+        request=OwnAccountInput,
+        responses={200: OpenApiResponse(description="Dados da própria conta atualizados.")},
+    )
     @transaction.atomic
     def patch(self, request):
         serializer = OwnAccountInput(data=request.data, partial=True)
@@ -656,12 +802,7 @@ class OwnAccountView(APIView):
                     .filter(profile=instructor)
                     .first()
                 )
-                required = {
-                    "instructor_city",
-                    "instructor_uf",
-                    "service_latitude",
-                    "service_longitude",
-                }
+                required = {"instructor_city", "instructor_uf"}
                 if not area and (missing := required - set(data)):
                     raise serializers.ValidationError(
                         {"service_area": f"Campos obrigatórios: {', '.join(sorted(missing))}"}
@@ -694,12 +835,24 @@ class OwnAccountView(APIView):
                         radius_km=data.get("service_radius_km", 10),
                         location_authorized=False,
                     )
+                if (
+                    data.get("service_location_authorized")
+                    and not point
+                    and not area.public_service_location
+                ):
+                    raise serializers.ValidationError(
+                        {
+                            "service_location_authorized": (
+                                "Busque ou marque uma área pública antes de autorizar a publicação."
+                            )
+                        }
+                    )
                 if data.get("service_location_authorized") and not area.location_authorized:
                     grant_service_location_authorization(
                         actor=request.user,
                         service_area=area,
-                        purpose="CONTROLLED_PILOT_MARKETPLACE_DISCOVERY",
-                        policy_version="PILOT-1",
+                        purpose="PUBLIC_SERVICE_AREA_DISCOVERY",
+                        policy_version="PRODUCTION-1",
                         reason="OWNER_EXPLICIT_AUTHORIZATION",
                         request_id=getattr(request, "request_id", None),
                     )
@@ -712,6 +865,10 @@ class OwnAccountView(APIView):
                         offer.duration_minutes = data["duration_minutes"]
                     offer.save(update_fields=["price_amount", "duration_minutes", "updated_at"])
                 elif "price_amount" in data and "duration_minutes" in data:
+                    if not instructor.categories:
+                        raise serializers.ValidationError(
+                            {"categories": "Informe ao menos uma categoria antes da oferta."}
+                        )
                     InstructorOffer.objects.create(
                         instructor=instructor,
                         category=instructor.categories[0],

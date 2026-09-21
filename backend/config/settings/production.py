@@ -15,8 +15,8 @@ if not CSRF_TRUSTED_ORIGINS or any("*" in origin for origin in CSRF_TRUSTED_ORIG
     raise RuntimeError("PRODUCTION requires explicit HTTPS CSRF origins")
 if any(not origin.startswith("https://") for origin in CSRF_TRUSTED_ORIGINS):
     raise RuntimeError("PRODUCTION CSRF origins must use HTTPS")
-if not MAPTILER_API_KEY:
-    raise RuntimeError("PRODUCTION requires its own MAPTILER_API_KEY")
+# MapTiler is required only by map/geocoding capabilities. Instructor account
+# creation and structured onboarding remain available if the provider is down.
 if not ADMIN_MFA_REQUIRED:
     raise RuntimeError("PRODUCTION requires admin MFA")
 if not os.getenv("DATABASE_URL"):

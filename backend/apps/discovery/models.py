@@ -136,7 +136,7 @@ class InstructorServiceArea(ProtectedStateModel):
     )
     city = models.CharField(max_length=100)
     uf = models.CharField(max_length=2)
-    public_service_location = models.PointField(geography=True, srid=4326)
+    public_service_location = models.PointField(geography=True, srid=4326, null=True, blank=True)
     private_location = models.PointField(geography=True, srid=4326, null=True, blank=True)
     radius_km = models.PositiveSmallIntegerField(default=10)
     location_authorized = models.BooleanField(default=False)

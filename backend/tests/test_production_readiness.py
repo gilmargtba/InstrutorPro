@@ -23,6 +23,7 @@ SECURE_SETTINGS = {
     "REAL_STUDENT_DEMAND_ENABLED": False,
     "REAL_DOCUMENT_UPLOAD_ENABLED": False,
     "REAL_PRODUCTION_AUTHORIZATION": "NOT_GRANTED",
+    "INSTRUCTOR_REGISTRATION_MODE": "DISABLED",
     "REAL_ACCOUNT_REGISTRATION": False,
     "REAL_PERSONAL_DATA": False,
     "REAL_STUDENT_USE": False,
@@ -36,6 +37,9 @@ SECURE_SETTINGS = {
     "REAL_PRO_BILLING": False,
     "ADMIN_MFA_REQUIRED": True,
     "MAPTILER_API_KEY": "production-key-present",
+    "EMAIL_BACKEND": "django.core.mail.backends.smtp.EmailBackend",
+    "EMAIL_HOST": "smtp.example.test",
+    "DEFAULT_FROM_EMAIL": "no-reply@example.test",
     "MEDIA_ROOT": "/app/private_documents",
 }
 
@@ -60,6 +64,29 @@ def test_production_readiness_fails_if_capability_is_enabled_without_authorizati
         call_command("production_readiness", stdout=output)
 
     assert "REAL_CAPABILITY_CONFIGURATION=FAIL" in output.getvalue()
+
+
+@override_settings(
+    **{
+        **SECURE_SETTINGS,
+        "INSTRUCTOR_REGISTRATION_MODE": "PRODUCTION",
+        "REAL_ACCOUNT_REGISTRATION": True,
+        "REAL_PERSONAL_DATA": True,
+        "REAL_INSTRUCTOR_REGISTRATION": True,
+    }
+)
+def test_production_readiness_accepts_instructor_production_without_global_production():
+    output = StringIO()
+
+    call_command("production_readiness", stdout=output)
+
+    result = output.getvalue()
+    assert "INSTRUCTOR_REGISTRATION_MODE=PRODUCTION" in result
+    assert "REAL_PRODUCTION_AUTHORIZATION=NOT_GRANTED" in result
+    assert "REAL_ACCOUNT_REGISTRATION=ENABLED" in result
+    assert "REAL_PERSONAL_DATA=ENABLED" in result
+    assert "REAL_INSTRUCTOR_REGISTRATION=ENABLED" in result
+    assert "REAL_MARKETPLACE_SEARCH=BLOCKED" in result
 
 
 @override_settings(

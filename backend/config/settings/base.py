@@ -153,6 +153,7 @@ SYNTHETIC_MARKETPLACE_ENABLED = (
 if APP_ENV == "PRODUCTION" and SYNTHETIC_MARKETPLACE_ENABLED:
     raise RuntimeError("Synthetic marketplace cannot be enabled in PRODUCTION")
 REAL_PRODUCTION_AUTHORIZATION = os.getenv("REAL_PRODUCTION_AUTHORIZATION", "NOT_GRANTED")
+INSTRUCTOR_REGISTRATION_MODE = os.getenv("INSTRUCTOR_REGISTRATION_MODE", "DISABLED").upper()
 
 
 def _env_flag(name):
@@ -194,6 +195,26 @@ MAPTILER_GEOCODING_URL = os.getenv("MAPTILER_GEOCODING_URL", "https://api.maptil
 MAPTILER_MAP_URL = os.getenv("MAPTILER_MAP_URL", "https://api.maptiler.com/maps/streets-v4")
 GEOCODING_TIMEOUT_SECONDS = float(os.getenv("GEOCODING_TIMEOUT_SECONDS", "4"))
 INSTRUCTOR_SEARCH_MAX_RESULTS = int(os.getenv("INSTRUCTOR_SEARCH_MAX_RESULTS", "50"))
+
+EMAIL_BACKEND = os.getenv("DJANGO_EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
+EMAIL_HOST = os.getenv("DJANGO_EMAIL_HOST", "")
+EMAIL_PORT = int(os.getenv("DJANGO_EMAIL_PORT", "587"))
+EMAIL_HOST_USER = os.getenv("DJANGO_EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.getenv("DJANGO_EMAIL_HOST_PASSWORD", "")
+EMAIL_USE_TLS = _env_flag("DJANGO_EMAIL_USE_TLS")
+EMAIL_USE_SSL = _env_flag("DJANGO_EMAIL_USE_SSL")
+DEFAULT_FROM_EMAIL = os.getenv("DJANGO_DEFAULT_FROM_EMAIL", "no-reply@instrutorprocnh.com.br")
+FRONTEND_PUBLIC_URL = os.getenv("FRONTEND_PUBLIC_URL", "http://localhost:4200").rstrip("/")
+
+REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"] = {
+    "registration": os.getenv(
+        "REGISTRATION_THROTTLE_RATE", "10000/minute" if APP_ENV == "TEST" else "5/hour"
+    ),
+    "login": os.getenv("LOGIN_THROTTLE_RATE", "10000/minute" if APP_ENV == "TEST" else "10/minute"),
+    "password_reset": os.getenv(
+        "PASSWORD_RESET_THROTTLE_RATE", "10000/minute" if APP_ENV == "TEST" else "5/hour"
+    ),
+}
 
 LOGGING = {
     "version": 1,
