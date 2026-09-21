@@ -1,6 +1,6 @@
 {
   "package": "instrutorpro-documentation",
-  "version": "3.10",
+  "version": "3.11",
   "reviewed_on": "2026-09-20",
   "path_base": "repository-root",
   "normative_documents": [
@@ -45,6 +45,7 @@
     "docs/CONTROLLED_PILOT_NATIONAL_SCOPE_FATIA_8H.md",
     "docs/CONTROLLED_PILOT_RELEASE_FATIA_8I.md",
     "docs/APPLICATION_DEPLOYMENT_FATIA_8J.md",
+    "docs/INSTRUCTOR_REGISTRATION_HOTFIX_POST_8J.md",
     "docs/PAYMENT_PROVIDER_REQUIREMENTS.md",
     "docs/PAYMENT_GATEWAY_SETUP.md"
   ],

@@ -616,3 +616,16 @@ Marketplace (M3) somente após M2 aceito. Google é gate opcional M2.1. Pagament
 - `APPLICATION_DEPLOYED=YES`, `REAL_MARKETPLACE_ENABLED=NO` e
   `PAYMENT_INFRASTRUCTURE_READY=YES`; todas as capabilities reais e comerciais permanecem falsas.
   Evidência completa em `docs/APPLICATION_DEPLOYMENT_FATIA_8J.md`.
+
+### Correção pós-8J — cadastro real de instrutor (20/09/2026)
+
+- diagnóstico confirmou rota pública HTTP 200 e API HTTP 403 porque a autorização estava
+  `NOT_GRANTED` e as três capabilities necessárias estavam falsas;
+- o frontend também não possuía onboarding real em produção e a tela de status consultava rota
+  `/demo/`; ambos foram corrigidos sem liberar documentos, busca, contato ou publicação;
+- o fluxo autorizado usa `CONTROLLED_PILOT` com conta, dados pessoais e cadastro de instrutor;
+  Termos/Política permanecem transacionais e o perfil nasce não verificado/não publicado;
+- cadastro/onboarding aceita as 27 UFs; prontidão territorial continua gate independente de
+  publicação e MapTiler não participa do cadastro;
+- validação local: 21 testes focados e 199 backend aprovados, Ruff, Django/migrations, build Angular
+  e testes frontend aprovados. Evidência em `docs/INSTRUCTOR_REGISTRATION_HOTFIX_POST_8J.md`.

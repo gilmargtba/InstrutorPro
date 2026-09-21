@@ -36,5 +36,5 @@ export class RealRegistrationComponent {
     this.http.get<any>('/privacy/notice/').subscribe(privacy=>{this.form.privacy_version=privacy.version;this.ready()});
   }
   private ready(){this.versionsReady.set(!!this.form.terms_version&&!!this.form.privacy_version)}
-  submit(){this.sending.set(true);this.message.set('');this.http.post('/marketplace/accounts/register/',this.form).subscribe({next:()=>this.router.navigateByUrl('/minha-conta'),error:e=>{this.sending.set(false);this.message.set(e?.error?.detail||'Cadastro indisponível. Confira os dados e os aceites.')}})}
+  submit(){this.sending.set(true);this.message.set('');this.http.post('/marketplace/accounts/register/',this.form).subscribe({next:()=>this.router.navigateByUrl(this.role==='INSTRUCTOR'?'/profissional/instrutor/onboarding':'/minha-conta'),error:e=>{this.sending.set(false);this.message.set(e?.error?.detail||'Cadastro indisponível. Confira os dados e os aceites.')}})}
 }

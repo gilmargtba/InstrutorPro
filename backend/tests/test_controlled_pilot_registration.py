@@ -3,6 +3,7 @@ from unittest.mock import patch
 
 import pytest
 from django.contrib.gis.geos import Point
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 from django.test import override_settings
 from django.utils import timezone
@@ -11,6 +12,8 @@ from rest_framework.test import APIClient
 from apps.accounts.models import Account
 from apps.discovery.models import InstructorProfile, InstructorServiceArea
 from apps.discovery.selectors import search_published_instructors
+from apps.marketplace.capabilities import enabled
+from apps.marketplace.documents import DocumentValidationError, inspect_document
 from apps.marketplace.models import (
     DataMode,
     InstructorContactChannel,
@@ -96,6 +99,36 @@ def test_real_instructor_registration_is_unpublished_and_uses_instructor_terms()
     assert profile.verification_status == "NOT_STARTED"
     acceptance = LegalAcceptanceRecord.objects.get(account=account)
     assert acceptance.terms_document.audience == "INSTRUCTOR"
+
+
+@pytest.mark.django_db
+@override_settings(
+    SYNTHETIC_MARKETPLACE_ENABLED=False,
+    SYNTHETIC_DOCUMENT_UPLOAD_ENABLED=False,
+    REAL_PRODUCTION_AUTHORIZATION="CONTROLLED_PILOT",
+    REAL_ACCOUNT_REGISTRATION=True,
+    REAL_PERSONAL_DATA=True,
+    REAL_STUDENT_USE=False,
+    REAL_INSTRUCTOR_REGISTRATION=True,
+    REAL_DOCUMENT_UPLOADS=False,
+    REAL_AUTOMATIC_PUBLICATION=False,
+)
+def test_instructor_pilot_registration_does_not_enable_student_documents_or_publication():
+    response = APIClient().post(
+        "/api/v1/marketplace/accounts/register/", payload("INSTRUCTOR"), format="json"
+    )
+
+    assert response.status_code == 201
+    profile = InstructorProfile.objects.get(person__account__email="real-instructor@example.com")
+    assert profile.verification_status == "NOT_STARTED"
+    assert profile.publication_status == "UNPUBLISHED"
+    assert not enabled("REAL_DOCUMENT_UPLOADS")
+    assert not enabled("REAL_AUTOMATIC_PUBLICATION")
+    with pytest.raises(DocumentValidationError, match="Upload real permanece desabilitado"):
+        inspect_document(
+            SimpleUploadedFile("credential.pdf", b"%PDF-1.7", content_type="application/pdf"),
+            data_mode=DataMode.REAL,
+        )
 
 
 @pytest.mark.django_db

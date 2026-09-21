@@ -13,6 +13,7 @@ import { environment } from '../environments/environment';
 import { AccountPrivacyComponent, MyAccountComponent, PrivacyPolicyComponent } from './features/account/account-privacy.component';
 import { LegalTermsComponent } from './features/account/legal-terms.component';
 import { RealRegistrationComponent } from './features/account/real-registration.component';
+import { RealInstructorOnboardingComponent } from './features/account/real-instructor-onboarding.component';
 
 export const routes: Routes = [
   { path:'', component:HomeComponent, title:'InstrutorProCNH — Sua jornada para a CNH' },
@@ -36,13 +37,13 @@ export const routes: Routes = [
   { path:'termos/instrutor', component:LegalTermsComponent, data:{audience:'instructor'}, title:'Termos do Instrutor — InstrutorProCNH' },
   { path:'cadastro/aluno', component:RealRegistrationComponent, data:{role:'STUDENT'}, title:'Criar conta de aluno — InstrutorProCNH' },
   { path:'cadastro/instrutor', component:RealRegistrationComponent, data:{role:'INSTRUCTOR'}, title:'Criar conta de instrutor — InstrutorProCNH' },
+  { path:'profissional/instrutor/onboarding', component:environment.production?RealInstructorOnboardingComponent:InstructorOnboardingComponent, title:'Cadastro profissional — InstrutorProCNH' },
   { path:'contato-privacidade', component:LegalPlaceholderComponent, title:'Contato de privacidade — InstrutorProCNH' },
   { path:'profissional/instrutor/status', component:InstructorStatusComponent, title:'Status do instrutor — InstrutorProCNH' },
   ...(environment.production ? [] : [
     { path:'aluno', component:StudentEntryComponent, title:'Aluno — InstrutorProCNH' },
     { path:'profissional/instrutor/entrada', component:InstructorEntryComponent, title:'Cadastro do instrutor — InstrutorProCNH' },
     { path:'profissional/instrutor', component:InstructorPortalComponent, title:'Painel do instrutor — InstrutorProCNH' },
-    { path:'profissional/instrutor/onboarding', component:InstructorOnboardingComponent, title:'Quero atuar como instrutor — InstrutorProCNH' },
     { path:'aluno/matching', component:MatchingComponent, title:'Matching demonstrativo — InstrutorProCNH' },
     { path:'aluno/demanda', component:StudentMarketplaceComponent, title:'Demanda demonstrativa — InstrutorProCNH' },
     { path:'aluno/cadastro-demo', component:StudentMarketplaceComponent, title:'Cadastro do aluno DEMO — InstrutorProCNH' },
