@@ -630,3 +630,6 @@ Marketplace (M3) somente após M2 aceito. Google é gate opcional M2.1. Pagament
   publicação e MapTiler não participa do cadastro;
 - validação local: 21 testes focados e 199 backend aprovados, Ruff, Django/migrations, build Angular
   e testes frontend aprovados. Evidência em `docs/INSTRUCTOR_REGISTRATION_HOTFIX_POST_8J.md`.
+- deploy concluído em 21/09/2026 no commit `b640bfb`: serviços saudáveis, rotas jurídica e de
+  cadastro HTTP 200, capabilities autorizadas carregadas, nenhuma identidade fictícia criada e
+  `FIRST_REAL_INSTRUCTOR_READY=YES`.

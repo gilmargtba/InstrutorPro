@@ -1,6 +1,6 @@
 # Correção pós-8J — cadastro real de instrutor
 
-Data: 20/09/2026 (America/Sao_Paulo).
+Data: 20–21/09/2026 (America/Sao_Paulo).
 
 ## Diagnóstico
 
@@ -60,3 +60,20 @@ A autorização cobre exclusivamente cadastro de instrutor no piloto controlado.
 continua bloqueada enquanto permanecerem pendentes o enquadramento DPO/pequeno porte, as decisões
 jurídicas residuais de retenção e os demais gates documentados. Cadastro não constitui
 credenciamento, verificação, elegibilidade, publicação ou homologação de aula.
+
+## Deploy e smoke em produção
+
+- CI dos commits `d976fca` e `b640bfb`: backend e frontend aprovados;
+- `VPS_HEAD_BEFORE=2fcfeb435c00b6f43197193b2047d5cfb30f24be`;
+- `VPS_HEAD_AFTER=b640bfbd60a263b84679e6557b0d3eee749a93b1`;
+- atualização feita por `git pull --ff-only origin main`;
+- backup preservado em `.env.production.pre-instructor-hotfix-20260921`;
+- somente `backend`, `frontend`, `worker` e `scheduler` foram reconstruídos/recriados;
+  PostgreSQL, Redis, gateway, certificados e volumes foram preservados;
+- configuração efetiva validada como `CONTROLLED_PILOT`, com conta, dados pessoais e cadastro de
+  instrutor habilitados; todas as demais capabilities reais/comerciais permaneceram bloqueadas;
+- `/cadastro/instrutor`, Termos do Instrutor e Política de Privacidade responderam HTTP 200;
+- logs recentes: `RECENT_ERRORS=NONE`; worktree rastreado limpo;
+- nenhum usuário ou identidade fictícia foi criado no smoke.
+
+`FIRST_REAL_INSTRUCTOR_READY=YES`

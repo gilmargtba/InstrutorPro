@@ -1,7 +1,7 @@
 {
   "package": "instrutorpro-documentation",
-  "version": "3.11",
-  "reviewed_on": "2026-09-20",
+  "version": "3.12",
+  "reviewed_on": "2026-09-21",
   "path_base": "repository-root",
   "normative_documents": [
     "README.md",
