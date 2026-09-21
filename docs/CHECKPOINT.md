@@ -635,3 +635,6 @@ Marketplace (M3) somente após M2 aceito. Google é gate opcional M2.1. Pagament
   `FIRST_REAL_INSTRUCTOR_READY=YES`.
 - tentativa real identificou senha com menos de 10 caracteres; o frontend passou a bloquear esse
   envio e exibir o detalhe retornado pela API. Build aprovado e suíte frontend com 22 testes.
+- regressão do incidente ampliada para senha/data inválidas, aceites ausentes, e-mail duplicado e
+  rollback integral: 27 testes focados e suíte backend com 205 testes aprovados; Ruff, Django e
+  migrations sem falhas ou deriva.

@@ -10,6 +10,7 @@ from django.utils import timezone
 from rest_framework.test import APIClient
 
 from apps.accounts.models import Account
+from apps.audit.models import AuditEvent
 from apps.discovery.models import InstructorProfile, InstructorServiceArea
 from apps.discovery.selectors import search_published_instructors
 from apps.marketplace.capabilities import enabled
@@ -21,7 +22,7 @@ from apps.marketplace.models import (
     MarketplaceEvent,
     StudentProfile,
 )
-from apps.people.models import RoleAssignment
+from apps.people.models import Person, RoleAssignment
 from apps.privacy.models import LegalAcceptanceRecord
 from apps.territories.models import FederativeUnit, RegulatoryReadiness
 from apps.territories.policies import (
@@ -99,6 +100,60 @@ def test_real_instructor_registration_is_unpublished_and_uses_instructor_terms()
     assert profile.verification_status == "NOT_STARTED"
     acceptance = LegalAcceptanceRecord.objects.get(account=account)
     assert acceptance.terms_document.audience == "INSTRUCTOR"
+
+
+@pytest.mark.django_db
+@override_settings(**PILOT)
+@pytest.mark.parametrize(
+    ("field", "value", "detail_field"),
+    [
+        ("password", "short123", "password"),
+        ("password_confirmation", "short123", "password_confirmation"),
+        ("birth_date", "05/04/1973", "birth_date"),
+    ],
+)
+def test_real_registration_rejects_invalid_password_or_date_without_persistence(
+    field, value, detail_field
+):
+    data = payload("INSTRUCTOR")
+    data[field] = value
+
+    response = APIClient().post("/api/v1/marketplace/accounts/register/", data, format="json")
+
+    assert response.status_code == 400
+    assert detail_field in response.json()["error"]["details"]
+    assert not Account.objects.filter(email=data["email"]).exists()
+
+
+@pytest.mark.django_db
+@override_settings(**PILOT)
+@pytest.mark.parametrize("missing_field", ["terms_accepted", "privacy_acknowledged"])
+def test_real_registration_rejects_absent_legal_acceptance_fields(missing_field):
+    data = payload("INSTRUCTOR")
+    data.pop(missing_field)
+
+    response = APIClient().post("/api/v1/marketplace/accounts/register/", data, format="json")
+
+    assert response.status_code == 400
+    assert missing_field in response.json()["error"]["details"]
+    assert not Account.objects.filter(email=data["email"]).exists()
+
+
+@pytest.mark.django_db
+@override_settings(**PILOT)
+def test_real_registration_rejects_duplicate_email_without_partial_identity():
+    Account.objects.create_user(
+        username="existing-owner", email="real-instructor@example.com", password="existing-pass"
+    )
+    data = payload("INSTRUCTOR")
+    data["username"] = "different-instructor"
+
+    response = APIClient().post("/api/v1/marketplace/accounts/register/", data, format="json")
+
+    assert response.status_code == 400
+    assert "email" in response.json()["error"]["details"]
+    assert Account.objects.filter(email__iexact=data["email"]).count() == 1
+    assert not Person.objects.filter(account__username="different-instructor").exists()
 
 
 @pytest.mark.django_db
@@ -281,7 +336,12 @@ def test_acceptance_failure_rolls_back_account_person_and_role():
         APIClient().post("/api/v1/marketplace/accounts/register/", payload(), format="json")
 
     assert not Account.objects.filter(email="real-student@example.com").exists()
+    assert not Person.objects.filter(account__email="real-student@example.com").exists()
     assert not RoleAssignment.objects.exists()
+    assert not StudentProfile.objects.exists()
+    assert not InstructorProfile.objects.exists()
+    assert not LegalAcceptanceRecord.objects.exists()
+    assert not AuditEvent.objects.filter(action="marketplace.real_account.registered").exists()
 
 
 @pytest.mark.django_db

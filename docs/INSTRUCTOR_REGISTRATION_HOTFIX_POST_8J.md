@@ -82,7 +82,17 @@ credenciamento, verificação, elegibilidade, publicação ou homologação de a
 
 - a primeira tentativa real do proprietário retornou HTTP 400 porque senha e confirmação tinham
   menos de 10 caracteres; nenhuma conta foi persistida;
+- a resposta padronizada da API identificou os campos `password` e `password_confirmation` com
+  comprimento inferior ao mínimo; não houve exceção de backend nem erro de capability;
+- o campo visual de data usa `type=date` e envia ISO `AAAA-MM-DD`, contrato aceito pelo
+  `DateField`; o formato visual localizado `DD/MM/AAAA` não é enviado como payload;
+- o frontend consulta as versões jurídicas vigentes e envia os nomes e tipos esperados pelo
+  serializer, incluindo audiência `INSTRUCTOR`, versões de Termos/Política e ambos os aceites;
 - a interface agora informa previamente o mínimo de 10 caracteres, impede envio do formulário
   inválido e apresenta os detalhes de validação devolvidos pela API em vez da mensagem genérica;
 - reprodução segura com domínio `example.invalid`: HTTP 400 com erro específico de comprimento;
-- Angular production build: `PASS`; testes frontend: 22 `PASS`.
+- regressão ampliada cobre cadastro `201`, senha e data inválidas, aceites ausentes, capability
+  bloqueada/liberada, e-mail duplicado, falha de persistência do aceite com rollback integral e
+  instrutor `NOT_STARTED/UNPUBLISHED`;
+- validação final: 27 testes focados e 205 testes backend `PASS`; Ruff, Django check e migration
+  check `PASS`; Angular production build `PASS` e 22 testes frontend `PASS`.
