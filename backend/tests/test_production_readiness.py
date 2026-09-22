@@ -39,7 +39,8 @@ SECURE_SETTINGS = {
     "REAL_AUTOMATIC_PUBLICATION": False,
     "REAL_PAYMENTS": False,
     "REAL_PRO_BILLING": False,
-    "ADMIN_MFA_REQUIRED": True,
+    "ADMIN_MFA_REQUIRED": False,
+    "OTP_ADMIN_REQUIRED": False,
     "MAPTILER_API_KEY": "production-key-present",
     "EMAIL_BACKEND": "django.core.mail.backends.smtp.EmailBackend",
     "EMAIL_HOST": "smtp.example.test",
@@ -56,6 +57,7 @@ def test_production_readiness_passes_with_all_real_capabilities_disabled():
 
     assert "REAL_CAPABILITY_CONFIGURATION=PASS" in output.getvalue()
     assert "TECHNICAL_PRODUCTION_READINESS=PASS" in output.getvalue()
+    assert "OTP_ADMIN_REQUIRED=false" in output.getvalue()
     assert "REAL_PRODUCTION_AUTHORIZATION=NOT_GRANTED" in output.getvalue()
 
 

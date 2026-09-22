@@ -4,15 +4,12 @@
 
 O Admin exige staff e permissões explícitas; aprovar/suspender chama serviço transacional auditado. Nenhum endpoint administrativo público foi criado.
 
-ADMIN-PROD-01 adiciona MFA TOTP obrigatório ao Admin, códigos de recuperação de uso único,
-bloqueio de tentativas por usuário/IP e sessão curta. O bootstrap e o acesso são auditados;
-segredos TOTP e códigos não são persistidos em auditoria. A publicação profissional existente
-permanece DEMO.
-
-Uma exceção humana temporária permite desativar o desafio MFA somente no servidor de avaliação com
-dados sintéticos. A flag mantém default seguro, não remove o cadastro TOTP e conserva senha, staff,
-permissões explícitas, rate limit e sessão curta. Enquanto ativa, impede classificar o ambiente como
-pronto para produção ou admitir dados/profissionais reais.
+Por decisão expressa do proprietário em 22/09/2026, o Admin usa usuário ou e-mail + senha, sem
+desafio OTP. A retirada é limitada a `/admin/` e compensada por HTTPS, cookies `Secure`/`HttpOnly`,
+CSRF, rotação nativa de sessão no login, expiração em 30 minutos, encerramento com o navegador,
+bloqueio Axes após cinco falhas por usuário/IP durante uma hora, permissões explícitas e auditoria
+de login bem-sucedido, falha e logout. Dados TOTP legados são preservados somente para rollback e
+não participam da autenticação vigente.
 
 Fonte oficial dos controles técnicos e operacionais. Autorização está em `AUTHORIZATION.md`; tratamento pessoal em `LGPD.md`; procedimentos de plataforma em `DEVOPS.md`.
 
@@ -80,7 +77,7 @@ Valores de timeout, tentativas e rate limit são configuração segura aprovada 
 Os seis avisos observados por `manage.py check --deploy` pertencem à configuração local de desenvolvimento e não autorizam seu uso em produção. O ambiente produtivo terá settings separados e deverá comprovar: HTTPS; HSTS com rollout seguro; `DEBUG=False`; chave longa e aleatória fornecida por secret manager/environment; cookies de sessão e CSRF com `Secure`; políticas adequadas de CSRF/sessão; e hosts/origens explicitamente permitidos. A configuração local permanece apropriada para HTTP de desenvolvimento e não será artificialmente tratada como produção.
 
 `config.settings.production` formaliza esse perfil com falha fechada para segredo, banco,
-Redis, hosts/origens, MFA e MapTiler. Ele bloqueia modo/ingestão sintéticos, exige HTTPS e não
+Redis, hosts/origens, autenticação administrativa e MapTiler. Ele bloqueia modo/ingestão sintéticos, exige HTTPS e não
 oferece wildcard de host/CORS. O comando `production_readiness` verifica controles técnicos,
 mas declara explicitamente que autorização real não foi concedida.
 

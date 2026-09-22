@@ -1,7 +1,8 @@
 from django.contrib import admin, messages
 from django.core.exceptions import PermissionDenied
-from django.http import HttpResponse
+from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.middleware.csrf import get_token
+from django.template.response import TemplateResponse
 from django.urls import path, reverse
 from django.utils.html import escape, format_html
 
@@ -151,14 +152,21 @@ class InstructorServiceAreaAdmin(admin.ModelAdmin):
 @admin.register(ProfessionalVerificationRequest)
 class ProfessionalVerificationRequestAdmin(admin.ModelAdmin):
     list_display = (
-        "profile",
-        "cpf_masked",
-        "status",
-        "submitted_at",
+        "instructor_name",
+        "service_uf",
+        "service_city",
+        "submitted_date",
+        "status_badge",
         "reviewer",
+        "queue_action",
+    )
+    list_filter = (
+        "status",
+        "profile__service_area__uf",
+        "profile__service_area__city",
+        "submitted_at",
         "review_started_at",
     )
-    list_filter = ("status", "submitted_at", "review_started_at")
     search_fields = ("profile__display_name", "profile__person__account__email")
     ordering = ("submitted_at", "created_at")
     actions = ("start_review_action", "approve_action", "reject_action")
@@ -174,27 +182,112 @@ class ProfessionalVerificationRequestAdmin(admin.ModelAdmin):
         "updated_at",
         "cpf_masked",
         "reveal_cpf_link",
+        "service_city",
+        "service_uf",
+        "workflow_actions",
         "public_message",
     )
-    fields = (
-        "profile",
-        "cpf_masked",
-        "reveal_cpf_link",
-        "status",
-        "submitted_at",
-        "review_started_at",
-        "reviewer",
-        "verification_method",
-        "verification_source",
-        "checked_at",
-        "internal_notes",
-        "rejection_reason_code",
-        "public_message",
-        "decided_at",
-        "decision_by",
-        "created_at",
-        "updated_at",
+    fieldsets = (
+        ("Dados do instrutor", {"fields": ("profile", "service_city", "service_uf")}),
+        ("Identificação privada", {"fields": ("cpf_masked", "reveal_cpf_link")}),
+        (
+            "Histórico da solicitação",
+            {
+                "fields": (
+                    "status",
+                    "submitted_at",
+                    "review_started_at",
+                    "reviewer",
+                    "decided_at",
+                    "decision_by",
+                    "created_at",
+                    "updated_at",
+                )
+            },
+        ),
+        (
+            "Análise profissional",
+            {
+                "fields": (
+                    "verification_method",
+                    "verification_source",
+                    "checked_at",
+                    "internal_notes",
+                    "rejection_reason_code",
+                )
+            },
+        ),
+        ("Decisão", {"fields": ("public_message", "workflow_actions")}),
     )
+
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related("profile__person__account", "profile__service_area", "reviewer")
+        )
+
+    @admin.display(description="Instrutor", ordering="profile__display_name")
+    def instructor_name(self, obj):
+        return obj.profile.display_name
+
+    @admin.display(description="UF", ordering="profile__service_area__uf")
+    def service_uf(self, obj):
+        try:
+            return obj.profile.service_area.uf
+        except InstructorServiceArea.DoesNotExist:
+            return "—"
+
+    @admin.display(description="Cidade", ordering="profile__service_area__city")
+    def service_city(self, obj):
+        try:
+            return obj.profile.service_area.city
+        except InstructorServiceArea.DoesNotExist:
+            return "—"
+
+    @admin.display(description="Enviada em", ordering="submitted_at")
+    def submitted_date(self, obj):
+        return obj.submitted_at
+
+    @admin.display(description="Status", ordering="status")
+    def status_badge(self, obj):
+        css = {
+            obj.Status.SUBMITTED: "submitted",
+            obj.Status.UNDER_REVIEW: "under_review",
+            obj.Status.VERIFIED: "verified",
+            obj.Status.REJECTED: "rejected",
+        }.get(obj.status, "submitted")
+        return format_html(
+            '<span class="status-badge status-{}">{}</span>', css, obj.get_status_display()
+        )
+
+    @admin.display(description="Ação")
+    def queue_action(self, obj):
+        url = reverse("admin:discovery_professionalverificationrequest_change", args=[obj.pk])
+        return format_html('<a class="button" href="{}">Abrir análise</a>', url)
+
+    @admin.display(description="Ações do fluxo")
+    def workflow_actions(self, obj):
+        if not obj:
+            return ""
+        base = "admin:discovery_verification_request_transition"
+        if obj.status == obj.Status.SUBMITTED:
+            url = reverse(base, args=[obj.pk, "start"])
+            return format_html(
+                '<span class="workflow-buttons"><a class="button" href="{}">'
+                "Iniciar análise</a></span>",
+                url,
+            )
+        if obj.status == obj.Status.UNDER_REVIEW:
+            approve = reverse(base, args=[obj.pk, "approve"])
+            reject = reverse(base, args=[obj.pk, "reject"])
+            return format_html(
+                '<span class="workflow-buttons"><a class="button default" href="{}">Aprovar</a>'
+                '<a class="button" href="{}">Rejeitar</a></span>',
+                approve,
+                reject,
+            )
+        return "Fluxo concluído"
 
     @admin.display(description="CPF")
     def cpf_masked(self, obj):
@@ -210,11 +303,58 @@ class ProfessionalVerificationRequestAdmin(admin.ModelAdmin):
     def get_urls(self):
         return [
             path(
+                "<uuid:object_id>/transition/<str:operation>/",
+                self.admin_site.admin_view(self.transition_view),
+                name="discovery_verification_request_transition",
+            ),
+            path(
                 "<uuid:object_id>/reveal-cpf/",
                 self.admin_site.admin_view(self.reveal_cpf_view),
                 name="discovery_verification_request_reveal_cpf",
-            )
+            ),
         ] + super().get_urls()
+
+    def transition_view(self, request, object_id, operation):
+        services = {
+            "start": ("Iniciar análise", start_verification_review),
+            "approve": ("Aprovar verificação", approve_verification_request),
+            "reject": ("Rejeitar verificação", reject_verification_request),
+        }
+        if operation not in services:
+            raise Http404
+        item = self.get_object(request, object_id)
+        if item is None:
+            raise Http404
+        if not self.has_change_permission(request, item):
+            raise PermissionDenied
+        label, service = services[operation]
+        back = reverse("admin:discovery_professionalverificationrequest_change", args=[item.pk])
+        if request.method == "POST":
+            if operation == "reject":
+                item.rejection_reason_code = request.POST.get("rejection_reason_code", "").strip()
+                item.save(update_fields=["rejection_reason_code", "updated_at"])
+            try:
+                service(
+                    actor=request.user,
+                    verification_request=item,
+                    request_id=getattr(request, "request_id", None),
+                )
+                self.message_user(request, f"{label} concluída com auditoria.", messages.SUCCESS)
+            except (WorkflowPermissionDenied, InvalidWorkflowTransition) as exc:
+                self.message_user(request, str(exc), messages.ERROR)
+            return HttpResponseRedirect(back)
+        return TemplateResponse(
+            request,
+            "admin/discovery/confirm_verification_transition.html",
+            {
+                **self.admin_site.each_context(request),
+                "title": label,
+                "item": item,
+                "operation": operation,
+                "back_url": back,
+                "opts": self.model._meta,
+            },
+        )
 
     @staticmethod
     def _can_reveal(request):

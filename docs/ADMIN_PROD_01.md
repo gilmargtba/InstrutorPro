@@ -11,23 +11,18 @@ explicitamente DEMO até um gate próprio de elegibilidade real.
 
 - `DEBUG=False`, segredo somente por ambiente, hosts/origens explícitos;
 - TLS público para `179.199.136.4`, cookies Secure, sessão de 30 minutos e encerramento no navegador;
-- MFA TOTP obrigatório em todo o Admin, com dez códigos de recuperação de uso único;
+- login exclusivo do Admin por usuário ou e-mail + senha, sem campo ou validação OTP;
 - cinco falhas de login por combinação usuário/IP bloqueiam por uma hora;
 - permissões ADMIN-PROD-01 explícitas e auditadas;
 - banco, Redis, backend e frontend sem porta pública; somente o gateway Docker publica 80/443;
 - seeds DEMO somente quando `DJANGO_LOAD_DEMO_DATA=true`.
 
-## Exceção temporária de avaliação em pré-produção
+## Decisão vigente de autenticação administrativa
 
-Por decisão humana de 29/08/2026, o servidor de demonstração pode usar
-`DJANGO_ADMIN_MFA_REQUIRED=false` exclusivamente durante a avaliação do painel por sócios e
-colaboradores, com dados sintéticos. A flag é segura por padrão (`true`), não remove dispositivos ou
-códigos cadastrados e não contorna staff, senha, permissões explícitas, Axes, sessão curta ou
-auditoria. Gilmar Cesar Alves é o responsável pela exceção.
-
-Enquanto a exceção estiver ativa, `ADMIN-PROD-01` permanece `NOT READY`: profissionais/dados reais,
-publicação real e produção continuam proibidos. O MFA deve ser reativado antes desses gates e a
-exceção deve ser revista ao encerrar a avaliação administrativa.
+Por decisão expressa de Gilmar Cesar Alves em 22/09/2026, `/admin/` não exige OTP. A autenticação
+aceita o `username` ou o e-mail único da conta, sempre com senha. Contas inativas, bloqueadas ou sem
+`is_staff` continuam negadas e nenhum usuário recebe elevação automática. O `django-otp` permanece
+instalado apenas para preservar dados de rollback; `OTP_ADMIN_REQUIRED=false` é invariável no código.
 
 ## Bootstrap humano
 
@@ -38,13 +33,10 @@ docker compose --env-file .env.demo -f compose.demo.yaml exec backend \
   python manage.py createsuperuser
 docker compose --env-file .env.demo -f compose.demo.yaml exec backend \
   python manage.py grant_admin_prod_access USUARIO
-docker compose --env-file .env.demo -f compose.demo.yaml exec backend \
-  python manage.py enroll_admin_mfa USUARIO
 ```
 
-O último comando mostra uma URI TOTP e códigos de recuperação uma única vez. O responsável deve
-escaneá-la no aplicativo autenticador e guardar os códigos offline. Segredos MFA não entram no Git,
-documentação, logs ou relatório.
+Execute também `python manage.py configure_admin_groups` para preparar os grupos Administrador da
+plataforma, Analista de verificação e Suporte. O comando não cria usuários nem adiciona membros.
 
 ## Backup e rollback antes do deploy
 
@@ -66,6 +58,5 @@ dura cerca de seis dias, portanto falha de renovação é bloqueador operacional
 ## Critério de prontidão
 
 READY exige evidência no Ubuntu de backup validado, certificado/renovação, migrations, containers,
-health/readiness, login com senha+TOTP, negativa sem MFA/permissão, organização e auditoria. Enquanto
-a exceção temporária estiver ativa, o estado é `NOT READY`, ainda que o restante da infraestrutura
-esteja operacional.
+health/readiness, login com usuário e com e-mail, negativas para senha inválida/conta sem staff,
+bloqueio de força bruta, sessão curta, organização e auditoria.

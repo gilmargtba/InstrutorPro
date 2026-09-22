@@ -1,8 +1,25 @@
 # Checkpoint do Projeto
 
 - Atualizado em: **2026-09-22**
-- Versão documental: **4.2**
-- Código-fonte: **Fatia 8M em produção; tratamento de sessão administrativa pendente de deploy**
+- Versão documental: **4.3**
+- Código-fonte: **Admin password-only e painel operacional concluídos localmente; deploy pendente**
+
+## Admin de produção — autenticação simples e painel operacional (22/09/2026)
+
+- decisão do proprietário remove OTP somente do `/admin/`; logins públicos permanecem inalterados;
+- autenticação administrativa aceita usuário ou e-mail único + senha e mantém conta ativa/staff,
+  Axes, CSRF, HTTPS, cookies seguros, rotação de sessão e expiração de 30 minutos;
+- login bem-sucedido, falha genérica sem identificador e logout geram `AuditEvent` sem credenciais;
+- painel exibe contagens reais e atalhos de instrutores, fila profissional e auditoria, sem menu de
+  pagamentos enquanto `REAL_PAYMENTS=false`;
+- fila apresenta nome, UF, cidade, data, status, revisor e ação, mantendo CPF mascarado e consulta
+  excepcional autorizada/auditada;
+- grupos de menor privilégio são preparados por comando idempotente, sem criar usuários;
+- `VERIFIED` continua distinto de `PUBLISHED`; uploads, publicação automática, pagamentos e Pro
+  permanecem bloqueados;
+- validação local: Django check e migration check passaram, Ruff passou e suíte backend completa
+  encerrou com `235 passed`; Angular não foi alterado e não exige rebuild nesta fatia;
+- deploy e smoke de produção ainda são obrigatórios antes de `ADMIN_PRODUCTION_READY=YES`.
 
 ## Fatia 8M — solicitação e revisão profissional real (22/09/2026)
 

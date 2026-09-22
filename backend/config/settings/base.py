@@ -59,7 +59,7 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "apps" / "core" / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -93,6 +93,7 @@ USE_I18N = True
 USE_TZ = True
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_DIRS = [BASE_DIR / "apps" / "core" / "static"]
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
@@ -143,7 +144,11 @@ AXES_LOCKOUT_PARAMETERS = [["username", "ip_address"]]
 AXES_SENSITIVE_PARAMETERS = ["password", "otp_token"]
 
 OTP_ADMIN_HIDE_SENSITIVE_DATA = True
-ADMIN_MFA_REQUIRED = os.getenv("DJANGO_ADMIN_MFA_REQUIRED", "true").lower() == "true"
+# Decisão do proprietário: o Admin usa usuário/e-mail + senha. django-otp permanece
+# instalado apenas para rollback de dados, sem participar da autenticação do Admin.
+ADMIN_MFA_REQUIRED = False
+OTP_ADMIN_REQUIRED = False
+ADMIN_SESSION_COOKIE_AGE = int(os.getenv("DJANGO_ADMIN_SESSION_AGE", "1800"))
 
 # Marketplace M1: recursos reais permanecem deny-by-default. O modo sintético é
 # explicitamente separado para demonstração e testes, sem liberar produção real.
@@ -154,9 +159,7 @@ if APP_ENV == "PRODUCTION" and SYNTHETIC_MARKETPLACE_ENABLED:
     raise RuntimeError("Synthetic marketplace cannot be enabled in PRODUCTION")
 REAL_PRODUCTION_AUTHORIZATION = os.getenv("REAL_PRODUCTION_AUTHORIZATION", "NOT_GRANTED")
 INSTRUCTOR_REGISTRATION_MODE = os.getenv("INSTRUCTOR_REGISTRATION_MODE", "DISABLED").upper()
-PROFESSIONAL_VERIFICATION_MODE = os.getenv(
-    "PROFESSIONAL_VERIFICATION_MODE", "DISABLED"
-).upper()
+PROFESSIONAL_VERIFICATION_MODE = os.getenv("PROFESSIONAL_VERIFICATION_MODE", "DISABLED").upper()
 PII_FIELD_ENCRYPTION_KEY = os.getenv("PII_FIELD_ENCRYPTION_KEY", "")
 PII_FINGERPRINT_KEY = os.getenv("PII_FINGERPRINT_KEY", "")
 

@@ -17,8 +17,6 @@ if any(not origin.startswith("https://") for origin in CSRF_TRUSTED_ORIGINS):
     raise RuntimeError("PRODUCTION CSRF origins must use HTTPS")
 # MapTiler is required only by map/geocoding capabilities. Instructor account
 # creation and structured onboarding remain available if the provider is down.
-if not ADMIN_MFA_REQUIRED:
-    raise RuntimeError("PRODUCTION requires admin MFA")
 if not os.getenv("DATABASE_URL"):
     raise RuntimeError("PRODUCTION requires DATABASE_URL")
 if not os.getenv("REDIS_URL"):
@@ -34,7 +32,7 @@ SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = False
 SECURE_REFERRER_POLICY = "same-origin"
 SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin"
-SESSION_COOKIE_AGE = int(os.getenv("DJANGO_ADMIN_SESSION_AGE", "1800"))
+SESSION_COOKIE_AGE = ADMIN_SESSION_COOKIE_AGE
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 SYNTHETIC_MARKETPLACE_ENABLED = False

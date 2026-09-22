@@ -32,7 +32,7 @@ class Command(BaseCommand):
             "SYNTHETIC": not settings.SYNTHETIC_MARKETPLACE_ENABLED
             and not settings.SYNTHETIC_DOCUMENT_UPLOAD_ENABLED,
             "REAL_CAPABILITY_CONFIGURATION": not configuration_errors(),
-            "ADMIN_MFA": settings.ADMIN_MFA_REQUIRED,
+            "ADMIN_PASSWORD_ONLY": not settings.OTP_ADMIN_REQUIRED,
             "MAPTILER": bool(settings.MAPTILER_API_KEY) or not enabled("REAL_MARKETPLACE_SEARCH"),
             "EMAIL_TRANSACTIONAL": settings.EMAIL_BACKEND
             != "django.core.mail.backends.console.EmailBackend"
@@ -47,6 +47,7 @@ class Command(BaseCommand):
         if failures:
             raise CommandError("Technical production readiness failed: " + ", ".join(failures))
         self.stdout.write(self.style.SUCCESS("TECHNICAL_PRODUCTION_READINESS=PASS"))
+        self.stdout.write(f"OTP_ADMIN_REQUIRED={str(settings.OTP_ADMIN_REQUIRED).lower()}")
         self.stdout.write(f"INSTRUCTOR_REGISTRATION_MODE={instructor_registration_mode()}")
         self.stdout.write(f"PROFESSIONAL_VERIFICATION_MODE={professional_verification_mode()}")
         self.stdout.write(f"REAL_PRODUCTION_AUTHORIZATION={settings.REAL_PRODUCTION_AUTHORIZATION}")

@@ -1,0 +1,27 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<div id="content-main" class="business-dashboard">
+  <h1>Painel administrativo</h1>
+  <p class="dashboard-lead">Acompanhe a operação sem misturar verificação profissional e publicação.</p>
+  <div class="metric-grid">
+    <a class="metric" href="{% url 'admin:discovery_instructorprofile_changelist' %}"><strong>{{ business_counts.instructors }}</strong><span>Instrutores</span></a>
+    <a class="metric warning" href="{% url 'admin:discovery_professionalverificationrequest_changelist' %}?status__exact=SUBMITTED"><strong>{{ business_counts.pending }}</strong><span>Aguardando análise</span></a>
+    <a class="metric info" href="{% url 'admin:discovery_professionalverificationrequest_changelist' %}?status__exact=UNDER_REVIEW"><strong>{{ business_counts.under_review }}</strong><span>Em análise</span></a>
+    <a class="metric success" href="{% url 'admin:discovery_instructorprofile_changelist' %}?verification_status__exact=VERIFIED"><strong>{{ business_counts.verified }}</strong><span>Verificados</span></a>
+    <a class="metric success" href="{% url 'admin:discovery_instructorprofile_changelist' %}?publication_status__exact=APPROVED"><strong>{{ business_counts.published }}</strong><span>Publicados</span></a>
+    <a class="metric danger" href="{% url 'admin:discovery_professionalverificationrequest_changelist' %}?status__exact=REJECTED"><strong>{{ business_counts.rejected }}</strong><span>Rejeitados</span></a>
+  </div>
+  <div class="operations-grid">
+    <section><h2>Instrutores</h2><a href="{% url 'admin:discovery_instructorprofile_changelist' %}">Perfis e publicação</a></section>
+    <section><h2>Verificação profissional</h2><a href="{% url 'admin:discovery_professionalverificationrequest_changelist' %}">Abrir fila de análise</a></section>
+    <section><h2>Publicação</h2><a href="{% url 'admin:discovery_instructorprofile_changelist' %}?verification_status__exact=VERIFIED">Verificados aguardando decisão</a></section>
+    <section><h2>Marketplace</h2><a href="{% url 'admin:marketplace_instructoroffer_changelist' %}">Ofertas dos instrutores</a></section>
+    <section><h2>Privacidade</h2><a href="{% url 'admin:privacy_privacyrequest_changelist' %}">Solicitações dos titulares</a></section>
+    <section><h2>Auditoria</h2><a href="{% url 'admin:audit_auditevent_changelist' %}">Eventos de auditoria</a></section>
+    <section><h2>Sistema</h2><p>Contas, organização e configurações conforme suas permissões.</p></section>
+  </div>
+  {% include "admin/app_list.html" with app_list=app_list show_changelinks=True %}
+</div>
+{% endblock %}
+{% block sidebar %}{% endblock %}
