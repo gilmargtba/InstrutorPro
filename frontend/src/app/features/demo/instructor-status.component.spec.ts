@@ -16,4 +16,15 @@ describe('InstructorStatusComponent',()=>{
     expect(link.textContent?.trim()).toBe('Editar perfil');
     expect(link.getAttribute('href')).toBe('/profissional/instrutor/onboarding');
   });
+
+  it('explains when the current session has no instructor profile',()=>{
+    const fixture=TestBed.createComponent(InstructorStatusComponent);
+    const http=TestBed.inject(HttpTestingController);
+    http.expectOne('/account/me/').flush({instructor:null});
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Perfil de instrutor não encontrado');
+    expect(fixture.nativeElement.textContent).not.toContain('Carregando cadastro');
+    const link=fixture.nativeElement.querySelector('a.button.primary') as HTMLAnchorElement;
+    expect(link.getAttribute('href')).toBe('/entrar');
+  });
 });

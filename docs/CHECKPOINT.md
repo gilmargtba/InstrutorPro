@@ -2,7 +2,7 @@
 
 - Atualizado em: **2026-09-22**
 - Versão documental: **4.2**
-- Código-fonte: **Fatia 8M implementada localmente; verificação profissional aguardando deploy**
+- Código-fonte: **Fatia 8M em produção; tratamento de sessão administrativa pendente de deploy**
 
 ## Fatia 8M — solicitação e revisão profissional real (22/09/2026)
 
@@ -15,9 +15,11 @@
 - `VERIFIED` não aprova nem publica o perfil. Documentos, busca, publicação, pagamentos e Pro
   continuam bloqueados por capabilities independentes;
 - gate `PROFESSIONAL_VERIFICATION_MODE=PRODUCTION` exige capability e as duas chaves de proteção;
+- telas privadas deixam de manter carregamento infinito quando a sessão autenticada não pertence a
+  um instrutor e orientam nova entrada com a conta profissional;
 - migrations são aditivas; rollback operacional desliga o gate e preserva dados/histórico;
 - validação local: Ruff e migrations passaram; suíte backend completa com `226 passed`; Angular
-  com `34 SUCCESS`; build de produção passou com os dois avisos de budget já conhecidos.
+  com `36 SUCCESS`; build de produção passou com os dois avisos de budget já conhecidos.
 
 ## Fatia 8L — cadastro nacional de instrutor em produção (21/09/2026)
 

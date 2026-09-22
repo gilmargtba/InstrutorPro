@@ -22,4 +22,11 @@ describe('ProfessionalVerificationComponent',()=>{
     http.expectOne('/instructor/verification/submit/').flush({status:'SUBMITTED',cpf_masked:'***.***.***-25',submitted_at:'x',review_started_at:null,decided_at:null,message:'',can_edit:false});
     expect(fixture.componentInstance.cpf).toBe('');
   });
+  it('shows a useful error instead of loading forever',()=>{
+    const fixture=TestBed.createComponent(ProfessionalVerificationComponent);const http=TestBed.inject(HttpTestingController);
+    http.expectOne('/instructor/verification/').flush({detail:'Forbidden'},{status:403,statusText:'Forbidden'});
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Não foi possível carregar a verificação profissional.');
+    expect(fixture.nativeElement.textContent).not.toContain('Carregando');
+  });
 });

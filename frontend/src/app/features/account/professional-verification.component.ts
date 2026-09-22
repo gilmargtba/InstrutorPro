@@ -38,6 +38,8 @@ type VerificationState = {
         @if(error()){<p class="error" role="alert">{{error()}}</p>}
         <a routerLink="/profissional/instrutor/status">Voltar ao status do cadastro</a>
       </article>
+    } @else if(error()) {
+      <article class="notice"><p class="error" role="alert">{{error()}}</p><a class="button primary" routerLink="/entrar">Entrar com a conta do instrutor</a></article>
     } @else {<p>Carregando…</p>}
   </section>`,
   styles: [`.notice{display:grid;gap:1rem;padding:1.5rem;border:1px solid #d6e5e3;border-radius:1rem;background:#fff}.notice form,.notice label{display:grid;gap:.5rem}.notice input{min-height:3rem;padding:.7rem;border:1px solid #bfd5d2;border-radius:.7rem}.notice .consent{display:flex;align-items:flex-start}.notice .consent input{min-height:auto;margin-top:.25rem}.privacy{font-size:.92rem}.error{color:#9a302c}`]
