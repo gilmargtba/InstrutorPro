@@ -18,10 +18,13 @@
 - recuperação segura de senha foi implementada com resposta antienumeração, token de uso único,
   senha mínima de dez caracteres, auditoria e rate limit. Sem SMTP real o endpoint falha fechado
   antes de gerar token; a prontidão exige configuração transacional confirmada na VPS;
+- o onboarding real bloqueia envio de campos obrigatórios inválidos, explicita o formato brasileiro
+  do WhatsApp e apresenta por campo os detalhes de validação retornados pela API, sem reduzir a
+  falha à mensagem genérica `Entrada inválida`;
 - pendências jurídicas de DPO e retenção permanecem registradas e não são apresentadas como `PASS`.
   Analytics conserva descarte aprovado em 90 dias; prazos ainda não decididos não foram inventados;
 - especificação e matriz operacional: `docs/INSTRUCTOR_REGISTRATION_PRODUCTION_FATIA_8L.md`.
-- validação local: backend `219 passed`; cenários dirigidos `10 passed`; Angular `31 SUCCESS`;
+- validação local: backend `219 passed`; cenários dirigidos `10 passed`; Angular `32 SUCCESS`;
   build de produção, Ruff, Django check e migration check passaram. Deploy/smoke ainda dependem da
   inspeção segura da VPS e da confirmação de e-mail transacional.
 

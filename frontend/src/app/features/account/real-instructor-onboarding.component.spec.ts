@@ -55,4 +55,13 @@ describe('RealInstructorOnboardingComponent',()=>{
     component.submit();
     const request=http.expectOne('/account/me/');expect(request.request.body.instructor_city).toBe('Rio Branco');expect(request.request.body.instructor_uf).toBe('AC');expect(request.request.body.service_latitude).toBeUndefined();expect(request.request.body.service_location_authorized).toBeFalse();request.flush({});
   });
+  it('shows the exact API validation reason instead of the generic message',()=>{
+    const component=TestBed.createComponent(RealInstructorOnboardingComponent).componentInstance;
+    const http=TestBed.inject(HttpTestingController);
+    http.expectOne('/account/me/').flush({instructor:{display_name:'Instrutora Nacional'}});
+    component.form.whatsapp='64999990001';component.form.price_amount=100;component.form.instructor_city='Goiatuba';component.form.instructor_uf='GO';component.form.vehicle.make='Marca';component.form.vehicle.model='Modelo';
+    component.submit();
+    http.expectOne('/account/me/').flush({error:{code:'INVALID',message:'Entrada inválida',details:{whatsapp:['Informe um número válido no formato +55, DDD e número.'],vehicle:{year:['Informe um ano válido.']}}}},{status:400,statusText:'Bad Request'});
+    expect(component.message()).toContain('WhatsApp: Informe um número válido');expect(component.message()).toContain('Ano: Informe um ano válido.');expect(component.message()).not.toBe('Entrada inválida');
+  });
 });
