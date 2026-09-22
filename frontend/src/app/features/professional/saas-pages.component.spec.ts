@@ -20,6 +20,7 @@ describe('professional SaaS pages',()=>{
     const text=fixture.nativeElement.textContent;
     expect(text).toContain('Olá, Carlos'); expect(text).toContain('Plano Free');
     expect(text).toContain('Aparições nas buscas'); expect(text).toContain('ainda não recebeu contatos');
+    expect(text).toContain('Status e verificação'); expect(text).toContain('Editar perfil');
   });
 
   it('switches among 7, 30 and 90 day periods',()=>{
