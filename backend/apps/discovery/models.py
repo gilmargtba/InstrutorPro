@@ -58,6 +58,8 @@ class DemoInstructorServiceLocation(models.Model):
     is_demo = models.BooleanField(default=True, editable=False)
 
     class Meta:
+        verbose_name = "local de atendimento demonstrativo"
+        verbose_name_plural = "locais de atendimento demonstrativos"
         ordering = ["display_name"]
         indexes = [models.Index(fields=["uf", "city"])]
         constraints = [
@@ -123,7 +125,9 @@ class InstructorProfile(ProtectedStateModel):
     is_demo = models.BooleanField(default=True, editable=False)
 
     class Meta:
-        permissions = [("manage_instructor_publication", "Can decide instructor publication")]
+        permissions = [
+            ("manage_instructor_publication", "Pode decidir a publicação de instrutores")
+        ]
         verbose_name = "perfil de instrutor"
         verbose_name_plural = "perfis de instrutores"
 
@@ -251,10 +255,12 @@ class ProfessionalVerificationRequest(ProtectedStateModel):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
+        verbose_name = "solicitação de verificação profissional"
+        verbose_name_plural = "solicitações de verificação profissional"
         ordering = ["submitted_at", "created_at"]
         permissions = [
-            ("review_professional_verification", "Can review professional verification"),
-            ("reveal_protected_identifier", "Can reveal protected personal identifier"),
+            ("review_professional_verification", "Pode revisar verificação profissional"),
+            ("reveal_protected_identifier", "Pode revelar identificador pessoal protegido"),
         ]
         constraints = [
             models.UniqueConstraint(

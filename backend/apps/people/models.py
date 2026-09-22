@@ -17,6 +17,10 @@ class Person(models.Model):
     cpf_key_version = models.CharField(max_length=20, blank=True, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        verbose_name = "pessoa"
+        verbose_name_plural = "pessoas"
+
     def __str__(self):
         return str(self.id)
 
@@ -51,6 +55,8 @@ class RoleAssignment(models.Model):
     revoke_reason = models.CharField(max_length=100, blank=True)
 
     class Meta:
+        verbose_name = "atribuição de papel"
+        verbose_name_plural = "atribuições de papéis"
         constraints = [
             models.UniqueConstraint(
                 fields=["person", "role"],
@@ -58,7 +64,7 @@ class RoleAssignment(models.Model):
                 name="uq_active_person_role",
             )
         ]
-        permissions = [("manage_role_assignments", "Can grant and revoke personal roles")]
+        permissions = [("manage_role_assignments", "Pode conceder e revogar papéis pessoais")]
 
     def __str__(self):
         return f"{self.person_id}:{self.role}"

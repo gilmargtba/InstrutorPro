@@ -35,6 +35,8 @@ class StudentProfile(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        verbose_name = "perfil de aluno"
+        verbose_name_plural = "perfis de alunos"
         indexes = [models.Index(fields=["uf", "city", "data_mode"])]
 
 
@@ -55,6 +57,8 @@ class InstructorOnboardingDraft(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
+        verbose_name = "rascunho de cadastro de instrutor"
+        verbose_name_plural = "rascunhos de cadastro de instrutor"
         constraints = [
             models.CheckConstraint(
                 condition=Q(current_step__gte=1) & Q(current_step__lte=7),
@@ -85,6 +89,8 @@ class StudentDemand(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
+        verbose_name = "demanda de aluno"
+        verbose_name_plural = "demandas de alunos"
         indexes = [models.Index(fields=["status", "data_mode", "uf", "city"])]
 
 
@@ -113,6 +119,10 @@ class InstructorVehicle(models.Model):
     )
     data_mode = models.CharField(max_length=12, choices=DataMode.choices)
 
+    class Meta:
+        verbose_name = "veículo de instrutor"
+        verbose_name_plural = "veículos de instrutores"
+
 
 class InstructorOffer(models.Model):
     """Commercial offer; it is not an official training-hours record."""
@@ -137,6 +147,8 @@ class InstructorOffer(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
+        verbose_name = "oferta de instrutor"
+        verbose_name_plural = "ofertas de instrutores"
         indexes = [models.Index(fields=["instructor", "is_active", "category"])]
         constraints = [
             models.CheckConstraint(condition=Q(price_amount__gt=0), name="ck_offer_price_positive"),
@@ -163,6 +175,10 @@ class InstructorContactChannel(models.Model):
     is_active = models.BooleanField(default=True)
     data_mode = models.CharField(max_length=12, choices=DataMode.choices)
     updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "canal de contato do instrutor"
+        verbose_name_plural = "canais de contato dos instrutores"
 
 
 class MarketplaceEvent(models.Model):
@@ -191,6 +207,8 @@ class MarketplaceEvent(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        verbose_name = "evento do marketplace"
+        verbose_name_plural = "eventos do marketplace"
         indexes = [models.Index(fields=["instructor", "event_type", "created_at"])]
         constraints = [
             models.UniqueConstraint(
@@ -227,7 +245,9 @@ class Plan(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        permissions = [("manage_saas", "Can manage SaaS plans and subscriptions")]
+        verbose_name = "plano"
+        verbose_name_plural = "planos"
+        permissions = [("manage_saas", "Pode gerenciar planos e assinaturas")]
         ordering = ["display_order", "code"]
         constraints = [
             models.CheckConstraint(
@@ -246,6 +266,10 @@ class Entitlement(models.Model):
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        verbose_name = "benefício"
+        verbose_name_plural = "benefícios"
+
     def __str__(self):
         return self.name
 
@@ -258,6 +282,8 @@ class PlanEntitlement(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        verbose_name = "benefício do plano"
+        verbose_name_plural = "benefícios dos planos"
         constraints = [
             models.UniqueConstraint(fields=["plan", "entitlement"], name="uq_plan_entitlement")
         ]
@@ -290,6 +316,8 @@ class Subscription(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
+        verbose_name = "assinatura"
+        verbose_name_plural = "assinaturas"
         indexes = [models.Index(fields=["account", "status"])]
         constraints = [
             models.UniqueConstraint(
@@ -320,6 +348,8 @@ class DocumentRequirement(models.Model):
     active_until = models.DateField(null=True, blank=True)
 
     class Meta:
+        verbose_name = "requisito documental"
+        verbose_name_plural = "requisitos documentais"
         constraints = [
             models.UniqueConstraint(
                 fields=["uf", "category", "provider_type", "rule_version", "document_type"],
@@ -392,8 +422,10 @@ class InstructorDocument(models.Model):
     data_mode = models.CharField(max_length=12, choices=DataMode.choices)
 
     class Meta:
+        verbose_name = "documento do instrutor"
+        verbose_name_plural = "documentos dos instrutores"
         indexes = [models.Index(fields=["instructor", "status", "valid_until"])]
-        permissions = [("review_instructor_document", "Can review instructor documents")]
+        permissions = [("review_instructor_document", "Pode revisar documentos de instrutores")]
         constraints = [
             models.CheckConstraint(
                 condition=Q(valid_until__isnull=True)
@@ -436,7 +468,9 @@ class ProfilePhoto(models.Model):
     review_reason = models.CharField(max_length=240, blank=True)
 
     class Meta:
-        permissions = [("review_profile_photo", "Can review instructor profile photos")]
+        verbose_name = "foto do perfil"
+        verbose_name_plural = "fotos dos perfis"
+        permissions = [("review_profile_photo", "Pode revisar fotos de perfis de instrutores")]
         indexes = [models.Index(fields=["instructor", "status", "uploaded_at"])]
 
 
@@ -452,6 +486,8 @@ class PracticalTrainingRequirement(models.Model):
     active_until = models.DateField(null=True, blank=True)
 
     class Meta:
+        verbose_name = "requisito de formação prática"
+        verbose_name_plural = "requisitos de formação prática"
         constraints = [
             models.UniqueConstraint(
                 fields=["uf", "category", "process_type", "rule_version"],
@@ -506,6 +542,8 @@ class PlatformLesson(models.Model):
     data_mode = models.CharField(max_length=12, choices=DataMode.choices)
 
     class Meta:
+        verbose_name = "aula da plataforma"
+        verbose_name_plural = "aulas da plataforma"
         constraints = [
             models.CheckConstraint(
                 condition=Q(duration_minutes__gt=0), name="ck_platform_lesson_duration_positive"
@@ -525,6 +563,8 @@ class InstructorPrerequisiteAcceptance(models.Model):
     data_mode = models.CharField(max_length=12, choices=DataMode.choices)
 
     class Meta:
+        verbose_name = "aceite de pré-requisito do instrutor"
+        verbose_name_plural = "aceites de pré-requisitos dos instrutores"
         constraints = [
             models.UniqueConstraint(
                 fields=["instructor", "policy_version"], name="uq_instructor_prerequisite_version"
@@ -555,4 +595,6 @@ class LessonRequest(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
+        verbose_name = "solicitação de aula"
+        verbose_name_plural = "solicitações de aulas"
         indexes = [models.Index(fields=["instructor", "status", "created_at"])]

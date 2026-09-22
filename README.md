@@ -260,6 +260,10 @@ O perfil de produção controlado usa login administrativo por usuário ou e-mai
 rate limiting, sessão curta, auditoria e permissões explícitas. Consulte `docs/ADMIN_PROD_01.md`;
 verificação profissional continua separada de publicação.
 
+O idioma operacional da interface é **português do Brasil (`pt-br`)**. O painel administrativo usa
+nomes de aplicativos, módulos, filas e permissões em português; códigos técnicos e valores internos
+de enumeração permanecem estáveis para não alterar contratos de API ou regras de negócio.
+
 ### Demo em Ubuntu
 
 O fluxo separado para publicar e atualizar a demo sintética em um servidor Ubuntu

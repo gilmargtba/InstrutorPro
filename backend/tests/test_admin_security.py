@@ -188,6 +188,82 @@ def test_admin_dashboard_and_logout_are_available_and_audited(client):
 
 
 @pytest.mark.django_db
+def test_admin_navigation_uses_brazilian_portuguese_model_names(client):
+    account = Account.objects.create_superuser(
+        username="locale-admin",
+        email="locale-admin@example.invalid",
+        password="strong-test-password",
+    )
+    client.force_login(account)
+
+    response = client.get(reverse("admin:index"))
+    content = response.content.decode()
+
+    assert response.status_code == 200
+    for translated_name in (
+        "Contas",
+        "Identidades externas",
+        "Pessoas",
+        "Atribuições de papéis",
+        "Eventos de auditoria",
+        "Avisos de privacidade",
+        "Documentos legais",
+        "Registros de aceite legal",
+        "Solicitações de privacidade",
+        "Requisitos documentais",
+        "Benefícios",
+        "Canais de contato dos instrutores",
+        "Documentos dos instrutores",
+        "Ofertas de instrutores",
+        "Aceites de pré-requisitos dos instrutores",
+        "Veículos de instrutores",
+        "Solicitações de aulas",
+        "Eventos do marketplace",
+        "Benefícios dos planos",
+        "Planos",
+        "Aulas da plataforma",
+        "Requisitos de formação prática",
+        "Fotos dos perfis",
+        "Demandas de alunos",
+        "Perfis de alunos",
+        "Assinaturas",
+        "Solicitações de verificação profissional",
+    ):
+        assert translated_name in content
+
+    for english_name in (
+        "Accounts",
+        "External identities",
+        "Persons",
+        "Role assignments",
+        "Audit events",
+        "Privacy notices",
+        "Legal documents",
+        "Legal acceptance records",
+        "Privacy requests",
+        "Document requirements",
+        "Entitlements",
+        "Instructor contact channels",
+        "Instructor documents",
+        "Instructor offers",
+        "Instructor prerequisite acceptances",
+        "Instructor vehicles",
+        "Lesson requests",
+        "Marketplace events",
+        "Plan entitlements",
+        "Plans",
+        "Platform lessons",
+        "Practical training requirements",
+        "Profile photos",
+        "Student demands",
+        "Student profiles",
+        "Subscriptions",
+        "Professional verification requests",
+    ):
+        assert english_name not in content
+
+
+@pytest.mark.django_db
 def test_admin_login_rotates_session_and_applies_short_expiry(client):
     account = Account.objects.create_user(
         username="session-admin",

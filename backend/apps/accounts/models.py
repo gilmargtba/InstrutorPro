@@ -31,7 +31,9 @@ class Account(AbstractUser):
     lifecycle_version = models.PositiveBigIntegerField(default=0)
 
     class Meta:
-        permissions = [("manage_account_lifecycle", "Can manage account lifecycle")]
+        verbose_name = "conta"
+        verbose_name_plural = "contas"
+        permissions = [("manage_account_lifecycle", "Pode gerenciar o ciclo de vida de contas")]
         constraints = [
             models.CheckConstraint(
                 condition=(
@@ -61,6 +63,8 @@ class ExternalIdentity(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        verbose_name = "identidade externa"
+        verbose_name_plural = "identidades externas"
         constraints = [
             models.UniqueConstraint(
                 fields=["provider", "subject"], name="uq_identity_provider_subject"

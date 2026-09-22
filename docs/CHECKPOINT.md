@@ -1,8 +1,21 @@
 # Checkpoint do Projeto
 
 - Atualizado em: **2026-09-22**
-- Versão documental: **4.3**
-- Código-fonte: **Admin password-only e painel operacional concluídos localmente; deploy pendente**
+- Versão documental: **4.4**
+- Código-fonte: **Admin em português do Brasil concluído localmente; deploy pendente**
+
+## Localização pt-BR do painel administrativo (22/09/2026)
+
+- `LANGUAGE_CODE=pt-br` permanece como idioma global da aplicação;
+- aplicativos, módulos, filas e permissões próprios do Django Admin receberam nomes oficiais em
+  português do Brasil, eliminando os rótulos automáticos em inglês do menu e dos breadcrumbs;
+- códigos técnicos, nomes de campos de API e valores internos de enumeração não foram traduzidos,
+  preservando contratos e regras de negócio;
+- migrations alteram somente metadados (`Meta options`), sem modificar ou apagar dados;
+- páginas públicas já estavam em português; a correção concentra-se na navegação administrativa;
+- validação local: teste direcionado do Admin com `20 passed`, suíte backend completa com
+  `237 passed`, Ruff aprovado, Django check sem erros e nenhuma migration pendente;
+- deploy ainda é necessário antes de considerar a tradução ativa em produção.
 
 ## Admin de produção — autenticação simples e painel operacional (22/09/2026)
 

@@ -14,6 +14,8 @@ class PrivacyNotice(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        verbose_name = "aviso de privacidade"
+        verbose_name_plural = "avisos de privacidade"
         constraints = [
             models.UniqueConstraint(
                 fields=["is_current"],
@@ -46,6 +48,8 @@ class LegalDocument(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        verbose_name = "documento legal"
+        verbose_name_plural = "documentos legais"
         constraints = [
             models.UniqueConstraint(
                 fields=["document_type", "audience", "version"],
@@ -99,6 +103,8 @@ class LegalAcceptanceRecord(models.Model):
     request_id = models.UUIDField(null=True, blank=True)
 
     class Meta:
+        verbose_name = "registro de aceite legal"
+        verbose_name_plural = "registros de aceite legal"
         constraints = [
             models.UniqueConstraint(
                 fields=["account", "terms_document", "privacy_notice"],
@@ -152,8 +158,10 @@ class PrivacyRequest(models.Model):
     internal_notes = models.TextField(blank=True)
 
     class Meta:
+        verbose_name = "solicitação de privacidade"
+        verbose_name_plural = "solicitações de privacidade"
         ordering = ["-requested_at"]
-        permissions = [("manage_privacy_requests", "Can manage privacy requests")]
+        permissions = [("manage_privacy_requests", "Pode gerenciar solicitações de privacidade")]
 
     def __str__(self):
         return f"{self.request_type}:{self.id}"

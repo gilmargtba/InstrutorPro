@@ -8,6 +8,10 @@ class Country(models.Model):
     code = models.CharField(max_length=2, unique=True)
     name = models.CharField(max_length=100)
 
+    class Meta:
+        verbose_name = "país"
+        verbose_name_plural = "países"
+
     def __str__(self):
         return self.name
 
@@ -31,6 +35,8 @@ class FederativeUnit(models.Model):
     )
 
     class Meta:
+        verbose_name = "unidade federativa"
+        verbose_name_plural = "unidades federativas"
         ordering = ["code"]
 
     def __str__(self):
@@ -65,6 +71,8 @@ class RegulatoryReadiness(models.Model):
     reviewed_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
+        verbose_name = "prontidão regulatória"
+        verbose_name_plural = "registros de prontidão regulatória"
         constraints = [
             models.UniqueConstraint(
                 fields=["federative_unit", "provider_type", "capability"],

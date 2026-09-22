@@ -14,6 +14,8 @@ class PaymentCustomer(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        verbose_name = "cliente de pagamento"
+        verbose_name_plural = "clientes de pagamento"
         constraints = [
             models.UniqueConstraint(
                 fields=["provider", "provider_customer_id"], name="uq_payment_provider_customer"
@@ -54,6 +56,8 @@ class PaymentOrder(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
+        verbose_name = "ordem de pagamento"
+        verbose_name_plural = "ordens de pagamento"
         constraints = [
             models.UniqueConstraint(
                 fields=["provider", "provider_payment_id"],
@@ -80,6 +84,8 @@ class PaymentTransaction(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        verbose_name = "transação de pagamento"
+        verbose_name_plural = "transações de pagamento"
         constraints = [
             models.UniqueConstraint(
                 fields=["order", "provider_event_id"], name="uq_payment_transaction_event"
@@ -106,6 +112,8 @@ class PaymentWebhookEvent(models.Model):
     processed_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
+        verbose_name = "evento de webhook de pagamento"
+        verbose_name_plural = "eventos de webhook de pagamento"
         constraints = [
             models.UniqueConstraint(
                 fields=["provider", "provider_event_id"], name="uq_payment_webhook_event"

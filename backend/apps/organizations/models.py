@@ -104,6 +104,10 @@ class Clinic(models.Model):
     display_name = models.CharField(max_length=150)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        verbose_name = "clínica"
+        verbose_name_plural = "clínicas"
+
     def __str__(self):
         return self.display_name
 
@@ -121,6 +125,8 @@ class ClinicMembership(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        verbose_name = "vínculo com clínica"
+        verbose_name_plural = "vínculos com clínicas"
         constraints = [
             models.UniqueConstraint(fields=["clinic", "person"], name="uq_clinic_person")
         ]

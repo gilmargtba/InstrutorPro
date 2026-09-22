@@ -18,8 +18,10 @@ class AuditEvent(models.Model):
     occurred_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
     class Meta:
+        verbose_name = "evento de auditoria"
+        verbose_name_plural = "eventos de auditoria"
         ordering = ["-occurred_at"]
-        permissions = [("view_security_audit", "Can view security audit events")]
+        permissions = [("view_security_audit", "Pode visualizar eventos de auditoria de segurança")]
         indexes = [models.Index(fields=["target_type", "target_id"], name="audit_target_idx")]
 
     def __str__(self):
