@@ -15,10 +15,11 @@
 - fila apresenta nome, UF, cidade, data, status, revisor e ação, mantendo CPF mascarado e consulta
   excepcional autorizada/auditada;
 - grupos de menor privilégio são preparados por comando idempotente, sem criar usuários;
+- associação a grupo é explícita, exige conta staff ativa, não concede superusuário e gera auditoria;
 - `VERIFIED` continua distinto de `PUBLISHED`; uploads, publicação automática, pagamentos e Pro
   permanecem bloqueados;
 - validação local: Django check e migration check passaram, Ruff passou e suíte backend completa
-  encerrou com `235 passed`; Angular não foi alterado e não exige rebuild nesta fatia;
+  encerrou com `236 passed`; Angular não foi alterado e não exige rebuild nesta fatia;
 - deploy e smoke de produção ainda são obrigatórios antes de `ADMIN_PRODUCTION_READY=YES`.
 
 ## Fatia 8M — solicitação e revisão profissional real (22/09/2026)

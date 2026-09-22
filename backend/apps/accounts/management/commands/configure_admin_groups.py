@@ -8,12 +8,15 @@ GROUP_PERMISSIONS = {
         "organizations.manage_platform_organization",
         "organizations.validate_platform_organization",
         "discovery.view_instructorprofile",
+        "discovery.change_instructorprofile",
         "discovery.view_professionalverificationrequest",
         "discovery.change_professionalverificationrequest",
         "discovery.manage_instructor_publication",
         "discovery.review_professional_verification",
         "discovery.reveal_protected_identifier",
         "audit.view_security_audit",
+        "marketplace.view_instructoroffer",
+        "privacy.manage_privacy_requests",
     },
     "Analista de verificação": {
         "discovery.view_instructorprofile",
@@ -26,7 +29,7 @@ GROUP_PERMISSIONS = {
         "accounts.view_account",
         "discovery.view_instructorprofile",
         "discovery.view_professionalverificationrequest",
-        "audit.view_auditevent",
+        "audit.view_security_audit",
     },
 }
 

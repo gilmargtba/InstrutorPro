@@ -270,9 +270,7 @@ def test_verification_transition_button_confirms_and_audits_review_start(client)
         Permission.objects.get(codename="review_professional_verification")
     )
     client.force_login(analyst)
-    url = reverse(
-        "admin:discovery_verification_request_transition", args=[item.pk, "start"]
-    )
+    url = reverse("admin:discovery_verification_request_transition", args=[item.pk, "start"])
     assert client.get(url).status_code == 200
     assert client.post(url).status_code == 302
     item.refresh_from_db()
@@ -293,6 +291,23 @@ def test_admin_groups_are_idempotent_and_do_not_create_or_elevate_users():
     support = Group.objects.get(name="Suporte")
     assert analyst.permissions.filter(codename="review_professional_verification").exists()
     assert not support.permissions.filter(codename="reveal_protected_identifier").exists()
+    assert support.permissions.filter(codename="view_security_audit").exists()
+
+
+@pytest.mark.django_db
+def test_assign_admin_group_requires_active_staff_and_is_audited():
+    account = Account.objects.create_user(
+        username="group-admin",
+        email="group-admin@example.invalid",
+        password="strong-test-password",
+        is_staff=True,
+    )
+    call_command("configure_admin_groups")
+    call_command("assign_admin_group", account.username, "Administrador da plataforma")
+    account.refresh_from_db()
+    assert account.groups.filter(name="Administrador da plataforma").exists()
+    assert not account.is_superuser
+    assert AuditEvent.objects.filter(actor=account, action="accounts.admin_group.assigned").exists()
 
 
 @pytest.mark.django_db
