@@ -40,6 +40,18 @@ Fonte oficial dos comportamentos HTTP internos. Endpoints são implementados som
 
 Base: `/api/v1`.
 
+## Verificação profissional — Fatia 8M
+
+- `GET /instructor/verification/`: retorna somente status, datas, mensagem segura e CPF mascarado
+  da solicitação pertencente à conta autenticada.
+- `PATCH /instructor/verification/`: valida e protege o CPF do próprio instrutor; nunca devolve o
+  valor integral, ciphertext ou fingerprint.
+- `POST /instructor/verification/submit/`: envia a solicitação. Repetição após envio retorna o
+  mesmo estado sem criar nova solicitação ou novo evento de submissão.
+
+Não há endpoint público de decisão. Revisão e decisão são administrativas, com permissão explícita,
+MFA, auditoria e bloqueio concorrente. `VERIFIED` não altera `publication_status`.
+
 ## Conta própria e privacidade — Fatia 7
 
 - `GET/PATCH /account/me/`: retorna a projeção da própria conta e aceita somente campos cadastrais

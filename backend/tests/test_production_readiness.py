@@ -28,6 +28,10 @@ SECURE_SETTINGS = {
     "REAL_PERSONAL_DATA": False,
     "REAL_STUDENT_USE": False,
     "REAL_INSTRUCTOR_REGISTRATION": False,
+    "PROFESSIONAL_VERIFICATION_MODE": "DISABLED",
+    "REAL_PROFESSIONAL_VERIFICATION": False,
+    "PII_FIELD_ENCRYPTION_KEY": "",
+    "PII_FINGERPRINT_KEY": "",
     "REAL_MARKETPLACE_SEARCH": False,
     "REAL_WHATSAPP_CONTACT": False,
     "REAL_MARKETPLACE_ANALYTICS": False,
@@ -87,6 +91,37 @@ def test_production_readiness_accepts_instructor_production_without_global_produ
     assert "REAL_PERSONAL_DATA=ENABLED" in result
     assert "REAL_INSTRUCTOR_REGISTRATION=ENABLED" in result
     assert "REAL_MARKETPLACE_SEARCH=BLOCKED" in result
+
+
+@override_settings(
+    **{
+        **SECURE_SETTINGS,
+        "PROFESSIONAL_VERIFICATION_MODE": "PRODUCTION",
+        "REAL_PROFESSIONAL_VERIFICATION": True,
+        "PII_FIELD_ENCRYPTION_KEY": "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA=",
+        "PII_FINGERPRINT_KEY": "test-only-fingerprint-key-with-32-bytes-minimum",
+    }
+)
+def test_production_readiness_accepts_isolated_professional_verification_gate():
+    output = StringIO()
+    call_command("production_readiness", stdout=output)
+    result = output.getvalue()
+    assert "PROFESSIONAL_VERIFICATION_MODE=PRODUCTION" in result
+    assert "REAL_PROFESSIONAL_VERIFICATION=ENABLED" in result
+
+
+@pytest.mark.parametrize("missing", ["PII_FIELD_ENCRYPTION_KEY", "PII_FINGERPRINT_KEY"])
+def test_professional_verification_requires_both_protection_keys(missing):
+    configured = {
+        **SECURE_SETTINGS,
+        "PROFESSIONAL_VERIFICATION_MODE": "PRODUCTION",
+        "REAL_PROFESSIONAL_VERIFICATION": True,
+        "PII_FIELD_ENCRYPTION_KEY": "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA=",
+        "PII_FINGERPRINT_KEY": "test-only-fingerprint-key-with-32-bytes-minimum",
+        missing: "",
+    }
+    with override_settings(**configured), pytest.raises(CommandError):
+        call_command("production_readiness", stdout=StringIO())
 
 
 @override_settings(

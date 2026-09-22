@@ -124,6 +124,8 @@ def test_admin_prod_access_grants_only_explicit_permissions():
         "manage_platform_organization",
         "validate_platform_organization",
         "manage_instructor_publication",
+        "review_professional_verification",
+        "reveal_protected_identifier",
         "view_security_audit",
     }
     assert granted < set(Permission.objects.values_list("codename", flat=True))

@@ -24,17 +24,103 @@ from apps.marketplace.analytics import (
 )
 from apps.marketplace.capabilities import enabled
 from apps.marketplace.models import DataMode, MarketplaceEvent
+from apps.people.identifiers import mask_cpf
 from apps.people.models import Person, RoleAssignment
 
 from .geocoding import LocationNotFound, ProviderUnavailable, get_geocoding_provider
 from .map_tiles import MapTileUnavailable, fetch_map_tile
-from .models import InstructorProfile, InstructorServiceArea
+from .models import (
+    InstructorProfile,
+    InstructorServiceArea,
+    ProfessionalVerificationRequest,
+)
 from .selectors import (
     published_instructor_counts_by_uf,
     published_instructor_profiles,
     search_published_instructors,
 )
-from .services import grant_service_location_authorization, submit_profile
+from .services import (
+    InvalidWorkflowTransition,
+    WorkflowPermissionDenied,
+    grant_service_location_authorization,
+    submit_profile,
+)
+from .verification_services import save_verification_draft, submit_verification_request
+
+
+class ProfessionalVerificationRequestInput(serializers.Serializer):
+    cpf = serializers.CharField(min_length=11, max_length=14, write_only=True)
+
+
+def _verification_profile(request):
+    return get_object_or_404(
+        InstructorProfile.objects.select_related("person__account"),
+        person__account=request.user,
+        is_demo=False,
+    )
+
+
+def _verification_payload(profile):
+    item = profile.verification_requests.order_by("-created_at").first()
+    return {
+        "status": item.status if item else ProfessionalVerificationRequest.Status.DRAFT,
+        "cpf_masked": mask_cpf(profile.person.cpf_last2),
+        "submitted_at": item.submitted_at if item else None,
+        "review_started_at": item.review_started_at if item else None,
+        "decided_at": item.decided_at if item else None,
+        "message": item.public_message if item else "",
+        "can_edit": not item or item.status in {
+            ProfessionalVerificationRequest.Status.DRAFT,
+            ProfessionalVerificationRequest.Status.REJECTED,
+        },
+    }
+
+
+class ProfessionalVerificationRequestView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        profile = _verification_profile(request)
+        if not enabled("REAL_PROFESSIONAL_VERIFICATION"):
+            return Response({"detail": "Verificação profissional indisponível."}, status=403)
+        return Response(_verification_payload(profile))
+
+    def patch(self, request):
+        serializer = ProfessionalVerificationRequestInput(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        profile = _verification_profile(request)
+        try:
+            save_verification_draft(
+                actor=request.user,
+                profile=profile,
+                cpf=serializer.validated_data["cpf"],
+                request_id=getattr(request, "request_id", None),
+            )
+        except WorkflowPermissionDenied as exc:
+            raise PermissionDenied(str(exc)) from exc
+        except (ValueError, InvalidWorkflowTransition) as exc:
+            raise serializers.ValidationError({"cpf": str(exc)}) from exc
+        profile.refresh_from_db()
+        return Response(_verification_payload(profile))
+
+
+class ProfessionalVerificationSubmitView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        profile = _verification_profile(request)
+        try:
+            item, created = submit_verification_request(
+                actor=request.user,
+                profile=profile,
+                request_id=getattr(request, "request_id", None),
+            )
+        except WorkflowPermissionDenied as exc:
+            raise PermissionDenied(str(exc)) from exc
+        except InvalidWorkflowTransition as exc:
+            raise serializers.ValidationError({"detail": str(exc)}) from exc
+        profile.refresh_from_db()
+        return Response(_verification_payload(profile), status=201 if created else 200)
 
 
 class SearchParameters(serializers.Serializer):

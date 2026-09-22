@@ -8,12 +8,24 @@ from .api import (
     InstructorSearchView,
     InstructorStateSummaryView,
     MapTileView,
+    ProfessionalVerificationRequestView,
+    ProfessionalVerificationSubmitView,
     PublicInstructorProfileView,
     PublicProfilePhotoView,
     WhatsAppContactView,
 )
 
 urlpatterns = [
+    path(
+        "instructor/verification/",
+        ProfessionalVerificationRequestView.as_view(),
+        name="professional-verification-request",
+    ),
+    path(
+        "instructor/verification/submit/",
+        ProfessionalVerificationSubmitView.as_view(),
+        name="professional-verification-submit",
+    ),
     path("instructors/search/", InstructorSearchView.as_view(), name="instructor-search"),
     path(
         "instructors/<uuid:pk>/", PublicInstructorProfileView.as_view(), name="instructor-profile"

@@ -23,5 +23,7 @@ docker compose --env-file "$env_file" -f compose.production.yaml run --rm --no-d
 echo PRODUCTION_CONFIG_VALIDATION=PASS
 registration_mode=$(sed -n 's/^INSTRUCTOR_REGISTRATION_MODE=//p' "$env_file" | tail -n 1)
 echo "INSTRUCTOR_REGISTRATION_MODE=${registration_mode:-DISABLED}"
+verification_mode=$(sed -n 's/^PROFESSIONAL_VERIFICATION_MODE=//p' "$env_file" | tail -n 1)
+echo "PROFESSIONAL_VERIFICATION_MODE=${verification_mode:-DISABLED}"
 authorization=$(sed -n 's/^REAL_PRODUCTION_AUTHORIZATION=//p' "$env_file" | tail -n 1)
 echo "REAL_PRODUCTION_AUTHORIZATION=${authorization:-NOT_GRANTED}"

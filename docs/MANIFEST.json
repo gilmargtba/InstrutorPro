@@ -1,7 +1,7 @@
 {
   "package": "instrutorpro-documentation",
-  "version": "3.21",
-  "reviewed_on": "2026-09-21",
+  "version": "3.22",
+  "reviewed_on": "2026-09-22",
   "path_base": "repository-root",
   "normative_documents": [
     "README.md",
@@ -47,6 +47,7 @@
     "docs/APPLICATION_DEPLOYMENT_FATIA_8J.md",
     "docs/INSTRUCTOR_REGISTRATION_HOTFIX_POST_8J.md",
     "docs/INSTRUCTOR_REGISTRATION_PRODUCTION_FATIA_8L.md",
+    "docs/PROFESSIONAL_VERIFICATION_FATIA_8M.md",
     "docs/PAYMENT_PROVIDER_REQUIREMENTS.md",
     "docs/PAYMENT_GATEWAY_SETUP.md"
   ],
@@ -65,7 +66,7 @@
       "note": "Provisional brand asset; the product name and visual identity remain open decisions."
     }
   ],
-  "updated_at": "2026-09-21",
+  "updated_at": "2026-09-22",
   "scope": "national-27-ufs",
   "first_wave": [
     "RS",
@@ -95,5 +96,5 @@
     "INSTRUCTOR_CANDIDATE",
     "INSTRUCTOR_ACADEMY"
   ],
-  "notes": "Cadastro e onboarding reais de instrutor foram autorizados nacionalmente por capability na Fatia 8L. Verificação, publicação, documentos, busca, pagamentos e Pro conservam gates independentes; fluxos sintéticos continuam isolados."
+  "notes": "Cadastro e onboarding reais permanecem separados das demais capabilities. A Fatia 8M adiciona solicitação e revisão profissional com CPF protegido e gate próprio; verificação não publica perfil. Documentos, busca, publicação, pagamentos e Pro conservam gates independentes."
 }

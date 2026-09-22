@@ -6,6 +6,7 @@ from apps.marketplace.capabilities import (
     configuration_errors,
     enabled,
     instructor_registration_mode,
+    professional_verification_mode,
 )
 
 
@@ -47,6 +48,7 @@ class Command(BaseCommand):
             raise CommandError("Technical production readiness failed: " + ", ".join(failures))
         self.stdout.write(self.style.SUCCESS("TECHNICAL_PRODUCTION_READINESS=PASS"))
         self.stdout.write(f"INSTRUCTOR_REGISTRATION_MODE={instructor_registration_mode()}")
+        self.stdout.write(f"PROFESSIONAL_VERIFICATION_MODE={professional_verification_mode()}")
         self.stdout.write(f"REAL_PRODUCTION_AUTHORIZATION={settings.REAL_PRODUCTION_AUTHORIZATION}")
         for name in CAPABILITIES:
             self.stdout.write(f"{name}={'ENABLED' if enabled(name) else 'BLOCKED'}")

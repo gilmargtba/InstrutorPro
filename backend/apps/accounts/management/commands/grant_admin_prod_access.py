@@ -9,6 +9,8 @@ PERMISSIONS = (
     ("organizations", "manage_platform_organization"),
     ("organizations", "validate_platform_organization"),
     ("discovery", "manage_instructor_publication"),
+    ("discovery", "review_professional_verification"),
+    ("discovery", "reveal_protected_identifier"),
     ("audit", "view_security_audit"),
 )
 

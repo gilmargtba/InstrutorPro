@@ -17,6 +17,12 @@ INSTRUCTOR_REGISTRATION_CAPABILITIES = {
     "REAL_PERSONAL_DATA",
     "REAL_INSTRUCTOR_REGISTRATION",
 }
+PROFESSIONAL_VERIFICATION_DISABLED = "DISABLED"
+PROFESSIONAL_VERIFICATION_PRODUCTION = "PRODUCTION"
+PROFESSIONAL_VERIFICATION_STATES = {
+    PROFESSIONAL_VERIFICATION_DISABLED,
+    PROFESSIONAL_VERIFICATION_PRODUCTION,
+}
 
 
 @dataclass(frozen=True)
@@ -30,6 +36,7 @@ CAPABILITIES = {
     "REAL_PERSONAL_DATA": Capability("REAL_PERSONAL_DATA", True),
     "REAL_STUDENT_USE": Capability("REAL_STUDENT_USE", True),
     "REAL_INSTRUCTOR_REGISTRATION": Capability("REAL_INSTRUCTOR_REGISTRATION", True),
+    "REAL_PROFESSIONAL_VERIFICATION": Capability("REAL_PROFESSIONAL_VERIFICATION", True),
     "REAL_MARKETPLACE_SEARCH": Capability("REAL_MARKETPLACE_SEARCH", True),
     "REAL_WHATSAPP_CONTACT": Capability("REAL_WHATSAPP_CONTACT", True),
     "REAL_MARKETPLACE_ANALYTICS": Capability("REAL_MARKETPLACE_ANALYTICS", True),
@@ -52,7 +59,18 @@ def instructor_registration_mode() -> str:
     return getattr(settings, "INSTRUCTOR_REGISTRATION_MODE", INSTRUCTOR_REGISTRATION_DISABLED)
 
 
+def professional_verification_mode() -> str:
+    return getattr(
+        settings, "PROFESSIONAL_VERIFICATION_MODE", PROFESSIONAL_VERIFICATION_DISABLED
+    )
+
+
 def enabled(name: str) -> bool:
+    if (
+        name == "REAL_PROFESSIONAL_VERIFICATION"
+        and professional_verification_mode() == PROFESSIONAL_VERIFICATION_PRODUCTION
+    ):
+        return configured(name)
     if (
         name in INSTRUCTOR_REGISTRATION_CAPABILITIES
         and instructor_registration_mode() == INSTRUCTOR_REGISTRATION_PRODUCTION
@@ -70,11 +88,21 @@ def enabled(name: str) -> bool:
 def configuration_errors() -> list[str]:
     state = authorization_state()
     registration_mode = instructor_registration_mode()
+    verification_mode = professional_verification_mode()
     errors = []
     if state not in AUTHORIZATION_STATES:
         return ["REAL_PRODUCTION_AUTHORIZATION_INVALID"]
     if registration_mode not in INSTRUCTOR_REGISTRATION_STATES:
         errors.append("INSTRUCTOR_REGISTRATION_MODE_INVALID")
+    if verification_mode not in PROFESSIONAL_VERIFICATION_STATES:
+        errors.append("PROFESSIONAL_VERIFICATION_MODE_INVALID")
+    if verification_mode == PROFESSIONAL_VERIFICATION_PRODUCTION:
+        if not configured("REAL_PROFESSIONAL_VERIFICATION"):
+            errors.append("REAL_PROFESSIONAL_VERIFICATION_REQUIRED_FOR_PRODUCTION")
+        if not getattr(settings, "PII_FIELD_ENCRYPTION_KEY", ""):
+            errors.append("PII_FIELD_ENCRYPTION_KEY_REQUIRED")
+        if len(getattr(settings, "PII_FINGERPRINT_KEY", "")) < 32:
+            errors.append("PII_FINGERPRINT_KEY_REQUIRED")
     if registration_mode == INSTRUCTOR_REGISTRATION_PRODUCTION:
         errors.extend(
             f"{name}_REQUIRED_FOR_INSTRUCTOR_PRODUCTION"
@@ -84,6 +112,8 @@ def configuration_errors() -> list[str]:
     globally_authorized = set(CAPABILITIES)
     if registration_mode == INSTRUCTOR_REGISTRATION_PRODUCTION:
         globally_authorized -= INSTRUCTOR_REGISTRATION_CAPABILITIES
+    if verification_mode == PROFESSIONAL_VERIFICATION_PRODUCTION:
+        globally_authorized.discard("REAL_PROFESSIONAL_VERIFICATION")
     if state == NOT_GRANTED and any(configured(name) for name in globally_authorized):
         errors.append("CAPABILITY_ENABLED_WITHOUT_AUTHORIZATION")
     if state == CONTROLLED_PILOT:

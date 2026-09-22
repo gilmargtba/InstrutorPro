@@ -1,8 +1,23 @@
 # Checkpoint do Projeto
 
-- Atualizado em: **2026-09-21**
-- Versão documental: **4.1**
-- Código-fonte: **Fatia 8L em validação; cadastro real de instrutor separado das demais capabilities**
+- Atualizado em: **2026-09-22**
+- Versão documental: **4.2**
+- Código-fonte: **Fatia 8M implementada localmente; verificação profissional aguardando deploy**
+
+## Fatia 8M — solicitação e revisão profissional real (22/09/2026)
+
+- instrutor autenticado possui página privada para informar CPF e enviar solicitação idempotente;
+- CPF validado, cifrado em repouso e deduplicado por índice cego HMAC com chave separada; APIs,
+  listagens e logs recebem somente máscara/metadados;
+- fila administrativa dedicada ordena envios antigos, bloqueia criação/exclusão manual e exige
+  permissão, MFA, atribuição de revisor, método, fonte e data antes da aprovação;
+- decisão é transacional e auditada; rejeição usa motivo estruturado e mensagem segura;
+- `VERIFIED` não aprova nem publica o perfil. Documentos, busca, publicação, pagamentos e Pro
+  continuam bloqueados por capabilities independentes;
+- gate `PROFESSIONAL_VERIFICATION_MODE=PRODUCTION` exige capability e as duas chaves de proteção;
+- migrations são aditivas; rollback operacional desliga o gate e preserva dados/histórico;
+- validação local: Ruff e migrations passaram; suíte backend completa com `226 passed`; Angular
+  com `34 SUCCESS`; build de produção passou com os dois avisos de budget já conhecidos.
 
 ## Fatia 8L — cadastro nacional de instrutor em produção (21/09/2026)
 

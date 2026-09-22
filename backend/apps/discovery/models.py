@@ -209,6 +209,62 @@ class ProfessionalVerification(models.Model):
         verbose_name_plural = "verificações profissionais"
 
 
+class ProfessionalVerificationRequest(ProtectedStateModel):
+    protected_state_fields = ("status", "reviewer_id", "decided_at")
+
+    class Status(models.TextChoices):
+        DRAFT = "DRAFT", "Rascunho"
+        SUBMITTED = "SUBMITTED", "Enviada"
+        UNDER_REVIEW = "UNDER_REVIEW", "Em análise"
+        VERIFIED = "VERIFIED", "Verificada"
+        REJECTED = "REJECTED", "Rejeitada"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    profile = models.ForeignKey(
+        InstructorProfile, on_delete=models.PROTECT, related_name="verification_requests"
+    )
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.DRAFT)
+    submitted_at = models.DateTimeField(null=True, blank=True, db_index=True)
+    review_started_at = models.DateTimeField(null=True, blank=True)
+    reviewer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="assigned_professional_verification_requests",
+    )
+    verification_method = models.CharField(max_length=80, blank=True)
+    verification_source = models.CharField(max_length=160, blank=True)
+    checked_at = models.DateTimeField(null=True, blank=True)
+    internal_notes = models.TextField(blank=True)
+    rejection_reason_code = models.CharField(max_length=80, blank=True)
+    public_message = models.CharField(max_length=240, blank=True)
+    decided_at = models.DateTimeField(null=True, blank=True)
+    decision_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="decided_professional_verification_requests",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["submitted_at", "created_at"]
+        permissions = [
+            ("review_professional_verification", "Can review professional verification"),
+            ("reveal_protected_identifier", "Can reveal protected personal identifier"),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["profile"],
+                condition=models.Q(status__in=["DRAFT", "SUBMITTED", "UNDER_REVIEW"]),
+                name="uq_active_professional_verification_request",
+            )
+        ]
+
+
 class PublicationDecision(models.Model):
     class Decision(models.TextChoices):
         APPROVE = "APPROVE", "Aprovar"

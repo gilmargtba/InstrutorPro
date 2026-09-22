@@ -11,6 +11,10 @@ class Person(models.Model):
     )
     phone = models.CharField(max_length=20, blank=True)
     birth_date = models.DateField(null=True, blank=True)
+    cpf_ciphertext = models.TextField(blank=True, editable=False)
+    cpf_fingerprint = models.CharField(max_length=64, unique=True, null=True, editable=False)
+    cpf_last2 = models.CharField(max_length=2, blank=True, editable=False)
+    cpf_key_version = models.CharField(max_length=20, blank=True, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
