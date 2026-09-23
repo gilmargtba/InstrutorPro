@@ -1,8 +1,25 @@
 # Checkpoint do Projeto
 
-- Atualizado em: **2026-09-22**
-- Versão documental: **4.4**
-- Código-fonte: **Admin em português do Brasil concluído localmente; deploy pendente**
+- Atualizado em: **2026-09-23**
+- Versão documental: **4.5**
+- Código-fonte: **Upload documental privado preparado localmente; ativação e deploy pendentes**
+
+## Fatia 8N — upload documental profissional (23/09/2026)
+
+- infraestrutura de upload privado vinculada ao rascunho de verificação, com requisitos versionados,
+  aprovados e filtrados por UF/categoria, sem presumir regras estaduais;
+- validação de arquivo, quarentena, integração clamd de falha fechada, promoção somente após
+  resultado limpo, snapshot na submissão, download autenticado e auditoria;
+- campos de retenção e suspensão de descarte criados sem estabelecer prazo jurídico nem executar
+  eliminação automática; backup do volume privado foi incluído no script, pendente de teste de
+  restauração em ambiente real;
+- acesso direto às rotas de arquivo bloqueado no nginx; não há URL pública fornecida pela API;
+- ativação continua **bloqueada** por homologação do scanner, volume/backup/restauração,
+  política de retenção e versão jurídica da Política de Privacidade;
+- validação local: 250 testes backend, 13 testes específicos de upload, Ruff, Django check,
+  migrations e build Angular passaram; o ChromeHeadless não iniciou no Docker local por restrição
+  de namespace, então a suíte Angular permanece pendente neste ambiente;
+- detalhes, gates e rollback em `docs/PROFESSIONAL_DOCUMENT_UPLOAD_FATIA_8N.md`.
 
 ## Localização pt-BR do painel administrativo (22/09/2026)
 

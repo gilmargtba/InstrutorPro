@@ -346,6 +346,11 @@ class DocumentRequirement(models.Model):
     requires_validity = models.BooleanField(default=False)
     active_from = models.DateField()
     active_until = models.DateField(null=True, blank=True)
+    source_reference = models.CharField(max_length=240, default="")
+    approval_recorded_at = models.DateTimeField(null=True, blank=True)
+    approval_recorded_by = models.ForeignKey(
+        "accounts.Account", on_delete=models.PROTECT, null=True, blank=True
+    )
 
     class Meta:
         verbose_name = "requisito documental"
@@ -373,7 +378,7 @@ class InstructorDocument(models.Model):
 
     class ScanStatus(models.TextChoices):
         PENDING = "PENDING", "Aguardando análise"
-        CLEAN = "CLEAN", "Fixture segura"
+        CLEAN = "CLEAN", "Arquivo analisado"
         BLOCKED = "BLOCKED", "Bloqueado"
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -389,6 +394,13 @@ class InstructorDocument(models.Model):
     )
     requirement = models.ForeignKey(
         DocumentRequirement, on_delete=models.PROTECT, related_name="documents"
+    )
+    verification_request = models.ForeignKey(
+        "discovery.ProfessionalVerificationRequest",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="documents",
     )
     issuer = models.CharField(max_length=160, blank=True)
     credential_uf = models.CharField(max_length=2, blank=True)
@@ -409,6 +421,9 @@ class InstructorDocument(models.Model):
         "self", on_delete=models.PROTECT, null=True, blank=True, related_name="replacements"
     )
     uploaded_at = models.DateTimeField(auto_now_add=True)
+    scanned_at = models.DateTimeField(null=True, blank=True)
+    retention_expires_at = models.DateTimeField(null=True, blank=True)
+    legal_hold = models.BooleanField(default=False)
     reviewed_by = models.ForeignKey(
         "accounts.Account",
         on_delete=models.PROTECT,

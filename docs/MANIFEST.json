@@ -1,7 +1,7 @@
 {
   "package": "instrutorpro-documentation",
-  "version": "3.24",
-  "reviewed_on": "2026-09-22",
+  "version": "3.25",
+  "reviewed_on": "2026-09-23",
   "path_base": "repository-root",
   "normative_documents": [
     "README.md",
@@ -48,6 +48,7 @@
     "docs/INSTRUCTOR_REGISTRATION_HOTFIX_POST_8J.md",
     "docs/INSTRUCTOR_REGISTRATION_PRODUCTION_FATIA_8L.md",
     "docs/PROFESSIONAL_VERIFICATION_FATIA_8M.md",
+    "docs/PROFESSIONAL_DOCUMENT_UPLOAD_FATIA_8N.md",
     "docs/PAYMENT_PROVIDER_REQUIREMENTS.md",
     "docs/PAYMENT_GATEWAY_SETUP.md"
   ],
@@ -66,7 +67,7 @@
       "note": "Provisional brand asset; the product name and visual identity remain open decisions."
     }
   ],
-  "updated_at": "2026-09-22",
+  "updated_at": "2026-09-23",
   "scope": "national-27-ufs",
   "first_wave": [
     "RS",
@@ -96,5 +97,5 @@
     "INSTRUCTOR_CANDIDATE",
     "INSTRUCTOR_ACADEMY"
   ],
-  "notes": "Cadastro e onboarding reais permanecem separados das demais capabilities. A Fatia 8M adiciona solicitação e revisão profissional com CPF protegido e gate próprio; verificação não publica perfil. Documentos, busca, publicação, pagamentos e Pro conservam gates independentes."
+  "notes": "Cadastro, verificação e documentos conservam gates independentes. A Fatia 8N prepara upload privado e configurável por UF, mas não aprova requisitos estaduais nem ativa uploads reais sem scanner, backup/restauração, retenção e privacidade validados. Verificação não publica perfil."
 }

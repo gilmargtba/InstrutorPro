@@ -43,4 +43,6 @@ REAL_STUDENT_REGISTRATION_ENABLED = False
 REAL_INSTRUCTOR_REGISTRATION_ENABLED = False
 REAL_INSTRUCTOR_PUBLICATION_ENABLED = False
 REAL_STUDENT_DEMAND_ENABLED = False
-REAL_DOCUMENT_UPLOAD_ENABLED = False
+# Real ingestion remains disabled by default and additionally requires the capability,
+# mode, scanner, private storage and operational gates.
+REAL_DOCUMENT_UPLOAD_ENABLED = os.getenv("REAL_DOCUMENT_UPLOAD_ENABLED", "false").lower() == "true"

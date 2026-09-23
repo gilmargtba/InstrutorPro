@@ -207,8 +207,24 @@ class InstructorDocumentDownloadView(APIView):
 
     def get(self, request, pk):
         document = get_object_or_404(
-            InstructorDocument.objects.select_related("instructor__person__account"), pk=pk
+            InstructorDocument.objects.select_related(
+                "instructor__person__account", "verification_request"
+            ),
+            pk=pk,
         )
+        if document.data_mode == DataMode.REAL:
+            item = document.verification_request
+            if (
+                document.scan_status != InstructorDocument.ScanStatus.CLEAN
+                or item is None
+                or item.status != item.Status.UNDER_REVIEW
+                or item.reviewer_id != request.user.id
+                or not can_review_document(request.user)
+            ):
+                return Response(
+                    {"code": "forbidden", "detail": "Acesso ao documento negado."},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
         if request.user != document.instructor.person.account and not can_review_document(
             request.user
         ):

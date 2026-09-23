@@ -28,6 +28,14 @@ services:
       retries: 10
     networks: [private]
 
+  clamav:
+    image: clamav/clamav:stable
+    profiles: [document-upload]
+    restart: unless-stopped
+    volumes:
+      - clamav_signatures:/var/lib/clamav
+    networks: [private]
+
   backend:
     build: {context: ./backend}
     restart: unless-stopped
@@ -117,6 +125,7 @@ volumes:
   demo_redis_data:
   demo_static_data:
   demo_private_documents:
+  clamav_signatures:
   demo_celerybeat_data:
   letsencrypt_config:
   letsencrypt_webroot:

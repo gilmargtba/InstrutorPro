@@ -60,9 +60,7 @@ def instructor_registration_mode() -> str:
 
 
 def professional_verification_mode() -> str:
-    return getattr(
-        settings, "PROFESSIONAL_VERIFICATION_MODE", PROFESSIONAL_VERIFICATION_DISABLED
-    )
+    return getattr(settings, "PROFESSIONAL_VERIFICATION_MODE", PROFESSIONAL_VERIFICATION_DISABLED)
 
 
 def enabled(name: str) -> bool:
@@ -103,6 +101,13 @@ def configuration_errors() -> list[str]:
             errors.append("PII_FIELD_ENCRYPTION_KEY_REQUIRED")
         if len(getattr(settings, "PII_FINGERPRINT_KEY", "")) < 32:
             errors.append("PII_FINGERPRINT_KEY_REQUIRED")
+    if configured("REAL_DOCUMENT_UPLOADS"):
+        if getattr(settings, "PROFESSIONAL_DOCUMENT_UPLOAD_MODE", "DISABLED") != "PRODUCTION":
+            errors.append("PROFESSIONAL_DOCUMENT_UPLOAD_MODE_REQUIRED")
+        if not getattr(settings, "REAL_DOCUMENT_UPLOAD_ENABLED", False):
+            errors.append("REAL_DOCUMENT_UPLOAD_ENABLED_REQUIRED")
+        if not getattr(settings, "CLAMD_HOST", ""):
+            errors.append("CLAMD_HOST_REQUIRED")
     if registration_mode == INSTRUCTOR_REGISTRATION_PRODUCTION:
         errors.extend(
             f"{name}_REQUIRED_FOR_INSTRUCTOR_PRODUCTION"

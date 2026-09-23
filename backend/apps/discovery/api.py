@@ -11,6 +11,7 @@ from django.utils import timezone
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import serializers, status
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -23,7 +24,19 @@ from apps.marketplace.analytics import (
     whatsapp_destination,
 )
 from apps.marketplace.capabilities import enabled
-from apps.marketplace.models import DataMode, MarketplaceEvent
+from apps.marketplace.models import (
+    DataMode,
+    DocumentRequirement,
+    InstructorDocument,
+    MarketplaceEvent,
+)
+from apps.marketplace.real_documents import (
+    DocumentUploadError,
+    applicable_requirements,
+    remove_draft_document,
+    upload_available,
+    upload_professional_document,
+)
 from apps.people.identifiers import mask_cpf
 from apps.people.models import Person, RoleAssignment
 
@@ -62,6 +75,7 @@ def _verification_profile(request):
 
 def _verification_payload(profile):
     item = profile.verification_requests.order_by("-created_at").first()
+    documents_enabled = upload_available()
     return {
         "status": item.status if item else ProfessionalVerificationRequest.Status.DRAFT,
         "cpf_masked": mask_cpf(profile.person.cpf_last2),
@@ -69,10 +83,30 @@ def _verification_payload(profile):
         "review_started_at": item.review_started_at if item else None,
         "decided_at": item.decided_at if item else None,
         "message": item.public_message if item else "",
-        "can_edit": not item or item.status in {
+        "can_edit": not item
+        or item.status
+        in {
             ProfessionalVerificationRequest.Status.DRAFT,
             ProfessionalVerificationRequest.Status.REJECTED,
         },
+        "documents_enabled": documents_enabled,
+        "requirements": [
+            {"id": str(row.id), "label": row.label, "required": row.required}
+            for row in applicable_requirements(profile)
+        ]
+        if documents_enabled
+        else [],
+        "documents": [
+            {
+                "id": str(row.id),
+                "requirement_id": str(row.requirement_id),
+                "scan_status": row.scan_status,
+                "status": row.status,
+            }
+            for row in item.documents.filter(data_mode=DataMode.REAL)
+        ]
+        if documents_enabled and item
+        else [],
     }
 
 
@@ -121,6 +155,61 @@ class ProfessionalVerificationSubmitView(APIView):
             raise serializers.ValidationError({"detail": str(exc)}) from exc
         profile.refresh_from_db()
         return Response(_verification_payload(profile), status=201 if created else 200)
+
+
+class ProfessionalVerificationDocumentView(APIView):
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def post(self, request):
+        profile = _verification_profile(request)
+        if not upload_available():
+            raise PermissionDenied("Envio de documentos indisponível.")
+        item = (
+            profile.verification_requests.filter(
+                status=ProfessionalVerificationRequest.Status.DRAFT
+            )
+            .order_by("-created_at")
+            .first()
+        )
+        if item is None:
+            raise serializers.ValidationError({"detail": "Salve o CPF antes de enviar documentos."})
+        try:
+            requirement = DocumentRequirement.objects.get(pk=request.data.get("requirement_id"))
+        except (DocumentRequirement.DoesNotExist, ValueError, TypeError):
+            raise serializers.ValidationError({"requirement_id": "Requisito inválido."}) from None
+        upload = request.FILES.get("file")
+        if upload is None:
+            raise serializers.ValidationError({"file": "Selecione um arquivo."})
+        try:
+            upload_professional_document(
+                actor=request.user,
+                verification_request=item,
+                requirement=requirement,
+                upload=upload,
+                request_id=getattr(request, "request_id", None),
+            )
+        except DocumentUploadError as exc:
+            raise serializers.ValidationError({"file": str(exc)}) from exc
+        return Response(_verification_payload(profile), status=201)
+
+    def delete(self, request, pk):
+        profile = _verification_profile(request)
+        document = get_object_or_404(
+            InstructorDocument,
+            pk=pk,
+            instructor=profile,
+            data_mode=DataMode.REAL,
+        )
+        try:
+            remove_draft_document(
+                actor=request.user,
+                document=document,
+                request_id=getattr(request, "request_id", None),
+            )
+        except DocumentUploadError as exc:
+            raise serializers.ValidationError({"detail": str(exc)}) from exc
+        return Response(status=204)
 
 
 class SearchParameters(serializers.Serializer):

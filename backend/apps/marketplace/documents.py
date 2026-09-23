@@ -136,6 +136,12 @@ def review_document(*, actor, document, decision, reason, source):
     )
     if actor == locked.instructor.person.account:
         raise DocumentPermissionDenied("O titular não pode revisar o próprio documento")
+    if locked.data_mode == DataMode.REAL:
+        item = locked.verification_request
+        if item is None or item.status != item.Status.UNDER_REVIEW or item.reviewer_id != actor.pk:
+            raise DocumentPermissionDenied(
+                "Somente o revisor responsável pode analisar o documento"
+            )
     if locked.status not in {
         InstructorDocument.Status.PENDING,
         InstructorDocument.Status.UNDER_REVIEW,

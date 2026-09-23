@@ -5,6 +5,8 @@ from django.utils import timezone
 
 from apps.audit.models import AuditEvent
 from apps.marketplace.capabilities import enabled
+from apps.marketplace.models import InstructorDocument
+from apps.marketplace.real_documents import applicable_requirements, upload_available
 from apps.people.identifiers import encrypt_identifier, fingerprint_identifier, normalize_cpf
 
 from .models import (
@@ -118,10 +120,36 @@ def submit_verification_request(*, actor, profile, request_id=None):
         raise InvalidWorkflowTransition(
             "Revise e confirme o CPF antes de enviar uma nova solicitação."
         )
+    if upload_available():
+        requirements = list(
+            applicable_requirements(profile).order_by("uf", "category", "document_type")
+        )
+        for requirement in requirements:
+            documents = list(current.documents.filter(requirement=requirement))
+            if requirement.required and not documents:
+                raise InvalidWorkflowTransition(
+                    f"Documento obrigatório pendente: {requirement.label}."
+                )
+            if any(
+                document.scan_status != InstructorDocument.ScanStatus.CLEAN
+                for document in documents
+            ):
+                raise InvalidWorkflowTransition("Aguarde a análise antimalware dos documentos.")
+        current.requirements_snapshot = [
+            {
+                "id": str(requirement.id),
+                "rule_version": requirement.rule_version,
+                "required": requirement.required,
+                "document_type": requirement.document_type,
+            }
+            for requirement in requirements
+        ]
     current.status = ProfessionalVerificationRequest.Status.SUBMITTED
     current.submitted_at = timezone.now()
     with allow_critical_state_mutation():
-        current.save(update_fields=["status", "submitted_at", "updated_at"])
+        current.save(
+            update_fields=["status", "submitted_at", "requirements_snapshot", "updated_at"]
+        )
     _audit(actor, "submitted", current, "OWNER_SUBMITTED", request_id)
     return current, True
 
@@ -168,6 +196,16 @@ def _lock_for_decision(actor, verification_request):
 @transaction.atomic
 def approve_verification_request(*, actor, verification_request, request_id=None):
     item = _lock_for_decision(actor, verification_request)
+    for requirement in item.requirements_snapshot:
+        if (
+            requirement["required"]
+            and not item.documents.filter(
+                requirement_id=requirement["id"],
+                scan_status=InstructorDocument.ScanStatus.CLEAN,
+                status=InstructorDocument.Status.APPROVED,
+            ).exists()
+        ):
+            raise InvalidWorkflowTransition("Documento obrigatório ainda não foi aprovado.")
     if (
         not item.verification_method.strip()
         or not item.verification_source.strip()

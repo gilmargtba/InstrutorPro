@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib import admin
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.html import format_html
 
 from apps.audit.models import AuditEvent
@@ -12,6 +13,7 @@ from .documents import (
     review_profile_photo,
 )
 from .models import (
+    DataMode,
     DocumentRequirement,
     Entitlement,
     InstructorContactChannel,
@@ -54,8 +56,68 @@ class LessonRequestAdmin(admin.ModelAdmin):
 
 @admin.register(DocumentRequirement)
 class DocumentRequirementAdmin(admin.ModelAdmin):
-    list_display = ("label", "uf", "category", "rule_version", "required", "active_from")
+    list_display = (
+        "label",
+        "uf",
+        "category",
+        "rule_version",
+        "required",
+        "active_from",
+        "approval_recorded_at",
+    )
     list_filter = ("uf", "category", "required", "document_type")
+    readonly_fields = ("approval_recorded_at", "approval_recorded_by")
+    actions = ("approve_rules",)
+
+    def has_change_permission(self, request, obj=None):
+        return super().has_change_permission(request, obj) and not (
+            obj and obj.approval_recorded_at
+        )
+
+    def save_model(self, request, obj, form, change):
+        before = None
+        if change:
+            previous = DocumentRequirement.objects.get(pk=obj.pk)
+            before = {
+                "rule_version": previous.rule_version,
+                "required": previous.required,
+                "active_from": previous.active_from.isoformat(),
+            }
+        super().save_model(request, obj, form, change)
+        AuditEvent.objects.create(
+            actor=request.user,
+            action="marketplace.document_requirement.admin_saved",
+            target_type="marketplace.DocumentRequirement",
+            target_id=obj.pk,
+            request_id=getattr(request, "request_id", None),
+            metadata={"before": before, "rule_version": obj.rule_version, "uf": obj.uf},
+        )
+
+    @admin.action(description="Aprovar regras com fonte registrada")
+    def approve_rules(self, request, queryset):
+        if not request.user.can_operate or not request.user.has_perm(
+            "marketplace.change_documentrequirement"
+        ):
+            self.message_user(request, "Permissão insuficiente.", level="error")
+            return
+        count = 0
+        for rule in queryset.filter(approval_recorded_at__isnull=True):
+            if not rule.source_reference.strip():
+                self.message_user(request, "Regra sem fonte não foi aprovada.", level="error")
+                continue
+            rule.approval_recorded_at = timezone.now()
+            rule.approval_recorded_by = request.user
+            rule.save(update_fields=["approval_recorded_at", "approval_recorded_by"])
+            AuditEvent.objects.create(
+                actor=request.user,
+                action="marketplace.document_requirement.approved",
+                target_type="marketplace.DocumentRequirement",
+                target_id=rule.pk,
+                request_id=getattr(request, "request_id", None),
+                metadata={"rule_version": rule.rule_version, "uf": rule.uf},
+            )
+            count += 1
+        self.message_user(request, f"{count} regra(s) aprovada(s).")
 
 
 @admin.register(InstructorDocument)
@@ -84,6 +146,23 @@ class InstructorDocumentAdmin(admin.ModelAdmin):
         "reviewed_at",
     )
     actions = ("approve_selected", "reject_selected")
+
+    def get_readonly_fields(self, request, obj=None):
+        fields = super().get_readonly_fields(request, obj)
+        if obj and obj.data_mode == DataMode.REAL:
+            return tuple(dict.fromkeys((*fields, *(field.name for field in obj._meta.fields))))
+        return fields
+
+    def get_fields(self, request, obj=None):
+        fields = super().get_fields(request, obj)
+        if obj and obj.data_mode == DataMode.REAL:
+            return [field for field in fields if field != "file"]
+        return fields
+
+    def has_delete_permission(self, request, obj=None):
+        return super().has_delete_permission(request, obj) and not (
+            obj and obj.data_mode == DataMode.REAL
+        )
 
     @admin.display(description="Arquivo privado")
     def secure_download(self, obj):

@@ -252,6 +252,7 @@ class ProfessionalVerificationRequest(ProtectedStateModel):
         related_name="decided_professional_verification_requests",
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    requirements_snapshot = models.JSONField(default=list, blank=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
