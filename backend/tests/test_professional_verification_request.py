@@ -80,9 +80,10 @@ def test_owner_submits_cpf_encrypted_and_receives_only_masked_value():
     assert submitted.status_code == 201
     assert repeated.status_code == 200
     assert ProfessionalVerificationRequest.objects.filter(profile=profile).count() == 1
-    assert AuditEvent.objects.filter(
-        action="discovery.professional_verification.submitted"
-    ).count() == 1
+    assert (
+        AuditEvent.objects.filter(action="discovery.professional_verification.submitted").count()
+        == 1
+    )
 
     changed = client.patch(
         "/api/v1/instructor/verification/", {"cpf": "111.444.777-35"}, format="json"
@@ -99,9 +100,12 @@ def test_cpf_is_validated_and_unique_by_blind_index():
     second, _ = instructor("second")
     client = APIClient()
     client.force_authenticate(first)
-    assert client.patch(
-        "/api/v1/instructor/verification/", {"cpf": "52998224725"}, format="json"
-    ).status_code == 200
+    assert (
+        client.patch(
+            "/api/v1/instructor/verification/", {"cpf": "52998224725"}, format="json"
+        ).status_code
+        == 200
+    )
     client.force_authenticate(second)
     duplicate = client.patch(
         "/api/v1/instructor/verification/", {"cpf": "529.982.247-25"}, format="json"
