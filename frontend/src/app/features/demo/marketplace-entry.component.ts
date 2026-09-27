@@ -1,6 +1,6 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
 @Component({
@@ -19,13 +19,43 @@ export class InstructorEntryComponent { accepted=false; }
 
 @Component({
   selector: 'app-login', imports: [FormsModule, RouterLink],
-  template: `<section class="page narrow"><header class="page-head"><div><p class="eyebrow">Acesso</p><h1>Entrar no InstrutorProCNH</h1></div></header><form class="login" (ngSubmit)="submit()"><label>E-mail<input type="email" name="email" [(ngModel)]="email" required></label><label>Senha<input type="password" name="password" [(ngModel)]="password" required></label><button class="button primary" [disabled]="sending">Entrar</button><a routerLink="/recuperar-senha">Esqueci minha senha</a><a routerLink="/cadastro/instrutor">Criar conta de instrutor</a>@if(error){<p>{{error}}</p>}</form></section>`,
+  template: `<section class="page narrow"><header class="page-head"><div><p class="eyebrow">Acesso</p><h1>Entrar no InstrutorProCNH</h1></div></header>
+    <form class="login" #loginForm="ngForm" (ngSubmit)="submit(loginForm)" [attr.aria-busy]="sending()">
+      <label>E-mail<input type="email" name="email" [(ngModel)]="email" autocomplete="username" email required></label>
+      <label>Senha<input type="password" name="password" [(ngModel)]="password" autocomplete="current-password" required></label>
+      @if(error()){<p role="alert">{{error()}}</p>}
+      <button type="submit" class="button primary" [disabled]="sending()">{{sending() ? 'Entrando…' : 'Entrar'}}</button>
+      <a routerLink="/recuperar-senha">Esqueci minha senha</a><a routerLink="/cadastro/instrutor">Criar conta de instrutor</a>
+    </form></section>`,
   styles: [`.login{display:grid;gap:1rem;padding:1.5rem;border:1px solid #d6e5e3;border-radius:1rem;background:#fff}.login label{display:grid;gap:.4rem;font-weight:750}.login input{min-height:3rem;padding:.7rem;border:1px solid #bfd5d2;border-radius:.7rem}.login p{color:#9a302c}`]
 })
 export class LoginComponent {
   private http=inject(HttpClient); private router=inject(Router);
-  email=''; password=''; sending=false; error='';
-  submit(){this.sending=true;this.http.post<{roles:string[];is_staff:boolean}>('/marketplace/session/login/',{email:this.email,password:this.password}).subscribe({next:r=>{this.sending=false;const target=r.is_staff?'/admin/':r.roles.includes('INSTRUCTOR')?'/instrutor':r.roles.includes('STUDENT')?'/aluno/painel':'/';if(target==='/admin/')window.location.assign(target);else void this.router.navigate([target])},error:()=>{this.sending=false;this.error='E-mail ou senha inválidos.'}})}
+  email=''; password=''; sending=signal(false); error=signal('');
+  submit(form: NgForm) {
+    if (this.sending()) return;
+    this.error.set('');
+    if (form.invalid) {
+      this.error.set('Informe um e-mail válido e sua senha.');
+      return;
+    }
+    this.sending.set(true);
+    this.http.post<{roles:string[];is_staff:boolean}>('/marketplace/session/login/', {email:this.email.trim(),password:this.password}).subscribe({
+      next:r=>{
+        this.sending.set(false);
+        const target=r.is_staff?'/admin/':r.roles.includes('INSTRUCTOR')?'/instrutor':r.roles.includes('STUDENT')?'/aluno/painel':'/';
+        if(target==='/admin/')window.location.assign(target);else void this.router.navigate([target]);
+      },
+      error:(failure: HttpErrorResponse)=>{
+        this.sending.set(false);
+        this.error.set(failure.status===400 || failure.status===401
+          ? 'E-mail ou senha inválidos. Confira os dados ou clique em “Esqueci minha senha”.'
+          : failure.status===429
+            ? 'Muitas tentativas de acesso. Aguarde antes de tentar novamente.'
+            : 'Não foi possível entrar agora. Tente novamente em instantes.');
+      },
+    });
+  }
 }
 
 type StudentSession={display_name:string;city:string;uf:string;intended_category:string;preferred_transmission:string;request_count:number;upcoming_lesson_count:number};

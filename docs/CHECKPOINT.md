@@ -1,8 +1,22 @@
 # Checkpoint do Projeto
 
 - Atualizado em: **2026-09-27**
-- Versão documental: **4.7**
+- Versão documental: **4.8**
 - Código-fonte: **Upload privado implantado com flag OFF; homologação técnica parcial por execução assistida**
+
+## Feedback do login público — 27/09/2026
+
+- captura de produção confirmou POST do login com HTTP 400 e resposta genérica
+  `Credenciais inválidas`, sem aviso visível no formulário;
+- login passa a usar signals para feedback assíncrono, exibe aviso acessível com orientação
+  para recuperação, estado `Entrando…`, validação local e bloqueio de envio duplicado;
+- excesso de tentativas e falhas de rede/servidor recebem mensagens próprias e seguras,
+  sem revelar existência/estado da conta nem reproduzir detalhes internos da API;
+- cinco testes DOM no modo zoneless cobrem erro assíncrono, validação, throttling,
+  indisponibilidade, retry e redirecionamento; suíte Angular completa: `41 SUCCESS`;
+  build de produção aprovado com os dois avisos de budget preexistentes;
+- sem alteração de backend, senha, conta, autorização ou migrations. Deploy pendente;
+  recuperação por e-mail continua dependente de SMTP confirmado na VPS.
 
 ## Correções de homologação 8O — 27/09/2026
 

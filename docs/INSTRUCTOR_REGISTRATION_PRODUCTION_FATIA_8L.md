@@ -57,6 +57,12 @@ host e remetente configurados; credenciais permanecem exclusivamente no `.env.pr
 Sem essa configuração, o endpoint de solicitação falha fechado com `503` antes de gerar token,
 evitando que um link de recuperação seja impresso pelo backend de e-mail de console.
 
+O login público exibe feedback reativo e acessível: credenciais inválidas orientam a conferir
+os dados ou usar “Esqueci minha senha”, sem distinguir conta inexistente, bloqueada ou senha
+incorreta. Durante o envio, o botão informa `Entrando…` e impede duplicação; limite de tentativas
+e indisponibilidade recebem avisos seguros separados. A mudança de interface não redefine senhas
+nem comprova configuração SMTP em produção.
+
 O deploy conserva `DEBUG=false`, TLS/cookies seguros, CSRF/CORS/hosts explícitos, PostgreSQL e Redis
 sem portas públicas, secrets fora do Git e allowlist de campos no onboarding. Nenhum endpoint do
 titular aceita estados de verificação/publicação.
