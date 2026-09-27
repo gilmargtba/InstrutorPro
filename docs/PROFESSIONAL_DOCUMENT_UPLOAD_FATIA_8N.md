@@ -16,7 +16,7 @@ Estado em 23/09/2026: código local preparado, **não implantado**. `REAL_DOCUME
 1. Confirmar em ambiente real o volume privado, permissões e bloqueio HTTP direto, inclusive por hostname e IP.
 2. Subir clamd com base de assinaturas atualizada e comprovar health check, detecção EICAR inofensiva, indisponibilidade e recuperação. A imagem foi declarada, mas ainda não homologada na VPS.
 3. Validar backup **e restauração** do volume documental junto do banco. `scripts/backup-production.sh` agora prepara um arquivo TAR privado e checksum, mas não foi executado nem restaurado na VPS; backup na mesma VPS não substitui cópia protegida independente.
-4. Aprovar política jurídica de retenção e descarte. Os campos `retention_expires_at` e `legal_hold` foram criados, mas não existe expurgo automático autorizado; nenhum prazo nacional foi presumido.
+4. Aprovar política jurídica de retenção e descarte. A Fatia 8O acrescenta política versionada, estado de agendamento, tarefa diária e teste de exclusão sintética; sem política de produção aprovada a tarefa não elimina documentos reais. Nenhum prazo nacional foi presumido.
 5. Revisar e aprovar nova versão da Política de Privacidade para explicitar finalidade, acesso, conservação e eliminação dos documentos. Não editar o texto jurídico sem aprovação.
 6. Fazer smoke completo com arquivo não pessoal e confirmar que as regras aprovadas refletem apenas as UFs/categorias cuja fonte foi registrada.
 

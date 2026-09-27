@@ -118,7 +118,11 @@ CELERY_BEAT_SCHEDULE = {
     "marketplace-analytics-retention-daily": {
         "task": "marketplace.enforce_analytics_retention",
         "schedule": 86400.0,
-    }
+    },
+    "professional-document-retention-daily": {
+        "task": "marketplace.enforce_professional_document_retention",
+        "schedule": 86400.0,
+    },
 }
 
 CORS_ALLOWED_ORIGINS = [item for item in os.getenv("CORS_ALLOWED_ORIGINS", "").split(",") if item]

@@ -1,8 +1,25 @@
 # Checkpoint do Projeto
 
-- Atualizado em: **2026-09-23**
-- Versão documental: **4.5**
-- Código-fonte: **Upload documental privado preparado localmente; ativação e deploy pendentes**
+- Atualizado em: **2026-09-27**
+- Versão documental: **4.6**
+- Código-fonte: **Upload privado enviado ao origin; homologação da VPS pendente de acesso SSH**
+
+## Fatia 8O — homologação técnica em andamento (23/09/2026)
+
+- commit `12eb56a` enviado a `origin/main`; CI inicial apontou somente formatação antiga; o commit
+  `df6532d` corrigiu a formatação e adicionou Angular tests ao CI; backend e frontend passaram;
+- SSH de linha de comando reconheceu a chave de host, mas a VPS recusou autenticação por chave;
+  backup, pull, migrations, ClamAV, EICAR, restore e smoke não foram executados na VPS;
+- engine de retenção local agora exige política versionada, ativa e aprovada, suporta agendamento
+  e legal hold e mantém descarte real inerte na ausência de política de produção; três testes com
+  dados técnicos/sintéticos passaram, incluindo falha de storage e retry, além de 253 testes
+  backend completos em 27/09; Ruff, Django check e migration check passaram;
+- operações POST/DELETE de documentos separadas para eliminar colisões de operationId; a geração
+  OpenAPI ainda apresenta erros preexistentes em outras APIs, sem afirmar contrato global limpo;
+- autenticação SSH por chave novamente recusada em 27/09; deploy continua não executado.
+- rascunho técnico para revisão jurídica em
+  `docs/PRIVACY_PROFESSIONAL_DOCUMENTS_REVIEW_DRAFT.md`; nenhuma Política publicada mudou;
+- `REAL_DOCUMENT_UPLOADS=false` permanece obrigatório até o relatório final de homologação.
 
 ## Fatia 8N — upload documental profissional (23/09/2026)
 

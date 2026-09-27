@@ -381,6 +381,10 @@ class InstructorDocument(models.Model):
         CLEAN = "CLEAN", "Arquivo analisado"
         BLOCKED = "BLOCKED", "Bloqueado"
 
+    class RetentionStatus(models.TextChoices):
+        POLICY_PENDING = "POLICY_PENDING", "Política pendente"
+        SCHEDULED = "SCHEDULED", "Descarte agendado"
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     instructor = models.ForeignKey(
         "discovery.InstructorProfile", on_delete=models.PROTECT, related_name="documents"
@@ -423,6 +427,14 @@ class InstructorDocument(models.Model):
     uploaded_at = models.DateTimeField(auto_now_add=True)
     scanned_at = models.DateTimeField(null=True, blank=True)
     retention_expires_at = models.DateTimeField(null=True, blank=True)
+    retention_status = models.CharField(
+        max_length=20,
+        choices=RetentionStatus.choices,
+        default=RetentionStatus.POLICY_PENDING,
+    )
+    retention_policy = models.ForeignKey(
+        "DocumentRetentionPolicy", on_delete=models.PROTECT, null=True, blank=True
+    )
     legal_hold = models.BooleanField(default=False)
     reviewed_by = models.ForeignKey(
         "accounts.Account",
@@ -448,6 +460,39 @@ class InstructorDocument(models.Model):
                 | Q(valid_until__gte=models.F("issued_at")),
                 name="ck_instructor_document_dates",
             )
+        ]
+
+
+class DocumentRetentionPolicy(models.Model):
+    class Scope(models.TextChoices):
+        TEST = "TEST", "Teste técnico"
+        PRODUCTION = "PRODUCTION", "Produção"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    scope = models.CharField(max_length=16, choices=Scope.choices)
+    rule_version = models.CharField(max_length=40)
+    retention_days = models.PositiveIntegerField()
+    source_reference = models.CharField(max_length=240)
+    approved_at = models.DateTimeField(null=True, blank=True)
+    approved_by = models.ForeignKey(
+        "accounts.Account", on_delete=models.PROTECT, null=True, blank=True
+    )
+    active = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "política de retenção documental"
+        verbose_name_plural = "políticas de retenção documental"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["scope"],
+                condition=Q(active=True),
+                name="uq_active_document_retention_policy_scope",
+            ),
+            models.CheckConstraint(
+                condition=Q(retention_days__gte=1),
+                name="ck_document_retention_days_positive",
+            ),
         ]
 
 

@@ -1,6 +1,6 @@
 {
   "package": "instrutorpro-documentation",
-  "version": "3.25",
+  "version": "3.26",
   "reviewed_on": "2026-09-23",
   "path_base": "repository-root",
   "normative_documents": [
@@ -49,6 +49,7 @@
     "docs/INSTRUCTOR_REGISTRATION_PRODUCTION_FATIA_8L.md",
     "docs/PROFESSIONAL_VERIFICATION_FATIA_8M.md",
     "docs/PROFESSIONAL_DOCUMENT_UPLOAD_FATIA_8N.md",
+    "docs/PRIVACY_PROFESSIONAL_DOCUMENTS_REVIEW_DRAFT.md",
     "docs/PAYMENT_PROVIDER_REQUIREMENTS.md",
     "docs/PAYMENT_GATEWAY_SETUP.md"
   ],

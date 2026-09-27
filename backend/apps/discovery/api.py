@@ -8,6 +8,7 @@ from django.db.models import Q
 from django.http import FileResponse, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import serializers, status
 from rest_framework.exceptions import PermissionDenied
@@ -161,6 +162,7 @@ class ProfessionalVerificationDocumentView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
 
+    @extend_schema(request=OpenApiTypes.OBJECT, responses={201: OpenApiTypes.OBJECT})
     def post(self, request):
         profile = _verification_profile(request)
         if not upload_available():
@@ -193,6 +195,11 @@ class ProfessionalVerificationDocumentView(APIView):
             raise serializers.ValidationError({"file": str(exc)}) from exc
         return Response(_verification_payload(profile), status=201)
 
+
+class ProfessionalVerificationDocumentRemoveView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(responses={204: None})
     def delete(self, request, pk):
         profile = _verification_profile(request)
         document = get_object_or_404(

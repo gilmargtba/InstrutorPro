@@ -16,6 +16,7 @@ from apps.discovery.models import InstructorServiceArea, ProfessionalVerificatio
 
 from .capabilities import enabled
 from .models import DataMode, DocumentRequirement, InstructorDocument
+from .professional_retention import schedule_document_retention
 
 
 class DocumentUploadError(ValueError):
@@ -160,6 +161,7 @@ def upload_professional_document(
             data_mode=DataMode.REAL,
             **metadata,
         )
+        schedule_document_retention(document)
         _audit(actor, document, "uploaded", request_id)
         _audit(None, document, "scan_started", request_id)
     try:

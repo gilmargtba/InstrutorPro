@@ -8,6 +8,7 @@ from .api import (
     InstructorSearchView,
     InstructorStateSummaryView,
     MapTileView,
+    ProfessionalVerificationDocumentRemoveView,
     ProfessionalVerificationDocumentView,
     ProfessionalVerificationRequestView,
     ProfessionalVerificationSubmitView,
@@ -24,7 +25,7 @@ urlpatterns = [
     ),
     path(
         "instructor/verification/documents/<uuid:pk>/",
-        ProfessionalVerificationDocumentView.as_view(),
+        ProfessionalVerificationDocumentRemoveView.as_view(),
         name="professional-verification-document-remove",
     ),
     path(
