@@ -34,6 +34,37 @@ PDF = b"%PDF-1.4\nTechnical upload smoke only\n%%EOF"
 UFS = "AC AL AP AM BA CE DF ES GO MA MT MS MG PA PB PR PE PI RJ RN RS RO RR SC SP SE TO".split()
 
 
+def embedded_eicar_pdf():
+    """A valid PDF with EICAR in an embedded file, so ClamAV parses the attachment."""
+    objects = [
+        b"<< /Type /Catalog /Pages 2 0 R /Names << /EmbeddedFiles "
+        b"<< /Names [(eicar.txt) 5 0 R] >> >> /AF [5 0 R] >>",
+        b"<< /Type /Pages /Count 1 /Kids [3 0 R] >>",
+        b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 100 100] /Contents 4 0 R /Resources << >> >>",
+        b"<< /Length 0 >>\nstream\n\nendstream",
+        b"<< /Type /Filespec /F (eicar.txt) /UF (eicar.txt) "
+        b"/EF << /F 6 0 R >> /AFRelationship /Data >>",
+        b"<< /Type /EmbeddedFile /Length "
+        + str(len(EICAR)).encode()
+        + b" >>\nstream\n"
+        + EICAR
+        + b"\nendstream",
+    ]
+    pdf = bytearray(b"%PDF-1.7\n%\xe2\xe3\xcf\xd3\n")
+    offsets = [0]
+    for number, body in enumerate(objects, 1):
+        offsets.append(len(pdf))
+        pdf.extend(f"{number} 0 obj\n".encode() + body + b"\nendobj\n")
+    xref = len(pdf)
+    pdf.extend(f"xref\n0 {len(offsets)}\n0000000000 65535 f \n".encode())
+    for offset in offsets[1:]:
+        pdf.extend(f"{offset:010d} 00000 n \n".encode())
+    pdf.extend(
+        f"trailer\n<< /Size {len(offsets)} /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n".encode()
+    )
+    return bytes(pdf)
+
+
 def sample(content=PDF, name="technical.pdf", mime="application/pdf"):
     return SimpleUploadedFile(name, content, content_type=mime)
 
@@ -227,10 +258,7 @@ class Command(BaseCommand):
             hashlib.sha256(restored.read_bytes()).hexdigest() == clean.sha256,
             "Restore hash differs",
         )
-        expect(
-            upload(b"%PDF-1.4\n" + EICAR).status_code == 201,
-            "EICAR pipeline rejected before scanner",
-        )
+        expect(upload(embedded_eicar_pdf()).status_code == 201, "EICAR PDF ingestion failed")
         blocked = item.documents.get(scan_status="BLOCKED")
         # on_commit deletion is intentionally deferred by this rollback-only smoke.
         expect(blocked.file.name.startswith("quarantine/"), "Blocked evidence was promoted")

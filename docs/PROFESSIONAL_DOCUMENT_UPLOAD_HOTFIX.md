@@ -55,6 +55,14 @@ diretório temporário exclusivo dentro do volume privado, removido ao concluir 
 O comando não altera flags persistentes e não toca em documentos existentes.
 O teste de frescor é técnico (assinaturas carregadas com menos de 48 h), não regra legal.
 
+Na primeira execução assistida, o smoke parou antes de ativar as flags: o teste usava
+EICAR apenas concatenado a um cabeçalho `%PDF`, que o ClamAV considerou limpo.
+O diagnóstico na VPS confirmou EICAR puro `BLOCKED`, mas os prefixos PDF/JPEG
+artificiais `CLEAN`. Um PDF com EICAR como anexo interno retornou `BLOCKED` no
+scanner real. O smoke agora usa esse PDF com catálogo, objeto incorporado e xref
+válidos; mantém a exigência de bloqueio pelo pipeline completo. Não se alterou a
+política do scanner nem se dispensou a verificação de vírus.
+
 O script liga apenas `REAL_DOCUMENT_UPLOADS=true`, `REAL_DOCUMENT_UPLOAD_ENABLED=true`
 e `PROFESSIONAL_DOCUMENT_UPLOAD_MODE=PRODUCTION` depois do PASS técnico. Se falhar após
 ativação, restaura a configuração anterior e recria backend/worker/scheduler; mantém

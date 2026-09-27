@@ -1,7 +1,7 @@
 # Checkpoint do Projeto
 
 - Atualizado em: **2026-09-27**
-- Versão documental: **4.9**
+- Versão documental: **4.10**
 - Código-fonte: **Upload privado implantado com flag OFF; homologação técnica parcial por execução assistida**
 
 ## Hotfix de upload voluntário — 27/09/2026
@@ -17,7 +17,11 @@
   sintaxe shell aprovados. OpenAPI gera saída válida, mas reporta 24 rotas com serializers
   ausentes preexistentes fora do hotfix; não declarar documentação global sem pendências.
 - Script de deploy com backup, smoke real, ativação condicional e restauração de flags em falha.
-  SSH automático indisponível; produção NÃO ativada nesta execução local. Execução na VPS pendente.
+  SSH automático indisponível. A primeira execução assistida na VPS parou no smoke antes
+  da ativação: EICAR concatenado a um cabeçalho PDF artificial não foi detectado.
+  Diagnóstico em memória confirmou que PDF com anexo EICAR real é `BLOCKED`;
+  fixture do smoke corrigida para esse formato. Flags de produção continuam OFF;
+  repetir o deploy/smoke completo após publicar esta correção.
 
 ## Feedback do login público — 27/09/2026
 
