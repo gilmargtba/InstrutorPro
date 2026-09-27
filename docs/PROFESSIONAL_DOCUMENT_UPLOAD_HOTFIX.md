@@ -71,8 +71,12 @@ flags e recriar esses serviços, sem desfazer migration que já tenha documentos
 
 ## Estado verificável da entrega
 
-Validação local não equivale a homologação da VPS. A execução assistida deve fornecer
-`DOCUMENT_TECHNICAL_SMOKE=PASS` e `DOCUMENT_UPLOAD_PRODUCTION_STATUS=ENABLED`.
-Até esse retorno, produção permanece OFF / deploy pendente.
+Na execução assistida da VPS em 27/09/2026, o commit `0c51b99` produziu
+`DOCUMENT_TECHNICAL_SMOKE=PASS` antes e depois de ligar as flags, readiness
+`status=ok` com banco `up` e `DOCUMENT_UPLOAD_PRODUCTION_STATUS=ENABLED`.
+Os controles de storage privado, EICAR, fail-closed, autorização, IDOR e
+backup/restauração técnica isolada passaram. Verificação e publicação automáticas
+permanecem desligadas. O teste usa dados sintéticos com rollback e não substitui
+um teste manual do fluxo de um instrutor real no navegador.
 Revisão de privacidade e política de retenção de produção: **PENDING**, não PASS.
 Requisitos estaduais aprovados observados na última consulta: **0 UFs**.

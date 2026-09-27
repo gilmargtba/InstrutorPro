@@ -1,8 +1,8 @@
 # Checkpoint do Projeto
 
 - Atualizado em: **2026-09-27**
-- Versão documental: **4.10**
-- Código-fonte: **Upload privado implantado com flag OFF; homologação técnica parcial por execução assistida**
+- Versão documental: **4.11**
+- Código-fonte: **Upload privado voluntário ativado na VPS; smoke técnico completo aprovado**
 
 ## Hotfix de upload voluntário — 27/09/2026
 
@@ -20,8 +20,12 @@
   SSH automático indisponível. A primeira execução assistida na VPS parou no smoke antes
   da ativação: EICAR concatenado a um cabeçalho PDF artificial não foi detectado.
   Diagnóstico em memória confirmou que PDF com anexo EICAR real é `BLOCKED`;
-  fixture do smoke corrigida para esse formato. Flags de produção continuam OFF;
-  repetir o deploy/smoke completo após publicar esta correção.
+  fixture do smoke corrigida para esse formato. Reexecução assistida do commit
+  `0c51b99638323efe888ec7de5093643a05834273` passou nos controles de
+  storage privado, scanner, formatos, autorização, IDOR, backup/restauração isolada
+  e limpeza técnica. Readiness retornou `status=ok`, banco `up`, e o script encerrou
+  com `DOCUMENT_UPLOAD_PRODUCTION_STATUS=ENABLED`. Verificação e publicação
+  automáticas continuam desligadas. Não houve aprovação de retenção/privacidade.
 
 ## Feedback do login público — 27/09/2026
 
