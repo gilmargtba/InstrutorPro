@@ -369,6 +369,11 @@ class DocumentRequirement(models.Model):
 
 
 class InstructorDocument(models.Model):
+    class DocumentType(models.TextChoices):
+        PROFESSIONAL_CREDENTIAL = "PROFESSIONAL_CREDENTIAL", "Credencial profissional"
+        PROFESSIONAL_CERTIFICATE = "PROFESSIONAL_CERTIFICATE", "Certificado/credenciamento"
+        OTHER_PROFESSIONAL = "OTHER_PROFESSIONAL", "Outro documento profissional"
+
     class Status(models.TextChoices):
         PENDING = "PENDING", "Pendente"
         UNDER_REVIEW = "UNDER_REVIEW", "Em análise"
@@ -397,8 +402,18 @@ class InstructorDocument(models.Model):
         related_name="documents",
     )
     requirement = models.ForeignKey(
-        DocumentRequirement, on_delete=models.PROTECT, related_name="documents"
+        DocumentRequirement,
+        on_delete=models.PROTECT,
+        related_name="documents",
+        null=True,
+        blank=True,
     )
+    document_type = models.CharField(max_length=32, choices=DocumentType.choices, blank=True)
+
+    @property
+    def document_label(self):
+        return self.requirement.label if self.requirement_id else self.get_document_type_display()
+
     verification_request = models.ForeignKey(
         "discovery.ProfessionalVerificationRequest",
         on_delete=models.PROTECT,
@@ -459,7 +474,19 @@ class InstructorDocument(models.Model):
                 | Q(issued_at__isnull=True)
                 | Q(valid_until__gte=models.F("issued_at")),
                 name="ck_instructor_document_dates",
-            )
+            ),
+            models.CheckConstraint(
+                condition=Q(requirement__isnull=False)
+                | Q(
+                    document_type__in=[
+                        "PROFESSIONAL_CREDENTIAL",
+                        "PROFESSIONAL_CERTIFICATE",
+                        "OTHER_PROFESSIONAL",
+                    ],
+                    verification_request__isnull=False,
+                ),
+                name="ck_document_requirement_or_generic",
+            ),
         ]
 
 

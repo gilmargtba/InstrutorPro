@@ -31,6 +31,85 @@ ENABLED = {
 }
 
 
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "uf", "AC AL AP AM BA CE DF ES GO MA MT MS MG PA PB PR PE PI RJ RN RS RO RR SC SP SE TO".split()
+)
+@override_settings(**{**ENABLED, "REAL_PRODUCTION_AUTHORIZATION": "NOT_GRANTED"})
+def test_generic_upload_with_zero_approved_requirements_in_every_uf(tmp_path, uf):
+    with override_settings(MEDIA_ROOT=tmp_path):
+        owner, instructor = profile("generic-owner")
+        InstructorServiceArea.objects.filter(profile=instructor).update(uf=uf)
+        save_verification_draft(actor=owner, profile=instructor, cpf="52998224725")
+        client = APIClient()
+        client.force_authenticate(owner)
+        state = client.get("/api/v1/instructor/verification/").json()
+        assert state["document_upload_available"] is True
+        assert state["requirements"] == []
+        with patch("apps.marketplace.real_documents.scan_with_clamd", return_value="CLEAN"):
+            response = client.post(
+                "/api/v1/instructor/verification/documents/",
+                {
+                    "document_type": "PROFESSIONAL_CREDENTIAL",
+                    "file": sample_file(),
+                },
+                format="multipart",
+            )
+        assert response.status_code == 201
+        document = InstructorDocument.objects.get()
+        assert document.requirement_id is None
+        assert document.retention_status == "POLICY_PENDING"
+        assert document.file.name.startswith("professional-documents/")
+        assert response.json()["documents"][0]["label"] == "Credencial profissional"
+        assert (
+            client.post("/api/v1/instructor/verification/submit/", {}, format="json").status_code
+            == 201
+        )
+        instructor.refresh_from_db()
+        assert instructor.verification_status != "VERIFIED"
+        assert instructor.publication_status == "UNPUBLISHED"
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("scan_result", ["PENDING", "BLOCKED"])
+@override_settings(**ENABLED)
+def test_generic_nonclean_file_cannot_accompany_submission(tmp_path, scan_result):
+    with override_settings(MEDIA_ROOT=tmp_path):
+        owner, instructor = profile("generic-nonclean")
+        save_verification_draft(actor=owner, profile=instructor, cpf="52998224725")
+        client = APIClient()
+        client.force_authenticate(owner)
+        kwargs = (
+            {"side_effect": DocumentUploadError()}
+            if scan_result == "PENDING"
+            else {"return_value": scan_result}
+        )
+        with patch("apps.marketplace.real_documents.scan_with_clamd", **kwargs):
+            assert (
+                client.post(
+                    "/api/v1/instructor/verification/documents/",
+                    {
+                        "document_type": "OTHER_PROFESSIONAL",
+                        "file": sample_file(),
+                    },
+                    format="multipart",
+                ).status_code
+                == 201
+            )
+        assert (
+            client.post("/api/v1/instructor/verification/submit/", {}, format="json").status_code
+            == 400
+        )
+        document = InstructorDocument.objects.get()
+        assert document.scan_status == scan_result
+        assert (
+            client.get(
+                f"/api/v1/marketplace/instructor-documents/{document.pk}/download/"
+            ).status_code
+            == 403
+        )
+
+
 def profile(username):
     account = Account.objects.create_user(
         username=username, email=f"{username}@example.invalid", password="test-password-123"

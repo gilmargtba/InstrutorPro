@@ -7,6 +7,7 @@ from django.urls import path, reverse
 from django.utils.html import escape, format_html
 
 from apps.audit.models import AuditEvent
+from apps.marketplace.models import InstructorDocument
 from apps.people.identifiers import decrypt_identifier, mask_cpf
 
 from .models import (
@@ -149,8 +150,61 @@ class InstructorServiceAreaAdmin(admin.ModelAdmin):
     readonly_fields = ("location_authorized",)
 
 
+class SubmittedDocumentInline(admin.TabularInline):
+    model = InstructorDocument
+    fk_name = "verification_request"
+    verbose_name_plural = "Documentos enviados"
+    fields = (
+        "document_label",
+        "original_name",
+        "uploaded_at",
+        "security_status",
+        "authorized_view",
+    )
+    readonly_fields = fields
+    extra = 0
+
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        if not request.user.can_operate or not request.user.has_perm(
+            "marketplace.review_instructor_document"
+        ):
+            return queryset.none()
+        return queryset.filter(
+            verification_request__reviewer=request.user,
+            verification_request__status=ProfessionalVerificationRequest.Status.UNDER_REVIEW,
+            scan_status=InstructorDocument.ScanStatus.CLEAN,
+        ).select_related("requirement")
+
+    @admin.display(description="Segurança")
+    def security_status(self, obj):
+        return "Pronto"
+
+    @admin.display(description="Arquivo privado")
+    def authorized_view(self, obj):
+        return format_html(
+            '<a href="{}">Visualizar com autorização e auditoria</a>',
+            reverse("instructor-document-download", kwargs={"pk": obj.pk}),
+        )
+
+    def has_view_permission(self, request, obj=None):
+        return request.user.can_operate and request.user.has_perm(
+            "marketplace.review_instructor_document"
+        )
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
 @admin.register(ProfessionalVerificationRequest)
 class ProfessionalVerificationRequestAdmin(admin.ModelAdmin):
+    inlines = (SubmittedDocumentInline,)
     list_display = (
         "instructor_name",
         "service_uf",

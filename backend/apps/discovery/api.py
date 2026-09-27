@@ -66,6 +66,14 @@ class ProfessionalVerificationRequestInput(serializers.Serializer):
     cpf = serializers.CharField(min_length=11, max_length=14, write_only=True)
 
 
+class ProfessionalDocumentInput(serializers.Serializer):
+    file = serializers.FileField(write_only=True)
+    requirement_id = serializers.UUIDField(required=False)
+    document_type = serializers.ChoiceField(
+        choices=InstructorDocument.DocumentType.choices, required=False
+    )
+
+
 def _verification_profile(request):
     return get_object_or_404(
         InstructorProfile.objects.select_related("person__account"),
@@ -91,6 +99,13 @@ def _verification_payload(profile):
             ProfessionalVerificationRequest.Status.REJECTED,
         },
         "documents_enabled": documents_enabled,
+        "document_upload_available": documents_enabled,
+        "document_types": [
+            {"value": value, "label": label}
+            for value, label in InstructorDocument.DocumentType.choices
+        ]
+        if documents_enabled
+        else [],
         "requirements": [
             {"id": str(row.id), "label": row.label, "required": row.required}
             for row in applicable_requirements(profile)
@@ -100,11 +115,15 @@ def _verification_payload(profile):
         "documents": [
             {
                 "id": str(row.id),
-                "requirement_id": str(row.requirement_id),
+                "requirement_id": str(row.requirement_id) if row.requirement_id else None,
+                "document_type": row.document_type,
+                "label": row.document_label,
+                "original_name": row.original_name,
+                "uploaded_at": row.uploaded_at,
                 "scan_status": row.scan_status,
                 "status": row.status,
             }
-            for row in item.documents.filter(data_mode=DataMode.REAL)
+            for row in item.documents.filter(data_mode=DataMode.REAL).select_related("requirement")
         ]
         if documents_enabled and item
         else [],
@@ -162,7 +181,7 @@ class ProfessionalVerificationDocumentView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
 
-    @extend_schema(request=OpenApiTypes.OBJECT, responses={201: OpenApiTypes.OBJECT})
+    @extend_schema(request=ProfessionalDocumentInput, responses={201: OpenApiTypes.OBJECT})
     def post(self, request):
         profile = _verification_profile(request)
         if not upload_available():
@@ -176,18 +195,24 @@ class ProfessionalVerificationDocumentView(APIView):
         )
         if item is None:
             raise serializers.ValidationError({"detail": "Salve o CPF antes de enviar documentos."})
-        try:
-            requirement = DocumentRequirement.objects.get(pk=request.data.get("requirement_id"))
-        except (DocumentRequirement.DoesNotExist, ValueError, TypeError):
-            raise serializers.ValidationError({"requirement_id": "Requisito inválido."}) from None
-        upload = request.FILES.get("file")
-        if upload is None:
-            raise serializers.ValidationError({"file": "Selecione um arquivo."})
+        serializer = ProfessionalDocumentInput(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        requirement = None
+        if data.get("requirement_id"):
+            try:
+                requirement = DocumentRequirement.objects.get(pk=data["requirement_id"])
+            except (DocumentRequirement.DoesNotExist, ValueError, TypeError):
+                raise serializers.ValidationError(
+                    {"requirement_id": "Requisito inválido."}
+                ) from None
+        upload = data["file"]
         try:
             upload_professional_document(
                 actor=request.user,
                 verification_request=item,
                 requirement=requirement,
+                document_type=data.get("document_type", ""),
                 upload=upload,
                 request_id=getattr(request, "request_id", None),
             )
@@ -422,7 +447,9 @@ class InstructorSearchView(APIView):
             scan_status=InstructorDocument.ScanStatus.CLEAN,
         ).filter(Q(valid_until__isnull=True) | Q(valid_until__gte=timezone.localdate()))
         approved = approved.select_related("requirement")
-        types = {document.requirement.document_type for document in approved}
+        types = {
+            document.requirement.document_type for document in approved if document.requirement_id
+        }
         if DocumentRequirement.DocumentType.INSTRUCTOR_AUTHORIZATION in types:
             claims.append("CREDENTIAL_VERIFIED")
         if DocumentRequirement.DocumentType.INSTRUCTOR_COURSE in types:

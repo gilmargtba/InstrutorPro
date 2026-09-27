@@ -1,7 +1,7 @@
 {
   "package": "instrutorpro-documentation",
-  "version": "3.26",
-  "reviewed_on": "2026-09-23",
+  "version": "3.27",
+  "reviewed_on": "2026-09-27",
   "path_base": "repository-root",
   "normative_documents": [
     "README.md",
@@ -49,6 +49,7 @@
     "docs/INSTRUCTOR_REGISTRATION_PRODUCTION_FATIA_8L.md",
     "docs/PROFESSIONAL_VERIFICATION_FATIA_8M.md",
     "docs/PROFESSIONAL_DOCUMENT_UPLOAD_FATIA_8N.md",
+    "docs/PROFESSIONAL_DOCUMENT_UPLOAD_HOTFIX.md",
     "docs/PRIVACY_PROFESSIONAL_DOCUMENTS_REVIEW_DRAFT.md",
     "docs/PAYMENT_PROVIDER_REQUIREMENTS.md",
     "docs/PAYMENT_GATEWAY_SETUP.md"
@@ -98,5 +99,5 @@
     "INSTRUCTOR_CANDIDATE",
     "INSTRUCTOR_ACADEMY"
   ],
-  "notes": "Cadastro, verificação e documentos conservam gates independentes. A Fatia 8N prepara upload privado e configurável por UF, mas não aprova requisitos estaduais nem ativa uploads reais sem scanner, backup/restauração, retenção e privacidade validados. Verificação não publica perfil."
+  "notes": "Decisão expressa de 27/09 permite upload voluntário nas 27 UFs sem lista estadual aprovada. Ativação depende dos controles técnicos reais; retenção e privacidade pendentes não são declaradas aprovadas. Cadastro, upload, verificação e publicação conservam gates independentes."
 }

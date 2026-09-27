@@ -135,7 +135,7 @@ def _audit(actor, document, action, request_id=None):
 
 
 def upload_professional_document(
-    *, actor, verification_request, requirement, upload, request_id=None
+    *, actor, verification_request, upload, requirement=None, document_type="", request_id=None
 ):
     if not upload_available():
         raise DocumentUploadError("Envio de documentos indisponível.")
@@ -148,14 +148,22 @@ def upload_professional_document(
         )
         if actor != item.profile.person.account or item.status != item.Status.DRAFT:
             raise DocumentUploadError("Somente o titular pode enviar durante o rascunho.")
-        if not applicable_requirements(item.profile).filter(pk=requirement.pk).exists():
+        if requirement is None and document_type not in InstructorDocument.DocumentType.values:
+            raise DocumentUploadError("Selecione um tipo de documento profissional válido.")
+        if requirement is not None and document_type:
+            raise DocumentUploadError("Informe um requisito ou um tipo voluntário, não ambos.")
+        if (
+            requirement is not None
+            and not applicable_requirements(item.profile).filter(pk=requirement.pk).exists()
+        ):
             raise DocumentUploadError("Documento não solicitado para esta configuração.")
-        if item.documents.filter(requirement=requirement).exists():
+        if requirement is not None and item.documents.filter(requirement=requirement).exists():
             raise DocumentUploadError("Remova o documento anterior antes de substituí-lo.")
         document = InstructorDocument.objects.create(
             instructor=item.profile,
             verification_request=item,
             requirement=requirement,
+            document_type=document_type,
             file=upload,
             size_bytes=upload.size,
             data_mode=DataMode.REAL,

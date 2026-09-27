@@ -120,6 +120,10 @@ def submit_verification_request(*, actor, profile, request_id=None):
         raise InvalidWorkflowTransition(
             "Revise e confirme o CPF antes de enviar uma nova solicitação."
         )
+    if current.documents.exclude(scan_status=InstructorDocument.ScanStatus.CLEAN).exists():
+        raise InvalidWorkflowTransition(
+            "Aguarde a verificação de segurança ou remova arquivos recusados."
+        )
     if upload_available():
         requirements = list(
             applicable_requirements(profile).order_by("uf", "category", "document_type")

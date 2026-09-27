@@ -1,5 +1,9 @@
 # Fatia 8N — documentos profissionais privados (pré-ativação)
 
+Atualização de 27/09/2026: os gates anteriores de lista territorial, retenção e
+privacidade para ativar upload voluntário foram substituídos pela autorização expressa
+em `PROFESSIONAL_DOCUMENT_UPLOAD_HOTFIX.md`. Pendências jurídicas continuam abertas.
+
 Estado em 27/09/2026: código implantado com flag OFF, homologação parcial por execução assistida do proprietário. `REAL_DOCUMENT_UPLOADS=false` em produção. Esta fatia não aprova regra documental de qualquer Detran e não altera a separação entre verificação e publicação. Evidências e pendências atuais no checkpoint.
 
 ## Fluxo implementado

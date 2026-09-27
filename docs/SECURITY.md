@@ -1,5 +1,16 @@
 # Segurança
 
+## Upload voluntário — 27/09/2026
+
+Modo documental PRODUCTION concede somente a capacidade documental expressamente
+autorizada, sem ampliar o gate global. Documentos genéricos não substituem requisitos
+legítimos e nunca geram claims oficiais. PENDING/BLOCKED bloqueiam submissão mesmo com
+flag OFF. Admin lista/download usa CLEAN, solicitação UNDER_REVIEW, revisor responsável
+e permissão explícita; anexo não publica nem verifica automaticamente.
+Retenção e revisão de privacidade permanecem PENDING quando não aprovadas;
+o proprietário retirou essas pendências do gate operacional, não as marcou aprovadas.
+Ativação exige smoke técnico real conforme `PROFESSIONAL_DOCUMENT_UPLOAD_HOTFIX.md`.
+
 ## CODEX 02D
 
 O Admin exige staff e permissões explícitas; aprovar/suspender chama serviço transacional auditado. Nenhum endpoint administrativo público foi criado.

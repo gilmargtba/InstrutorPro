@@ -12,8 +12,10 @@ type VerificationState = {
   message: string;
   can_edit: boolean;
   documents_enabled?: boolean;
+  document_upload_available?: boolean;
+  document_types?: {value:string;label:string}[];
   requirements?: {id:string;label:string;required:boolean}[];
-  documents?: {id:string;requirement_id:string;scan_status:string;status:string}[];
+  documents?: {id:string;requirement_id:string|null;scan_status:string;status:string;label:string;original_name:string}[];
 };
 
 @Component({
@@ -30,20 +32,34 @@ type VerificationState = {
           <form (ngSubmit)="submit()">
             <h3>1. Identificação privada</h3>
             <label>CPF
-              <input name="cpf" inputmode="numeric" autocomplete="off" maxlength="14" [(ngModel)]="cpf" (ngModelChange)="formatCpf()" placeholder="000.000.000-00" required>
+              <input name="cpf" inputmode="numeric" autocomplete="off" maxlength="14" [(ngModel)]="cpf" (ngModelChange)="formatCpf()" placeholder="000.000.000-00" [required]="!current.cpf_masked">
             </label>
             <p class="privacy">O CPF será usado exclusivamente para identificação e verificação profissional. Ele não será exibido no perfil público.</p>
             <h3>2. Dados profissionais</h3>
             <p>Os dados profissionais são os informados em <a routerLink="/profissional/instrutor/onboarding">Editar perfil</a>.</p>
-            @if(current.documents_enabled){
-              <h3>3. Documentos solicitados para sua UF e categoria</h3>
-              @if(!current.requirements?.length){<p>Nenhum documento foi configurado para esta solicitação. Não envie documentos desnecessários.</p>}
+            @if(current.document_upload_available || current.documents_enabled){
+              <h3>3. Documentos profissionais</h3>
+              <p>Envie documentos profissionais que ajudem na análise da sua solicitação de verificação.</p>
+              <p>Os anexos voluntários não são uma lista de exigências oficiais e não aprovam o cadastro automaticamente.</p>
+              <label>Tipo de documento
+                <select name="documentType" [(ngModel)]="documentType">
+                  @for(type of current.document_types || []; track type.value){<option [value]="type.value">{{type.label}}</option>}
+                </select>
+              </label>
+              <input #genericFile type="file" hidden accept=".pdf,.jpg,.jpeg,.png" (change)="uploadDocument(null,$event)">
+              <button type="button" [disabled]="sending || !current.cpf_masked" (click)="genericFile.click()">Adicionar documento</button>
+              @if(sending){<p role="status">Enviando e verificando segurança…</p>}
+              @for(document of current.documents || []; track document.id){
+                <div class="document-row"><strong>{{document.label}}</strong><span>{{document.original_name}}</span>
+                  <span role="status">{{securityLabel(document.scan_status)}}</span>
+                  <button type="button" [disabled]="sending" (click)="removeDocument(document.id)">Remover</button>
+                </div>
+              }
               @for(requirement of current.requirements || []; track requirement.id){
                 <div class="document-row">
                   <strong>{{requirement.label}}{{requirement.required?' (obrigatório)':''}}</strong>
                   @if(documentFor(requirement.id); as document){
-                    <span>Antimalware: {{document.scan_status}}</span>
-                    <button type="button" [disabled]="sending" (click)="removeDocument(document.id)">Remover</button>
+                    <span>{{securityLabel(document.scan_status)}}</span>
                   } @else {
                     <input type="file" accept=".pdf,.jpg,.jpeg,.png" [disabled]="sending || !current.cpf_masked" (change)="uploadDocument(requirement.id,$event)" aria-label="Enviar {{requirement.label}}">
                   }
@@ -58,6 +74,9 @@ type VerificationState = {
           </form>
         } @else {
           <p>Sua solicitação está protegida contra reenvio. Acompanhe o andamento nesta página.</p>
+          @for(document of current.documents || []; track document.id){
+            <p>{{document.label}} — {{document.original_name}} — {{securityLabel(document.scan_status)}}</p>
+          }
         }
         @if(error()){<p class="error" role="alert">{{error()}}</p>}
         <a routerLink="/profissional/instrutor/status">Voltar ao status do cadastro</a>
@@ -71,7 +90,12 @@ type VerificationState = {
 export class ProfessionalVerificationComponent {
   private http=inject(HttpClient);
   state=signal<VerificationState|undefined>(undefined);
-  error=signal(''); cpf=''; confirmed=false; sending=false;
+  error=signal(''); cpf=''; confirmed=false;
+  private busy=signal(false);
+  get sending(){return this.busy()}
+  set sending(value:boolean){this.busy.set(value)}
+  documentType='PROFESSIONAL_CREDENTIAL';
+  securityLabel(value:string){return value==='CLEAN'?'Pronto':value==='BLOCKED'?'Arquivo recusado':'Verificando segurança'}
 
   constructor(){this.load()}
   load(){this.http.get<VerificationState>('/instructor/verification/').subscribe({next:value=>this.state.set(value),error:()=>this.error.set('Não foi possível carregar a verificação profissional.')})}
@@ -86,11 +110,14 @@ export class ProfessionalVerificationComponent {
     this.sending=true;
     this.http.patch<VerificationState>('/instructor/verification/',{cpf:this.cpf}).subscribe({next:value=>{this.sending=false;this.cpf='';this.state.set(value)},error:error=>this.fail(error)});
   }
-  uploadDocument(requirementId:string,event:Event){
+  uploadDocument(requirementId:string|null,event:Event){
     const file=(event.target as HTMLInputElement).files?.[0];
     if(!file)return;
     this.sending=true;this.error.set('');
-    const data=new FormData();data.append('requirement_id',requirementId);data.append('file',file);
+    const data=new FormData();
+    if(requirementId){data.append('requirement_id',requirementId)}else{data.append('document_type',this.documentType)}
+    data.append('file',file);
+    (event.target as HTMLInputElement).value='';
     this.http.post<VerificationState>('/instructor/verification/documents/',data).subscribe({next:value=>{this.sending=false;this.state.set(value)},error:error=>this.fail(error)});
   }
   removeDocument(id:string){

@@ -1,8 +1,23 @@
 # Checkpoint do Projeto
 
 - Atualizado em: **2026-09-27**
-- Versão documental: **4.8**
+- Versão documental: **4.9**
 - Código-fonte: **Upload privado implantado com flag OFF; homologação técnica parcial por execução assistida**
+
+## Hotfix de upload voluntário — 27/09/2026
+
+- Decisão expressa do proprietário: upload voluntário nas 27 UFs sem inventar requisitos
+  estaduais, retenção legal ou aprovação de privacidade; decisão registrada em
+  `PROFESSIONAL_DOCUMENT_UPLOAD_HOTFIX.md` e substitui o gate jurídico anterior de ativação.
+- Tipo documental genérico e requisito estadual separados; migration 0012 aditiva.
+  UI oferece anexos com zero requisitos e mostra estados de segurança amigáveis.
+  Submissão bloqueia todo arquivo não-CLEAN; admin/download exigem revisor responsável.
+- Backend final: 283 testes aprovados; Angular: 42 aprovados e build de produção PASS
+  com avisos de budget existentes. Ruff lint/format, Django check, migration check e
+  sintaxe shell aprovados. OpenAPI gera saída válida, mas reporta 24 rotas com serializers
+  ausentes preexistentes fora do hotfix; não declarar documentação global sem pendências.
+- Script de deploy com backup, smoke real, ativação condicional e restauração de flags em falha.
+  SSH automático indisponível; produção NÃO ativada nesta execução local. Execução na VPS pendente.
 
 ## Feedback do login público — 27/09/2026
 

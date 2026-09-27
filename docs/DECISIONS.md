@@ -2,6 +2,14 @@
 
 Este documento é a fonte oficial de decisões consolidadas, contradições resolvidas e questões em aberto. Uma recomendação marcada como aberta não é uma decisão aceita.
 
+### Decisão operacional de 27/09/2026 — upload voluntário
+
+Aceita por autorização expressa do proprietário: upload profissional voluntário nas 27 UFs
+não depende de requisitos estaduais aprovados nem de política de retenção/privacidade aprovada.
+Estas pendências continuam PENDING, sem prazo jurídico inventado. Ativação exige controles
+técnicos reais PASS; não é aprovação oficial, verificação ou publicação automática.
+Detalhes e rollback em `PROFESSIONAL_DOCUMENT_UPLOAD_HOTFIX.md`.
+
 ## Estados
 
 - **Aceita:** normativa até nova ADR que a substitua.

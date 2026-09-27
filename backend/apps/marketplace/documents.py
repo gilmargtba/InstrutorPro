@@ -183,7 +183,7 @@ def review_document(*, actor, document, decision, reason, source):
             "after": decision,
             "version": locked.version,
             "source": source,
-            "uf": locked.credential_uf or locked.requirement.uf,
+            "uf": locked.credential_uf or (locked.requirement.uf if locked.requirement_id else ""),
         },
     )
     return locked

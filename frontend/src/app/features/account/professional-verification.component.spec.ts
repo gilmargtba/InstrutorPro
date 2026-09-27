@@ -6,6 +6,15 @@ import { ProfessionalVerificationComponent } from './professional-verification.c
 
 describe('ProfessionalVerificationComponent',()=>{
   beforeEach(()=>TestBed.configureTestingModule({imports:[ProfessionalVerificationComponent],providers:[provideHttpClient(),provideHttpClientTesting(),provideRouter([])]}));
+  it('offers voluntary documents with zero UF requirements and friendly security labels',()=>{
+    const fixture=TestBed.createComponent(ProfessionalVerificationComponent);const http=TestBed.inject(HttpTestingController);
+    http.expectOne('/instructor/verification/').flush({status:'DRAFT',cpf_masked:'***25',can_edit:true,document_upload_available:true,requirements:[],document_types:[{value:'PROFESSIONAL_CREDENTIAL',label:'Credencial profissional'}],documents:[{id:'one',requirement_id:null,label:'Credencial profissional',original_name:'teste.pdf',scan_status:'CLEAN'}]});
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Adicionar documento');
+    expect(fixture.nativeElement.textContent).toContain('Pronto');
+    expect(fixture.nativeElement.textContent).not.toContain('CLEAN');
+    expect(fixture.nativeElement.textContent).not.toContain('Nenhum documento foi configurado');
+  });
   it('does not send an invalid CPF',()=>{
     const fixture=TestBed.createComponent(ProfessionalVerificationComponent);const http=TestBed.inject(HttpTestingController);
     http.expectOne('/instructor/verification/').flush({status:'DRAFT',cpf_masked:'',submitted_at:null,review_started_at:null,decided_at:null,message:'',can_edit:true});

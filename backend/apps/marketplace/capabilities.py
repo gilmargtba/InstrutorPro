@@ -65,6 +65,11 @@ def professional_verification_mode() -> str:
 
 def enabled(name: str) -> bool:
     if (
+        name == "REAL_DOCUMENT_UPLOADS"
+        and getattr(settings, "PROFESSIONAL_DOCUMENT_UPLOAD_MODE", "DISABLED") == "PRODUCTION"
+    ):
+        return configured(name)
+    if (
         name == "REAL_PROFESSIONAL_VERIFICATION"
         and professional_verification_mode() == PROFESSIONAL_VERIFICATION_PRODUCTION
     ):
@@ -115,6 +120,8 @@ def configuration_errors() -> list[str]:
             if not configured(name)
         )
     globally_authorized = set(CAPABILITIES)
+    if getattr(settings, "PROFESSIONAL_DOCUMENT_UPLOAD_MODE", "DISABLED") == "PRODUCTION":
+        globally_authorized.discard("REAL_DOCUMENT_UPLOADS")
     if registration_mode == INSTRUCTOR_REGISTRATION_PRODUCTION:
         globally_authorized -= INSTRUCTOR_REGISTRATION_CAPABILITIES
     if verification_mode == PROFESSIONAL_VERIFICATION_PRODUCTION:
@@ -125,6 +132,6 @@ def configuration_errors() -> list[str]:
         errors.extend(
             f"{name}_FORBIDDEN_IN_CONTROLLED_PILOT"
             for name, capability in CAPABILITIES.items()
-            if not capability.pilot_allowed and configured(name)
+            if not capability.pilot_allowed and configured(name) and name in globally_authorized
         )
     return errors

@@ -9,6 +9,7 @@ from apps.audit.models import AuditEvent
 from .documents import (
     DocumentPermissionDenied,
     DocumentValidationError,
+    can_review_document,
     review_document,
     review_profile_photo,
 )
@@ -122,10 +123,25 @@ class DocumentRequirementAdmin(admin.ModelAdmin):
 
 @admin.register(InstructorDocument)
 class InstructorDocumentAdmin(admin.ModelAdmin):
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        real = (
+            queryset.filter(
+                data_mode=DataMode.REAL,
+                scan_status=InstructorDocument.ScanStatus.CLEAN,
+                verification_request__reviewer=request.user,
+                verification_request__status="UNDER_REVIEW",
+            )
+            if can_review_document(request.user)
+            else queryset.none()
+        )
+        return queryset.exclude(data_mode=DataMode.REAL) | real
+
     list_display = (
         "original_name",
         "instructor",
         "requirement",
+        "document_type",
         "status",
         "scan_status",
         "valid_until",

@@ -1,5 +1,21 @@
 # Contrato da API
 
+## Hotfix documental de 27/09/2026
+
+`GET /api/v1/instructor/verification/` informa `document_upload_available`,
+`document_types` e `requirements` separadamente. Zero requisitos aprovados não impede
+upload voluntário quando o gate técnico está ativo.
+
+`POST /api/v1/instructor/verification/documents/` recebe multipart `file` e
+`document_type` (`PROFESSIONAL_CREDENTIAL`, `PROFESSIONAL_CERTIFICATE`, `OTHER_PROFESSIONAL`),
+ou `requirement_id` de regra territorial aplicável. Não informar ambos.
+UUID/tipo inválidos recebem 400. Documento retorna tipo/label, nome original seguro,
+data, `requirement_id` opcional e resultado antimalware. Não retorna URL pública.
+Os estados técnicos são mapeados para mensagens amigáveis pela UI.
+Somente o titular em DRAFT envia/remove; submissão exige todos os anexos CLEAN.
+Download de evidência REAL permanece restrito ao revisor responsável durante UNDER_REVIEW.
+Detalhes operacionais em `PROFESSIONAL_DOCUMENT_UPLOAD_HOTFIX.md`.
+
 ## CODEX 02E — onboarding sintético
 
 `POST /api/v1/demo/instructor-onboarding/` aceita somente o formulário DEMO das cinco
