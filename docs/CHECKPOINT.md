@@ -1,14 +1,31 @@
 # Checkpoint do Projeto
 
 - Atualizado em: **2026-09-27**
-- Versão documental: **4.6**
-- Código-fonte: **Upload privado enviado ao origin; homologação da VPS pendente de acesso SSH**
+- Versão documental: **4.7**
+- Código-fonte: **Upload privado implantado com flag OFF; homologação técnica parcial por execução assistida**
+
+## Correções de homologação 8O — 27/09/2026
+
+- evidências fornecidas pelo proprietário mostram deploy de `9cffbc0`, readiness aprovado,
+  volume documental persistente e backup validado; restauração isolada de arquivo técnico passou
+  com hash idêntico e limpeza dos arquivos técnicos, sem sobrescrever documentos existentes;
+- scanner real respondeu PONG, carregou daily `28136` de 27/09 e passou scan limpo, EICAR e
+  indisponibilidade simulada, somente em memória; isso não homologa o pipeline completo;
+- FreshClam não resolvia DNS porque só tinha rede interna; correção persistente adiciona a rede
+  de saída ao scanner, sem publicar portas e sem montar documentos nele;
+- `/documents`, `/uploads` e `/private` responderam HTTP 200 `text/html`, compatível com fallback
+  Angular, sem prova de exposição de arquivo. nginx passa a negar esses prefixos com 404;
+- backend ainda precisa de `CLAMD_HOST`; acesso autorizado/IDOR, pipeline real, retenção na VPS,
+  persistência após recriação e smoke final continuam pendentes. Não ativar uploads;
+- correções de configuração desta seção ainda precisam ser implantadas e retestadas na VPS.
+- validação local das correções: três testes de regressão e Ruff passaram; nginx 1.28 validou
+  a sintaxe da configuração em container isolado. CI executa os três testes em cada release.
 
 ## Fatia 8O — homologação técnica em andamento (23/09/2026)
 
 - commit `12eb56a` enviado a `origin/main`; CI inicial apontou somente formatação antiga; o commit
   `df6532d` corrigiu a formatação e adicionou Angular tests ao CI; backend e frontend passaram;
-- SSH de linha de comando reconheceu a chave de host, mas a VPS recusou autenticação por chave;
+- inicialmente SSH de linha de comando reconheceu a chave de host, mas a VPS recusou autenticação por chave;
   backup, pull, migrations, ClamAV, EICAR, restore e smoke não foram executados na VPS;
 - engine de retenção local agora exige política versionada, ativa e aprovada, suporta agendamento
   e legal hold e mantém descarte real inerte na ausência de política de produção; três testes com
@@ -16,7 +33,8 @@
   backend completos em 27/09; Ruff, Django check e migration check passaram;
 - operações POST/DELETE de documentos separadas para eliminar colisões de operationId; a geração
   OpenAPI ainda apresenta erros preexistentes em outras APIs, sem afirmar contrato global limpo;
-- autenticação SSH por chave novamente recusada em 27/09; deploy continua não executado.
+- autenticação SSH por chave novamente recusada em 27/09; deploy posteriormente executado pelo
+  proprietário no terminal aberto, conforme evidências acima.
 - rascunho técnico para revisão jurídica em
   `docs/PRIVACY_PROFESSIONAL_DOCUMENTS_REVIEW_DRAFT.md`; nenhuma Política publicada mudou;
 - `REAL_DOCUMENT_UPLOADS=false` permanece obrigatório até o relatório final de homologação.

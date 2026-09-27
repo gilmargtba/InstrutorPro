@@ -34,7 +34,8 @@ services:
     restart: unless-stopped
     volumes:
       - clamav_signatures:/var/lib/clamav
-    networks: [private]
+    # Signature updates need outbound access; no host ports are published.
+    networks: [private, public]
 
   backend:
     build: {context: ./backend}

@@ -1,6 +1,6 @@
 # Fatia 8N — documentos profissionais privados (pré-ativação)
 
-Estado em 23/09/2026: código local preparado, **não implantado**. `REAL_DOCUMENT_UPLOADS=false` em produção. Esta fatia não aprova regra documental de qualquer Detran e não altera a separação entre verificação e publicação.
+Estado em 27/09/2026: código implantado com flag OFF, homologação parcial por execução assistida do proprietário. `REAL_DOCUMENT_UPLOADS=false` em produção. Esta fatia não aprova regra documental de qualquer Detran e não altera a separação entre verificação e publicação. Evidências e pendências atuais no checkpoint.
 
 ## Fluxo implementado
 
@@ -9,7 +9,8 @@ Estado em 23/09/2026: código local preparado, **não implantado**. `REAL_DOCUME
 - Somente o resultado `CLEAN` é promovido para a área privada de revisão. A submissão exige todos os requisitos obrigatórios do momento e nenhum arquivo pendente/bloqueado. O snapshot dos requisitos é preservado na solicitação.
 - O próprio instrutor pode remover o arquivo em `DRAFT`; depois de `SUBMITTED`, não pode alterar o conjunto. A revisão e o download exigem revisor designado e permissão explícita. O download é streaming autenticado, auditado, `nosniff` e sem cache.
 - O Admin pode aprovar regras com fonte registrada e revisar documentos. O objeto real não permite edição manual dos campos nem exibe a chave física do arquivo no formulário. `VERIFIED` não implica `PUBLISHED`.
-- O frontend mostra somente metadados e requisitos aplicáveis; não há URL pública de arquivo. O nginx bloqueia diretamente `/media`, `/quarantine`, `/private_documents` e `/professional-documents`.
+- O frontend mostra somente metadados e requisitos aplicáveis; não há URL pública de arquivo. O nginx bloqueia diretamente `/media`, `/documents`, `/uploads`, `/private`, `/quarantine`, `/private_documents` e `/professional-documents`; o bloqueio deve ser retestado após deploy da correção 8O.
+- ClamAV participa das redes interna e de saída para atualizar assinaturas, sem portas publicadas no host e sem acesso ao volume de documentos. Backend usa INSTREAM pela rede interna. Não usar conexão manual de rede como configuração permanente.
 
 ## Pendências antes de ativar
 

@@ -23,6 +23,7 @@ jobs:
       - run: pip install -r requirements.in
       - run: ruff format --check .
       - run: ruff check .
+      - run: python -m unittest discover -s ../scripts/tests -p test_document_deployment.py
       - run: python manage.py makemigrations --check --dry-run
       - run: python manage.py migrate
       - run: pytest
