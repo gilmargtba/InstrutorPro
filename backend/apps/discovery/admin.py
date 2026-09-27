@@ -22,6 +22,7 @@ from .services import (
     InvalidWorkflowTransition,
     WorkflowPermissionDenied,
     approve_publication,
+    can_manage_publication,
     reject_publication,
     revoke_service_location_authorization,
     start_review,
@@ -47,6 +48,7 @@ class InstructorProfileAdmin(admin.ModelAdmin):
         "situacao_perfil",
         "situacao_verificacao",
         "situacao_publicacao",
+        "publication_action",
         "map_visible",
     )
     actions = (
@@ -58,12 +60,14 @@ class InstructorProfileAdmin(admin.ModelAdmin):
         "unpublish_action",
         "revoke_location_action",
     )
+    list_filter = ("profile_status", "verification_status", "publication_status", "is_demo")
     readonly_fields = (
         "profile_status",
         "verification_status",
         "verified_until",
         "publication_status",
         "is_demo",
+        "publication_actions",
     )
 
     @admin.display(description="Nome público", ordering="display_name")
@@ -87,6 +91,87 @@ class InstructorProfileAdmin(admin.ModelAdmin):
         from .selectors import published_instructor_profiles
 
         return published_instructor_profiles().filter(pk=obj.pk).exists()
+
+    @admin.display(description="Publicação")
+    def publication_action(self, obj):
+        if obj.is_demo or obj.verification_status != "VERIFIED":
+            return "—"
+        return self.publication_actions(obj)
+
+    @admin.display(description="Ações de publicação")
+    def publication_actions(self, obj):
+        if not obj or obj.is_demo:
+            return "Use o fluxo DEMO somente para perfis sintéticos."
+        base = "admin:discovery_instructor_publication_transition"
+        if obj.profile_status == "UNDER_REVIEW" and obj.verification_status == "VERIFIED":
+            url = reverse(base, args=[obj.pk, "publish"])
+            return format_html('<a class="button default" href="{}">Publicar perfil</a>', url)
+        if obj.publication_status == "APPROVED":
+            suspend = reverse(base, args=[obj.pk, "suspend"])
+            unpublish = reverse(base, args=[obj.pk, "unpublish"])
+            return format_html(
+                '<span class="workflow-buttons"><a class="button" href="{}">Suspender</a>'
+                '<a class="button" href="{}">Despublicar</a></span>',
+                suspend,
+                unpublish,
+            )
+        if obj.publication_status == "SUSPENDED":
+            url = reverse(base, args=[obj.pk, "unpublish"])
+            return format_html('<a class="button" href="{}">Despublicar</a>', url)
+        return "Aguardando verificação ou gate territorial de publicação."
+
+    def get_urls(self):
+        return [
+            path(
+                "<uuid:object_id>/publication/<str:operation>/",
+                self.admin_site.admin_view(self.publication_transition_view),
+                name="discovery_instructor_publication_transition",
+            )
+        ] + super().get_urls()
+
+    def publication_transition_view(self, request, object_id, operation):
+        services = {
+            "publish": ("Publicar perfil", approve_publication),
+            "suspend": ("Suspender perfil", suspend_publication),
+            "unpublish": ("Despublicar perfil", unpublish_professional),
+        }
+        if operation not in services:
+            raise Http404
+        profile = self.get_object(request, object_id)
+        if profile is None or profile.is_demo:
+            raise Http404
+        if not can_manage_publication(request.user):
+            raise PermissionDenied
+        label, service = services[operation]
+        back = reverse("admin:discovery_instructorprofile_change", args=[profile.pk])
+        if request.method == "POST":
+            reason = request.POST.get("reason", "").strip()
+            if not reason:
+                self.message_user(request, "Informe o motivo da decisão.", messages.ERROR)
+            else:
+                try:
+                    service(
+                        actor=request.user,
+                        profile=profile,
+                        reason=reason,
+                        request_id=getattr(request, "request_id", None),
+                    )
+                    self.message_user(request, f"{label}: decisão auditada.", messages.SUCCESS)
+                except (WorkflowPermissionDenied, InvalidWorkflowTransition) as exc:
+                    self.message_user(request, str(exc), messages.ERROR)
+            return HttpResponseRedirect(back)
+        return TemplateResponse(
+            request,
+            "admin/discovery/confirm_publication_transition.html",
+            {
+                **self.admin_site.each_context(request),
+                "title": label,
+                "profile": profile,
+                "operation": operation,
+                "back_url": back,
+                "opts": self.model._meta,
+            },
+        )
 
     def _run(self, request, queryset, service, reason, area=False):
         ok = 0
@@ -116,27 +201,27 @@ class InstructorProfileAdmin(admin.ModelAdmin):
 
     @admin.action(description="Iniciar revisão DEMO")
     def start_review_action(self, r, q):
-        self._run(r, q, start_review, "ADMIN_DEMO_REVIEW")
+        self._run(r, q.filter(is_demo=True), start_review, "ADMIN_DEMO_REVIEW")
 
     @admin.action(description="Verificar DEMO")
     def verify_action(self, r, q):
-        self._run(r, q, verify_professional, "ADMIN_DEMO_VERIFICATION")
+        self._run(r, q.filter(is_demo=True), verify_professional, "ADMIN_DEMO_VERIFICATION")
 
     @admin.action(description="Aprovar publicação DEMO")
     def approve_action(self, r, q):
-        self._run(r, q, approve_publication, "ADMIN_DEMO_APPROVAL")
+        self._run(r, q.filter(is_demo=True), approve_publication, "ADMIN_DEMO_APPROVAL")
 
     @admin.action(description="Rejeitar publicação DEMO")
     def reject_action(self, r, q):
-        self._run(r, q, reject_publication, "ADMIN_DEMO_REJECTION")
+        self._run(r, q.filter(is_demo=True), reject_publication, "ADMIN_DEMO_REJECTION")
 
     @admin.action(description="Suspender publicação DEMO")
     def suspend_action(self, r, q):
-        self._run(r, q, suspend_publication, "ADMIN_DEMO_SUSPENSION")
+        self._run(r, q.filter(is_demo=True), suspend_publication, "ADMIN_DEMO_SUSPENSION")
 
     @admin.action(description="Despublicar DEMO")
     def unpublish_action(self, r, q):
-        self._run(r, q, unpublish_professional, "ADMIN_DEMO_UNPUBLISH")
+        self._run(r, q.filter(is_demo=True), unpublish_professional, "ADMIN_DEMO_UNPUBLISH")
 
     @admin.action(description="Revogar localização de atendimento")
     def revoke_location_action(self, r, q):

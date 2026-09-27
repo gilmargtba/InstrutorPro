@@ -75,10 +75,18 @@ class InstrutorProAdminSite(AdminSite):
         requests = ProfessionalVerificationRequest.objects.all()
         counts = {
             "instructors": InstructorProfile.objects.count(),
+            "new_instructors": InstructorProfile.objects.filter(
+                profile_status=InstructorProfile.Status.DRAFT, is_demo=False
+            ).count(),
             "pending": requests.filter(status=requests.model.Status.SUBMITTED).count(),
             "under_review": requests.filter(status=requests.model.Status.UNDER_REVIEW).count(),
             "verified": InstructorProfile.objects.filter(
                 verification_status=InstructorProfile.VerificationStatus.VERIFIED
+            ).count(),
+            "awaiting_publication": InstructorProfile.objects.filter(
+                verification_status=InstructorProfile.VerificationStatus.VERIFIED,
+                publication_status=InstructorProfile.PublicationStatus.UNPUBLISHED,
+                is_demo=False,
             ).count(),
             "published": InstructorProfile.objects.filter(
                 publication_status=InstructorProfile.PublicationStatus.APPROVED

@@ -55,6 +55,29 @@ def _require_feature(profile):
         raise WorkflowPermissionDenied("A verificação profissional real não está disponível.")
 
 
+def _advance_profile(*, actor, item, target, allowed, reason, request_id=None):
+    """Keep the profile workflow aligned with its real verification request."""
+    profile = InstructorProfile.objects.select_for_update().get(pk=item.profile_id)
+    before = profile.profile_status
+    if before == target:
+        return profile
+    if before not in allowed:
+        raise InvalidWorkflowTransition("Estado do perfil incompatível com a verificação.")
+    profile.profile_status = target
+    with allow_critical_state_mutation():
+        profile.save(update_fields=["profile_status"])
+    AuditEvent.objects.create(
+        actor=actor,
+        action="discovery.professional_verification.profile_status_changed",
+        target_type="discovery.InstructorProfile",
+        target_id=profile.id,
+        request_id=_request_id(request_id),
+        reason_code=reason,
+        metadata={"before": before, "after": target, "verification_request_id": str(item.id)},
+    )
+    return profile
+
+
 @transaction.atomic
 def save_verification_draft(*, actor, profile, cpf, request_id=None):
     profile = InstructorProfile.objects.select_for_update().get(pk=profile.pk)
@@ -148,6 +171,14 @@ def submit_verification_request(*, actor, profile, request_id=None):
             }
             for requirement in requirements
         ]
+    _advance_profile(
+        actor=actor,
+        item=current,
+        target=InstructorProfile.Status.SUBMITTED,
+        allowed={InstructorProfile.Status.DRAFT, InstructorProfile.Status.REJECTED},
+        reason="OWNER_VERIFICATION_SUBMITTED",
+        request_id=request_id,
+    )
     current.status = ProfessionalVerificationRequest.Status.SUBMITTED
     current.submitted_at = timezone.now()
     with allow_critical_state_mutation():
@@ -176,7 +207,14 @@ def start_verification_review(*, actor, verification_request, request_id=None):
     item.review_started_at = timezone.now()
     with allow_critical_state_mutation():
         item.save(update_fields=["status", "reviewer", "review_started_at", "updated_at"])
-    profile = InstructorProfile.objects.select_for_update().get(pk=item.profile_id)
+    profile = _advance_profile(
+        actor=actor,
+        item=item,
+        target=InstructorProfile.Status.UNDER_REVIEW,
+        allowed={InstructorProfile.Status.DRAFT, InstructorProfile.Status.SUBMITTED},
+        reason="ADMIN_VERIFICATION_REVIEW_STARTED",
+        request_id=request_id,
+    )
     profile.verification_status = InstructorProfile.VerificationStatus.PENDING
     with allow_critical_state_mutation():
         profile.save(update_fields=["verification_status"])
@@ -225,7 +263,14 @@ def approve_verification_request(*, actor, verification_request, request_id=None
         item.save(
             update_fields=["status", "decided_at", "decision_by", "public_message", "updated_at"]
         )
-    profile = InstructorProfile.objects.select_for_update().get(pk=item.profile_id)
+    profile = _advance_profile(
+        actor=actor,
+        item=item,
+        target=InstructorProfile.Status.UNDER_REVIEW,
+        allowed={InstructorProfile.Status.DRAFT, InstructorProfile.Status.SUBMITTED},
+        reason="ADMIN_VERIFICATION_APPROVED_PENDING_PUBLICATION",
+        request_id=request_id,
+    )
     profile.verification_status = InstructorProfile.VerificationStatus.VERIFIED
     with allow_critical_state_mutation():
         profile.save(update_fields=["verification_status"])
@@ -257,7 +302,18 @@ def reject_verification_request(*, actor, verification_request, request_id=None)
         item.save(
             update_fields=["status", "decided_at", "decision_by", "public_message", "updated_at"]
         )
-    profile = InstructorProfile.objects.select_for_update().get(pk=item.profile_id)
+    profile = _advance_profile(
+        actor=actor,
+        item=item,
+        target=InstructorProfile.Status.REJECTED,
+        allowed={
+            InstructorProfile.Status.DRAFT,
+            InstructorProfile.Status.SUBMITTED,
+            InstructorProfile.Status.UNDER_REVIEW,
+        },
+        reason="ADMIN_VERIFICATION_REJECTED",
+        request_id=request_id,
+    )
     profile.verification_status = InstructorProfile.VerificationStatus.REJECTED
     with allow_critical_state_mutation():
         profile.save(update_fields=["verification_status"])

@@ -12,6 +12,7 @@ from .models import (
     InstructorServiceArea,
     LocationPublicationAuthorization,
     ProfessionalVerification,
+    ProfessionalVerificationRequest,
     PublicationDecision,
     allow_critical_state_mutation,
 )
@@ -278,15 +279,26 @@ def decide_publication(*, actor, profile, decision, reason, request_id=None):
                     "Publicação real bloqueada: a UF não possui autorização regulatória vigente"
                 )
 
+        verified_request = bool(
+            verification
+            and verification.provider == "MANUAL_AUTHORIZED_SOURCE"
+            and ProfessionalVerificationRequest.objects.filter(
+                pk=_rid(verification.provenance_reference),
+                profile=p,
+                status=ProfessionalVerificationRequest.Status.VERIFIED,
+                decision_by__isnull=False,
+            ).exists()
+        )
         verification_evidence_valid = bool(
             verification
             and verification.status == ProfessionalVerification.Status.VERIFIED
             and (
                 p.is_demo
                 or (
-                    verification.provider == "MANUAL_NO_FILE"
+                    verification.provider in {"MANUAL_NO_FILE", "MANUAL_AUTHORIZED_SOURCE"}
                     and verification.authority
                     and verification.method
+                    and (verification.provider == "MANUAL_NO_FILE" or verified_request)
                 )
             )
         )

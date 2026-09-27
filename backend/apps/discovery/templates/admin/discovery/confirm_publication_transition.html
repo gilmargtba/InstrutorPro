@@ -1,0 +1,22 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<h1>{{ title }}</h1>
+<p><strong>Instrutor:</strong> {{ profile.display_name }}</p>
+<p><strong>Verificação:</strong> {{ profile.get_verification_status_display }}</p>
+<p><strong>Publicação atual:</strong> {{ profile.get_publication_status_display }}</p>
+{% if operation == "publish" %}
+<p>A publicação só ocorrerá se a verificação, a área autorizada e o gate regulatório da UF ainda estiverem válidos. Ela não é automática.</p>
+{% else %}
+<p>Esta decisão retira o perfil das buscas públicas e será auditada.</p>
+{% endif %}
+<form method="post">
+  {% csrf_token %}
+  <label for="publication-reason">Motivo da decisão</label>
+  <textarea id="publication-reason" name="reason" rows="3" maxlength="500" required></textarea>
+  <div class="submit-row">
+    <input type="submit" value="Confirmar: {{ title }}">
+    <a href="{{ back_url }}">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

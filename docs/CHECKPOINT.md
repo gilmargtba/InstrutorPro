@@ -818,3 +818,19 @@ Marketplace (M3) somente após M2 aceito. Google é gate opcional M2.1. Pagament
   texto pesquisado; coordenadas públicas são aproximadas no backend para duas casas decimais.
   Validação: 34 testes focados, 208 backend e 28 frontend, além de build Angular, Ruff, Django e
   migrations aprovados.
+
+### Sprint comercial — fluxo real de revisão e publicação (27/09/2026)
+
+- a solicitação de verificação real agora avança o estado do perfil de `DRAFT` para `SUBMITTED`, e a
+  análise administrativa sincroniza `UNDER_REVIEW`, `VERIFIED` ou `REJECTED` com auditoria;
+- a decisão manual de publicação reconhece a evidência `MANUAL_AUTHORIZED_SOURCE` somente quando
+  ligada a uma solicitação verificada e decidida por administrador. A autorização territorial vigente,
+  a área de atendimento e os demais gates de publicação continuam obrigatórios;
+- o Admin ganhou fila de perfis reais verificados e botões individuais para publicar, suspender e
+  despublicar com confirmação, motivo obrigatório e auditoria. Ações em massa DEMO não processam
+  perfis reais;
+- validação local: 286 testes backend, 42 frontend, Ruff, Django check, migration check e build
+  Angular passaram. O build ainda alerta para orçamento de bundle/SCSS, sem falhar;
+- isto não habilita a busca real nem comprova entrega de e-mail, MapTiler, foto real ou jornada humana
+  na VPS. `REAL_MARKETPLACE_SEARCH` deve continuar desativado até aprovação territorial explícita e
+  validação técnica de produção. Nenhum dado profissional fictício foi criado para liberar o fluxo.
