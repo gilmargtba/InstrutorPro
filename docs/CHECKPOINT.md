@@ -1,5 +1,22 @@
 # Checkpoint do Projeto
 
+## Hotfix de geocodificação Brasília/DF — 28/09/2026
+
+- Causa reproduzida com resposta real sanitizada do MapTiler: Brasília traz
+  `subregion.62` com texto `Distrito Federal`, enquanto `region.1474` é
+  `Região Centro-Oeste`; o parser anterior não lia `subregion` e devolvia UF vazia.
+  Consulta por CEP também traz `place` Brasília após `municipality` Plano Piloto.
+- Parser reconhece `region`/`subregion`, códigos estruturados e nomes estaduais
+  exatos, normaliza as 27 UFs e não inventa sigla se o contexto for insuficiente
+  ou contraditório. API informa `uf_resolution`; frontend exige confirmação
+  explícita em caso incompleto. Busca geocodificada envia UF canônica e
+  coordenadas ao filtro PostGIS, mantendo o fluxo GPS sem UF.
+- Nenhuma migration, alteração de prontidão regulatória, aprovação de UF ou
+  publicação de instrutor integra esta fatia. Busca real permanece desligada.
+- Validação local: 329 testes backend e 45 Angular aprovados; Ruff,
+  build Angular de produção, Django check e migration check passaram.
+  Deploy/smoke de produção registrados após execução.
+
 ## Deploy do painel regulatório por UF — 28/09/2026
 
 - A VPS `179.199.136.4` foi atualizada por fast-forward de `ebd0999` para

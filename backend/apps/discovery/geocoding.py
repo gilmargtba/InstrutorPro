@@ -10,11 +10,12 @@ from django.conf import settings
 
 
 def _normalized_region_name(value: str) -> str:
-    return "".join(
+    normalized = "".join(
         character
         for character in unicodedata.normalize("NFKD", value).casefold()
         if not unicodedata.combining(character)
-    ).strip()
+    )
+    return " ".join(normalized.split())
 
 
 _BRAZIL_STATE_CODES = {
@@ -49,6 +50,42 @@ _BRAZIL_STATE_CODES = {
         "Tocantins": "TO",
     }.items()
 }
+_BRAZIL_STATE_CODES["federal district"] = "DF"
+BRAZIL_UFS = frozenset(_BRAZIL_STATE_CODES.values())
+
+
+def resolve_brazilian_uf(value: str | None) -> str:
+    """Normalize an exact Brazilian state name or code; never guess from a substring."""
+    if not isinstance(value, str):
+        return ""
+    normalized = _normalized_region_name(value)
+    if normalized.startswith("br-"):
+        normalized = normalized[3:]
+    code = normalized.upper()
+    return code if code in BRAZIL_UFS else _BRAZIL_STATE_CODES.get(normalized, "")
+
+
+def _uf_from_feature(feature: dict) -> str:
+    candidates = set()
+    for item in [feature, *(feature.get("context") or [])]:
+        item_type = str(item.get("id") or "").split(".", 1)[0]
+        if item_type not in {"region", "subregion"}:
+            continue
+        properties = item.get("properties") or {}
+        for raw in (
+            properties.get("short_code"),
+            properties.get("region_code"),
+            item.get("short_code"),
+            item.get("region_code"),
+            item.get("text"),
+            str(item.get("place_name") or "").split(",")[0],
+        ):
+            if code := resolve_brazilian_uf(raw):
+                candidates.add(code)
+    if not candidates:
+        label = feature.get("place_name") or ""
+        candidates = {code for part in label.split(",") if (code := resolve_brazilian_uf(part))}
+    return next(iter(candidates)) if len(candidates) == 1 else ""
 
 
 class GeocodingError(Exception):
@@ -75,7 +112,7 @@ class GeocodingResult:
     bbox: tuple[float, float, float, float] | None = None
 
     def public_dict(self):
-        return asdict(self)
+        return {**asdict(self), "uf_resolution": "RESOLVED" if self.uf else "NEEDS_CONFIRMATION"}
 
 
 class GeocodingProvider:
@@ -131,27 +168,17 @@ class MapTilerGeocodingProvider(GeocodingProvider):
         center = feature.get("center") or feature.get("geometry", {}).get("coordinates")
         if not center or len(center) < 2:
             return None
-        city, uf = "", ""
-        for item in [feature, *feature.get("context", [])]:
-            item_id = item.get("id", "")
-            if item_id.startswith(("municipality.", "place.")) and not city:
-                city = item.get("text") or item.get("place_name", "").split(",")[0]
-            short = item.get("properties", {}).get("short_code", "")
-            if short.upper().startswith("BR-"):
-                uf = short.split("-")[-1].upper()
-            if not uf and item_id.startswith("region."):
-                region_name = item.get("text") or item.get("place_name", "").split(",")[0]
-                uf = _BRAZIL_STATE_CODES.get(_normalized_region_name(region_name), "")
-        label = feature.get("place_name") or feature.get("text", "")
-        if not uf:
-            uf = next(
-                (
-                    code
-                    for part in label.split(",")
-                    if (code := _BRAZIL_STATE_CODES.get(_normalized_region_name(part)))
-                ),
-                "",
+        city = ""
+        items = [feature, *(feature.get("context") or [])]
+        for prefix in ("place.", "municipality.", "locality."):
+            item = next(
+                (item for item in items if str(item.get("id") or "").startswith(prefix)), None
             )
+            if item:
+                city = item.get("text") or str(item.get("place_name") or "").split(",")[0]
+                break
+        label = feature.get("place_name") or feature.get("text", "")
+        uf = _uf_from_feature(feature)
         raw_bbox = feature.get("bbox")
         return GeocodingResult(
             str(feature.get("id", "")),

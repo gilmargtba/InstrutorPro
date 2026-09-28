@@ -41,7 +41,7 @@ from apps.marketplace.real_documents import (
 from apps.people.identifiers import mask_cpf
 from apps.people.models import Person, RoleAssignment
 
-from .geocoding import LocationNotFound, ProviderUnavailable, get_geocoding_provider
+from .geocoding import BRAZIL_UFS, LocationNotFound, ProviderUnavailable, get_geocoding_provider
 from .map_tiles import MapTileUnavailable, fetch_map_tile
 from .models import (
     InstructorProfile,
@@ -247,6 +247,7 @@ class ProfessionalVerificationDocumentRemoveView(APIView):
 class SearchParameters(serializers.Serializer):
     latitude = serializers.FloatField(min_value=-90, max_value=90)
     longitude = serializers.FloatField(min_value=-180, max_value=180)
+    uf = serializers.ChoiceField(choices=sorted(BRAZIL_UFS), required=False)
     radius_km = serializers.ChoiceField(choices=[5, 10, 20, 50])
     category = serializers.ChoiceField(choices=["B"])
     transmission = serializers.ChoiceField(choices=["MANUAL", "AUTOMATIC"], required=False)
@@ -345,6 +346,7 @@ class InstructorSearchView(APIView):
             for name in [
                 "latitude",
                 "longitude",
+                "uf",
                 "radius_km",
                 "category",
                 "transmission",

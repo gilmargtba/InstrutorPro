@@ -491,6 +491,20 @@ def test_api_excludes_private_location(actor):
 
 
 @pytest.mark.django_db
+def test_search_uses_canonical_uf_alongside_postgis_coordinates(actor):
+    make_profile(actor)
+    params = {"latitude": -30.0346, "longitude": -51.2177, "radius_km": 10, "category": "B"}
+    assert (
+        APIClient().get("/api/v1/instructors/search/", {**params, "uf": "RS"}).json()["count"] == 1
+    )
+    assert (
+        APIClient().get("/api/v1/instructors/search/", {**params, "uf": "DF"}).json()["count"] == 0
+    )
+    invalid = APIClient().get("/api/v1/instructors/search/", {**params, "uf": "Distrito Federal"})
+    assert invalid.status_code == 400
+
+
+@pytest.mark.django_db
 def test_national_summary_counts_only_published_instructors(actor):
     make_profile(actor)
     make_profile(actor)

@@ -49,6 +49,7 @@ def search_published_instructors(
     *,
     latitude,
     longitude,
+    uf=None,
     radius_km,
     category,
     transmission=None,
@@ -62,6 +63,8 @@ def search_published_instructors(
         service_area__public_service_location__distance_lte=(origin, D(km=float(radius_km))),
         categories__contains=[category],
     )
+    if uf:
+        queryset = queryset.filter(service_area__uf=uf)
     if transmission:
         queryset = queryset.filter(transmission_options__contains=[transmission])
     if vehicle_available is not None:

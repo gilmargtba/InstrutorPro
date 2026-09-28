@@ -11,6 +11,7 @@ import {
   GeocodingResult,
 } from '../../demo/instructor-search.provider';
 import { LeafletMapProvider } from '../../demo/map.provider';
+import { BRAZIL_UFS } from '../../shared/brazil-ufs';
 
 @Component({
   selector: 'app-instructor-map',
@@ -66,6 +67,9 @@ import { LeafletMapProvider } from '../../demo/map.provider';
         </p>
         <button class="use-location" type="button" (click)="useMyLocation()"><i class="pi pi-crosshairs"></i> Usar minha localização</button>
         @if(locationMessage){<p class="location-message" role="status">{{locationMessage}}</p>}
+        @if(pendingLocation){<label>Confirme a UF desta localidade
+          <select name="confirmedUf" [(ngModel)]="confirmedUf"><option value="">Selecione a UF</option>@for(uf of brazilUfs;track uf){<option [value]="uf">{{uf}}</option>}</select>
+        </label><button type="button" [disabled]="!confirmedUf" (click)="confirmLocationUf()">Confirmar UF</button>}
       </div>
 
       <div class="map-workspace" id="resultado-busca">
@@ -258,6 +262,9 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
   view: 'map' | 'list' = 'map';
   suggestions: GeocodingResult[] = [];
   locationMessage = '';
+  readonly brazilUfs = BRAZIL_UFS;
+  pendingLocation: GeocodingResult | null = null;
+  confirmedUf = '';
   contactError = '';
   private readonly locationQueries = new Subject<string>();
 
@@ -285,25 +292,16 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
     this.loading = true;
     this.error = false;
     this.filtersOpen = false;
+    this.pendingLocation = null;
+    this.confirmedUf = '';
+    this.locationMessage = '';
     this.scrollToResults();
 
     this.api.geocode(this.filters.location).subscribe({
       next: (geocoding) => {
         const point = geocoding.results[0];
-        this.map.focus(point.latitude, point.longitude, 12);
-        this.suggestions = [];
-        void this.router.navigate([], {queryParams:{local:point.label,uf:point.uf||null,categoria:this.filters.category,raio:this.filters.radius},replaceUrl:true});
-        this.api.search(point.latitude, point.longitude, this.filters).subscribe({
-          next: (response) => {
-            this.items = response.results;
-            this.selected = null;
-            this.loading = false;
-            this.drawerOpen = true;
-            this.map.render(this.items, null);
-            this.changeDetector.detectChanges();
-          },
-          error: () => this.fail(),
-        });
+        if (!point) { this.fail(); return; }
+        this.acceptPoint(point);
       },
       error: (response: HttpErrorResponse) => {
         this.items = [];
@@ -315,8 +313,56 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
     });
   }
 
+  private acceptPoint(point:GeocodingResult) {
+    if (!point.uf) {
+      this.pendingLocation = point;
+      this.loading = false;
+      this.locationMessage = 'A UF não foi determinada. Selecione e confirme a UF antes de continuar.';
+      this.backToIntro();
+      this.changeDetector.detectChanges();
+      return;
+    }
+    this.searchFromPoint(point);
+  }
+
+  confirmLocationUf() {
+    if (!this.pendingLocation || !this.brazilUfs.includes(this.confirmedUf as typeof BRAZIL_UFS[number])) return;
+    const point = {...this.pendingLocation, uf:this.confirmedUf};
+    this.pendingLocation = null;
+    this.locationMessage = `UF ${this.confirmedUf} confirmada por você para esta busca.`;
+    this.loading = true;
+    this.searched = true;
+    this.scrollToResults();
+    this.searchFromPoint(point);
+  }
+
+  private searchFromPoint(point:GeocodingResult) {
+        this.map.focus(point.latitude, point.longitude, 12);
+        this.suggestions = [];
+        void this.router.navigate([], {queryParams:{local:point.label,uf:point.uf,categoria:this.filters.category,raio:this.filters.radius},replaceUrl:true});
+        this.api.search(point.latitude, point.longitude, this.filters, point.uf).subscribe({
+          next: (response) => {
+            this.items = response.results;
+            this.selected = null;
+            this.loading = false;
+            this.drawerOpen = true;
+            this.map.render(this.items, null);
+            this.changeDetector.detectChanges();
+          },
+          error: () => this.fail(),
+        });
+  }
+
   suggest(query:string) { if(query.trim().length >= 3) this.locationQueries.next(query.trim()); else this.suggestions=[]; }
-  choose(place:GeocodingResult) { this.filters.location=place.label;this.suggestions=[];this.search(); }
+  choose(place:GeocodingResult) {
+    this.filters.location=place.label;
+    this.suggestions=[];
+    this.searched=true;
+    this.loading=true;
+    this.error=false;
+    this.scrollToResults();
+    this.acceptPoint(place);
+  }
   useMyLocation() {
     this.locationMessage='Localizando…';
     if(!navigator.geolocation){this.locationMessage='Geolocalização não disponível. Use a busca manual.';return;}

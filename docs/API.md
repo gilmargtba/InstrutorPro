@@ -34,11 +34,15 @@ aprovada; esta fatia não criou essa projeção.
 ## Descoberta geoespacial e contato comercial — Fatias 3 e 4
 
 - `GET /api/v1/geocoding/search/?q=Porto%20Alegre%2C%20RS&limit=5`: autocomplete/geocoding brasileiro pelo adapter MapTiler executado no backend; aceita cidade, bairro e CEP, sujeito à capacidade do provider.
+  Cada resultado inclui `city`, `uf` canônica (sigla de duas letras), coordenadas e
+  `uf_resolution=RESOLVED|NEEDS_CONFIRMATION`. O parser utiliza códigos estruturados ou
+  nomes exatos de estado em `region`/`subregion`, inclusive `Distrito Federal` → `DF`;
+  contexto insuficiente ou contraditório mantém `uf` vazia e exige confirmação explícita.
   O onboarding real permite buscar cidade, bairro ou ponto público e ajustar um marcador no mapa;
   não solicita endereço residencial, rejeita resultado pertencente a outra cidade/UF e não
   persiste o texto usado na busca. As coordenadas públicas são reduzidas para duas casas decimais
   no backend antes da persistência.
-- `GET /api/v1/instructors/search/?latitude=-30.0346&longitude=-51.2177&radius_km=10&category=B`: busca PostGIS; aceita `transmission`, `vehicle_available`, `max_price` e `ordering=distance|price`. Retorna preço decimal em BRL, duração e projeção pública do veículo.
+- `GET /api/v1/instructors/search/?latitude=-30.0346&longitude=-51.2177&radius_km=10&category=B&uf=RS`: busca PostGIS; aceita `uf` canônica opcional como filtro adicional, `transmission`, `vehicle_available`, `max_price` e `ordering=distance|price`. Sem `uf` (como no GPS autorizado), o cálculo espacial permanece inalterado. Retorna preço decimal em BRL, duração e projeção pública do veículo.
 - `GET /api/v1/instructors/{uuid}/`: projeção pública mínima do perfil publicável, incluindo oferta ativa.
 - `POST /api/v1/instructors/{uuid}/whatsapp-contact/`: registra um clique deduplicado por sessão/instrutor/hora e devolve `destination_url` para `wa.me`; não envia mensagem e não devolve o telefone bruto.
 
