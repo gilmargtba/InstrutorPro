@@ -15,7 +15,20 @@
   publicação de instrutor integra esta fatia. Busca real permanece desligada.
 - Validação local: 329 testes backend e 45 Angular aprovados; Ruff,
   build Angular de produção, Django check e migration check passaram.
-  Deploy/smoke de produção registrados após execução.
+- Commit `a49aa61` enviado a `origin/main` e aplicado por fast-forward na VPS
+  após backup novo validado de PostgreSQL e documentos privados, sem
+  restauração, migration ou alteração de volumes. Apenas backend/frontend foram
+  reconstruídos e substituídos; ambos ficaram `Healthy`.
+- Smoke da API pública: `Brasília`, `Brasília DF`, `Brasília, DF` e CEP
+  `70040-010` retornaram `city=Brasília`, `uf=DF` e `uf_resolution=RESOLVED`;
+  Goiânia/GO, São Paulo/SP, Rio de Janeiro/RJ, Florianópolis/SC e Manaus/AM
+  também retornaram UFs canônicas. HTTPS readiness informou banco `up`, home
+  respondeu 200 e serviu o bundle frontend novo; Django check na VPS passou.
+- Auditoria após deploy: 27 registros de prontidão, 27 `REVIEW_REQUIRED`,
+  0 `APPROVED`, 0 UFs habilitadas para publicação. Busca real, contato real,
+  pagamentos, billing PRO e publicação real permaneceram desligados; upload
+  documental voluntário permaneceu ligado. Nenhum instrutor foi aprovado
+  automaticamente por este hotfix.
 
 ## Deploy do painel regulatório por UF — 28/09/2026
 
