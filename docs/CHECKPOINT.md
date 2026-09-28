@@ -6,20 +6,26 @@
   nenhuma UF foi aprovada por essa triagem. Fontes incompletas e vigência não confirmada
   permanecem `NEEDS_REVIEW` no relatório (`REVIEW_REQUIRED` no banco).
 - Painel administrativo e histórico de decisões preparados para revisão por UF. A
-  conta existente `gilmar` é o responsável designado; concessão de permissão e carga
-  de registros dependem de execução controlada no ambiente-alvo. Sem criação de
-  conta, redefinição de senha ou aprovação em lote.
+  conta existente `gilmar` é o responsável designado. Em 28/09, a VPS recebeu o
+  commit `ebd0999`; o backend ficou saudável, `manage.py check` passou, a migration
+  `territories.0004` estava aplicada e `/api/v1/readiness/` retornou banco `up`.
+  Backup do banco e do volume documental foi validado antes da atualização.
+- A carga controlada criou 27 registros `REVIEW_REQUIRED` e aprovou zero UFs.
+  A conta administrativa existente `gilmar` recebeu as três permissões de revisão,
+  sem criação de conta ou alteração de senha. Conferência posterior no banco:
+  `TOTAL=27`, `PENDING=27`, `APPROVED=0`, `PUBLICATION_UFS=0` e
+  `GILMAR_REVIEW_PERMISSION=True`. A visualização humana do painel ainda deve ser
+  conferida; nenhuma revisão de vigência ou aprovação humana foi executada.
 - Registro `APPROVED` requer decisão explícita de `gilmar`, fonte/norma,
   vigência e justificativa; autorização individual e publicação seguem gates separados.
 - Validação local: 289 testes backend aprovados; 69 testes focados repetidos após
   reforço do gate de vigência, Ruff lint/formatação, Django check e verificação
-  de migration aprovados. Implantação e carga na VPS ainda não executadas nesta
-  fatia; não declarar os 27 registros visíveis em produção antes dessa etapa.
-  Busca real e pagamentos permanecem desligados.
+  de migration aprovados. Busca real, pagamentos e publicação real permanecem
+  desligados; não confundir cadastro da análise com autorização profissional.
 
-- Atualizado em: **2026-09-27**
-- Versão documental: **4.11**
-- Código-fonte: **Upload privado voluntário ativado na VPS; smoke técnico completo aprovado**
+- Atualizado em: **2026-09-28**
+- Versão documental: **4.12**
+- Código-fonte: **Upload privado voluntário ativo; triagem regulatória das 27 UFs implantada, pendente de revisão humana**
 
 ## Hotfix de upload voluntário — 27/09/2026
 
