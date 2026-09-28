@@ -402,8 +402,13 @@ def test_real_manual_verification_requires_provenance_and_no_document_upload(act
         provider_type=INSTRUCTOR_PROVIDER_TYPE,
         capability=INSTRUCTOR_PUBLICATION_CAPABILITY,
         status=RegulatoryReadiness.Status.APPROVED,
+        valid_from=timezone.localdate(),
+        source_url="https://publicacoeslegais.detran.rs.gov.br/portaria-detran-rs-n-99-2026",
+        source_reference="Portaria DETRAN/RS 99/2026",
         reviewed_by=actor,
         reviewed_at=timezone.now(),
+        approved_by=actor,
+        approved_at=timezone.now(),
     )
     approve_publication(actor=actor, profile=profile, reason="PILOT_APPROVE")
     profile.refresh_from_db()

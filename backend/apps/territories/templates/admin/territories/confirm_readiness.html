@@ -1,0 +1,14 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<h1>Confirmar prontidão regulatória — {{ item.federative_unit.code }}</h1>
+<p>Esta decisão libera apenas o gate territorial para publicação manual de instrutores individualmente verificados. Não autoriza nenhum profissional automaticamente.</p>
+<p>Norma: {{ item.source_reference }}<br>Fonte: <a href="{{ item.source_url }}" rel="noopener noreferrer">{{ item.source_url }}</a></p>
+<p>Observações: {{ item.notes }}</p>
+<form method="post">{% csrf_token %}
+  <p><label>Início de vigência confirmado <input type="date" name="valid_from" required></label></p>
+  <p><label>Justificativa da decisão <textarea name="reason" required></textarea></label></p>
+  <p><label><input type="checkbox" name="confirm_current_source" required> Confirmei pessoalmente a fonte oficial vigente, alterações e forma de verificar cada autorização profissional.</label></p>
+  <input type="submit" value="Confirmar aprovação desta UF">
+  <a href="{{ back_url }}">Cancelar</a>
+</form>
+{% endblock %}

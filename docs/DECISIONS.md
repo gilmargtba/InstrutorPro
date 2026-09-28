@@ -2,6 +2,18 @@
 
 Este documento é a fonte oficial de decisões consolidadas, contradições resolvidas e questões em aberto. Uma recomendação marcada como aberta não é uma decisão aceita.
 
+### Decisão do proprietário de 28/09/2026 — prontidão por UF
+
+Cadastro, upload voluntário e verificação podem abranger as 27 UFs, preservados
+seus controles independentes. A pesquisa inicial de normas oficiais por UF entra
+como `REVIEW_REQUIRED` (`NEEDS_REVIEW` no relatório), nunca como pronta. A conta
+administrativa existente `gilmar` é a responsável pela confirmação humana de
+vigência e escopo; não criar outra conta nem modificar sua senha. Somente sua
+confirmação explícita por UF, com fonte, vigência, justificativa, `reviewed_by/at`,
+`approved_by/at` e histórico, permite `APPROVED`. Isso não confere autorização
+profissional individual, não presume qualificação jurídica de `gilmar` e não libera
+automaticamente busca ou publicação. Nenhuma aprovação automática é permitida.
+
 ### Decisão operacional de 27/09/2026 — upload voluntário
 
 Aceita por autorização expressa do proprietário: upload profissional voluntário nas 27 UFs

@@ -210,8 +210,13 @@ def test_verified_real_request_requires_territorial_gate_then_manual_publication
         provider_type=INSTRUCTOR_PROVIDER_TYPE,
         capability=INSTRUCTOR_PUBLICATION_CAPABILITY,
         status=RegulatoryReadiness.Status.APPROVED,
+        valid_from=timezone.localdate(),
+        source_url="https://publicacoeslegais.detran.rs.gov.br/portaria-detran-rs-n-99-2026",
+        source_reference="Portaria DETRAN/RS 99/2026",
         reviewed_by=admin,
         reviewed_at=timezone.now(),
+        approved_by=admin,
+        approved_at=timezone.now(),
     )
     approve_publication(actor=admin, profile=profile, reason="ADMIN_REVIEWED_PUBLICATION")
     profile.refresh_from_db()
@@ -276,8 +281,13 @@ def test_admin_publication_button_confirms_reason_and_preserves_regulatory_gate(
         provider_type=INSTRUCTOR_PROVIDER_TYPE,
         capability=INSTRUCTOR_PUBLICATION_CAPABILITY,
         status=RegulatoryReadiness.Status.APPROVED,
+        valid_from=timezone.localdate(),
+        source_url="https://publicacoeslegais.detran.rs.gov.br/portaria-detran-rs-n-99-2026",
+        source_reference="Portaria DETRAN/RS 99/2026",
         reviewed_by=manager,
         reviewed_at=timezone.now(),
+        approved_by=manager,
+        approved_at=timezone.now(),
     )
     assert web.post(url, {"reason": "Revisão manual concluída"}).status_code == 302
     profile.refresh_from_db()

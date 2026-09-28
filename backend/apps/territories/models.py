@@ -1,6 +1,6 @@
 import uuid
 
-from django.db import models
+from django.db import models, transaction
 
 
 class Country(models.Model):
@@ -61,6 +61,8 @@ class RegulatoryReadiness(models.Model):
     valid_from = models.DateField(null=True, blank=True)
     valid_until = models.DateField(null=True, blank=True)
     source_url = models.URLField(blank=True)
+    source_reference = models.CharField(max_length=255, blank=True)
+    notes = models.TextField(blank=True)
     reviewed_by = models.ForeignKey(
         "accounts.Account",
         null=True,
@@ -69,6 +71,14 @@ class RegulatoryReadiness(models.Model):
         related_name="regulatory_reviews",
     )
     reviewed_at = models.DateTimeField(null=True, blank=True)
+    approved_by = models.ForeignKey(
+        "accounts.Account",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="regulatory_approvals",
+    )
+    approved_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         verbose_name = "prontidão regulatória"
@@ -82,3 +92,56 @@ class RegulatoryReadiness(models.Model):
 
     def __str__(self):
         return f"{self.federative_unit_id}:{self.provider_type}:{self.capability}"
+
+    def save(self, *args, **kwargs):
+        with transaction.atomic():
+            super().save(*args, **kwargs)
+            RegulatoryReadinessHistory.objects.create(
+                readiness=self,
+                status=self.status,
+                valid_from=self.valid_from,
+                valid_until=self.valid_until,
+                source_url=self.source_url,
+                source_reference=self.source_reference,
+                notes=self.notes,
+                reviewed_by=self.reviewed_by,
+                reviewed_at=self.reviewed_at,
+                approved_by=self.approved_by,
+                approved_at=self.approved_at,
+            )
+
+
+class RegulatoryReadinessHistory(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    readiness = models.ForeignKey(
+        RegulatoryReadiness, on_delete=models.PROTECT, related_name="history"
+    )
+    status = models.CharField(max_length=20, choices=RegulatoryReadiness.Status.choices)
+    valid_from = models.DateField(null=True, blank=True)
+    valid_until = models.DateField(null=True, blank=True)
+    source_url = models.URLField(blank=True)
+    source_reference = models.CharField(max_length=255, blank=True)
+    notes = models.TextField(blank=True)
+    reviewed_by = models.ForeignKey(
+        "accounts.Account", null=True, on_delete=models.PROTECT, related_name="+"
+    )
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    approved_by = models.ForeignKey("accounts.Account", null=True, on_delete=models.PROTECT)
+    approved_at = models.DateTimeField(null=True, blank=True)
+    recorded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-recorded_at"]
+        verbose_name = "histórico de prontidão regulatória"
+        verbose_name_plural = "histórico de prontidão regulatória"
+
+    def __str__(self):
+        return f"{self.readiness_id}:{self.status}:{self.recorded_at}"
+
+    def save(self, *args, **kwargs):
+        if self.pk and type(self).objects.filter(pk=self.pk).exists():
+            raise ValueError("Regulatory readiness history is append-only")
+        return super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        raise ValueError("Regulatory readiness history is append-only")

@@ -14,9 +14,14 @@ def approved_instructor_publication_ufs(*, on_date=None):
         regulatory_readiness__provider_type=INSTRUCTOR_PROVIDER_TYPE,
         regulatory_readiness__capability=INSTRUCTOR_PUBLICATION_CAPABILITY,
         regulatory_readiness__status=RegulatoryReadiness.Status.APPROVED,
+        regulatory_readiness__reviewed_by__isnull=False,
+        regulatory_readiness__reviewed_at__isnull=False,
+        regulatory_readiness__source_url__gt="",
+        regulatory_readiness__source_reference__gt="",
+        regulatory_readiness__approved_by__isnull=False,
+        regulatory_readiness__approved_at__isnull=False,
     ).filter(
-        Q(regulatory_readiness__valid_from__isnull=True)
-        | Q(regulatory_readiness__valid_from__lte=day),
+        Q(regulatory_readiness__valid_from__lte=day),
         Q(regulatory_readiness__valid_until__isnull=True)
         | Q(regulatory_readiness__valid_until__gte=day),
     )

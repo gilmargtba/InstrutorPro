@@ -61,11 +61,23 @@ def payload(role="STUDENT"):
 @pytest.fixture(autouse=True)
 def territory(db):
     call_command("seed_territories", verbosity=0)
+    reviewer = Account.objects.create_user(
+        username="territory-reviewer",
+        email="territory-reviewer@example.com",
+        password="test-password",
+    )
     RegulatoryReadiness.objects.create(
         federative_unit=FederativeUnit.objects.get(code="RS"),
         provider_type=INSTRUCTOR_PROVIDER_TYPE,
         capability=INSTRUCTOR_PUBLICATION_CAPABILITY,
         status=RegulatoryReadiness.Status.APPROVED,
+        valid_from=timezone.localdate(),
+        source_url="https://publicacoeslegais.detran.rs.gov.br/portaria-detran-rs-n-99-2026",
+        source_reference="Portaria DETRAN/RS 99/2026",
+        reviewed_by=reviewer,
+        reviewed_at=timezone.now(),
+        approved_by=reviewer,
+        approved_at=timezone.now(),
     )
 
 

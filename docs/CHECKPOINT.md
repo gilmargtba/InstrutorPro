@@ -1,5 +1,22 @@
 # Checkpoint do Projeto
 
+## Triagem regulatória nacional e confirmação humana — 28/09/2026
+
+- Inventário preliminar de 27 UFs documentado em `REGULATORY_READINESS_27_UFS.md`;
+  nenhuma UF foi aprovada por essa triagem. Fontes incompletas e vigência não confirmada
+  permanecem `NEEDS_REVIEW` no relatório (`REVIEW_REQUIRED` no banco).
+- Painel administrativo e histórico de decisões preparados para revisão por UF. A
+  conta existente `gilmar` é o responsável designado; concessão de permissão e carga
+  de registros dependem de execução controlada no ambiente-alvo. Sem criação de
+  conta, redefinição de senha ou aprovação em lote.
+- Registro `APPROVED` requer decisão explícita de `gilmar`, fonte/norma,
+  vigência e justificativa; autorização individual e publicação seguem gates separados.
+- Validação local: 289 testes backend aprovados; 69 testes focados repetidos após
+  reforço do gate de vigência, Ruff lint/formatação, Django check e verificação
+  de migration aprovados. Implantação e carga na VPS ainda não executadas nesta
+  fatia; não declarar os 27 registros visíveis em produção antes dessa etapa.
+  Busca real e pagamentos permanecem desligados.
+
 - Atualizado em: **2026-09-27**
 - Versão documental: **4.11**
 - Código-fonte: **Upload privado voluntário ativado na VPS; smoke técnico completo aprovado**
