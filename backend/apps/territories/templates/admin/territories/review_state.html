@@ -1,0 +1,14 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<h1>Revisar ou bloquear UF — {{ item.federative_unit.code }}</h1>
+<p>Estado atual: {{ item.get_status_display }}. Esta decisão afeta apenas o gate territorial desta UF; não altera cadastro nem upload documental.</p>
+<form method="post">{% csrf_token %}
+  <p><label>Decisão <select name="status" required>
+    <option value="REVIEW_REQUIRED">Manter em revisão</option>
+    <option value="SUSPENDED">Bloquear UF</option>
+  </select></label></p>
+  <p><label>Justificativa <textarea name="reason" required></textarea></label></p>
+  <input type="submit" value="Registrar decisão desta UF">
+  <a href="{{ back_url }}">Cancelar</a>
+</form>
+{% endblock %}

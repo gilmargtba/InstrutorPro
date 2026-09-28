@@ -1,5 +1,21 @@
 # Checkpoint do Projeto
 
+## Painel regulatório por UF — desenvolvimento local, deploy pendente — 28/09/2026
+
+- O Admin ganhou órgão da fonte, data da consulta, evidências e histórico desses
+  campos, além de decisões individuais de manter em revisão e bloquear UF. A
+  aprovação humana requer os campos preenchidos; a policy de publicação falha
+  fechada se faltarem. A decisão de bloqueio revoga apenas a UF correspondente.
+- Migration aditiva `territories.0005` criada; a VPS ainda está no commit
+  `ebd0999` e **não** recebeu esta atualização. SSH automático da sessão recusou
+  autenticação por chave/senha em modo não interativo; não declarar correção implantada.
+- Cadastro e upload nacionais permanecem independentes de prontidão regulatória;
+  busca e publicação real só retornam profissionais individualmente elegíveis em
+  UFs explicitamente aprovadas. Nenhuma UF foi aprovada nesta fatia.
+- Validação local: 290 testes backend e 42 frontend aprovados; Ruff, Django check,
+  migration check e build Angular de produção passaram. Permanecem dois avisos
+  preexistentes de orçamento de bundle/SCSS no build, sem falha.
+
 ## Triagem regulatória nacional e confirmação humana — 28/09/2026
 
 - Inventário preliminar de 27 UFs documentado em `REGULATORY_READINESS_27_UFS.md`;

@@ -62,6 +62,9 @@ class RegulatoryReadiness(models.Model):
     valid_until = models.DateField(null=True, blank=True)
     source_url = models.URLField(blank=True)
     source_reference = models.CharField(max_length=255, blank=True)
+    source_authority = models.CharField(max_length=255, blank=True)
+    source_consulted_at = models.DateField(null=True, blank=True)
+    evidence = models.TextField(blank=True)
     notes = models.TextField(blank=True)
     reviewed_by = models.ForeignKey(
         "accounts.Account",
@@ -103,6 +106,9 @@ class RegulatoryReadiness(models.Model):
                 valid_until=self.valid_until,
                 source_url=self.source_url,
                 source_reference=self.source_reference,
+                source_authority=self.source_authority,
+                source_consulted_at=self.source_consulted_at,
+                evidence=self.evidence,
                 notes=self.notes,
                 reviewed_by=self.reviewed_by,
                 reviewed_at=self.reviewed_at,
@@ -121,6 +127,9 @@ class RegulatoryReadinessHistory(models.Model):
     valid_until = models.DateField(null=True, blank=True)
     source_url = models.URLField(blank=True)
     source_reference = models.CharField(max_length=255, blank=True)
+    source_authority = models.CharField(max_length=255, blank=True)
+    source_consulted_at = models.DateField(null=True, blank=True)
+    evidence = models.TextField(blank=True)
     notes = models.TextField(blank=True)
     reviewed_by = models.ForeignKey(
         "accounts.Account", null=True, on_delete=models.PROTECT, related_name="+"

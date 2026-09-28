@@ -12,7 +12,10 @@ from apps.discovery.models import InstructorProfile
 
 from .models import FederativeUnit, RegulatoryReadiness, RegulatoryReadinessHistory
 from .policies import INSTRUCTOR_PROVIDER_TYPE, INSTRUCTOR_PUBLICATION_CAPABILITY
-from .services import approve_instructor_publication_uf
+from .services import (
+    approve_instructor_publication_uf,
+    set_instructor_publication_uf_review_state,
+)
 
 
 @admin.register(FederativeUnit)
@@ -24,6 +27,7 @@ class FederativeUnitAdmin(admin.ModelAdmin):
         "norm",
         "last_review",
         "source",
+        "review_link",
         "published_count",
     )
     search_fields = ("code", "name")
@@ -89,6 +93,16 @@ class FederativeUnitAdmin(admin.ModelAdmin):
             service_area__uf=obj.code,
         ).count()
 
+    @admin.display(description="Análise")
+    def review_link(self, obj):
+        item = self._readiness(obj)
+        if item is None:
+            return "—"
+        return format_html(
+            '<a href="{}">Abrir análise</a>',
+            reverse("admin:territories_regulatoryreadiness_change", args=[item.pk]),
+        )
+
 
 class RegulatoryReadinessHistoryInline(admin.TabularInline):
     model = RegulatoryReadinessHistory
@@ -98,6 +112,9 @@ class RegulatoryReadinessHistoryInline(admin.TabularInline):
         "recorded_at",
         "status",
         "source_reference",
+        "source_authority",
+        "source_consulted_at",
+        "evidence",
         "valid_from",
         "valid_until",
         "reviewed_by",
@@ -115,9 +132,12 @@ class RegulatoryReadinessAdmin(admin.ModelAdmin):
         "uf",
         "status_badge",
         "source_reference",
+        "source_authority",
+        "source_consulted_at",
         "reviewed_at",
         "source_link",
         "approve_link",
+        "review_state_link",
     )
     list_filter = ("status", "provider_type", "capability")
     search_fields = ("federative_unit__code", "source_reference")
@@ -138,6 +158,9 @@ class RegulatoryReadinessAdmin(admin.ModelAdmin):
         "status",
         "source_url",
         "source_reference",
+        "source_authority",
+        "source_consulted_at",
+        "evidence",
         "notes",
         "valid_from",
         "valid_until",
@@ -179,6 +202,13 @@ class RegulatoryReadinessAdmin(admin.ModelAdmin):
             reverse("admin:territories_readiness_approve", args=[obj.pk]),
         )
 
+    @admin.display(description="Outras decisões")
+    def review_state_link(self, obj):
+        return format_html(
+            '<a href="{}">Manter em revisão / Bloquear</a>',
+            reverse("admin:territories_readiness_review_state", args=[obj.pk]),
+        )
+
     def save_model(self, request, obj, form, change):
         if not request.user.has_perm("territories.change_regulatoryreadiness"):
             raise PermissionDenied
@@ -204,7 +234,12 @@ class RegulatoryReadinessAdmin(admin.ModelAdmin):
                 "<uuid:object_id>/approve/",
                 self.admin_site.admin_view(self.approve_view),
                 name="territories_readiness_approve",
-            )
+            ),
+            path(
+                "<uuid:object_id>/review-state/",
+                self.admin_site.admin_view(self.review_state_view),
+                name="territories_readiness_review_state",
+            ),
         ] + super().get_urls()
 
     def approve_view(self, request, object_id):
@@ -237,6 +272,37 @@ class RegulatoryReadinessAdmin(admin.ModelAdmin):
             {
                 **self.admin_site.each_context(request),
                 "title": "Confirmar prontidão regulatória",
+                "item": item,
+                "back_url": back,
+                "opts": self.model._meta,
+            },
+        )
+
+    def review_state_view(self, request, object_id):
+        item = self.get_object(request, object_id)
+        if item is None:
+            raise Http404
+        if not request.user.has_perm("territories.change_regulatoryreadiness"):
+            raise PermissionDenied
+        back = reverse("admin:territories_regulatoryreadiness_change", args=[item.pk])
+        if request.method == "POST":
+            try:
+                set_instructor_publication_uf_review_state(
+                    actor=request.user,
+                    readiness_id=item.pk,
+                    status=request.POST.get("status", ""),
+                    reason=request.POST.get("reason", ""),
+                )
+                self.message_user(request, "Decisão registrada para esta UF.", messages.SUCCESS)
+            except ValidationError as exc:
+                self.message_user(request, str(exc), messages.ERROR)
+            return HttpResponseRedirect(back)
+        return TemplateResponse(
+            request,
+            "admin/territories/review_state.html",
+            {
+                **self.admin_site.each_context(request),
+                "title": "Revisar ou bloquear UF",
                 "item": item,
                 "back_url": back,
                 "opts": self.model._meta,

@@ -4,6 +4,15 @@ Levantamento inicial em 28/09/2026. Escopo: **publicação de instrutor de trân
 
 Responsável humano designado: conta administrativa existente `gilmar`, sem criação de conta e sem alteração de senha. O levantamento automatizado apenas reúne indícios; `reviewed_by`, `reviewed_at`, `approved_by` e `approved_at` só são preenchidos por confirmação explícita dessa conta, individualmente por UF, no painel. `HUMAN_REGULATORY_APPROVAL_REQUIRED=true`; `AUTO_REGULATORY_APPROVAL=false`. A designação não pressupõe formação jurídica, função de DPO nem credenciamento oficial.
 
+O painel administrativo apresenta UF, estado, referência normativa, órgão da fonte,
+URL oficial, data da consulta, evidências, vigência e histórico. Esses últimos campos
+de revisão são preenchidos por humano, não pelo seed preliminar. A ação individual
+**Aprovar UF** exige esses dados, confirmação de vigência e justificativa; grava
+revisor/aprovador, instantes e evento de auditoria. **Manter em revisão** e
+**Bloquear UF** exigem justificativa e revogam eventual aprovação territorial,
+sem afetar cadastro ou upload. No modelo, `APPROVED` corresponde ao `READY` do
+relatório e `SUSPENDED` ao bloqueio; não existe aprovação em lote.
+
 ## Base federal e invariantes
 
 - [Código de Trânsito Brasileiro, art. 155](https://www.planalto.gov.br/ccivil_03/leis/l9503compilado.htm), [Lei nº 12.302/2010](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12302.htm) e [Resolução CONTRAN nº 1.020/2025, arts. 109–110](https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/Resolucao10202025.pdf) são a base comum. A resolução consta [em vigor no índice oficial](https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-Senatran/resolucoes-contran).

@@ -18,6 +18,9 @@ def approved_instructor_publication_ufs(*, on_date=None):
         regulatory_readiness__reviewed_at__isnull=False,
         regulatory_readiness__source_url__gt="",
         regulatory_readiness__source_reference__gt="",
+        regulatory_readiness__source_authority__gt="",
+        regulatory_readiness__source_consulted_at__lte=day,
+        regulatory_readiness__evidence__gt="",
         regulatory_readiness__approved_by__isnull=False,
         regulatory_readiness__approved_at__isnull=False,
     ).filter(

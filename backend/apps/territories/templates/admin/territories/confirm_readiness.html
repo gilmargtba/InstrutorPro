@@ -2,8 +2,9 @@
 {% block content %}
 <h1>Confirmar prontidão regulatória — {{ item.federative_unit.code }}</h1>
 <p>Esta decisão libera apenas o gate territorial para publicação manual de instrutores individualmente verificados. Não autoriza nenhum profissional automaticamente.</p>
-<p>Norma: {{ item.source_reference }}<br>Fonte: <a href="{{ item.source_url }}" rel="noopener noreferrer">{{ item.source_url }}</a></p>
-<p>Observações: {{ item.notes }}</p>
+<p>Norma: {{ item.source_reference }}<br>Órgão: {{ item.source_authority }}<br>Fonte: <a href="{{ item.source_url }}" rel="noopener noreferrer">{{ item.source_url }}</a><br>Consultada em: {{ item.source_consulted_at|default:"não informado" }}</p>
+<p>Evidências: {{ item.evidence|linebreaksbr }}</p>
+<p>Observações: {{ item.notes|linebreaksbr }}</p>
 <form method="post">{% csrf_token %}
   <p><label>Início de vigência confirmado <input type="date" name="valid_from" required></label></p>
   <p><label>Justificativa da decisão <textarea name="reason" required></textarea></label></p>
