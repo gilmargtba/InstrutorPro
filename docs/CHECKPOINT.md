@@ -1,14 +1,43 @@
 # Checkpoint do Projeto
 
-## Painel regulatório por UF — desenvolvimento local, deploy pendente — 28/09/2026
+## Deploy do painel regulatório por UF — 28/09/2026
+
+- A VPS `179.199.136.4` foi atualizada por fast-forward de `ebd0999` para
+  `a1ab4bb`, correspondente a `origin/main` no momento do deploy. As cópias
+  locais não rastreadas de `.env.production` foram preservadas.
+- Antes da atualização, `scripts/backup-production.sh` gerou e validou o dump
+  PostgreSQL e o arquivo de documentos privados em
+  `/home/gilmar/backups/instrutorpro/production/`, ambos com SHA-256; não houve
+  restauração nem remoção de dados/volumes.
+- Backend, worker e scheduler foram reconstruídos e iniciaram; o backend ficou
+  `Healthy`. `territories.0005` aparece aplicada e `manage.py check` não encontrou
+  problemas. PostgreSQL, Redis e ClamAV estavam saudáveis; gateway e frontend
+  permaneciam em execução.
+- HTTPS e página inicial responderam 200 com certificado válido; cadastro de
+  instrutor, login admin e página de verificação responderam 200. O Admin
+  redirecionou anonimamente para login, inclusive na rota de prontidão
+  regulatória; a visualização autenticada ainda depende de conferência humana.
+  `/api/v1/readiness/` respondeu `status=ok`, banco `up`; a API de verificação
+  negou acesso anônimo (403), e o OPTIONS do cadastro respondeu 200.
+- Conferência sanitizada no banco: `TOTAL_UFS=27`, `PENDING_UFS=27`,
+  `APPROVED_UFS=0`, `PUBLICATION_UFS=0` e permissão de revisão de `gilmar=True`.
+  Cadastro real de instrutor, verificação profissional e upload documental
+  permaneceram habilitados; `REAL_MARKETPLACE_SEARCH`, contato real por WhatsApp,
+  pagamentos e cobrança PRO permaneceram desabilitados.
+- MapTiler respondeu a consulta pública de Brasília, mas a API retornou `uf`
+  vazia nesse resultado. A integração está acessível, não homologada para todos
+  os casos; busca pública não foi ativada. Não houve criação de conta, envio de
+  documento pessoal, aprovação de UF ou publicação de instrutor no smoke.
+
+## Painel regulatório por UF — implementação local e deploy concluído — 28/09/2026
 
 - O Admin ganhou órgão da fonte, data da consulta, evidências e histórico desses
   campos, além de decisões individuais de manter em revisão e bloquear UF. A
   aprovação humana requer os campos preenchidos; a policy de publicação falha
   fechada se faltarem. A decisão de bloqueio revoga apenas a UF correspondente.
-- Migration aditiva `territories.0005` criada; a VPS ainda está no commit
-  `ebd0999` e **não** recebeu esta atualização. SSH automático da sessão recusou
-  autenticação por chave/senha em modo não interativo; não declarar correção implantada.
+- Migration aditiva `territories.0005` aplicada na VPS no commit `a1ab4bb`;
+  acesso SSH por chave dedicado foi configurado sem alterar senhas ou substituir
+  as chaves já autorizadas.
 - Cadastro e upload nacionais permanecem independentes de prontidão regulatória;
   busca e publicação real só retornam profissionais individualmente elegíveis em
   UFs explicitamente aprovadas. Nenhuma UF foi aprovada nesta fatia.
