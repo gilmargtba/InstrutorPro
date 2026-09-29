@@ -1,5 +1,38 @@
 # Checkpoint do Projeto
 
+## Validação direta do MVP e sincronização — 29/09/2026
+
+- `origin/main` e VPS sincronizados no commit `b717310` por push e
+  fast-forward, após backup validado do banco e dos documentos privados. Apenas
+  o backend foi reconstruído e voltou `Healthy`; migrations estavam aplicadas e
+  Django check passou.
+- Validação local: 336 testes backend, 45 testes Angular, Ruff check/format,
+  Django check, migration check sem deriva e build Angular de produção passaram.
+  O build mantém avisos não bloqueantes de orçamento de bundle/SCSS.
+- Smoke externo após deploy: readiness com banco `up`; geocoding resolveu
+  Brasília/DF, Goiânia/GO, São Paulo/SP, Rio de Janeiro/RJ, Florianópolis/SC e
+  Manaus/AM. PostGIS 3.5 responde; não foi reproduzida perda de UF.
+- Smoke técnico de documentos em produção passou para storage privado, ClamAV
+  com assinaturas recentes, arquivo limpo, EICAR, falha fechada, autorização,
+  IDOR, backup/restore técnico e remoção dos dados sintéticos. O limite
+  configurado é 5 MiB; PDF/JPEG/PNG e limite são cobertos pela suíte.
+- A conta existente `gilmar` permanece staff com permissão regulatória. Há 27
+  análises `REVIEW_REQUIRED`, zero UFs aprovadas e zero UFs autorizadas para
+  publicação. Existem 3 perfis reais, nenhum verificado ou publicado; nenhuma
+  aprovação foi executada. Login humano de `gilmar` e jornada de e-mail externa
+  não foram exercidos sem credencial/sessão do titular.
+- Busca, contato WhatsApp e analytics reais permanecem bloqueados por
+  `REAL_MARKETPLACE_SEARCH=false`, `REAL_WHATSAPP_CONTACT=false`,
+  `REAL_MARKETPLACE_ANALYTICS=false` e
+  `REAL_PRODUCTION_AUTHORIZATION=NOT_GRANTED`; a rota pública de estados
+  retornou zero estados com perfis publicados elegíveis.
+- Asaas sandbox foi validado somente por testes do adaptador: a VPS não tem
+  `PAYMENT_PROVIDER=ASAAS`, `PAYMENT_ENVIRONMENT=sandbox`, chave sandbox nem
+  token de webhook configurados. Checkout/customer/subscription/webhook/
+  entitlement Asaas E2E seguem bloqueados; o adaptador ainda não está conectado
+  ao fluxo público. `REAL_PAYMENTS=false` e `REAL_PRO_BILLING=false` foram
+  reconfirmados, sem cobrança.
+
 ## Decisão comercial e primeiro adaptador Asaas sandbox — 29/09/2026
 
 - Proprietário alterou o MVP para `MARKETPLACE_MODEL=LEAD_GENERATION`: busca,
