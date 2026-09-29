@@ -1,6 +1,13 @@
 # Marketplace SaaS de Aulas Práticas de Direção
 
-Base documental e técnica para construir uma plataforma que aproxima alunos e instrutores autônomos de direção, formaliza a contratação e cobra comissão. O repositório possui a fundação executável descrita no checkpoint; somente a atividade ali autorizada pode ser iniciada sem reinterpretar o produto.
+Base documental e técnica para construir uma plataforma que aproxima alunos e instrutores autônomos de direção. O repositório possui a fundação executável descrita no checkpoint; somente a atividade ali autorizada pode ser iniciada sem reinterpretar o produto.
+
+**Decisão comercial vigente (29/09/2026):** o MVP é geração de leads — busca,
+perfil e contato voluntário via WhatsApp. Contratação e pagamento da aula são
+externos; não há reserva paga, comissão ou split de aula na plataforma. A única
+cobrança planejada é a assinatura opcional PRO do instrutor, ainda sem preço e
+com integração Asaas restrita a sandbox. O fluxo transacional de aulas descrito
+abaixo é histórico e está adiado. Veja `docs/SCOPE.md` e `docs/DECISIONS.md`.
 
 O sistema realiza **verificação interna para publicação**. Não credencia instrutor perante órgão público, não homologa aula, não garante validade oficial e não substitui Detran ou Senatran.
 

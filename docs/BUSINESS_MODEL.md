@@ -2,6 +2,21 @@
 
 Este documento é a fonte oficial do funcionamento econômico. Valores e políticas em aberto não podem ser codificados como definitivos; seus identificadores estão em `DECISIONS.md`.
 
+## Modelo vigente do MVP comercial — 29/09/2026
+
+O marketplace é de geração de leads: busca → perfil → clique voluntário para
+WhatsApp. Aluno e instrutor negociam e agendam diretamente. A plataforma não
+recebe pagamento de aula, não cobra comissão (comissão da aula = 0), não cria
+reserva paga e não faz split, retenção ou repasse. Cancelamento financeiro,
+no-show financeiro e disputa financeira da aula não se aplicam ao MVP.
+
+FREE continua funcional conforme capacidades já implementadas e não depende de
+PRO para cadastro, verificação ou publicação básica. A única monetização
+pretendida é a assinatura opcional PRO do instrutor, com preço ainda não
+definido e ativação exclusivamente após confirmação confiável do gateway.
+As seções abaixo sobre pagamento de aula, comissão e ledger descrevem o modelo
+transacional anterior e estão adiadas; não governam o MVP vigente.
+
 ## Atores econômicos e responsabilidades propostas
 
 | Ator                  | Papel econômico                                                      | Responsabilidade operacional                                                               | Limite jurídico a validar                                                             |

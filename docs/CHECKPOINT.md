@@ -1,5 +1,25 @@
 # Checkpoint do Projeto
 
+## Decisão comercial e primeiro adaptador Asaas sandbox — 29/09/2026
+
+- Proprietário alterou o MVP para `MARKETPLACE_MODEL=LEAD_GENERATION`: busca,
+  perfil e contato voluntário por WhatsApp; sem pagamento/reserva/comissão de
+  aula. FREE permanece independente de PRO e de autorização regulatória.
+- Asaas escolhido para investigação/implementação em sandbox. Adaptador local
+  isolado usa somente `api-sandbox.asaas.com`, rejeita chave de produção,
+  prepara customer, checkout hospedado mensal de cartão e consultas/cancelamento
+  de assinatura. Nenhuma API pública ou capability de cobrança foi ativada.
+- Webhook PRO, associação de cobrança à assinatura, reconciliação, inadimplência,
+  renovação, cancelamento ao fim do período, preço PRO, testes E2E com conta
+  Asaas e UI de assinatura ainda estão pendentes. Não chamar esta fatia de
+  integração comercial completa. `REAL_PAYMENTS=false` e
+  `REAL_PRO_BILLING=false`; nenhuma cobrança ou conta real criada.
+- Validação: sete testes isolados do adaptador, Ruff check/format, 336 testes
+  backend no Docker isolado e Django check passaram. O ambiente não possui
+  credencial/token Asaas sandbox; portanto `SANDBOX_E2E=BLOCKED`, sem
+  criação de customer/checkout no Asaas. Volumes e contêineres temporários
+  de teste foram removidos, sem tocar os volumes existentes.
+
 ## Hotfix de geocodificação Brasília/DF — 28/09/2026
 
 - Causa reproduzida com resposta real sanitizada do MapTiler: Brasília traz
@@ -642,9 +662,9 @@ reais, pagamentos, expansão além de categoria B ou retomada de `IAM-003`/CODEX
 | ID       | Classe         | Resumo                                                          | Gate                 |
 | -------- | -------------- | --------------------------------------------------------------- | -------------------- |
 | OPEN-002 | resolvido M1 / bloqueante demais escopos | RS/Porto Alegre/B aprovado; demais linhas pendentes | A14/M2 |
-| OPEN-003 | bloqueante     | comissão, hold, cancelamento, no-show, conclusão e disputa      | B5/B6/M3             |
+| OPEN-003 | adiado | financeiro de aulas fora do MVP de leads | fase futura |
 | OPEN-004 | bloqueante     | responsabilidade, consumo, vínculo, seguro, termos e bases LGPD | usuários reais/M6    |
-| OPEN-005 | bloqueante     | gateway, split/KYC, tributação e política contábil              | C1/M4                |
+| OPEN-005 | parcial | Asaas sandbox escolhido; PRO real exige preço, contrato, tributação, privacidade e E2E | cobrança real PRO |
 | OPEN-006 | parcial        | provider real, contratos, regiões e suboperadores; simuladores liberados para desenvolvimento | provider real/A14/M6 |
 | OPEN-007 | condicional/bloqueante produção | Integração/testes DEV concluídos; faltam contrato/DPA, subprocessadores, países, retenção e aceite do endpoint europeu | B1/M3 |
 | OPEN-008 | bloqueante     | retenção, direitos e papéis de tratamento                       | produção/M6          |
@@ -652,7 +672,7 @@ reais, pagamentos, expansão além de categoria B ou retomada de `IAM-003`/CODEX
 | OPEN-010 | bloqueante     | metas, duração, coortes e go/no-go do piloto                    | M7                   |
 | OPEN-011 | não bloqueante | biblioteca/política OIDC Google                                 | Gate M2.1            |
 | OPEN-012 | não bloqueante | nome, marca e domínio                                           | produção pública/VOI |
-| OPEN-013 | não bloqueante | modelo SaaS do instrutor                                        | pós-piloto/M9        |
+| OPEN-013 | parcial | FREE/PRO no MVP; preço e ativação paga pendentes | PRO real |
 | OPEN-014 | diferido       | menores bloqueados no MVP; mecanismo/política para expansão futura | expansão com menores |
 
 Detalhes, recomendação, alternativas, impactos e owner estão em `DECISIONS.md`.

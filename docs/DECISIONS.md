@@ -2,6 +2,21 @@
 
 Este documento é a fonte oficial de decisões consolidadas, contradições resolvidas e questões em aberto. Uma recomendação marcada como aberta não é uma decisão aceita.
 
+### Decisão comercial do proprietário de 29/09/2026 — lead generation e PRO
+
+O MVP deixa de cobrar ou reservar aulas. O fluxo aluno → busca → perfil →
+WhatsApp é geração de leads, com negociação/agendamento externos. Comissão de
+aula é zero; split, repasse, hold, cancelamento/no-show/disputa financeira de
+aula não se aplicam. FREE não depende de PRO para elegibilidade/publicação.
+PRO é assinatura opcional do instrutor, separada de verificação e prontidão
+regulatória. Asaas foi selecionado para implementação inicial **somente em
+sandbox**, com checkout hospedado, confirmação por webhook autenticado e
+idempotente. Pix e cartão dependem de prova do comportamento de cada modalidade;
+preço mensal, contratos, tributação, privacidade e ativação de cobrança real
+permanecem pendentes. `REAL_PAYMENTS=false` e `REAL_PRO_BILLING=false`.
+Os textos históricos de MVP transacional em outros documentos não autorizam
+implementação de pagamento de aula nesta fase.
+
 ### Decisão do proprietário de 28/09/2026 — prontidão por UF
 
 Cadastro, upload voluntário e verificação podem abranger as 27 UFs, preservados
@@ -76,9 +91,9 @@ Detalhes e rollback em `PROFESSIONAL_DOCUMENT_UPLOAD_HOTFIX.md`.
 | ID       | Classe/gate                            | Questão                                                                         | Recomendação proposta                                                                            | Alternativas e impactos                                                                       | Dono                                       |
 | -------- | -------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------- | ------------------------------------------ |
 | OPEN-002 | **Resolvido para M1 Porto Alegre/categoria B; bloqueante nos demais escopos** | Quais evidências e requisitos locais, validade e revisão? | `GOV002-RS-INSTRUCTOR` aprovado com lista manual, 24h, tolerância 72h e sem upload; demais linhas seguem conservadoras. | A aprovação M1 não se estende a outra UF/categoria/tipo. | COMPLIANCE + LEGAL |
-| OPEN-003 | **Bloqueante B5/B6**                   | Comissão, preço, hold, cancelamento, no-show, conclusão e disputa.              | Uma política simples e versionada, validada por jurídico/finanças e testada no piloto.           | Regras flexíveis aumentam casos e suporte; regras rígidas elevam abandono/risco consumerista. | Product + Legal + Finance + Operations     |
+| OPEN-003 | **Adiado; fora do MVP de leads** | Comissão/hold/cancelamento/no-show/disputa financeira de aula. | Nenhuma reserva ou pagamento de aula no MVP; só reabrir em fase transacional futura. | Preserva escopo e evita inventar política hoje. | Product + Legal + Finance + Operations |
 | OPEN-004 | **Bloqueante antes de usuários reais** | Responsabilidade da plataforma, consumo, vínculo, seguros, termos e bases LGPD. | Parecer jurídico brasileiro documentado e termos aprovados.                                      | Operar só com disclaimers não reduz adequadamente o risco.                                    | Legal + Compliance                         |
-| OPEN-005 | **Bloqueante C1**                      | Gateway, fluxo de split/KYC, tributação e política contábil.                    | RFP com sandbox e prova de webhook/conciliação; parecer jurídico-contábil antes do ledger final. | Checkout simples sem split muda repasse/risco; custódia pela plataforma está fora do escopo.  | Finance + Legal + Accounting + Engineering |
+| OPEN-005 | **Parcial: Asaas sandbox; cobrança real bloqueada** | Assinatura PRO: preço, contrato, tributação, contabilidade, privacidade, webhook e reconciliação; split/KYC de instrutor adiado. | Validar ciclo sandbox e obter decisões/pareceres aplicáveis antes de cobrar de verdade. | Seleção técnica do gateway não fecha os gates comerciais e legais. | Finance + Legal + Accounting + Engineering |
 | OPEN-006 | **Bloqueante apenas no gate do provider real/A14/M6** | Quais fornecedores de produção, contratos, regiões e suboperadores serão adotados? | Desenvolvimento usa portas/adapters e simuladores para e-mail, storage privado, malware scan, mapas, pagamentos e notificações; produção exige decisão humana/contratual. | Escolher fornecedor definitivo agora cria acoplamento; não definir antes de produção impede avaliação de segurança/LGPD. | Engineering + Security/Privacy + Legal |
 | OPEN-007 | **Decisão técnica aceita; bloqueante contratual para produção/B1** | MapTiler Cloud Flex foi aprovado como provider preferencial do M1 em Porto Alegre, com PostGIS como fonte de verdade, geocoding no backend, Leaflet, sem GPS e fallback por cidade. | Antes de dados reais: aceitar plano/DPA, subprocessadores, países/transferência, retenção da consulta e endpoint europeu; restringir chaves e testar falha/custos. | A seleção remove o bloqueio genérico, mas não autoriza ativação real sem as evidências condicionantes. | Product + Privacy + Legal + Engineering |
 | OPEN-008 | **Piloto: `BLOCKED`; produção: `BLOCKED_EXTERNAL`** | Bases, LIA aplicável, retenção, RIPD, canal/DPO e providers. | Proprietário aprovou em 18/09/2026 idade 18+, LIA-8F-01/02, analytics por 90 dias, RIPD do recorte e WhatsApp externo. Faltam política completa de retenção, `DPO_STATUS=PENDING_CLASSIFICATION` e, para busca, revisão MapTiler. | Aprovação parcial não autoriza dados reais; provider bloqueia apenas a capability dependente. | Privacy + Legal |
@@ -86,7 +101,7 @@ Detalhes e rollback em `PROFESSIONAL_DOCUMENT_UPLOAD_HOTFIX.md`.
 | OPEN-010 | **Piloto: `PASS`; produção: pendente** | Duração, coortes e regra go/no-go. | Proprietário aprovou 30 dias, 10 alunos, 3 instrutores, Porto Alegre/RS, categoria B, adultos, sem pagamentos/documentos/autopublicação em 18/09/2026. | Alterar baseline durante a execução invalida a evidência. | Product + Data + Operations |
 | OPEN-011 | **Não bloqueante até Gate A19/M2.1**   | Biblioteca OIDC e política de recuperação/vínculo Google.                       | Backend OIDC maduro, vinculação por reautenticação e recuperação independente.                   | Adiar indefinidamente não afeta o primeiro ciclo/MVP central.                                 | Security + Engineering                     |
 | OPEN-012 | **Não bloqueante até VOI**             | A marca e o domínio InstrutorProCNH estão disponíveis e podem ser protegidos?       | Pesquisar e registrar marca/domínio antes de produção pública.                                   | Operar sem validação cria custo de troca e possível conflito marcário.                        | Founders + Legal + Marketing               |
-| OPEN-013 | **Fundação técnica autorizada; comercial bloqueado** | SaaS, alunos próprios, pacotes e assinatura. | Planos/capacidades e analytics reais de eventos podem ser preparados sem cobrança; preço, checkout, gateway e ativação paga exigem decisão comercial posterior. | Preserva aprendizagem do marketplace sem presumir modelo comercial ou transformar pagamento em elegibilidade. | Product + Finance |
+| OPEN-013 | **PRO incluído no MVP; preço/ativação real pendentes** | FREE e assinatura opcional PRO; demais SaaS avançado adiado. | Preparar Asaas sandbox sem preço inventado, sem cobrança real ou efeito regulatório. | PRO pago só após confirmação confiável e decisão separada de produção. | Product + Finance |
 | OPEN-014 | **Bloqueante para cadastro operacional de menores/expansão futura** | Qual política e mecanismo proporcional serão adotados para menores? | No MVP, bloquear cadastro operacional e coleta de dados de menores em demanda/mapa/marketplace; não definir mecanismo definitivo ainda. | Admitir menores exige política específica, melhor interesse, avaliação do ECA Digital, RIPD e controles próprios. | Product + Legal + Privacy |
 
 ## Regra de decisão

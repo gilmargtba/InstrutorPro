@@ -2,12 +2,28 @@
 
 Este documento é a fonte oficial de fronteiras. Outros documentos podem detalhar, mas não incluir funcionalidade por conta própria.
 
+## Emenda comercial do proprietário — 29/09/2026
+
+O MVP comercial é **geração de leads**, não uma intermediação financeira da aula:
+aluno pesquisa, consulta perfil minimizado e decide contatar o instrutor por
+WhatsApp. Negociação, agenda, contratação e pagamento da aula ocorrem diretamente
+entre as partes, fora da plataforma. A plataforma não cobra do aluno, não reserva
+aula paga, não retém valor, não faz split/repasse nem cobra comissão por aula.
+Somente a assinatura opcional PRO do instrutor pode gerar receita da plataforma;
+FREE mantém cadastro, verificação e publicação básica sujeitos aos mesmos gates
+regulatórios e individuais. PRO não confere verificação ou publicação.
+
+Os trechos abaixo que descrevem reserva, comissão, ledger de aulas ou execução
+transacional representam o plano anterior e ficam **adiados para fase futura**.
+Nenhuma flag de pagamento real é autorizada por esta emenda. A integração Asaas
+começa exclusivamente em sandbox, com preço real de PRO ainda não definido.
+
 ## Definições de entrega
 
 | Entrega                         | Resultado observável                                                                                                                 | Limite                                                                        |
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------- |
 | Primeiro ciclo de implementação | instrutor passa por cadastro, documentos, revisão e elegibilidade auditáveis                                                         | sem marketplace, agenda, pagamento, mapa, chat ou integração pública          |
-| MVP funcional                   | jornada CNH conecta aluno a instrutor e permite descoberta de clínicas/profissionais, com contratação de aula percorrendo negociação, reserva, pagamento, execução, eventual disputa e avaliação | arquitetura nacional, primeira onda técnica/comercial RS/SC/SP/RJ/ES, AM/RO/AC/RR somente na matriz regulatória, providers substituíveis e operação assistida |
+| MVP funcional                   | busca e perfil de instrutor elegível com contato voluntário por WhatsApp; FREE e assinatura PRO opcional, somente após confirmação financeira válida | sem reserva ou pagamento de aula, comissão, split, repasse ou publicação automática; ativação real depende dos gates por UF, profissional, privacidade e operação |
 | Piloto                          | MVP operado com usuários reais e métricas, sob limites e critérios de `PILOT.md`                                                     | não equivale a expansão nem valida todas as hipóteses nacionais               |
 | Versão operacional inicial      | operação contínua após piloto aprovado, com suporte, SLOs, continuidade e processo de release sustentáveis                           | mesma proposta central e expansão controlada                                  |
 | Evolução posterior              | SaaS do instrutor, integrações oficiais e expansão geográfica                                                                        | exige evidência e novo gate de escopo                                         |
@@ -41,10 +57,23 @@ Não inclui busca, disponibilidade, negociação, reserva, pagamento, avaliaçã
 ### Descoberta e oferta
 
 - área de serviço e busca geográfica;
-- filtros por categoria, transmissão, oferta com/sem veículo, preço e disponibilidade;
+- filtros por categoria, transmissão, oferta com/sem veículo e preço informado pelo instrutor;
 - perfil público minimizado;
-- oferta de serviço com preço/duração definidos pelo instrutor dentro das políticas da plataforma;
-- disponibilidade recorrente e exceções.
+- oferta de serviço com preço/duração informativos, sem checkout de aula;
+- CTA voluntário para WhatsApp profissional, auditado e sem envio automático de mensagem.
+
+### Assinatura opcional PRO do instrutor
+
+- FREE permanece funcional sem cobrança e sem dependência de PRO para verificação/publicação;
+- preço mensal PRO é configuração administrativa ainda pendente de decisão;
+- checkout hospedado no Asaas, primeiro em sandbox, sem captura de cartão na plataforma;
+- entitlement PRO somente após confirmação autenticada e idempotente do pagamento;
+- renovação, inadimplência, cancelamento, período pago e reconciliação são estados auditáveis;
+- pagamento PRO nunca altera elegibilidade, prontidão regulatória ou publicação.
+
+## Modelo transacional de aulas adiado
+
+As subseções seguintes são histórico de escopo futuro, não requisitos do MVP vigente.
 
 ### Negociação e reserva
 
@@ -74,7 +103,7 @@ Não inclui busca, disponibilidade, negociação, reserva, pagamento, avaliaçã
 - backoffice de suporte e moderação;
 - avaliação única por participação após conclusão elegível.
 
-### Operação e conformidade
+## Operação e conformidade do MVP
 
 - administração com menor privilégio, MFA e trilha de auditoria;
 - LGPD, canal de direitos, retenção aprovada e resposta a incidente;
@@ -91,14 +120,19 @@ Não inclui busca, disponibilidade, negociação, reserva, pagamento, avaliaçã
 - categorias de instrutor habilitadas conforme regra federal e estadual vigente, sem assumir categoria B como regra nacional;
 - um gateway, um provedor de mapas, um storage e provedores mínimos de mensagem;
 - verificação interna manual, com tarefas automáticas apenas de apoio;
-- uma moeda (`BRL`) e valores em centavos no ledger;
+- assinatura PRO, quando autorizada, em `BRL`, com valores em centavos internamente;
 - web responsiva/PWA; sem app nativo;
 - comunicação assíncrona transacional; sem chat em tempo real;
 - suporte assistido pode orientar e reprocessar operações autorizadas, mas nunca receber senha, OTP, cartão ou dinheiro em nome das partes.
 
 ## Escopo definitivo do piloto
 
-O piloto executa o MVP funcional em produção limitada com 20–50 instrutores elegíveis como meta de oferta, população de alunos controlada, suporte em horário publicado, limites financeiros e de volume configurados, conciliação diária e revisão semanal. Cidade, duração, orçamento, limites e responsáveis são bloqueios de entrada, não valores a serem inventados na implementação. Os critérios completos estão em `PILOT.md`.
+O piloto executa o MVP de leads em produção limitada com instrutores elegíveis,
+população de alunos controlada, suporte em horário publicado, limites de volume
+e revisão semanal. Se a assinatura PRO for incluída no piloto, exige gate
+financeiro e conciliação próprios; não há pagamento de aulas. Cidade, duração,
+orçamento, limites e responsáveis são bloqueios de entrada, não valores a serem
+inventados na implementação. Os critérios completos estão em `PILOT.md`.
 
 ## Versão operacional inicial
 
@@ -113,7 +147,7 @@ Inclui somente após gate positivo do piloto:
 ## Evolução posterior
 
 - alunos próprios do instrutor, agenda e link próprios;
-- pacotes, lembretes, calendário e assinatura SaaS;
+- pacotes, lembretes e calendário; assinatura PRO básica já pertence ao MVP após gate próprio;
 - login Gov.br, Consulta Online Senatran, Datavalid ou Detran apenas com base legal, contrato, documentação e homologação;
 - novas categorias/UFs por configuração e análise local;
 - app nativo, chat, antifraude avançado e seguros/parcerias se métricas justificarem.
@@ -137,16 +171,15 @@ Inclui somente após gate positivo do piloto:
 
 1. Jornadas funcionam sem edição manual de banco e com autorização por objeto.
 2. Somente instrutor elegível aparece; perda de elegibilidade o remove dentro do SLO aprovado.
-3. Aceite cria uma única reserva para a proposta e impede sobreposição concorrente.
-4. Preço, comissão, política e condições são snapshots de versões do servidor.
-5. Confirmação financeira nasce apenas de evento confiável do gateway; duplicação não duplica efeito.
-6. Ledger permanece balanceado e reconciliável; cartão e credenciais externas não são armazenados.
-7. Cancelamento, no-show, conclusão e disputa seguem política aprovada e auditável.
-8. Avaliação exige participação elegível e não expõe dados privados.
-9. Backoffice aplica segregação, MFA, motivo e auditoria.
-10. Segurança, LGPD, restore, rollback, alertas, OpenAPI, testes e homologação passam pelos gates documentados.
-11. Interfaces e comunicações não afirmam homologação oficial.
-12. Piloto só inicia quando todos os bloqueios de entrada de `PILOT.md` estiverem fechados.
+3. Busca, perfil minimizado e WhatsApp não expõem dados protegidos nem simulam reserva/pagamento de aula.
+4. FREE não depende de PRO para cadastro, verificação ou publicação básica.
+5. Se PRO estiver habilitado, somente webhook autenticado e deduplicado ou conciliação confiável confirma período pago e entitlement.
+6. Cancelamento de PRO preserva acesso ao período já pago, quando aplicável; inadimplência e expiração revogam acesso conforme regra versionada.
+7. Cartão e credenciais externas não são armazenados.
+8. Backoffice aplica segregação, motivo e auditoria.
+9. Segurança, LGPD, restore, rollback, alertas, OpenAPI, testes e homologação passam pelos gates documentados.
+10. Interfaces e comunicações não afirmam homologação oficial.
+11. Piloto só inicia quando todos os bloqueios de entrada de `PILOT.md` estiverem fechados.
 
 ## Consolidação de escopo — demanda, matching e jornada do instrutor
 

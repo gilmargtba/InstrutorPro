@@ -37,6 +37,18 @@ publicação regulatória, pagamentos ou integrações oficiais.
 
 Fonte oficial das unidades implementáveis. Prioridade: `P0` bloqueia a sequência; `P1` compõe o caminho crítico; `P2` entra após o gate indicado. Cada tarefa termina em estado executável e commit próprio/coerente conforme `AGENTS.md`.
 
+## Replanejamento comercial de 29/09/2026
+
+Para o MVP vigente, `MKT-004` é busca/perfil/contato de leads, condicionado a
+elegibilidade individual e por UF. `BKG-001–003`, `FIN-002–008` relativos a
+pagamento/reserva/comissão de **aulas** estão adiados; não os executar como
+caminho crítico do MVP atual. A monetização PRO usa fatias próprias, sem
+reaproveitar estados de aula: (1) adaptador Asaas sandbox e contrato; (2)
+customer/checkout idempotentes; (3) webhook autenticado e período pago;
+(4) cancelamento, inadimplência, renovação e reconciliação; (5) UI e E2E sandbox.
+Preço PRO e cobrança real exigem decisão separada. Nenhuma fatia PRO muda
+RegulatoryReadiness ou publicação.
+
 ## M0 — Governança e decisões
 
 ### GOV-001 — Fixar jurisdição e categoria (`P0`)

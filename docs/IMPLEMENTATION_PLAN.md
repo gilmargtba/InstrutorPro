@@ -221,6 +221,14 @@ Saída: acesso Google sem duplicar contas, alterar papel ou conceder elegibilida
 
 ## Fase B — Descoberta, agenda e negociação (M3)
 
+**Emenda 29/09/2026:** para o MVP de leads, executar apenas descoberta,
+perfil minimizado e contato WhatsApp elegíveis. Agenda/negociação/reserva de
+aula abaixo são plano transacional adiado. PRO usa trilha própria de sandbox,
+webhook, períodos, cancelamento e reconciliação, sem comissão de aula. As
+dependências antigas `OPEN-003`/`OPEN-005` de aula não autorizam nem bloqueiam
+isoladamente a preparação técnica de PRO; preço e cobrança real têm gates
+próprios descritos em `DECISIONS.md` e `CHECKPOINT.md`.
+
 Entrada: A18 concluída; `OPEN-003` aprovada para negociação/reserva e `OPEN-007` fechada antes de mapa.
 
 ### B1 — Área de serviço

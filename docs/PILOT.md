@@ -1,5 +1,11 @@
 # Plano do Piloto Controlado
 
+**Emenda comercial de 29/09/2026:** o MVP piloto vigente é geração de leads,
+sem reserva, pagamento, comissão, split ou repasse de aulas. Requisitos antigos
+abaixo relativos a fluxo financeiro de aulas são históricos e não autorizam
+ativação. Assinatura PRO opcional requer gate financeiro próprio; nenhum
+pagamento real foi liberado por esta emenda.
+
 Fonte oficial do piloto. A funcionalidade é definitiva; cidade, duração, orçamento, limites e thresholds numéricos continuam bloqueantes porque a documentação não contém evidência para escolhê-los. Esses campos são congelados em `PIL-001`, antes do primeiro usuário real.
 
 > Proposta ainda não aprovada: a Fatia 8F define um `CONTROLLED_PILOT` pré-transacional de 30
