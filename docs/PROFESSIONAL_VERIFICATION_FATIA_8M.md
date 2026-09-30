@@ -7,7 +7,8 @@ administrativo autorizado registre a análise. A aprovação confirma somente a 
 da identidade profissional consultada. Ela não homologa aula, não representa autorização oficial,
 não aprova publicação e não torna o perfil pesquisável.
 
-Uploads reais, busca pública, publicação automática, pagamentos e Pro permanecem bloqueados.
+No escopo original desta fatia, uploads reais, busca pública, publicação automática, pagamentos e
+Pro ainda não eram liberados. O estado atual dessas capacidades está em `docs/CHECKPOINT.md`.
 
 ## Fluxo
 
@@ -23,6 +24,19 @@ Uploads reais, busca pública, publicação automática, pagamentos e Pro perman
 
 O reenvio de uma solicitação já enviada é idempotente. Uma rejeição permite nova solicitação sem
 apagar o histórico e as auditorias anteriores.
+
+## Triagem e decisão no Admin
+
+- A fila mostra quantas pendências objetivas existem por solicitação: documento obrigatório sem
+  aprovação individual, arquivo ainda não liberado pelo antimalware e metadados da consulta ausentes.
+  O indicador é auxílio operacional, não decisão de elegibilidade.
+- A tela de aprovação reúne documentos privados acessíveis ao revisor atribuído, método, fonte,
+  notas internas e confirmação explícita de consulta humana. O registro da consulta e a decisão
+  ocorrem na mesma transação: se faltar evidência ou permissão, nenhum metadado novo fica gravado.
+- A rejeição usa código estruturado e só é gravada depois de validar o revisor responsável.
+  Aprovação/rejeição em massa não estão disponíveis; cada decisão exige análise individual.
+- A verificação interna não altera a publicação. Prontidão regulatória por UF e decisão de
+  publicação continuam em fluxos separados e com seus próprios gates humanos.
 
 ## Dados e segurança
 

@@ -235,6 +235,63 @@ def _lock_for_decision(actor, verification_request):
     return item
 
 
+def review_checklist(item):
+    """Operational hints only; never an authorization or approval decision."""
+    if item.status != item.Status.UNDER_REVIEW:
+        return []
+    documents = list(item.documents.all())
+    missing = []
+    for requirement in item.requirements_snapshot:
+        if requirement.get("required") and not any(
+            str(document.requirement_id) == str(requirement.get("id"))
+            and document.scan_status == InstructorDocument.ScanStatus.CLEAN
+            and document.status == InstructorDocument.Status.APPROVED
+            for document in documents
+        ):
+            missing.append("Documento obrigatório sem aprovação individual")
+            break
+    if any(document.scan_status != InstructorDocument.ScanStatus.CLEAN for document in documents):
+        missing.append("Arquivo em quarentena ou sem análise antimalware concluída")
+    if not item.verification_method.strip():
+        missing.append("Método da consulta não registrado")
+    if not item.verification_source.strip():
+        missing.append("Fonte da consulta não registrada")
+    if not item.checked_at:
+        missing.append("Data da consulta não registrada")
+    return missing
+
+
+@transaction.atomic
+def record_review_and_approve(
+    *, actor, verification_request, method, source, notes, consultation_confirmed, request_id=None
+):
+    """Record the human attestation and decide atomically; no publication follows."""
+    item = _lock_for_decision(actor, verification_request)
+    method = method.strip()
+    source = source.strip()
+    if not consultation_confirmed or not method or not source:
+        raise InvalidWorkflowTransition("Confirme a consulta e informe método e fonte.")
+    if len(method) > 40 or len(source) > 80:
+        raise InvalidWorkflowTransition("Método ou fonte excede o tamanho permitido.")
+    item.verification_method = method
+    item.verification_source = source
+    item.checked_at = timezone.now()
+    item.internal_notes = notes.strip()
+    item.save(
+        update_fields=[
+            "verification_method",
+            "verification_source",
+            "checked_at",
+            "internal_notes",
+            "updated_at",
+        ]
+    )
+    _audit(actor, "review_metadata_updated", item, "ADMIN_CONSULTATION_CONFIRMED", request_id)
+    return approve_verification_request(
+        actor=actor, verification_request=item, request_id=request_id
+    )
+
+
 @transaction.atomic
 def approve_verification_request(*, actor, verification_request, request_id=None):
     item = _lock_for_decision(actor, verification_request)
@@ -254,6 +311,8 @@ def approve_verification_request(*, actor, verification_request, request_id=None
         or not item.checked_at
     ):
         raise InvalidWorkflowTransition("Método, fonte e data da consulta são obrigatórios.")
+    if len(item.verification_method.strip()) > 40 or len(item.verification_source.strip()) > 80:
+        raise InvalidWorkflowTransition("Método ou fonte excede o limite da evidência.")
     now = timezone.now()
     item.status = item.Status.VERIFIED
     item.decided_at = now
@@ -290,8 +349,10 @@ def approve_verification_request(*, actor, verification_request, request_id=None
 
 
 @transaction.atomic
-def reject_verification_request(*, actor, verification_request, request_id=None):
+def reject_verification_request(*, actor, verification_request, reason_code=None, request_id=None):
     item = _lock_for_decision(actor, verification_request)
+    if reason_code is not None:
+        item.rejection_reason_code = reason_code.strip()
     if not item.rejection_reason_code.strip():
         raise InvalidWorkflowTransition("O motivo estruturado da rejeição é obrigatório.")
     item.status = item.Status.REJECTED
@@ -300,7 +361,14 @@ def reject_verification_request(*, actor, verification_request, request_id=None)
     item.public_message = SAFE_REJECTION_MESSAGE
     with allow_critical_state_mutation():
         item.save(
-            update_fields=["status", "decided_at", "decision_by", "public_message", "updated_at"]
+            update_fields=[
+                "status",
+                "rejection_reason_code",
+                "decided_at",
+                "decision_by",
+                "public_message",
+                "updated_at",
+            ]
         )
     profile = _advance_profile(
         actor=actor,

@@ -1,3 +1,4 @@
+from django import forms
 from django.contrib import admin, messages
 from django.core.exceptions import PermissionDenied
 from django.http import Http404, HttpResponse, HttpResponseRedirect
@@ -31,8 +32,9 @@ from .services import (
     verify_professional,
 )
 from .verification_services import (
-    approve_verification_request,
+    record_review_and_approve,
     reject_verification_request,
+    review_checklist,
     start_verification_review,
 )
 
@@ -287,6 +289,49 @@ class SubmittedDocumentInline(admin.TabularInline):
         return False
 
 
+class VerificationApprovalForm(forms.Form):
+    verification_method = forms.CharField(
+        label="Método da consulta",
+        max_length=40,
+        help_text=(
+            "Descreva como você conferiu a evidência; não declare autorização oficial sem prova."
+        ),
+    )
+    verification_source = forms.CharField(
+        label="Fonte consultada",
+        max_length=80,
+        help_text="Informe órgão e referência/URL da fonte efetivamente consultada.",
+    )
+    internal_notes = forms.CharField(
+        label="Notas internas (sem CPF completo)",
+        required=False,
+        widget=forms.Textarea(attrs={"rows": 3}),
+    )
+    consultation_confirmed = forms.BooleanField(
+        label="Confirmo que consultei esta fonte agora e revisei os documentos aplicáveis.",
+        required=True,
+    )
+
+
+class VerificationRejectionForm(forms.Form):
+    rejection_reason_code = forms.ChoiceField(
+        label="Motivo estruturado da rejeição",
+        choices=[
+            ("", "Selecione um motivo"),
+            ("REQUIREMENT_MISSING", "Requisito obrigatório ausente"),
+            ("DOCUMENT_UNREADABLE", "Documento ilegível"),
+            ("DOCUMENT_MISMATCH", "Documento divergente"),
+            ("DOCUMENT_EXPIRED", "Documento vencido"),
+            ("OFFICIAL_AUTHORIZATION_NOT_CONFIRMED", "Autorização não confirmada"),
+            ("OFFICIAL_AUTHORIZATION_INACTIVE", "Autorização inativa"),
+            ("VEHICLE_REQUIREMENT_NOT_MET", "Requisito de veículo não atendido"),
+            ("INFORMATION_INCONSISTENT", "Informações inconsistentes"),
+            ("REVIEW_CONFLICT", "Conflito na revisão"),
+            ("POLICY_VERSION_CONFLICT", "Versão da regra conflitante"),
+        ],
+    )
+
+
 @admin.register(ProfessionalVerificationRequest)
 class ProfessionalVerificationRequestAdmin(admin.ModelAdmin):
     inlines = (SubmittedDocumentInline,)
@@ -297,6 +342,7 @@ class ProfessionalVerificationRequestAdmin(admin.ModelAdmin):
         "submitted_date",
         "status_badge",
         "reviewer",
+        "triage_status",
         "queue_action",
     )
     list_filter = (
@@ -308,7 +354,7 @@ class ProfessionalVerificationRequestAdmin(admin.ModelAdmin):
     )
     search_fields = ("profile__display_name", "profile__person__account__email")
     ordering = ("submitted_at", "created_at")
-    actions = ("start_review_action", "approve_action", "reject_action")
+    actions = ("start_review_action",)
     readonly_fields = (
         "profile",
         "status",
@@ -325,6 +371,7 @@ class ProfessionalVerificationRequestAdmin(admin.ModelAdmin):
         "service_uf",
         "workflow_actions",
         "public_message",
+        "review_checklist_display",
     )
     fieldsets = (
         ("Dados do instrutor", {"fields": ("profile", "service_city", "service_uf")}),
@@ -356,7 +403,10 @@ class ProfessionalVerificationRequestAdmin(admin.ModelAdmin):
                 )
             },
         ),
-        ("Decisão", {"fields": ("public_message", "workflow_actions")}),
+        (
+            "Decisão",
+            {"fields": ("review_checklist_display", "public_message", "workflow_actions")},
+        ),
     )
 
     def get_queryset(self, request):
@@ -364,6 +414,7 @@ class ProfessionalVerificationRequestAdmin(admin.ModelAdmin):
             super()
             .get_queryset(request)
             .select_related("profile__person__account", "profile__service_area", "reviewer")
+            .prefetch_related("documents")
         )
 
     @admin.display(description="Instrutor", ordering="profile__display_name")
@@ -398,6 +449,28 @@ class ProfessionalVerificationRequestAdmin(admin.ModelAdmin):
         }.get(obj.status, "submitted")
         return format_html(
             '<span class="status-badge status-{}">{}</span>', css, obj.get_status_display()
+        )
+
+    @admin.display(description="Triagem")
+    def triage_status(self, obj):
+        if obj.status == obj.Status.SUBMITTED:
+            return "Aguardando revisor"
+        if obj.status != obj.Status.UNDER_REVIEW:
+            return "Concluída" if obj.status != obj.Status.DRAFT else "Rascunho"
+        missing = review_checklist(obj)
+        return f"{len(missing)} pendência(s)" if missing else "Conferência humana necessária"
+
+    @admin.display(description="Checklist antes da decisão")
+    def review_checklist_display(self, obj):
+        if not obj:
+            return ""
+        if obj.status == obj.Status.SUBMITTED:
+            return "Assuma a solicitação antes de analisar as evidências."
+        if obj.status != obj.Status.UNDER_REVIEW:
+            return "Solicitação fora da etapa de análise."
+        missing = review_checklist(obj)
+        return (
+            "; ".join(missing) if missing else "Campos completos; decisão humana ainda obrigatória."
         )
 
     @admin.display(description="Ação")
@@ -456,7 +529,7 @@ class ProfessionalVerificationRequestAdmin(admin.ModelAdmin):
     def transition_view(self, request, object_id, operation):
         services = {
             "start": ("Iniciar análise", start_verification_review),
-            "approve": ("Aprovar verificação", approve_verification_request),
+            "approve": ("Aprovar verificação", None),
             "reject": ("Rejeitar verificação", reject_verification_request),
         }
         if operation not in services:
@@ -468,20 +541,59 @@ class ProfessionalVerificationRequestAdmin(admin.ModelAdmin):
             raise PermissionDenied
         label, service = services[operation]
         back = reverse("admin:discovery_professionalverificationrequest_change", args=[item.pk])
+        form_class = {
+            "approve": VerificationApprovalForm,
+            "reject": VerificationRejectionForm,
+        }.get(operation)
+        initial = (
+            {
+                "verification_method": item.verification_method,
+                "verification_source": item.verification_source,
+                "internal_notes": item.internal_notes,
+            }
+            if operation == "approve"
+            else {"rejection_reason_code": item.rejection_reason_code}
+        )
+        form = (
+            form_class(request.POST if request.method == "POST" else None, initial=initial)
+            if form_class
+            else None
+        )
         if request.method == "POST":
-            if operation == "reject":
-                item.rejection_reason_code = request.POST.get("rejection_reason_code", "").strip()
-                item.save(update_fields=["rejection_reason_code", "updated_at"])
-            try:
-                service(
-                    actor=request.user,
-                    verification_request=item,
-                    request_id=getattr(request, "request_id", None),
-                )
-                self.message_user(request, f"{label} concluída com auditoria.", messages.SUCCESS)
-            except (WorkflowPermissionDenied, InvalidWorkflowTransition) as exc:
-                self.message_user(request, str(exc), messages.ERROR)
-            return HttpResponseRedirect(back)
+            if form is None or form.is_valid():
+                try:
+                    if operation == "approve":
+                        record_review_and_approve(
+                            actor=request.user,
+                            verification_request=item,
+                            method=form.cleaned_data["verification_method"],
+                            source=form.cleaned_data["verification_source"],
+                            notes=form.cleaned_data["internal_notes"],
+                            consultation_confirmed=form.cleaned_data["consultation_confirmed"],
+                            request_id=getattr(request, "request_id", None),
+                        )
+                    elif operation == "reject":
+                        reject_verification_request(
+                            actor=request.user,
+                            verification_request=item,
+                            reason_code=form.cleaned_data["rejection_reason_code"],
+                            request_id=getattr(request, "request_id", None),
+                        )
+                    else:
+                        service(
+                            actor=request.user,
+                            verification_request=item,
+                            request_id=getattr(request, "request_id", None),
+                        )
+                    self.message_user(
+                        request, f"{label} concluída com auditoria.", messages.SUCCESS
+                    )
+                    return HttpResponseRedirect(back)
+                except (WorkflowPermissionDenied, InvalidWorkflowTransition) as exc:
+                    if form is None:
+                        self.message_user(request, str(exc), messages.ERROR)
+                        return HttpResponseRedirect(back)
+                    form.add_error(None, str(exc))
         return TemplateResponse(
             request,
             "admin/discovery/confirm_verification_transition.html",
@@ -492,6 +604,15 @@ class ProfessionalVerificationRequestAdmin(admin.ModelAdmin):
                 "operation": operation,
                 "back_url": back,
                 "opts": self.model._meta,
+                "form": form,
+                "review_checklist": review_checklist(item),
+                "review_documents": (
+                    item.documents.filter(scan_status=InstructorDocument.ScanStatus.CLEAN)
+                    if operation == "approve"
+                    and item.reviewer_id == request.user.id
+                    and request.user.has_perm("marketplace.review_instructor_document")
+                    else []
+                ),
             },
         )
 
@@ -592,14 +713,6 @@ class ProfessionalVerificationRequestAdmin(admin.ModelAdmin):
     @admin.action(description="Assumir e iniciar análise")
     def start_review_action(self, request, queryset):
         self._run(request, queryset, start_verification_review)
-
-    @admin.action(description="Aprovar verificação")
-    def approve_action(self, request, queryset):
-        self._run(request, queryset, approve_verification_request)
-
-    @admin.action(description="Rejeitar verificação")
-    def reject_action(self, request, queryset):
-        self._run(request, queryset, reject_verification_request)
 
 
 @admin.register(LocationPublicationAuthorization, ProfessionalVerification, PublicationDecision)

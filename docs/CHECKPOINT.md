@@ -1,5 +1,16 @@
 # Checkpoint do Projeto
 
+## Triagem da verificação profissional no Admin — 30/09/2026
+
+- A fila local de solicitações agora sinaliza pendências de documento, liberação antimalware e
+  metadados da consulta. A decisão individual reúne evidências privadas autorizadas, método,
+  fonte e confirmação humana; registro e aprovação são atômicos.
+- A rejeição registra motivo estruturado somente após validar o revisor atribuído. Ações de
+  aprovar/rejeitar em massa foram removidas. Nenhuma verificação, UF ou publicação real foi
+  aprovada por esta alteração; não houve alteração de senha ou de configuração da VPS.
+- Validação local: 339 testes backend no Docker isolado, Ruff check/format, Django check e
+  migration check passaram. Nenhuma migration nova foi necessária.
+
 ## Validação direta do MVP e sincronização — 29/09/2026
 
 - `origin/main` e VPS sincronizados no commit `b717310` por push e

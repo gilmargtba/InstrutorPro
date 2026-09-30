@@ -4,14 +4,37 @@
   <h1>{{ title }}</h1>
   <p>Instrutor: <strong>{{ item.profile.display_name }}</strong></p>
   <p>Status atual: <strong>{{ item.get_status_display }}</strong></p>
-  <p>Esta ação altera o fluxo e será registrada na auditoria.</p>
+  <p>Esta é uma decisão interna auditada. Ela não autoriza nem publica o instrutor.</p>
+  {% if operation == "approve" %}
+    <h2>Checklist de análise</h2>
+    {% if review_checklist %}
+      <ul>{% for pending in review_checklist %}<li>{{ pending }}</li>{% endfor %}</ul>
+    {% else %}
+      <p>Campos existentes completos. A conferência da fonte e a decisão humana ainda são obrigatórias.</p>
+    {% endif %}
+    {% if review_documents %}
+      <h2>Documentos privados atribuídos à revisão</h2>
+      <ul>{% for document in review_documents %}
+        <li>{{ document.document_label }} — {{ document.get_status_display }} —
+          <a href="{% url 'instructor-document-download' document.pk %}">Visualizar com autorização e auditoria</a>
+        </li>
+      {% endfor %}</ul>
+    {% endif %}
+  {% endif %}
   <form method="post">{% csrf_token %}
-    {% if operation == "reject" %}
-      <div class="form-row"><label for="id_rejection_reason_code">Motivo estruturado da rejeição</label>
-      <input id="id_rejection_reason_code" name="rejection_reason_code" required maxlength="80" value="{{ item.rejection_reason_code }}"></div>
+    {% if form %}
+      {{ form.non_field_errors }}
+      {% for field in form %}
+        <div class="form-row">
+          {{ field.errors }}
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.help_text %}<p class="help">{{ field.help_text }}</p>{% endif %}
+        </div>
+      {% endfor %}
     {% endif %}
     <div class="submit-row">
-      <input type="submit" class="default" value="Confirmar: {{ title }}">
+      <input type="submit" class="default" value="{% if operation == 'approve' %}Registrar consulta e aprovar verificação interna{% else %}Confirmar: {{ title }}{% endif %}">
       <a class="button" href="{{ back_url }}">Cancelar</a>
     </div>
   </form>

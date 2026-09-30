@@ -1,4 +1,7 @@
+from uuid import uuid4
+
 import pytest
+from django.contrib import admin as django_admin
 from django.contrib.auth.models import Permission
 from django.contrib.gis.geos import Point
 from django.test import override_settings
@@ -160,6 +163,109 @@ def test_admin_review_requires_assignment_and_metadata_and_does_not_publish():
     assert profile.verification_status == InstructorProfile.VerificationStatus.VERIFIED
     assert profile.publication_status == InstructorProfile.PublicationStatus.UNPUBLISHED
     assert profile.profile_status == InstructorProfile.Status.UNDER_REVIEW
+
+
+@pytest.mark.django_db
+@override_settings(**VERIFICATION_ENABLED)
+def test_admin_can_record_consultation_and_approve_in_one_audited_step():
+    _, profile = instructor("quick-review-owner")
+    analyst = reviewer("quick-review-analyst")
+    item = ProfessionalVerificationRequest.objects.create(
+        profile=profile, status=ProfessionalVerificationRequest.Status.SUBMITTED
+    )
+    start_verification_review(actor=analyst, verification_request=item)
+    item.refresh_from_db()
+    admin_config = django_admin.site._registry[ProfessionalVerificationRequest]
+    assert admin_config.triage_status(item) == "3 pendência(s)"
+    assert admin_config.actions == ("start_review_action",)
+    web = Client()
+    web.force_login(analyst)
+    url = reverse("admin:discovery_verification_request_transition", args=[item.pk, "approve"])
+    page = web.get(url)
+    assert page.status_code == 200
+    assert "Registrar consulta e aprovar verificação interna" in page.content.decode()
+    data = {
+        "verification_method": "Consulta manual",
+        "verification_source": "Fonte oficial conferida",
+        "internal_notes": "Evidência consistente.",
+    }
+    assert web.post(url, data).status_code == 200  # Attestation is mandatory.
+    item.refresh_from_db()
+    assert item.status == item.Status.UNDER_REVIEW
+    assert not item.verification_source
+    data["consultation_confirmed"] = "on"
+    assert web.post(url, data).status_code == 302
+    item.refresh_from_db()
+    profile.refresh_from_db()
+    assert item.status == item.Status.VERIFIED
+    assert admin_config.triage_status(item) == "Concluída"
+    assert item.checked_at is not None and item.decision_by == analyst
+    assert profile.verification_status == profile.VerificationStatus.VERIFIED
+    assert profile.publication_status == profile.PublicationStatus.UNPUBLISHED
+    assert (
+        AuditEvent.objects.filter(
+            action="discovery.professional_verification.review_metadata_updated", target_id=item.pk
+        ).count()
+        == 1
+    )
+
+
+@pytest.mark.django_db
+@override_settings(**VERIFICATION_ENABLED)
+def test_one_step_approval_rolls_back_metadata_when_required_document_is_missing():
+    _, profile = instructor("quick-review-missing")
+    analyst = reviewer("quick-review-missing-analyst")
+    item = ProfessionalVerificationRequest.objects.create(
+        profile=profile,
+        status=ProfessionalVerificationRequest.Status.SUBMITTED,
+        requirements_snapshot=[{"id": str(uuid4()), "required": True}],
+    )
+    start_verification_review(actor=analyst, verification_request=item)
+    web = Client()
+    web.force_login(analyst)
+    url = reverse("admin:discovery_verification_request_transition", args=[item.pk, "approve"])
+    assert (
+        web.post(
+            url,
+            {
+                "verification_method": "Consulta manual",
+                "verification_source": "Fonte oficial conferida",
+                "consultation_confirmed": "on",
+            },
+        ).status_code
+        == 200
+    )
+    item.refresh_from_db()
+    assert item.status == item.Status.UNDER_REVIEW
+    assert item.checked_at is None and not item.verification_source
+    assert not AuditEvent.objects.filter(
+        action="discovery.professional_verification.review_metadata_updated", target_id=item.pk
+    ).exists()
+
+
+@pytest.mark.django_db
+@override_settings(**VERIFICATION_ENABLED)
+def test_rejection_cannot_change_reason_for_another_reviewer_and_uses_structured_code():
+    _, profile = instructor("quick-reject-owner")
+    analyst = reviewer("quick-reject-analyst")
+    other = reviewer("quick-reject-other")
+    item = ProfessionalVerificationRequest.objects.create(
+        profile=profile, status=ProfessionalVerificationRequest.Status.SUBMITTED
+    )
+    start_verification_review(actor=analyst, verification_request=item)
+    web = Client()
+    url = reverse("admin:discovery_verification_request_transition", args=[item.pk, "reject"])
+    web.force_login(other)
+    assert web.post(url, {"rejection_reason_code": "DOCUMENT_MISMATCH"}).status_code == 200
+    item.refresh_from_db()
+    assert item.status == item.Status.UNDER_REVIEW
+    assert not item.rejection_reason_code
+    web.force_login(analyst)
+    assert web.post(url, {"rejection_reason_code": "DOCUMENT_MISMATCH"}).status_code == 302
+    item.refresh_from_db()
+    assert item.status == item.Status.REJECTED
+    assert item.rejection_reason_code == "DOCUMENT_MISMATCH"
+    assert item.decision_by == analyst
 
 
 @pytest.mark.django_db
