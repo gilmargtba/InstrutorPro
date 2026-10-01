@@ -10,6 +10,16 @@
   aprovada por esta alteração; não houve alteração de senha ou de configuração da VPS.
 - Validação local: 339 testes backend no Docker isolado, Ruff check/format, Django check e
   migration check passaram. Nenhuma migration nova foi necessária.
+- Deploy em 01/10/2026: o commit `6d82dd3` foi enviado à `origin/main` e aplicado por
+  fast-forward na VPS, após backup validado do PostgreSQL e dos documentos privados em
+  `/home/gilmar/backups/instrutorpro/production/` (arquivos de `20261001T172419Z`). Apenas o
+  backend foi reconstruído/substituído e ficou `Healthy`; migration check e Django check na VPS
+  passaram. A rota pública de readiness respondeu `status=ok`, banco `up`.
+- Após o deploy, `REAL_PAYMENTS`, `REAL_PRO_BILLING`, `REAL_MARKETPLACE_SEARCH` e
+  `REAL_WHATSAPP_CONTACT` continuaram `false`. Havia 0 solicitações profissionais verificadas,
+  0 UFs regulatórias aprovadas, 0 UFs liberadas para publicação e 0 perfis reais publicados.
+  Um perfil demonstrativo já tinha status de publicação aprovado; nenhuma decisão foi executada
+  pelo deploy.
 
 ## Validação direta do MVP e sincronização — 29/09/2026
 
