@@ -1,5 +1,18 @@
 # Checkpoint do Projeto
 
+## Correção da mensagem documental no status do instrutor — 02/10/2026
+
+- A tela `Status do cadastro` deixou de afirmar que documentos ainda não foram
+  solicitados, pois o upload voluntário pode estar disponível mesmo sem requisito
+  territorial obrigatório. Ela encaminha à página de verificação para consultar
+  a disponibilidade e os anexos.
+- Quando a verificação já está `VERIFIED`, a tela explica que a solicitação
+  encerrada não recebe novos anexos e identifica o link como visualização da
+  verificação concluída. Nenhum documento, decisão ou gate de publicação mudou.
+- Validação local: 46 testes Angular e build de produção passaram; os avisos
+  preexistentes de orçamento de bundle/SCSS permanecem. Alteração ainda não
+  implantada na VPS.
+
 ## Hotfix do Salvar na análise profissional — 02/10/2026
 
 - O erro 403 foi reproduzido nos logs após aprovação humana: o POST em
