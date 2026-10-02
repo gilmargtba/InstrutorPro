@@ -10,8 +10,14 @@
   encerrada não recebe novos anexos e identifica o link como visualização da
   verificação concluída. Nenhum documento, decisão ou gate de publicação mudou.
 - Validação local: 46 testes Angular e build de produção passaram; os avisos
-  preexistentes de orçamento de bundle/SCSS permanecem. Alteração ainda não
-  implantada na VPS.
+  preexistentes de orçamento de bundle/SCSS permanecem.
+- Deploy autorizado pelo proprietário em 02/10/2026: o commit `538288b` foi
+  enviado a `origin/main` e aplicado por fast-forward na VPS após backup
+  validado do PostgreSQL e dos documentos privados (`20261002T175818Z`). Apenas
+  o frontend foi reconstruído e substituído; ficou `Healthy`. A rota de status
+  e o novo bundle responderam HTTPS 200, o texto corrigido consta no bundle e
+  a readiness da API informou `status=ok`, banco `up`. Nenhuma migration, flag,
+  decisão ou dado profissional foi alterado.
 
 ## Hotfix do Salvar na análise profissional — 02/10/2026
 
