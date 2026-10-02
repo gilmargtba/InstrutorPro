@@ -334,6 +334,13 @@ class VerificationRejectionForm(forms.Form):
 
 @admin.register(ProfessionalVerificationRequest)
 class ProfessionalVerificationRequestAdmin(admin.ModelAdmin):
+    review_metadata_fields = (
+        "verification_method",
+        "verification_source",
+        "checked_at",
+        "internal_notes",
+        "rejection_reason_code",
+    )
     inlines = (SubmittedDocumentInline,)
     list_display = (
         "instructor_name",
@@ -416,6 +423,49 @@ class ProfessionalVerificationRequestAdmin(admin.ModelAdmin):
             .select_related("profile__person__account", "profile__service_area", "reviewer")
             .prefetch_related("documents")
         )
+
+    def _can_edit_review_metadata(self, request, obj):
+        return bool(
+            obj
+            and self.has_change_permission(request, obj)
+            and obj.status == obj.Status.UNDER_REVIEW
+            and obj.reviewer_id == request.user.id
+        )
+
+    def get_readonly_fields(self, request, obj=None):
+        fields = super().get_readonly_fields(request, obj)
+        if obj and not self._can_edit_review_metadata(request, obj):
+            return (*fields, *self.review_metadata_fields)
+        return fields
+
+    def changeform_view(self, request, object_id=None, form_url="", extra_context=None):
+        obj = self.get_object(request, object_id) if object_id else None
+        if (
+            obj
+            and self.has_change_permission(request, obj)
+            and not self._can_edit_review_metadata(request, obj)
+        ):
+            if request.method == "POST":
+                if obj.reviewer_id and obj.reviewer_id != request.user.id:
+                    raise PermissionDenied(
+                        "Somente o revisor responsável pode registrar a análise."
+                    )
+                self.message_user(
+                    request,
+                    "Esta solicitação não pode ser editada nesta etapa; "
+                    "nenhuma alteração foi gravada.",
+                    messages.WARNING,
+                )
+                return HttpResponseRedirect(
+                    reverse("admin:discovery_professionalverificationrequest_change", args=[obj.pk])
+                )
+            extra_context = {
+                **(extra_context or {}),
+                "show_save": False,
+                "show_save_and_continue": False,
+                "show_save_and_add_another": False,
+            }
+        return super().changeform_view(request, object_id, form_url, extra_context)
 
     @admin.display(description="Instrutor", ordering="profile__display_name")
     def instructor_name(self, obj):

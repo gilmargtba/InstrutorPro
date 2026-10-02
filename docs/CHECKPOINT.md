@@ -1,5 +1,19 @@
 # Checkpoint do Projeto
 
+## Hotfix do Salvar na análise profissional — 02/10/2026
+
+- O erro 403 foi reproduzido nos logs após aprovação humana: o POST em
+  `/admin/discovery/professionalverificationrequest/.../change/` ainda oferecido
+  na tela tentava editar uma solicitação já `VERIFIED` e era recusado por
+  `save_model`. A decisão original permaneceu válida e auditada.
+- A página agora permite editar metadados somente ao revisor atribuído durante
+  `UNDER_REVIEW`; nos demais estados, mostra campos somente leitura e oculta
+  Salvar. Um POST tardio é redirecionado com aviso, sem gravação nem nova decisão.
+- Validação local: 342 testes backend no Docker isolado, Ruff check/format,
+  Django check e migration check passaram. Nenhuma migration ou alteração de
+  permissões é necessária.
+- Deploy de produção deste hotfix ainda pendente neste checkpoint.
+
 ## Ativação independente de busca e WhatsApp — 01/10/2026
 
 - Autorização explícita do proprietário permite ligar busca pública e contato WhatsApp

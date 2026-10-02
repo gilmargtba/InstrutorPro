@@ -212,6 +212,72 @@ def test_admin_can_record_consultation_and_approve_in_one_audited_step():
 
 @pytest.mark.django_db
 @override_settings(**VERIFICATION_ENABLED)
+def test_completed_verification_admin_hides_save_and_handles_stale_post_without_writing():
+    _, profile = instructor("completed-review-owner")
+    analyst = reviewer("completed-review-analyst")
+    item = ProfessionalVerificationRequest.objects.create(
+        profile=profile, status=ProfessionalVerificationRequest.Status.SUBMITTED
+    )
+    web = Client()
+    web.force_login(analyst)
+    change_url = reverse("admin:discovery_professionalverificationrequest_change", args=[item.pk])
+    approval_url = reverse(
+        "admin:discovery_verification_request_transition", args=[item.pk, "approve"]
+    )
+    assert b'name="_save"' not in web.get(change_url).content
+    assert web.post(change_url, {"verification_method": "Antes da análise"}).status_code == 302
+    item.refresh_from_db()
+    assert not item.verification_method
+    start_verification_review(actor=analyst, verification_request=item)
+    item.refresh_from_db()
+    assert web.get(change_url).status_code == 200
+    assert b'name="_save"' in web.get(change_url).content
+    assert (
+        web.post(
+            approval_url,
+            {
+                "verification_method": "Consulta manual",
+                "verification_source": "Fonte oficial conferida",
+                "consultation_confirmed": "on",
+            },
+        ).status_code
+        == 302
+    )
+    item.refresh_from_db()
+    assert item.status == item.Status.VERIFIED
+
+    page = web.get(change_url)
+    assert page.status_code == 200
+    assert b'name="_save"' not in page.content
+    assert "verification_method" in django_admin.site._registry[
+        ProfessionalVerificationRequest
+    ].get_readonly_fields(page.wsgi_request, item)
+    audit_count = AuditEvent.objects.filter(target_id=item.pk).count()
+    stale_save = web.post(
+        change_url,
+        {
+            "verification_method": "Tentativa tardia",
+            "verification_source": "Outra fonte",
+            "_save": "Salvar",
+        },
+    )
+    assert stale_save.status_code == 302
+    assert stale_save.url == change_url
+    item.refresh_from_db()
+    assert item.verification_method == "Consulta manual"
+    assert item.verification_source == "Fonte oficial conferida"
+    assert AuditEvent.objects.filter(target_id=item.pk).count() == audit_count
+
+    other = reviewer("completed-review-other")
+    web.force_login(other)
+    assert web.post(change_url, {"verification_method": "Não autorizado"}).status_code == 403
+    item.refresh_from_db()
+    assert item.verification_method == "Consulta manual"
+    assert AuditEvent.objects.filter(target_id=item.pk).count() == audit_count
+
+
+@pytest.mark.django_db
+@override_settings(**VERIFICATION_ENABLED)
 def test_one_step_approval_rolls_back_metadata_when_required_document_is_missing():
     _, profile = instructor("quick-review-missing")
     analyst = reviewer("quick-review-missing-analyst")

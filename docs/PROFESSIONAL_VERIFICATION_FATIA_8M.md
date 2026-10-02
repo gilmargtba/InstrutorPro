@@ -35,6 +35,10 @@ apagar o histórico e as auditorias anteriores.
   ocorrem na mesma transação: se faltar evidência ou permissão, nenhum metadado novo fica gravado.
 - A rejeição usa código estruturado e só é gravada depois de validar o revisor responsável.
   Aprovação/rejeição em massa não estão disponíveis; cada decisão exige análise individual.
+- A página administrativa só oferece edição de metadados ao revisor atribuído enquanto a
+  solicitação está `UNDER_REVIEW`. Em `SUBMITTED` ou após decisão, os campos ficam somente
+  leitura e o botão Salvar desaparece; envio tardio do formulário volta à análise com aviso,
+  sem modificar a decisão ou criar nova auditoria.
 - A verificação interna não altera a publicação. Prontidão regulatória por UF e decisão de
   publicação continuam em fluxos separados e com seus próprios gates humanos.
 
