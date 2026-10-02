@@ -23,6 +23,7 @@ PROFESSIONAL_VERIFICATION_STATES = {
     PROFESSIONAL_VERIFICATION_DISABLED,
     PROFESSIONAL_VERIFICATION_PRODUCTION,
 }
+INDEPENDENT_PUBLIC_CAPABILITIES = {"REAL_MARKETPLACE_SEARCH", "REAL_WHATSAPP_CONTACT"}
 
 
 @dataclass(frozen=True)
@@ -64,6 +65,9 @@ def professional_verification_mode() -> str:
 
 
 def enabled(name: str) -> bool:
+    # Public discovery/contact are individually authorized; eligibility remains in selectors.
+    if name in INDEPENDENT_PUBLIC_CAPABILITIES:
+        return configured(name)
     if (
         name == "REAL_DOCUMENT_UPLOADS"
         and getattr(settings, "PROFESSIONAL_DOCUMENT_UPLOAD_MODE", "DISABLED") == "PRODUCTION"
@@ -120,6 +124,7 @@ def configuration_errors() -> list[str]:
             if not configured(name)
         )
     globally_authorized = set(CAPABILITIES)
+    globally_authorized -= INDEPENDENT_PUBLIC_CAPABILITIES
     if getattr(settings, "PROFESSIONAL_DOCUMENT_UPLOAD_MODE", "DISABLED") == "PRODUCTION":
         globally_authorized.discard("REAL_DOCUMENT_UPLOADS")
     if registration_mode == INSTRUCTOR_REGISTRATION_PRODUCTION:

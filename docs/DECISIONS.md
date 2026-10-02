@@ -2,6 +2,21 @@
 
 Este documento é a fonte oficial de decisões consolidadas, contradições resolvidas e questões em aberto. Uma recomendação marcada como aberta não é uma decisão aceita.
 
+### Decisão do proprietário de 01/10/2026 — ativação independente de descoberta pública
+
+Busca nacional, perfil público elegível e contato voluntário por WhatsApp foram
+autorizados em produção por capacidades independentes. Ligar busca não aprova UF,
+verifica instrutor ou publica perfil: os selectors continuam exigindo elegibilidade
+individual, publicação manual e prontidão da UF. O clique WhatsApp pode registrar
+somente o evento minimizado `WHATSAPP_CONTACT_CLICKED` sem ligar analytics geral;
+mensagens e conteúdo da conversa não são armazenados.
+
+O proprietário também autorizou preparar Asaas e PRO reais, mas **não** dispensou
+credencial de produção, webhook autenticado/idempotente, testes E2E, reconciliação,
+preço PRO definido e demais gates financeiros. Até prova desses requisitos,
+`REAL_PAYMENTS=false` e `REAL_PRO_BILLING=false`. A autorização substitui apenas a
+pendência de decisão comercial, não constitui confirmação de pagamento.
+
 ### Decisão comercial do proprietário de 29/09/2026 — lead generation e PRO
 
 O MVP deixa de cobrar ou reservar aulas. O fluxo aluno → busca → perfil →
@@ -12,8 +27,9 @@ PRO é assinatura opcional do instrutor, separada de verificação e prontidão
 regulatória. Asaas foi selecionado para implementação inicial **somente em
 sandbox**, com checkout hospedado, confirmação por webhook autenticado e
 idempotente. Pix e cartão dependem de prova do comportamento de cada modalidade;
-preço mensal, contratos, tributação, privacidade e ativação de cobrança real
-permanecem pendentes. `REAL_PAYMENTS=false` e `REAL_PRO_BILLING=false`.
+preço mensal, contratos, tributação, privacidade e ativação técnica de cobrança real
+permanecem pendentes. A autorização condicional posterior de 01/10/2026 não
+elimina esses gates. `REAL_PAYMENTS=false` e `REAL_PRO_BILLING=false`.
 Os textos históricos de MVP transacional em outros documentos não autorizam
 implementação de pagamento de aula nesta fase.
 

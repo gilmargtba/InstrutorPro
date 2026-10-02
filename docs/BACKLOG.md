@@ -46,7 +46,8 @@ caminho crítico do MVP atual. A monetização PRO usa fatias próprias, sem
 reaproveitar estados de aula: (1) adaptador Asaas sandbox e contrato; (2)
 customer/checkout idempotentes; (3) webhook autenticado e período pago;
 (4) cancelamento, inadimplência, renovação e reconciliação; (5) UI e E2E sandbox.
-Preço PRO e cobrança real exigem decisão separada. Nenhuma fatia PRO muda
+Preço PRO ainda precisa ser informado e a cobrança real precisa passar pelos
+gates financeiros da decisão de 01/10/2026. Nenhuma fatia PRO muda
 RegulatoryReadiness ou publicação.
 
 ## M0 — Governança e decisões

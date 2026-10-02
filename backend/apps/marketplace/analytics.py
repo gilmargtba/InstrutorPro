@@ -30,7 +30,11 @@ def record_marketplace_event(
     is_real = not settings.SYNTHETIC_MARKETPLACE_ENABLED and (
         instructor is None or not instructor.is_demo
     )
-    if is_real and not enabled("REAL_MARKETPLACE_ANALYTICS"):
+    contact_event_allowed = (
+        event_type == MarketplaceEvent.Type.WHATSAPP_CONTACT_CLICKED
+        and enabled("REAL_WHATSAPP_CONTACT")
+    )
+    if is_real and not (enabled("REAL_MARKETPLACE_ANALYTICS") or contact_event_allowed):
         return None, False
     now = timezone.now()
     bucket = now.replace(minute=0, second=0, microsecond=0)

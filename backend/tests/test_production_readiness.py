@@ -75,6 +75,27 @@ def test_production_readiness_fails_if_capability_is_enabled_without_authorizati
 @override_settings(
     **{
         **SECURE_SETTINGS,
+        "REAL_MARKETPLACE_SEARCH": True,
+        "REAL_WHATSAPP_CONTACT": True,
+    }
+)
+def test_owner_authorized_public_discovery_does_not_enable_other_capabilities():
+    output = StringIO()
+
+    call_command("production_readiness", stdout=output)
+
+    result = output.getvalue()
+    assert "REAL_PRODUCTION_AUTHORIZATION=NOT_GRANTED" in result
+    assert "REAL_MARKETPLACE_SEARCH=ENABLED" in result
+    assert "REAL_WHATSAPP_CONTACT=ENABLED" in result
+    assert "REAL_MARKETPLACE_ANALYTICS=BLOCKED" in result
+    assert "REAL_PAYMENTS=BLOCKED" in result
+    assert "REAL_PRO_BILLING=BLOCKED" in result
+
+
+@override_settings(
+    **{
+        **SECURE_SETTINGS,
         "INSTRUCTOR_REGISTRATION_MODE": "PRODUCTION",
         "REAL_ACCOUNT_REGISTRATION": True,
         "REAL_PERSONAL_DATA": True,

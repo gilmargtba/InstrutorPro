@@ -1,5 +1,23 @@
 # Checkpoint do Projeto
 
+## Ativação independente de busca e WhatsApp — 01/10/2026
+
+- Autorização explícita do proprietário permite ligar busca pública e contato WhatsApp
+  em produção separadamente dos gates financeiros e da aprovação das 27 UFs.
+  Os selectors continuam exigindo verificação profissional, publicação manual,
+  conta ativa e UF liberada para cada perfil; não houve aprovação automática.
+- O registro minimizado de `WHATSAPP_CONTACT_CLICKED` passa a funcionar com
+  contato ligado, mesmo com analytics geral desligado. Busca e visualização de
+  perfil não são registradas nesse modo; conteúdo de conversa não é armazenado.
+- Teste de regressão confirmou que assinatura PRO ativa não altera verificação,
+  publicação nem prontidão regulatória. Sem credencial Asaas de produção, preço
+  PRO e integração financeira E2E, `REAL_PAYMENTS` e `REAL_PRO_BILLING` seguem
+  `false`.
+- Validação local: 341 testes backend e 45 testes Angular aprovados; Ruff
+  check/format, Django check, migration check e build Angular de produção
+  passaram. O build mantém avisos não bloqueantes de orçamento de bundle/SCSS.
+- Deploy e smoke de produção desta fatia ainda pendentes neste checkpoint.
+
 ## Triagem da verificação profissional no Admin — 30/09/2026
 
 - A fila local de solicitações agora sinaliza pendências de documento, liberação antimalware e

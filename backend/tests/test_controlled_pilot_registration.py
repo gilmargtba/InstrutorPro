@@ -468,6 +468,71 @@ def test_real_whatsapp_records_minimized_deduplicated_analytics():
     assert "+5551999990001" not in str(event.__dict__)
 
 
+@pytest.mark.django_db
+@override_settings(
+    SYNTHETIC_MARKETPLACE_ENABLED=False,
+    REAL_PRODUCTION_AUTHORIZATION="NOT_GRANTED",
+    REAL_MARKETPLACE_SEARCH=True,
+    REAL_WHATSAPP_CONTACT=True,
+    REAL_MARKETPLACE_ANALYTICS=False,
+)
+def test_public_search_profile_and_contact_are_independent_of_global_gate():
+    published = _published_profile("public-lead", is_demo=False, data_mode=DataMode.REAL)
+    unpublished = _published_profile(
+        "private-lead",
+        is_demo=False,
+        data_mode=DataMode.REAL,
+        publication_status="UNPUBLISHED",
+    )
+    _published_profile(
+        "unapproved-uf-lead",
+        is_demo=False,
+        data_mode=DataMode.REAL,
+        city="Goiânia",
+        uf="GO",
+        latitude=-16.6869,
+        longitude=-49.2648,
+    )
+    InstructorContactChannel.objects.create(
+        instructor=published,
+        whatsapp_e164="+5551999990001",
+        data_mode=DataMode.REAL,
+    )
+    client = APIClient()
+    search = client.get(
+        "/api/v1/instructors/search/",
+        {"latitude": -30.0346, "longitude": -51.2177, "radius_km": 10, "category": "B"},
+    )
+    assert search.status_code == 200
+    assert [row["id"] for row in search.json()["results"]] == [str(published.id)]
+    assert (
+        client.get(
+            "/api/v1/instructors/search/",
+            {"latitude": -16.6869, "longitude": -49.2648, "radius_km": 10, "category": "B"},
+        ).json()["count"]
+        == 0
+    )
+    assert client.get(f"/api/v1/instructors/{unpublished.id}/").status_code == 404
+    assert client.post(f"/api/v1/instructors/{unpublished.id}/whatsapp-contact/").status_code == 404
+
+    profile = client.get(f"/api/v1/instructors/{published.id}/")
+    assert profile.status_code == 200
+    assert profile.json()["id"] == str(published.id)
+    assert not {"cpf", "email", "documents", "internal_notes", "whatsapp_e164", "address"} & set(
+        profile.json()
+    )
+    contact_url = f"/api/v1/instructors/{published.id}/whatsapp-contact/"
+    first = client.post(contact_url, {"category": "B", "source": "public-profile"})
+    second = client.post(contact_url, {"category": "B", "source": "public-profile"})
+    assert first.status_code == second.status_code == 200
+    assert first.json()["destination_url"].startswith("https://wa.me/5551999990001?")
+    assert first.json()["unique_contact"] is True
+    assert second.json()["unique_contact"] is False
+    assert set(MarketplaceEvent.objects.values_list("event_type", flat=True)) == {
+        MarketplaceEvent.Type.WHATSAPP_CONTACT_CLICKED
+    }
+
+
 def _published_profile(
     username,
     *,

@@ -5,10 +5,15 @@ from django.test import override_settings
 from django.utils import timezone
 
 from apps.accounts.models import Account
-from apps.marketplace.models import Plan, Subscription
+from apps.discovery.models import InstructorProfile
+from apps.marketplace.models import Subscription
+from apps.marketplace.saas import ensure_saas_catalog, has_entitlement
 from apps.payments.models import PaymentOrder, PaymentTransaction, PaymentWebhookEvent
 from apps.payments.providers import FakePaymentProvider
 from apps.payments.services import create_payment, process_webhook
+from apps.people.models import Person
+from apps.territories.models import Country, FederativeUnit, RegulatoryReadiness
+from apps.territories.policies import INSTRUCTOR_PROVIDER_TYPE, INSTRUCTOR_PUBLICATION_CAPABILITY
 
 pytestmark = pytest.mark.django_db
 
@@ -89,12 +94,19 @@ def test_valid_webhook_is_idempotent_and_invalid_signature_is_rejected():
 )
 def test_pro_entitlement_activates_only_after_confirmed_payment():
     owner = account()
-    plan = Plan.objects.create(
-        code="PRO-TEST",
-        name="Pro Test",
-        status=Plan.Status.DRAFT,
-        billing_interval=Plan.BillingInterval.MONTHLY,
+    person = Person.objects.create(account=owner)
+    profile = InstructorProfile.objects.create(person=person, display_name="Instrutor pendente")
+    country = Country.objects.create(code="BR", name="Brasil")
+    uf = FederativeUnit.objects.create(
+        country=country, code="RS", name="Rio Grande do Sul", ibge_code="43"
     )
+    readiness = RegulatoryReadiness.objects.create(
+        federative_unit=uf,
+        provider_type=INSTRUCTOR_PROVIDER_TYPE,
+        capability=INSTRUCTOR_PUBLICATION_CAPABILITY,
+        status=RegulatoryReadiness.Status.REVIEW_REQUIRED,
+    )
+    _, plan = ensure_saas_catalog()
     subscription = Subscription.objects.create(
         account=owner, plan=plan, status=Subscription.Status.PAST_DUE, started_at=timezone.now()
     )
@@ -110,6 +122,13 @@ def test_pro_entitlement_activates_only_after_confirmed_payment():
     process_webhook(provider=provider, signature=signature, raw_body=raw)
     subscription.refresh_from_db()
     assert subscription.status == Subscription.Status.ACTIVE
+    assert has_entitlement(owner, "ADVANCED_ANALYTICS")
+    profile.refresh_from_db()
+    readiness.refresh_from_db()
+    assert profile.verification_status == InstructorProfile.VerificationStatus.NOT_STARTED
+    assert profile.publication_status == InstructorProfile.PublicationStatus.UNPUBLISHED
+    assert readiness.status == RegulatoryReadiness.Status.REVIEW_REQUIRED
+    assert readiness.approved_at is None
 
 
 @override_settings(
