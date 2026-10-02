@@ -12,7 +12,16 @@
 - Validação local: 342 testes backend no Docker isolado, Ruff check/format,
   Django check e migration check passaram. Nenhuma migration ou alteração de
   permissões é necessária.
-- Deploy de produção deste hotfix ainda pendente neste checkpoint.
+- Deploy de produção em 02/10/2026: commit `e81d32b` enviado a `origin/main`
+  e aplicado por fast-forward na VPS após backup validado do PostgreSQL e dos
+  documentos privados (arquivos `20261002T165802Z`). Nenhuma migration foi
+  aplicada; somente o backend foi reconstruído/substituído e ficou `Healthy`.
+  Django check e prontidão técnica passaram; readiness HTTPS respondeu com
+  banco `up`.
+- Conferência somente de leitura do registro afetado: continua `VERIFIED`,
+  decidido por `gilmar`, com os cinco eventos auditados preservados. No código
+  ativo da VPS, `SAVE_ALLOWED=False` e todos os metadados de revisão estão
+  somente leitura. Nenhuma decisão foi refeita durante o smoke.
 
 ## Ativação independente de busca e WhatsApp — 01/10/2026
 
