@@ -16,7 +16,29 @@
 - Validação local: 341 testes backend e 45 testes Angular aprovados; Ruff
   check/format, Django check, migration check e build Angular de produção
   passaram. O build mantém avisos não bloqueantes de orçamento de bundle/SCSS.
-- Deploy e smoke de produção desta fatia ainda pendentes neste checkpoint.
+- Deploy em 02/10/2026 UTC: commit `d59a5d5` enviado a `origin/main` e aplicado
+  por fast-forward na VPS após backup validado do PostgreSQL e dos documentos
+  privados (arquivos `20261002T014808Z`). Migration sem pendências, Django
+  check e prontidão técnica passaram. Somente o backend foi reconstruído e
+  substituído; ficou `Healthy`. A configuração privada anterior foi preservada
+  em backup com acesso restrito.
+- Flags efetivas: `REAL_MARKETPLACE_SEARCH=true` e `REAL_WHATSAPP_CONTACT=true`;
+  `REAL_MARKETPLACE_ANALYTICS=false`, `REAL_PAYMENTS=false` e
+  `REAL_PRO_BILLING=false`. A home respondeu 200 e readiness HTTPS informou
+  banco `up`. Busca anônima em Brasília/DF retornou zero resultados sem erro;
+  o resumo público retornou zero UFs com perfis elegíveis.
+- MapTiler resolveu Brasília/DF, Goiânia/GO, São Paulo/SP, Rio de Janeiro/RJ,
+  Florianópolis/SC e Manaus/AM. PostGIS 3.5 respondeu. Permanecem 27 análises
+  regulatórias, zero aprovadas, zero UFs para publicação e zero instrutores
+  reais publicados. Nenhuma aprovação, publicação, cobrança ou contato via
+  WhatsApp com um perfil real foi executado.
+- A conta existente `gilmar` segue ativa/staff e possui permissões efetivas de
+  revisão profissional, documentos privados, RegulatoryReadiness e publicação;
+  senha e conta não foram alteradas. As URLs administrativas protegidas
+  responderam com redirecionamento para login anônimo; login humano não foi
+  exercido. A VPS não possui credencial de produção Asaas nem segredo de webhook;
+  o plano PRO segue em rascunho, sem preço e não público. Pagamento/PRO reais
+  continuam bloqueados apenas por seus próprios gates.
 
 ## Triagem da verificação profissional no Admin — 30/09/2026
 
