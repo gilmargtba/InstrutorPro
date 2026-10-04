@@ -13,7 +13,13 @@ from apps.discovery.models import (
     InstructorServiceArea,
     ProfessionalVerificationRequest,
 )
-from apps.discovery.verification_services import save_verification_draft, start_verification_review
+from apps.discovery.verification_services import (
+    record_review_and_approve,
+    reject_verification_request,
+    save_verification_draft,
+    start_verification_review,
+)
+from apps.marketplace.documents import review_document
 from apps.marketplace.models import DocumentRequirement, InstructorDocument
 from apps.marketplace.real_documents import DocumentUploadError, inspect_real_upload
 from apps.people.models import Person
@@ -180,6 +186,153 @@ def reviewer(username, *, can_access_document):
     if can_access_document:
         account.user_permissions.add(Permission.objects.get(codename="review_instructor_document"))
     return account
+
+
+@pytest.mark.django_db
+@override_settings(**ENABLED)
+def test_verified_owner_can_submit_private_supplement_for_human_review(tmp_path):
+    with override_settings(MEDIA_ROOT=tmp_path):
+        owner, instructor = profile("supplement-owner")
+        analyst = reviewer("supplement-analyst", can_access_document=True)
+        client = APIClient()
+        client.force_authenticate(owner)
+        assert (
+            client.patch(
+                "/api/v1/instructor/verification/", {"cpf": "52998224725"}, format="json"
+            ).status_code
+            == 200
+        )
+        assert (
+            client.post("/api/v1/instructor/verification/submit/", {}, format="json").status_code
+            == 201
+        )
+        original = ProfessionalVerificationRequest.objects.get(profile=instructor)
+        start_verification_review(actor=analyst, verification_request=original)
+        record_review_and_approve(
+            actor=analyst,
+            verification_request=original,
+            method="Consulta manual",
+            source="Fonte de teste autorizada",
+            notes="",
+            consultation_confirmed=True,
+        )
+        instructor.refresh_from_db()
+
+        state = client.get("/api/v1/instructor/verification/").json()
+        assert state["can_start_supplement"] is True
+        assert state["can_edit"] is False
+        opened = client.post("/api/v1/instructor/verification/supplement/", {}, format="json")
+        repeated = client.post("/api/v1/instructor/verification/supplement/", {}, format="json")
+        assert opened.status_code == 201
+        assert repeated.status_code == 200
+        assert opened.json()["is_supplement"] is True
+        supplement = ProfessionalVerificationRequest.objects.exclude(pk=original.pk).get(
+            profile=instructor
+        )
+        assert supplement.previous_verified_request_id == original.id
+        assert (
+            client.patch(
+                "/api/v1/instructor/verification/", {"cpf": "11144477735"}, format="json"
+            ).status_code
+            == 400
+        )
+        assert (
+            client.post("/api/v1/instructor/verification/submit/", {}, format="json").status_code
+            == 400
+        )
+        with patch("apps.marketplace.real_documents.scan_with_clamd", return_value="CLEAN"):
+            upload = client.post(
+                "/api/v1/instructor/verification/documents/",
+                {"document_type": "PROFESSIONAL_CREDENTIAL", "file": sample_file()},
+                format="multipart",
+            )
+        assert upload.status_code == 201
+        document = InstructorDocument.objects.get(verification_request=supplement)
+        other, _ = profile("supplement-other")
+        client.force_authenticate(other)
+        assert client.get("/api/v1/instructor/verification/").json()["documents"] == []
+        assert (
+            client.post(
+                "/api/v1/instructor/verification/supplement/", {}, format="json"
+            ).status_code
+            == 400
+        )
+        client.force_authenticate(owner)
+        assert (
+            client.post("/api/v1/instructor/verification/submit/", {}, format="json").status_code
+            == 201
+        )
+        instructor.refresh_from_db()
+        assert instructor.verification_status == InstructorProfile.VerificationStatus.PENDING
+        assert instructor.publication_status == InstructorProfile.PublicationStatus.UNPUBLISHED
+        start_verification_review(actor=analyst, verification_request=supplement)
+        with pytest.raises(Exception, match="documentos complementares"):
+            record_review_and_approve(
+                actor=analyst,
+                verification_request=supplement,
+                method="Consulta manual",
+                source="Fonte de teste autorizada",
+                notes="",
+                consultation_confirmed=True,
+            )
+        review_document(
+            actor=analyst,
+            document=document,
+            decision=InstructorDocument.Status.APPROVED,
+            reason="TEST_REVIEW",
+            source="Fonte de teste autorizada",
+        )
+        record_review_and_approve(
+            actor=analyst,
+            verification_request=supplement,
+            method="Consulta manual",
+            source="Fonte de teste autorizada",
+            notes="",
+            consultation_confirmed=True,
+        )
+        original.refresh_from_db()
+        instructor.refresh_from_db()
+        assert original.status == original.Status.VERIFIED
+        assert supplement.previous_verified_request_id == original.id
+        assert instructor.verification_status == InstructorProfile.VerificationStatus.VERIFIED
+        assert instructor.publication_status == InstructorProfile.PublicationStatus.UNPUBLISHED
+
+        assert (
+            client.post(
+                "/api/v1/instructor/verification/supplement/", {}, format="json"
+            ).status_code
+            == 201
+        )
+        retry_candidate = ProfessionalVerificationRequest.objects.filter(
+            profile=instructor, status=ProfessionalVerificationRequest.Status.DRAFT
+        ).get()
+        assert retry_candidate.previous_verified_request_id == supplement.id
+        with patch("apps.marketplace.real_documents.scan_with_clamd", return_value="CLEAN"):
+            assert (
+                client.post(
+                    "/api/v1/instructor/verification/documents/",
+                    {"document_type": "OTHER_PROFESSIONAL", "file": sample_file("cnh.pdf")},
+                    format="multipart",
+                ).status_code
+                == 201
+            )
+        assert (
+            client.post("/api/v1/instructor/verification/submit/", {}, format="json").status_code
+            == 201
+        )
+        start_verification_review(actor=analyst, verification_request=retry_candidate)
+        reject_verification_request(
+            actor=analyst, verification_request=retry_candidate, reason_code="TEST_INSUFFICIENT"
+        )
+        instructor.refresh_from_db()
+        assert instructor.publication_status == InstructorProfile.PublicationStatus.UNPUBLISHED
+        assert client.get("/api/v1/instructor/verification/").json()["can_start_supplement"] is True
+        reopened = client.post("/api/v1/instructor/verification/supplement/", {}, format="json")
+        assert reopened.status_code == 201
+        newest = ProfessionalVerificationRequest.objects.filter(
+            profile=instructor, status=ProfessionalVerificationRequest.Status.DRAFT
+        ).get()
+        assert newest.previous_verified_request_id == retry_candidate.previous_verified_request_id
 
 
 @pytest.mark.django_db

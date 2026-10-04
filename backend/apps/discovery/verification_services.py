@@ -78,6 +78,69 @@ def _advance_profile(*, actor, item, target, allowed, reason, request_id=None):
     return profile
 
 
+def can_start_document_supplement(profile, latest=None):
+    """A supplement is available only for a verified, unpublished real instructor."""
+    if latest is None:
+        latest = profile.verification_requests.order_by("-created_at").first()
+    return bool(
+        latest
+        and (
+            latest.status == ProfessionalVerificationRequest.Status.VERIFIED
+            or (
+                latest.status == ProfessionalVerificationRequest.Status.REJECTED
+                and latest.previous_verified_request_id
+            )
+        )
+        and not profile.is_demo
+        and enabled("REAL_PROFESSIONAL_VERIFICATION")
+        and upload_available()
+        and profile.person.cpf_ciphertext
+        and profile.verification_status
+        in {
+            InstructorProfile.VerificationStatus.VERIFIED,
+            InstructorProfile.VerificationStatus.REJECTED,
+        }
+        and profile.profile_status
+        in {InstructorProfile.Status.UNDER_REVIEW, InstructorProfile.Status.REJECTED}
+        and profile.publication_status == InstructorProfile.PublicationStatus.UNPUBLISHED
+    )
+
+
+@transaction.atomic
+def start_document_supplement(*, actor, profile, request_id=None):
+    profile = InstructorProfile.objects.select_for_update().get(pk=profile.pk)
+    if actor != profile.person.account:
+        raise WorkflowPermissionDenied("Somente o próprio instrutor pode complementar documentos.")
+    latest = (
+        ProfessionalVerificationRequest.objects.select_for_update()
+        .filter(profile=profile)
+        .order_by("-created_at")
+        .first()
+    )
+    if latest and latest.status == latest.Status.DRAFT and latest.previous_verified_request_id:
+        return latest, False
+    if not can_start_document_supplement(profile, latest):
+        raise InvalidWorkflowTransition(
+            "A complementação exige verificação concluída, upload disponível "
+            "e perfil não publicado."
+        )
+    previous_verified = (
+        latest.previous_verified_request if latest.status == latest.Status.REJECTED else latest
+    )
+    item = ProfessionalVerificationRequest.objects.create(
+        profile=profile, previous_verified_request=previous_verified
+    )
+    _audit(
+        actor,
+        "supplement_started",
+        item,
+        "OWNER_DOCUMENT_SUPPLEMENT_STARTED",
+        request_id,
+        previous_verified_request_id=str(previous_verified.id),
+    )
+    return item, True
+
+
 @transaction.atomic
 def save_verification_draft(*, actor, profile, cpf, request_id=None):
     profile = InstructorProfile.objects.select_for_update().get(pk=profile.pk)
@@ -90,6 +153,10 @@ def save_verification_draft(*, actor, profile, cpf, request_id=None):
         .order_by("-created_at")
         .first()
     )
+    if latest and latest.previous_verified_request_id:
+        raise InvalidWorkflowTransition(
+            "O CPF não pode ser alterado na complementação de documentos."
+        )
     if latest and latest.status in {
         ProfessionalVerificationRequest.Status.SUBMITTED,
         ProfessionalVerificationRequest.Status.UNDER_REVIEW,
@@ -143,11 +210,17 @@ def submit_verification_request(*, actor, profile, request_id=None):
         raise InvalidWorkflowTransition(
             "Revise e confirme o CPF antes de enviar uma nova solicitação."
         )
+    if current.previous_verified_request_id and not current.documents.exists():
+        raise InvalidWorkflowTransition(
+            "Anexe ao menos um documento antes de enviar a complementação."
+        )
+    if current.previous_verified_request_id and not upload_available():
+        raise InvalidWorkflowTransition("Envio de documentos indisponível nesta etapa.")
     if current.documents.exclude(scan_status=InstructorDocument.ScanStatus.CLEAN).exists():
         raise InvalidWorkflowTransition(
             "Aguarde a verificação de segurança ou remova arquivos recusados."
         )
-    if upload_available():
+    if upload_available() and not current.previous_verified_request_id:
         requirements = list(
             applicable_requirements(profile).order_by("uf", "category", "document_type")
         )
@@ -171,14 +244,24 @@ def submit_verification_request(*, actor, profile, request_id=None):
             }
             for requirement in requirements
         ]
+    allowed_profile_states = {
+        InstructorProfile.Status.DRAFT,
+        InstructorProfile.Status.REJECTED,
+    }
+    if current.previous_verified_request_id:
+        allowed_profile_states.add(InstructorProfile.Status.UNDER_REVIEW)
     _advance_profile(
         actor=actor,
         item=current,
         target=InstructorProfile.Status.SUBMITTED,
-        allowed={InstructorProfile.Status.DRAFT, InstructorProfile.Status.REJECTED},
+        allowed=allowed_profile_states,
         reason="OWNER_VERIFICATION_SUBMITTED",
         request_id=request_id,
     )
+    if current.previous_verified_request_id:
+        profile.verification_status = InstructorProfile.VerificationStatus.PENDING
+        with allow_critical_state_mutation():
+            profile.save(update_fields=["verification_status"])
     current.status = ProfessionalVerificationRequest.Status.SUBMITTED
     current.submitted_at = timezone.now()
     with allow_critical_state_mutation():
@@ -252,6 +335,10 @@ def review_checklist(item):
             break
     if any(document.scan_status != InstructorDocument.ScanStatus.CLEAN for document in documents):
         missing.append("Arquivo em quarentena ou sem análise antimalware concluída")
+    if item.previous_verified_request_id and any(
+        document.status != InstructorDocument.Status.APPROVED for document in documents
+    ):
+        missing.append("Documento complementar sem aprovação individual")
     if not item.verification_method.strip():
         missing.append("Método da consulta não registrado")
     if not item.verification_source.strip():
@@ -295,6 +382,16 @@ def record_review_and_approve(
 @transaction.atomic
 def approve_verification_request(*, actor, verification_request, request_id=None):
     item = _lock_for_decision(actor, verification_request)
+    if item.previous_verified_request_id and (
+        not item.documents.exists()
+        or item.documents.exclude(
+            scan_status=InstructorDocument.ScanStatus.CLEAN,
+            status=InstructorDocument.Status.APPROVED,
+        ).exists()
+    ):
+        raise InvalidWorkflowTransition(
+            "Todos os documentos complementares precisam de aprovação individual."
+        )
     for requirement in item.requirements_snapshot:
         if (
             requirement["required"]

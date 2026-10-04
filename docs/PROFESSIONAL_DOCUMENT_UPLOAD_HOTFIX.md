@@ -7,6 +7,16 @@ Não aprova uma política jurídica, prazo de retenção nem lista estadual de d
 
 ## Contrato e domínio
 
+Complementação pós-verificação (04/10/2026): uma solicitação `VERIFIED` é imutável.
+O instrutor real verificado e não publicado pode abrir um novo rascunho vinculado à
+decisão anterior, anexar CNH como `OTHER_PROFESSIONAL` ou credenciamento como
+`PROFESSIONAL_CERTIFICATE`, e enviar para nova análise humana. A submissão exige ao
+menos um arquivo CLEAN; todos os anexos complementares exigem aprovação individual
+do revisor. O CPF não é reaberto, o arquivo não ganha URL pública e o envio torna a
+verificação corrente pendente, sem publicação automática. Uma complementação rejeitada
+pode ser refeita; o histórico anterior não é sobrescrito. Perfil já publicado não usa
+esse fluxo, para não mudar silenciosamente uma publicação ativa.
+
 - `document_upload_available` / `documents_enabled` dependem das flags documentais,
   modo `PRODUCTION`, scanner configurado e storage privado; não dependem de uma lista estadual.
 - Autorização documental em modo `PRODUCTION` é específica: não liga pagamentos,

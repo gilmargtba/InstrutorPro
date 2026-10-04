@@ -19,14 +19,14 @@ describe('InstructorStatusComponent',()=>{
     expect(link.getAttribute('href')).toBe('/profissional/instrutor/onboarding');
   });
 
-  it('explains that a completed verification cannot receive new attachments',()=>{
+  it('offers the path to a controlled complement after completed verification',()=>{
     const fixture=TestBed.createComponent(InstructorStatusComponent);
     const http=TestBed.inject(HttpTestingController);
     http.expectOne('/account/me/').flush({instructor:{display_name:'Instrutor Real',profile_status:'UNDER_REVIEW',verification_status:'VERIFIED',publication_status:'UNPUBLISHED'}});
     fixture.detectChanges();
     const text=fixture.nativeElement.textContent as string;
-    expect(text).toContain('não é possível acrescentar anexos a essa solicitação');
-    expect(text).toContain('Ver verificação concluída');
+    expect(text).toContain('solicitação concluída permanece preservada');
+    expect(text).toContain('Verificar ou complementar documentos');
     expect(text).not.toContain('Solicitar verificação profissional');
     const link=fixture.nativeElement.querySelector('a.button.primary') as HTMLAnchorElement;
     expect(link.getAttribute('href')).toBe('/profissional/instrutor/verificacao');

@@ -38,4 +38,19 @@ describe('ProfessionalVerificationComponent',()=>{
     expect(fixture.nativeElement.textContent).toContain('Não foi possível carregar a verificação profissional.');
     expect(fixture.nativeElement.textContent).not.toContain('Carregando');
   });
+  it('opens a supplement without asking to edit the previously verified CPF',()=>{
+    const fixture=TestBed.createComponent(ProfessionalVerificationComponent);const http=TestBed.inject(HttpTestingController);
+    http.expectOne('/instructor/verification/').flush({status:'VERIFIED',cpf_masked:'***.***.***-25',can_edit:false,can_start_supplement:true,document_upload_available:true,documents:[]});
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Complementar documentos');
+    fixture.componentInstance.startSupplement();
+    const opened=http.expectOne('/instructor/verification/supplement/');
+    expect(opened.request.method).toBe('POST');
+    opened.flush({status:'DRAFT',cpf_masked:'***.***.***-25',can_edit:true,is_supplement:true,document_upload_available:true,document_types:[{value:'PROFESSIONAL_CREDENTIAL',label:'Credencial profissional'}],documents:[]});
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Adicionar documento');
+    expect(fixture.nativeElement.textContent).toContain('Enviar documentos para análise');
+    expect(fixture.nativeElement.querySelector('input[name="cpf"]')).toBeNull();
+    expect(fixture.nativeElement.textContent).not.toContain('Salvar rascunho');
+  });
 });

@@ -272,6 +272,16 @@ def decide_publication(*, actor, profile, decision, reason, request_id=None):
         from apps.marketplace.documents import documents_satisfy_active_requirements
         from apps.territories.policies import instructor_publication_is_allowed
 
+        if p.verification_requests.filter(
+            status__in=[
+                ProfessionalVerificationRequest.Status.DRAFT,
+                ProfessionalVerificationRequest.Status.SUBMITTED,
+                ProfessionalVerificationRequest.Status.UNDER_REVIEW,
+            ]
+        ).exists():
+            raise InvalidWorkflowTransition(
+                "Publicação bloqueada enquanto há solicitação de verificação ativa."
+            )
         if not p.is_demo:
             area = getattr(p, "service_area", None)
             if not area or not instructor_publication_is_allowed(area.uf):

@@ -59,7 +59,12 @@ from .services import (
     grant_service_location_authorization,
     submit_profile,
 )
-from .verification_services import save_verification_draft, submit_verification_request
+from .verification_services import (
+    can_start_document_supplement,
+    save_verification_draft,
+    start_document_supplement,
+    submit_verification_request,
+)
 
 
 class ProfessionalVerificationRequestInput(serializers.Serializer):
@@ -93,11 +98,13 @@ def _verification_payload(profile):
         "decided_at": item.decided_at if item else None,
         "message": item.public_message if item else "",
         "can_edit": not item
-        or item.status
-        in {
-            ProfessionalVerificationRequest.Status.DRAFT,
-            ProfessionalVerificationRequest.Status.REJECTED,
-        },
+        or item.status == ProfessionalVerificationRequest.Status.DRAFT
+        or (
+            item.status == ProfessionalVerificationRequest.Status.REJECTED
+            and not item.previous_verified_request_id
+        ),
+        "is_supplement": bool(item and item.previous_verified_request_id),
+        "can_start_supplement": can_start_document_supplement(profile, item),
         "documents_enabled": documents_enabled,
         "document_upload_available": documents_enabled,
         "document_types": [
@@ -174,6 +181,25 @@ class ProfessionalVerificationSubmitView(APIView):
         except InvalidWorkflowTransition as exc:
             raise serializers.ValidationError({"detail": str(exc)}) from exc
         profile.refresh_from_db()
+        return Response(_verification_payload(profile), status=201 if created else 200)
+
+
+class ProfessionalVerificationSupplementView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(responses={201: OpenApiTypes.OBJECT})
+    def post(self, request):
+        profile = _verification_profile(request)
+        try:
+            _, created = start_document_supplement(
+                actor=request.user,
+                profile=profile,
+                request_id=getattr(request, "request_id", None),
+            )
+        except WorkflowPermissionDenied as exc:
+            raise PermissionDenied(str(exc)) from exc
+        except InvalidWorkflowTransition as exc:
+            raise serializers.ValidationError({"detail": str(exc)}) from exc
         return Response(_verification_payload(profile), status=201 if created else 200)
 
 

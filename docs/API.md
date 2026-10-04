@@ -2,6 +2,19 @@
 
 ## Hotfix documental de 27/09/2026
 
+### Complementação após verificação concluída
+
+`GET /api/v1/instructor/verification/` também informa `can_start_supplement` e
+`is_supplement`. Para perfil real verificado, ainda não publicado e com upload técnico
+disponível, `POST /api/v1/instructor/verification/supplement/` abre um novo rascunho
+vinculado à solicitação `VERIFIED` anterior; a repetição é idempotente. Um complemento
+rejeitado pode ser refeito em outro rascunho. CPF não pode ser alterado no complemento.
+O upload usa a mesma rota privada já existente; o envio exige ao menos um anexo CLEAN.
+Ao enviar, a verificação corrente fica pendente e a publicação permanece bloqueada.
+Cada documento complementar requer decisão individual do revisor responsável antes
+da nova verificação humana. A decisão anterior permanece no histórico; nenhum anexo
+gera verificação, publicação ou autorização oficial automaticamente.
+
 `GET /api/v1/instructor/verification/` informa `document_upload_available`,
 `document_types` e `requirements` separadamente. Zero requisitos aprovados não impede
 upload voluntário quando o gate técnico está ativo.

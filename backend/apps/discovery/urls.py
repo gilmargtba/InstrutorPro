@@ -12,6 +12,7 @@ from .api import (
     ProfessionalVerificationDocumentView,
     ProfessionalVerificationRequestView,
     ProfessionalVerificationSubmitView,
+    ProfessionalVerificationSupplementView,
     PublicInstructorProfileView,
     PublicProfilePhotoView,
     WhatsAppContactView,
@@ -37,6 +38,11 @@ urlpatterns = [
         "instructor/verification/submit/",
         ProfessionalVerificationSubmitView.as_view(),
         name="professional-verification-submit",
+    ),
+    path(
+        "instructor/verification/supplement/",
+        ProfessionalVerificationSupplementView.as_view(),
+        name="professional-verification-supplement",
     ),
     path("instructors/search/", InstructorSearchView.as_view(), name="instructor-search"),
     path(

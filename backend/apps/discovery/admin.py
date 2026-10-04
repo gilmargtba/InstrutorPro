@@ -364,6 +364,7 @@ class ProfessionalVerificationRequestAdmin(admin.ModelAdmin):
     actions = ("start_review_action",)
     readonly_fields = (
         "profile",
+        "previous_verified_request",
         "status",
         "submitted_at",
         "review_started_at",
@@ -381,7 +382,10 @@ class ProfessionalVerificationRequestAdmin(admin.ModelAdmin):
         "review_checklist_display",
     )
     fieldsets = (
-        ("Dados do instrutor", {"fields": ("profile", "service_city", "service_uf")}),
+        (
+            "Dados do instrutor",
+            {"fields": ("profile", "service_city", "service_uf", "previous_verified_request")},
+        ),
         ("Identificação privada", {"fields": ("cpf_masked", "reveal_cpf_link")}),
         (
             "Histórico da solicitação",

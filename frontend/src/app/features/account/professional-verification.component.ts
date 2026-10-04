@@ -11,6 +11,8 @@ type VerificationState = {
   decided_at: string|null;
   message: string;
   can_edit: boolean;
+  is_supplement?: boolean;
+  can_start_supplement?: boolean;
   documents_enabled?: boolean;
   document_upload_available?: boolean;
   document_types?: {value:string;label:string}[];
@@ -30,17 +32,22 @@ type VerificationState = {
         @if(current.message){<p>{{current.message}}</p>}
         @if(current.can_edit){
           <form (ngSubmit)="submit()">
-            <h3>1. Identificação privada</h3>
-            <label>CPF
-              <input name="cpf" inputmode="numeric" autocomplete="off" maxlength="14" [(ngModel)]="cpf" (ngModelChange)="formatCpf()" placeholder="000.000.000-00" [required]="!current.cpf_masked">
-            </label>
-            <p class="privacy">O CPF será usado exclusivamente para identificação e verificação profissional. Ele não será exibido no perfil público.</p>
+            @if(current.is_supplement){
+              <p>Esta é uma nova solicitação de complementação, vinculada à verificação anterior. O CPF permanece protegido e não pode ser alterado aqui.</p>
+            } @else {
+              <h3>1. Identificação privada</h3>
+              <label>CPF
+                <input name="cpf" inputmode="numeric" autocomplete="off" maxlength="14" [(ngModel)]="cpf" (ngModelChange)="formatCpf()" placeholder="000.000.000-00" [required]="!current.cpf_masked">
+              </label>
+              <p class="privacy">O CPF será usado exclusivamente para identificação e verificação profissional. Ele não será exibido no perfil público.</p>
+            }
             <h3>2. Dados profissionais</h3>
             <p>Os dados profissionais são os informados em <a routerLink="/profissional/instrutor/onboarding">Editar perfil</a>.</p>
             @if(current.document_upload_available || current.documents_enabled){
               <h3>3. Documentos profissionais</h3>
               <p>Envie documentos profissionais que ajudem na análise da sua solicitação de verificação.</p>
               <p>Os anexos voluntários não são uma lista de exigências oficiais e não aprovam o cadastro automaticamente.</p>
+              <p>Para credenciamento, selecione “Certificado/credenciamento”. Para CNH, selecione “Outro documento profissional”.</p>
               <label>Tipo de documento
                 <select name="documentType" [(ngModel)]="documentType">
                   @for(type of current.document_types || []; track type.value){<option [value]="type.value">{{type.label}}</option>}
@@ -65,17 +72,21 @@ type VerificationState = {
                   }
                 </div>
               }
-              <p class="privacy">Salve primeiro o CPF. Arquivos aceitos: PDF, JPEG ou PNG, até 5 MB. Documentos não são publicados.</p>
+              <p class="privacy">@if(!current.cpf_masked){Salve primeiro o CPF. }Arquivos aceitos: PDF, JPEG ou PNG, até 5 MB. Documentos não são publicados.</p>
             } @else {<p>Documentos ainda não estão sendo solicitados nesta etapa.</p>}
             <h3>4. Revisão e envio</h3>
-            <label class="consent"><input type="checkbox" name="confirmed" [(ngModel)]="confirmed"> Confirmo que o CPF é meu e autorizo seu uso para esta verificação.</label>
-            <button class="button secondary" type="button" [disabled]="sending || !confirmed" (click)="saveDraft()">Salvar rascunho</button>
-            <button class="button primary" [disabled]="sending || !confirmed">Enviar solicitação de verificação</button>
+            <label class="consent"><input type="checkbox" name="confirmed" [(ngModel)]="confirmed"> @if(current.is_supplement){Confirmo que os anexos são meus e solicito nova revisão humana.}@else{Confirmo que o CPF é meu e autorizo seu uso para esta verificação.}</label>
+            @if(!current.is_supplement){<button class="button secondary" type="button" [disabled]="sending || !confirmed" (click)="saveDraft()">Salvar rascunho</button>}
+            <button class="button primary" [disabled]="sending || !confirmed">{{current.is_supplement?'Enviar documentos para análise':'Enviar solicitação de verificação'}}</button>
           </form>
         } @else {
           <p>Sua solicitação está protegida contra reenvio. Acompanhe o andamento nesta página.</p>
           @for(document of current.documents || []; track document.id){
             <p>{{document.label}} — {{document.original_name}} — {{securityLabel(document.scan_status)}}</p>
+          }
+          @if(current.can_start_supplement){
+            <p>Precisa acrescentar CNH, credencial ou outra evidência? Abra uma nova complementação. A decisão anterior fica preservada; os novos documentos passam por análise humana e não publicam seu perfil automaticamente.</p>
+            <button type="button" class="button primary" [disabled]="sending" (click)="startSupplement()">Complementar documentos</button>
           }
         }
         @if(error()){<p class="error" role="alert">{{error()}}</p>}
@@ -123,6 +134,10 @@ export class ProfessionalVerificationComponent {
   removeDocument(id:string){
     this.sending=true;this.error.set('');
     this.http.delete('/instructor/verification/documents/'+id+'/').subscribe({next:()=>{this.sending=false;this.load()},error:error=>this.fail(error)});
+  }
+  startSupplement(){
+    this.sending=true;this.error.set('');
+    this.http.post<VerificationState>('/instructor/verification/supplement/',{}).subscribe({next:value=>{this.sending=false;this.confirmed=false;this.state.set(value)},error:error=>this.fail(error)});
   }
   submit(){
     this.error.set('');

@@ -1,5 +1,23 @@
 # Checkpoint do Projeto
 
+## Complementação documental da verificação real — 04/10/2026
+
+- Solicitação `VERIFIED` permanece imutável. Um instrutor real verificado e não
+  publicado pode abrir um novo rascunho de complementação vinculado à decisão
+  anterior. O fluxo usa o upload privado existente e mantém CPF protegido.
+- O envio exige ao menos um anexo aprovado pelo scanner; bloqueia a elegibilidade
+  de publicação enquanto há rascunho ativo e volta a verificação corrente para
+  pendente após a submissão. Cada anexo complementar exige revisão individual;
+  nova verificação e publicação continuam decisões humanas separadas.
+- A tela de status aponta para a complementação; a tela de verificação explica
+  CNH/credenciamento, permite anexar e enviar sem reabrir a solicitação concluída.
+  Rejeição permite nova tentativa, sem sobrescrever o histórico.
+- Migration aditiva `discovery.0010` vincula a nova solicitação à verificação
+  anterior. Nenhuma flag de produção, conta ou decisão administrativa foi alterada.
+- Validação local: 343 testes backend e 47 frontend passaram; build Angular de
+  produção passou com avisos preexistentes de orçamento. Publicação/deploy desta
+  fatia ainda não foram executados.
+
 ## Correção da mensagem documental no status do instrutor — 02/10/2026
 
 - A tela `Status do cadastro` deixou de afirmar que documentos ainda não foram
