@@ -12,8 +12,16 @@
   para B. Após publicação, abre perfil público e busca pré-preenchida.
 - Validação local: 361 testes backend, 47 testes frontend, Ruff, Django check,
   migration check e build Angular passaram. O build conserva avisos preexistentes
-  de orçamento de bundle/SCSS. Deploy pendente; nenhuma decisão humana de UF ou
-  instrutor foi executada pelo agente.
+  de orçamento de bundle/SCSS.
+- Deploy de `3abf23e` na VPS concluído após backup validado de banco e
+  documentos privados. Atualização fast-forward, rebuild apenas do backend,
+  container saudável, Django check, migration check e readiness pública passaram.
+  Sem migration nova. Consulta somente leitura do perfil real em Goiatuba/GO:
+  `UNDER_REVIEW`, verificação `VERIFIED`, publicação `UNPUBLISHED`; bloqueios
+  calculados: GO `REVIEW_REQUIRED` e oferta B ausente/inativa. A fonte
+  regulatória cadastrada contém os campos técnicos mínimos; a vigência e o
+  mérito permanecem para confirmação humana de `gilmar`. Nenhuma UF, documento,
+  instrutor ou oferta foi aprovado/publicado/criado pelo deploy.
 
 ## Revisão em uma tela e e-mail pós-publicação — 05/10/2026
 
