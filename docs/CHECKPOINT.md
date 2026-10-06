@@ -1,5 +1,17 @@
 # Checkpoint do Projeto
 
+## Deploy da busca A–E e raio irrestrito — 06/10/2026
+
+- `origin/main` e VPS receberam, por fast-forward, `7f5fc50` e `3d58a84`.
+  Backup pré-deploy do banco e dos documentos privados passou em validação de
+  arquivo e SHA-256; a restauração não foi executada nesta atualização.
+- Imagens backend/frontend reconstruídas; migrations: nenhuma a aplicar.
+  Containers backend/frontend saudáveis, Django check sem erros e migration
+  check sem deriva. Health, readiness e página do mapa responderam HTTP 200.
+- Smoke público de Goiatuba/GO, categoria A, sem `radius_km`: 1 instrutor
+  retornado. Nenhuma UF, oferta ou perfil foi aprovado/publicado pelo deploy;
+  flags comerciais/financeiras não foram alteradas.
+
 ## Categorias A–E no FREE e busca nacional — 06/10/2026
 
 - Decisão comercial registrada: FREE não limita categorias e PRO não substitui
@@ -9,8 +21,8 @@
 - O mapa restaura a categoria do link, inicia com “Qualquer distância (Brasil)”
   e não filtra veículo sem escolha do aluno. A busca continua limitada em
   quantidade de resultados, ordenada pela distância ao ponto informado.
-- Nenhuma UF, perfil ou oferta foi ativada automaticamente. Mudança local ainda
-  não enviada nem implantada na VPS.
+- Nenhuma UF, perfil ou oferta foi ativada automaticamente. O deploy está
+  registrado na seção acima.
 
 ## Busca pública com raio flexível — 06/10/2026
 
@@ -23,7 +35,7 @@
   categoria/oferta A, portanto não aparece na busca B mesmo sem limite de raio.
 - Validação local: 364 testes backend, 53 frontend, build Angular, Ruff,
   Django check e migration check passaram. Os avisos preexistentes de orçamento
-  do build permanecem. Mudança ainda não enviada nem implantada na VPS.
+  do build permanecem. O deploy posterior está registrado na seção acima.
 
 ## Painel único de aprovação e publicação — 05/10/2026
 
