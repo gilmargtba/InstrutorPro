@@ -2,6 +2,20 @@
 
 Este documento é a fonte oficial de decisões consolidadas, contradições resolvidas e questões em aberto. Uma recomendação marcada como aberta não é uma decisão aceita.
 
+### Decisão do proprietário de 05/10/2026 — painel único de aprovação/publicação
+
+O Admin do perfil real reúne cadastro, documentos privados, verificação,
+prontidão da UF, ofertas por categoria, área e WhatsApp, com motivos objetivos
+para bloqueio. A conta responsável `gilmar` pode registrar na mesma tela as
+decisões humanas explícitas de UF e verificação e a publicação final; o botão
+combinado executa apenas decisões confirmadas, em transação única com auditoria
+e rollback integral em falha. A evidência regulatória incompleta permanece
+pendente, sem criação de fonte ou aprovação automática. Oferta de categoria
+nova exige categoria declarada no perfil, preço e duração explícitos; não há
+cópia automática entre categorias. Perfil só deve ser anunciado como disponível
+quando a publicação manual o tornar efetivamente visível na busca. O e-mail
+transacional pós-publicação definido abaixo continua independente de PRO.
+
 ### Decisão do proprietário de 05/10/2026 — revisão mais simples e aviso após publicação
 
 O revisor pode abrir os documentos privados, marcar individualmente os anexos

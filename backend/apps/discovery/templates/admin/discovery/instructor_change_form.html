@@ -1,0 +1,100 @@
+{% extends "admin/change_form.html" %}
+{% block content %}
+{% if approval_panel %}
+<section class="module" style="padding:18px;margin-bottom:18px;border:2px solid #187f83">
+  <h2>APROVAÇÃO E PUBLICAÇÃO — {{ approval_panel.profile.display_name }}</h2>
+  <p><strong>PRONTO PARA PUBLICAÇÃO:
+    {% if approval_panel.ready_to_publish %}<span style="color:#087443">SIM</span>{% else %}<span style="color:#a04410">NÃO</span>{% endif %}
+  </strong></p>
+  {% if approval_panel.blockers %}<div class="messagelist warning"><strong>Motivos:</strong><ul>
+    {% for reason in approval_panel.blockers %}<li>{{ reason }}</li>{% endfor %}
+  </ul></div>{% endif %}
+  <p>Cadastro: {% if approval_panel.registration_ok %}🟢 PRONTO{% else %}🟡 PENDENTE{% endif %} ·
+     Documentos: {% if approval_panel.documents_ok %}🟢 PRONTO{% else %}🟡 PENDENTE{% endif %} ·
+     Verificação: {% if approval_panel.verification_ok %}🟢 PRONTO{% else %}🟡 PENDENTE{% endif %} ·
+     UF: {% if approval_panel.uf_ok %}🟢 READY{% elif approval_panel.readiness.status == 'REVIEW_REQUIRED' %}🟡 REVIEW_REQUIRED{% else %}🔴 BLOQUEADA{% endif %} ·
+     Área: {% if approval_panel.area_ok %}🟢 PRONTA{% else %}🟡 PENDENTE{% endif %} ·
+     WhatsApp: {% if approval_panel.contact_ok %}🟢 PRONTO{% else %}🟡 PENDENTE{% endif %} ·
+     Perfil público: {% if approval_panel.public %}🟢 PUBLICADO{% else %}🟡 NÃO PUBLICADO{% endif %}</p>
+  <p>Categorias do perfil: {{ approval_panel.profile.categories|join:", "|default:"nenhuma" }} ·
+     Transmissão: {{ approval_panel.profile.transmission_options|join:", "|default:"não informada" }} ·
+     Veículo: {% if approval_panel.profile.vehicle_available %}sim{% else %}não{% endif %} ·
+     Área: {% if approval_panel.area %}{{ approval_panel.area.city }}/{{ approval_panel.area.uf }}, raio {{ approval_panel.area.radius_km }} km{% else %}pendente{% endif %}</p>
+  <p>Ofertas ativas: {% for category, registered, active in approval_panel.category_rows %}
+    <strong>{{ category }}={% if active %}SIM{% else %}NÃO{% endif %}</strong>{% if not forloop.last %} · {% endif %}
+  {% endfor %}</p>
+  {% if approval_panel.offers %}<table><thead><tr><th>Categoria</th><th>Preço</th><th>Duração</th><th>Ativa</th></tr></thead><tbody>
+    {% for offer in approval_panel.offers %}<tr><td>{{ offer.category }}</td><td>R$ {{ offer.price_amount }}</td><td>{{ offer.duration_minutes }} min</td><td>{{ offer.is_active|yesno:"sim,não" }}</td></tr>{% endfor %}
+  </tbody></table>{% endif %}
+  {% if approval_panel.readiness %}
+    <h3>Revisão regulatória — {{ approval_panel.area.uf }}</h3>
+    <p>Status: {{ approval_panel.readiness.get_status_display }} · Norma: {{ approval_panel.readiness.source_reference|default:"não cadastrada" }} ·
+       Órgão: {{ approval_panel.readiness.source_authority|default:"não cadastrado" }} ·
+       Consulta: {{ approval_panel.readiness.source_consulted_at|default:"não cadastrada" }}</p>
+    <p>Fonte: {% if approval_panel.readiness.source_url %}<a href="{{ approval_panel.readiness.source_url }}" target="_blank" rel="noopener noreferrer">{{ approval_panel.readiness.source_url }}</a>{% else %}não cadastrada{% endif %}</p>
+    <p>Evidências: {{ approval_panel.readiness.evidence|default:"não cadastradas"|linebreaksbr }}</p>
+    <p>Observações: {{ approval_panel.readiness.notes|default:"não cadastradas"|linebreaksbr }}</p>
+    {% if approval_panel.regulatory_missing %}<p style="color:#a04410">Faltam: {{ approval_panel.regulatory_missing|join:", " }}</p>{% endif %}
+  {% endif %}
+  {% if approval_panel.verification %}
+    <h3>Verificação profissional</h3>
+    <p>Solicitação: {{ approval_panel.verification.get_status_display }} · Revisor: {{ approval_panel.verification.reviewer|default:"não atribuído" }}</p>
+    {% if approval_panel.documents %}<ul>{% for document in approval_panel.documents %}<li>
+      {{ document.document_label }} — {{ document.get_status_display }} — {{ document.get_scan_status_display }}
+      {% if approval_panel.can_decide_verification %}
+        <a href="{% url 'instructor-document-download' document.pk %}" target="_blank" rel="noopener noreferrer">Abrir documento privado com auditoria</a>
+      {% endif %}
+    </li>{% endfor %}</ul>{% else %}<p>Nenhum documento anexado a esta solicitação.</p>{% endif %}
+  {% endif %}
+  {% if approval_panel.responsible %}
+  <form method="post" action="{{ approval_panel.action_url }}" style="border-top:1px solid #ccd;padding-top:15px">
+    {% csrf_token %}
+    {% if approval_panel.readiness.status == 'REVIEW_REQUIRED' and approval_panel.can_regulatory %}
+      <h3>Confirmar revisão da UF</h3>
+      <label><input type="checkbox" name="confirm_uf"> Conferi pessoalmente fonte oficial, evidências e vigência da UF acima</label><br>
+      <label>Início da vigência confirmado <input type="date" name="valid_from" value="{{ approval_panel.readiness.valid_from|date:'Y-m-d' }}"></label>
+      <label>Justificativa <input type="text" name="uf_reason" maxlength="500"></label>
+      <button type="submit" name="operation" value="approve_uf">CONFIRMAR REVISÃO DA UF E CONTINUAR</button>
+    {% endif %}
+    {% if approval_panel.verification.status == 'SUBMITTED' and approval_panel.can_review %}
+      <p><button type="submit" name="operation" value="start_review">Assumir análise nesta tela</button></p>
+    {% endif %}
+    {% if approval_panel.verification.status == 'UNDER_REVIEW' and approval_panel.can_decide_verification %}
+      <h3>Decisão profissional</h3>
+      {% if approval_panel.pending_documents %}<p>Abra cada documento antes de marcar:</p>
+        {% for document in approval_panel.pending_documents %}<label style="display:block"><input type="checkbox" name="reviewed_document_ids" value="{{ document.pk }}"> Conferi {{ document.document_label }} — {{ document.original_name }}</label>{% endfor %}
+      {% endif %}
+      <label>Método da consulta <input type="text" name="verification_method" maxlength="40" value="{{ approval_panel.verification.verification_method }}"></label>
+      <label>Fonte consultada <input type="text" name="verification_source" maxlength="80" value="{{ approval_panel.verification.verification_source }}"></label>
+      <label>Notas internas (sem CPF) <input type="text" name="verification_notes" value="{{ approval_panel.verification.internal_notes }}"></label><br>
+      <label><input type="checkbox" name="confirm_verification"> Conferi pessoalmente a fonte e os documentos aplicáveis</label>
+      <button type="submit" name="operation" value="approve_verification">APROVAR VERIFICAÇÃO</button><br>
+      <label>Motivo da rejeição <select name="rejection_reason_code"><option value="">Selecione</option><option value="REQUIREMENT_MISSING">Requisito ausente</option><option value="DOCUMENT_UNREADABLE">Documento ilegível</option><option value="DOCUMENT_MISMATCH">Documento divergente</option><option value="OFFICIAL_AUTHORIZATION_NOT_CONFIRMED">Autorização não confirmada</option><option value="INFORMATION_INCONSISTENT">Informações inconsistentes</option></select></label>
+      <button type="submit" name="operation" value="reject_verification">REJEITAR VERIFICAÇÃO</button>
+    {% endif %}
+    {% if approval_panel.can_offer %}
+      <h3>Cadastrar/atualizar oferta real</h3>
+      <p>Use somente categoria que o instrutor efetivamente atende. Não há cópia automática.</p>
+      <label>Categoria <select name="offer_category"><option value="">Selecione</option>{% for category, registered, active in approval_panel.category_rows %}{% if registered %}<option value="{{ category }}">{{ category }}</option>{% endif %}{% endfor %}</select></label>
+      <label>Preço R$ <input type="number" name="offer_price" min="0.01" step="0.01"></label>
+      <label>Duração (min) <input type="number" name="offer_duration" min="1"></label>
+      <label><input type="checkbox" name="offer_active" checked> Ativa</label>
+      <label>Justificativa <input type="text" name="offer_reason" maxlength="500"></label>
+      <button type="submit" name="operation" value="save_offer">SALVAR OFERTA</button>
+    {% endif %}
+    {% if approval_panel.can_publish and not approval_panel.public %}
+      <h3>Publicação manual</h3>
+      <label>Motivo <input type="text" name="publication_reason" maxlength="500"></label>
+      <label><input type="checkbox" name="confirm_publish"> Confirmo a decisão humana de publicar este instrutor real</label><br>
+      <button type="submit" name="operation" value="publish">PUBLICAR AGORA</button>
+      <button class="default" type="submit" name="operation" value="approve_publish">APROVAR E PUBLICAR INSTRUTOR</button>
+      <p>O botão combinado só executa as revisões da UF e da verificação se as confirmações específicas acima estiverem marcadas; tudo é revertido se qualquer gate falhar.</p>
+    {% endif %}
+  </form>
+  {% endif %}
+  {% if approval_panel.public %}<p><a class="button" href="{{ approval_panel.profile_url }}" target="_blank" rel="noopener">VER PERFIL PÚBLICO</a>
+    {% if approval_panel.search_url %}<a class="button" href="{{ approval_panel.search_url }}" target="_blank" rel="noopener">TESTAR NA BUSCA</a>{% endif %}</p>{% endif %}
+</section>
+{% endif %}
+{{ block.super }}
+{% endblock %}

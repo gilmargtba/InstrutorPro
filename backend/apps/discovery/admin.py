@@ -1,6 +1,9 @@
+from urllib.parse import urlencode
+
 from django import forms
+from django.conf import settings
 from django.contrib import admin, messages
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.middleware.csrf import get_token
 from django.template.response import TemplateResponse
@@ -11,6 +14,7 @@ from apps.audit.models import AuditEvent
 from apps.marketplace.models import InstructorDocument
 from apps.people.identifiers import decrypt_identifier, mask_cpf
 
+from .admin_approval import approval_panel, execute_approval_action
 from .models import (
     InstructorProfile,
     InstructorServiceArea,
@@ -45,6 +49,7 @@ def request_id(request):
 
 @admin.register(InstructorProfile)
 class InstructorProfileAdmin(admin.ModelAdmin):
+    change_form_template = "admin/discovery/instructor_change_form.html"
     list_display = (
         "nome_publico",
         "situacao_perfil",
@@ -96,9 +101,10 @@ class InstructorProfileAdmin(admin.ModelAdmin):
 
     @admin.display(description="Publicação")
     def publication_action(self, obj):
-        if obj.is_demo or obj.verification_status != "VERIFIED":
+        if obj.is_demo:
             return "—"
-        return self.publication_actions(obj)
+        url = reverse("admin:discovery_instructorprofile_change", args=[obj.pk])
+        return format_html('<a class="button" href="{}">Abrir aprovação e publicação</a>', url)
 
     @admin.display(description="Ações de publicação")
     def publication_actions(self, obj):
@@ -106,8 +112,7 @@ class InstructorProfileAdmin(admin.ModelAdmin):
             return "Use o fluxo DEMO somente para perfis sintéticos."
         base = "admin:discovery_instructor_publication_transition"
         if obj.profile_status == "UNDER_REVIEW" and obj.verification_status == "VERIFIED":
-            url = reverse(base, args=[obj.pk, "publish"])
-            return format_html('<a class="button default" href="{}">Publicar perfil</a>', url)
+            return "Use o painel Aprovação e publicação acima."
         if obj.publication_status == "APPROVED":
             suspend = reverse(base, args=[obj.pk, "suspend"])
             unpublish = reverse(base, args=[obj.pk, "unpublish"])
@@ -125,11 +130,71 @@ class InstructorProfileAdmin(admin.ModelAdmin):
     def get_urls(self):
         return [
             path(
+                "<uuid:object_id>/approval-action/",
+                self.admin_site.admin_view(self.approval_action_view),
+                name="discovery_instructor_approval_action",
+            ),
+            path(
                 "<uuid:object_id>/publication/<str:operation>/",
                 self.admin_site.admin_view(self.publication_transition_view),
                 name="discovery_instructor_publication_transition",
-            )
+            ),
         ] + super().get_urls()
+
+    def changeform_view(self, request, object_id=None, form_url="", extra_context=None):
+        if object_id:
+            profile = self.get_object(request, object_id)
+            if profile and not profile.is_demo and self.has_view_permission(request, profile):
+                panel = approval_panel(profile, request.user)
+                panel["action_url"] = reverse(
+                    "admin:discovery_instructor_approval_action", args=[profile.pk]
+                )
+                panel["profile_url"] = (
+                    f"{settings.FRONTEND_PUBLIC_URL}/aluno/instrutores/{profile.pk}"
+                )
+                if panel["active_categories"] and panel["area"]:
+                    area = panel["area"]
+                    query = urlencode(
+                        {
+                            "local": f"{area.city}, {area.uf}",
+                            "uf": area.uf,
+                            "categoria": panel["active_categories"][0],
+                            "raio": max(area.radius_km, 10),
+                        }
+                    )
+                    panel["search_url"] = (
+                        f"{settings.FRONTEND_PUBLIC_URL}/aluno/instrutores/mapa?{query}"
+                    )
+                extra_context = {**(extra_context or {}), "approval_panel": panel}
+        return super().changeform_view(request, object_id, form_url, extra_context)
+
+    def approval_action_view(self, request, object_id):
+        if request.method != "POST":
+            raise Http404
+        profile = self.get_object(request, object_id)
+        if profile is None or profile.is_demo:
+            raise Http404
+        if not self.has_change_permission(request, profile):
+            raise PermissionDenied
+        try:
+            record = execute_approval_action(
+                actor=request.user,
+                profile=profile,
+                data=request.POST,
+                request_id=getattr(request, "request_id", None),
+            )
+            self.message_user(request, "Decisão registrada com auditoria.", messages.SUCCESS)
+            if record and record.notice_status == PublicationDecision.NoticeStatus.PENDING:
+                self.message_user(
+                    request,
+                    "Perfil publicado; aviso por e-mail pendente de entrega.",
+                    messages.INFO,
+                )
+        except (InvalidWorkflowTransition, WorkflowPermissionDenied, ValidationError) as exc:
+            self.message_user(request, str(exc), messages.ERROR)
+        return HttpResponseRedirect(
+            reverse("admin:discovery_instructorprofile_change", args=[profile.pk])
+        )
 
     def publication_transition_view(self, request, object_id, operation):
         services = {

@@ -1,5 +1,20 @@
 # Checkpoint do Projeto
 
+## Painel único de aprovação e publicação — 05/10/2026
+
+- O perfil administrativo real mostra, numa seção, todos os gates de
+  publicação, documentos revisáveis, evidências da UF, categorias A–E e ofertas
+  ativas. As ações de revisão da UF, verificação, rejeição, oferta e publicação
+  ficam nessa página. O botão combinado exige confirmações humanas separadas
+  e usa transação única; não libera UF sem fonte/vigência nem publica perfil
+  sem oferta ativa por categoria, área, contato e visibilidade efetiva.
+- O painel mostra exatamente quando falta oferta de uma categoria; não copia A
+  para B. Após publicação, abre perfil público e busca pré-preenchida.
+- Validação local: 361 testes backend, 47 testes frontend, Ruff, Django check,
+  migration check e build Angular passaram. O build conserva avisos preexistentes
+  de orçamento de bundle/SCSS. Deploy pendente; nenhuma decisão humana de UF ou
+  instrutor foi executada pelo agente.
+
 ## Revisão em uma tela e e-mail pós-publicação — 05/10/2026
 
 - A tela de aprovação profissional permite conferir e marcar individualmente
