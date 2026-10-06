@@ -274,7 +274,7 @@ class SearchParameters(serializers.Serializer):
     latitude = serializers.FloatField(min_value=-90, max_value=90)
     longitude = serializers.FloatField(min_value=-180, max_value=180)
     uf = serializers.ChoiceField(choices=sorted(BRAZIL_UFS), required=False)
-    radius_km = serializers.ChoiceField(choices=[5, 10, 20, 50])
+    radius_km = serializers.IntegerField(min_value=1, max_value=5000, required=False)
     category = serializers.ChoiceField(choices=["B"])
     transmission = serializers.ChoiceField(choices=["MANUAL", "AUTOMATIC"], required=False)
     vehicle_available = serializers.BooleanField(required=False)
@@ -366,9 +366,7 @@ class InstructorSearchView(APIView):
 
     @extend_schema(
         parameters=[
-            OpenApiParameter(
-                name, str, required=name in {"latitude", "longitude", "radius_km", "category"}
-            )
+            OpenApiParameter(name, str, required=name in {"latitude", "longitude", "category"})
             for name in [
                 "latitude",
                 "longitude",

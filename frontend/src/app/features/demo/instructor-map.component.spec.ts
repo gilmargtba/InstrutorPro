@@ -63,7 +63,7 @@ describe('InstructorMapComponent geolocation', () => {
     fixture.detectChanges();
     fixture.componentInstance.filters.location = 'Brasília';
     fixture.componentInstance.search();
-    expect(search).toHaveBeenCalledWith(-15.79, -47.88, fixture.componentInstance.filters, 'DF');
+    expect(search).toHaveBeenCalledWith(-15.79, -47.88, fixture.componentInstance.filters);
   });
 
   it('keeps the UF from the selected autocomplete suggestion', () => {
@@ -77,7 +77,7 @@ describe('InstructorMapComponent geolocation', () => {
       uf_resolution:'RESOLVED',latitude:-15.79,longitude:-47.88,place_type:'place',bbox:null,
     });
     expect(geocode).not.toHaveBeenCalled();
-    expect(search).toHaveBeenCalledWith(-15.79, -47.88, fixture.componentInstance.filters, 'DF');
+    expect(search).toHaveBeenCalledWith(-15.79, -47.88, fixture.componentInstance.filters);
   });
 
   it('requires explicit UF confirmation when the provider cannot resolve it', () => {
@@ -96,6 +96,45 @@ describe('InstructorMapComponent geolocation', () => {
     expect(fixture.componentInstance.pendingLocation).not.toBeNull();
     fixture.componentInstance.confirmedUf = 'DF';
     fixture.componentInstance.confirmLocationUf();
-    expect(search).toHaveBeenCalledWith(-15.79, -47.88, fixture.componentInstance.filters, 'DF');
+    expect(search).toHaveBeenCalledWith(-15.79, -47.88, fixture.componentInstance.filters);
+  });
+
+  it('allows an unrestricted distance without inventing an instructor category', () => {
+    const fixture = TestBed.createComponent(InstructorMapComponent);
+    const component = fixture.componentInstance;
+    component.setAnyDistance(true);
+    expect(component.filters.radius).toBeNull();
+    expect(component.anyDistance).toBeTrue();
+    expect(component.filters.category).toBe('B');
+    component.setAnyDistance(false);
+    expect(component.filters.radius).toBe(10);
+  });
+
+  it('does not turn an empty radius input into an unrestricted search', () => {
+    const fixture = TestBed.createComponent(InstructorMapComponent);
+    const component = fixture.componentInstance;
+    const search = spyOn(TestBed.inject(InstructorSearchProvider), 'search');
+    component.filters.location = 'Goiatuba';
+    component.filters.radius = null;
+    component.search();
+    expect(search).not.toHaveBeenCalled();
+    expect(component.locationMessage).toContain('Informe um raio');
+  });
+
+  it('restores a custom radius from a search link', () => {
+    const route = TestBed.inject(ActivatedRoute);
+    spyOn(route.snapshot.queryParamMap, 'get').and.callFake(key => key === 'raio' ? '137' : null);
+    const fixture = TestBed.createComponent(InstructorMapComponent);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.filters.radius).toBe(137);
+  });
+
+  it('restores unlimited distance from a search link', () => {
+    const route = TestBed.inject(ActivatedRoute);
+    spyOn(route.snapshot.queryParamMap, 'get').and.callFake(key => key === 'raio' ? 'todos' : null);
+    const fixture = TestBed.createComponent(InstructorMapComponent);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.filters.radius).toBeNull();
+    expect(fixture.componentInstance.anyDistance).toBeTrue();
   });
 });

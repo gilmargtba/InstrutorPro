@@ -208,7 +208,8 @@ h1 span { color: var(--teal); }
 }
 
 .filter-panel label { display: flex; flex-direction: column; gap: .35rem; color: #3d5f6b; font-size: .74rem; font-weight: 850; }
-.filter-panel select { min-height: 2.75rem; padding: .6rem; border: 1px solid #c6d9d5; border-radius: .7rem; background: #fff; }
+.filter-panel select, .filter-panel input[type="number"] { min-height: 2.75rem; padding: .6rem; border: 1px solid #c6d9d5; border-radius: .7rem; background: #fff; }
+.filter-panel label.check { flex-direction: row; align-items: center; align-self: center; gap: .4rem; }
 
 .map-stage {
   position: relative;

@@ -117,13 +117,12 @@ import { BRAZIL_UFS } from '../../shared/brazil-ufs';
             </label>
             <label>
               Raio de busca
-              <select name="radius" [(ngModel)]="filters.radius">
-                <option [ngValue]="5">5 km</option>
-                <option [ngValue]="10">10 km</option>
-                <option [ngValue]="20">20 km</option>
-                <option [ngValue]="50">50 km</option>
-              </select>
+              <input name="radius" type="number" min="1" max="5000" step="1"
+                [disabled]="filters.radius === null" [(ngModel)]="filters.radius" />
             </label>
+            <label class="check"><input name="anyDistance" type="checkbox"
+              [ngModel]="anyDistance" (ngModelChange)="setAnyDistance($event)" />
+              Qualquer distância (Brasil)</label>
             <label>
               Preço máximo
               <select name="maxPrice" [(ngModel)]="filters.maxPrice">
@@ -259,6 +258,7 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
   error = false;
   filtersOpen = false;
   drawerOpen = true;
+  anyDistance = false;
   view: 'map' | 'list' = 'map';
   suggestions: GeocodingResult[] = [];
   locationMessage = '';
@@ -279,6 +279,15 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
       const item = this.items.find((candidate) => candidate.id === id);
       if (item) this.select(item);
     });
+    const routedRadius = this.route.snapshot.queryParamMap.get('raio');
+    if (routedRadius === 'todos') {
+      this.setAnyDistance(true);
+    } else if (routedRadius !== null) {
+      const radius = Number(routedRadius);
+      if (Number.isInteger(radius) && radius >= 1 && radius <= 5000) {
+        this.filters.radius = radius;
+      }
+    }
     const routedLocation = this.route.snapshot.queryParamMap.get('local');
     if (routedLocation) {
       this.filters.location = routedLocation;
@@ -288,6 +297,10 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
 
   search() {
     if (!this.filters.location.trim()) return;
+    if (!this.anyDistance && (this.filters.radius === null || !Number.isInteger(this.filters.radius) || this.filters.radius < 1 || this.filters.radius > 5000)) {
+      this.locationMessage = 'Informe um raio inteiro entre 1 e 5000 km ou selecione qualquer distância.';
+      return;
+    }
     this.searched = true;
     this.loading = true;
     this.error = false;
@@ -339,8 +352,8 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
   private searchFromPoint(point:GeocodingResult) {
         this.map.focus(point.latitude, point.longitude, 12);
         this.suggestions = [];
-        void this.router.navigate([], {queryParams:{local:point.label,uf:point.uf,categoria:this.filters.category,raio:this.filters.radius},replaceUrl:true});
-        this.api.search(point.latitude, point.longitude, this.filters, point.uf).subscribe({
+        void this.router.navigate([], {queryParams:{local:point.label,uf:point.uf,categoria:this.filters.category,raio:this.filters.radius ?? 'todos'},replaceUrl:true});
+        this.api.search(point.latitude, point.longitude, this.filters).subscribe({
           next: (response) => {
             this.items = response.results;
             this.selected = null;
@@ -394,8 +407,17 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
   }
 
   increaseRadius() {
-    this.filters.radius = this.filters.radius === 50 ? 50 : Math.min(50, this.filters.radius * 2);
+    if (this.filters.radius === null || this.filters.radius >= 5000) {
+      this.setAnyDistance(true);
+    } else {
+      this.filters.radius = Math.min(5000, this.filters.radius * 2);
+    }
     this.search();
+  }
+
+  setAnyDistance(enabled: boolean) {
+    this.anyDistance = enabled;
+    this.filters.radius = enabled ? null : 10;
   }
 
   backToIntro() {

@@ -491,6 +491,31 @@ def test_api_excludes_private_location(actor):
 
 
 @pytest.mark.django_db
+def test_search_accepts_arbitrary_radius_and_unlimited_distance(actor):
+    make_profile(actor)
+    params = {"latitude": -31, "longitude": -52, "category": "B"}
+    endpoint = "/api/v1/instructors/search/"
+    assert APIClient().get(endpoint, {**params, "radius_km": 10}).json()["count"] == 0
+    arbitrary = APIClient().get(endpoint, {**params, "radius_km": 200})
+    unlimited = APIClient().get(endpoint, params)
+    assert arbitrary.status_code == 200 and arbitrary.json()["count"] == 1
+    assert unlimited.status_code == 200 and unlimited.json()["count"] == 1
+    assert unlimited.json()["results"][0]["distance_km"] > 10
+
+
+@pytest.mark.django_db
+def test_unlimited_search_excludes_profile_without_public_point(actor):
+    _, area, *_ = make_profile(actor)
+    area.public_service_location = None
+    area.save(update_fields=["public_service_location"])
+    response = APIClient().get(
+        "/api/v1/instructors/search/",
+        {"latitude": -30.0346, "longitude": -51.2177, "category": "B"},
+    )
+    assert response.status_code == 200 and response.json()["count"] == 0
+
+
+@pytest.mark.django_db
 def test_search_uses_canonical_uf_alongside_postgis_coordinates(actor):
     make_profile(actor)
     params = {"latitude": -30.0346, "longitude": -51.2177, "radius_km": 10, "category": "B"}
@@ -531,7 +556,8 @@ def test_national_summary_counts_only_published_instructors(actor):
     [
         {},
         {"latitude": 91, "longitude": 0, "radius_km": 5, "category": "B"},
-        {"latitude": 0, "longitude": 0, "radius_km": 7, "category": "B"},
+        {"latitude": 0, "longitude": 0, "radius_km": 0, "category": "B"},
+        {"latitude": 0, "longitude": 0, "radius_km": 5001, "category": "B"},
     ],
 )
 def test_invalid_api(params):

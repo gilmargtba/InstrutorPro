@@ -1,5 +1,18 @@
 # Checkpoint do Projeto
 
+## Busca pública com raio flexível — 06/10/2026
+
+- A busca aceita raio inteiro de 1 a 5000 km ou distância irrestrita quando
+  `radius_km` é omitido. A interface oferece campo em km e opção “Qualquer
+  distância (Brasil)”, sem limitar resultados à UF do ponto pesquisado.
+- Permanecem os gates de perfil publicado, categoria/oferta ativa e o limite
+  configurado de resultados; a mudança não cria ofertas nem altera decisão
+  regulatória. Em produção, o perfil real observado em Goiatuba tem apenas
+  categoria/oferta A, portanto não aparece na busca B mesmo sem limite de raio.
+- Validação local: 364 testes backend, 53 frontend, build Angular, Ruff,
+  Django check e migration check passaram. Os avisos preexistentes de orçamento
+  do build permanecem. Mudança ainda não enviada nem implantada na VPS.
+
 ## Painel único de aprovação e publicação — 05/10/2026
 
 - O perfil administrativo real mostra, numa seção, todos os gates de

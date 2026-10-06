@@ -50,8 +50,8 @@ def search_published_instructors(
     latitude,
     longitude,
     uf=None,
-    radius_km,
     category,
+    radius_km=None,
     transmission=None,
     vehicle_available=None,
     max_price=None,
@@ -60,9 +60,13 @@ def search_published_instructors(
     data_mode = "SYNTHETIC" if settings.SYNTHETIC_MARKETPLACE_ENABLED else "REAL"
     origin = Point(float(longitude), float(latitude), srid=4326)
     queryset = published_instructor_profiles().filter(
-        service_area__public_service_location__distance_lte=(origin, D(km=float(radius_km))),
         categories__contains=[category],
+        service_area__public_service_location__isnull=False,
     )
+    if radius_km is not None:
+        queryset = queryset.filter(
+            service_area__public_service_location__distance_lte=(origin, D(km=radius_km))
+        )
     if uf:
         queryset = queryset.filter(service_area__uf=uf)
     if transmission:
