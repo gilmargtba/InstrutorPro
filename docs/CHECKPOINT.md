@@ -1,5 +1,21 @@
 # Checkpoint do Projeto
 
+## Revisão em uma tela e e-mail pós-publicação — 05/10/2026
+
+- A tela de aprovação profissional permite conferir e marcar individualmente
+  documentos limpos ainda pendentes. A decisão atômica grava a revisão dos
+  anexos selecionados, método/fonte reais e verificação interna; anexo ainda
+  pendente impede concluir a solicitação. Aprovação de UF e publicação continuam
+  decisões humanas independentes.
+- Uma publicação manual futura de perfil real cria um aviso transacional por
+  e-mail, somente se o perfil estiver efetivamente visível. O envio usa o
+  endereço cadastrado, sem CPF/documentos, estado de entrega na decisão de
+  publicação, até três tentativas e retry pelo worker. Não há WhatsApp
+  automático nem envio retroativo para publicações antigas.
+- Migration aditiva `discovery.0011` guarda estado de entrega. Validação local:
+  351 testes backend, Django check, migration check e Ruff passaram; deploy
+  ainda pendente. Nenhuma flag, aprovação ou dado real foi alterado.
+
 ## Complementação documental da verificação real — 04/10/2026
 
 - Solicitação `VERIFIED` permanece imutável. Um instrutor real verificado e não

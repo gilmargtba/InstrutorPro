@@ -115,6 +115,10 @@ CELERY_RESULT_BACKEND = REDIS_URL
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 300
 CELERY_BEAT_SCHEDULE = {
+    "publication-notice-retry-five-minutes": {
+        "task": "discovery.retry_publication_notices",
+        "schedule": 300.0,
+    },
     "marketplace-analytics-retention-daily": {
         "task": "marketplace.enforce_analytics_retention",
         "schedule": 86400.0,

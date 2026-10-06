@@ -5,6 +5,11 @@ from django.utils import timezone
 
 from apps.audit.models import AuditEvent
 from apps.marketplace.capabilities import enabled
+from apps.marketplace.documents import (
+    DocumentPermissionDenied,
+    DocumentValidationError,
+    review_document,
+)
 from apps.marketplace.models import InstructorDocument
 from apps.marketplace.real_documents import applicable_requirements, upload_available
 from apps.people.identifiers import encrypt_identifier, fingerprint_identifier, normalize_cpf
@@ -339,6 +344,15 @@ def review_checklist(item):
         document.status != InstructorDocument.Status.APPROVED for document in documents
     ):
         missing.append("Documento complementar sem aprovação individual")
+    elif any(
+        document.status
+        in {
+            InstructorDocument.Status.PENDING,
+            InstructorDocument.Status.UNDER_REVIEW,
+        }
+        for document in documents
+    ):
+        missing.append("Documento sem revisão individual")
     if not item.verification_method.strip():
         missing.append("Método da consulta não registrado")
     if not item.verification_source.strip():
@@ -350,7 +364,15 @@ def review_checklist(item):
 
 @transaction.atomic
 def record_review_and_approve(
-    *, actor, verification_request, method, source, notes, consultation_confirmed, request_id=None
+    *,
+    actor,
+    verification_request,
+    method,
+    source,
+    notes,
+    consultation_confirmed,
+    reviewed_document_ids=(),
+    request_id=None,
 ):
     """Record the human attestation and decide atomically; no publication follows."""
     item = _lock_for_decision(actor, verification_request)
@@ -360,6 +382,26 @@ def record_review_and_approve(
         raise InvalidWorkflowTransition("Confirme a consulta e informe método e fonte.")
     if len(method) > 40 or len(source) > 80:
         raise InvalidWorkflowTransition("Método ou fonte excede o tamanho permitido.")
+    selected_ids = {str(value) for value in reviewed_document_ids}
+    pending_documents = list(
+        item.documents.select_for_update().filter(
+            status__in=[InstructorDocument.Status.PENDING, InstructorDocument.Status.UNDER_REVIEW]
+        )
+    )
+    pending_by_id = {str(document.pk): document for document in pending_documents}
+    if selected_ids - pending_by_id.keys():
+        raise InvalidWorkflowTransition("A seleção de documentos mudou. Atualize a análise.")
+    for document_id in selected_ids:
+        try:
+            review_document(
+                actor=actor,
+                document=pending_by_id[document_id],
+                decision=InstructorDocument.Status.APPROVED,
+                reason="ADMIN_APPROVED_WITH_VERIFICATION",
+                source=source,
+            )
+        except (DocumentPermissionDenied, DocumentValidationError) as exc:
+            raise InvalidWorkflowTransition(str(exc)) from exc
     item.verification_method = method
     item.verification_source = source
     item.checked_at = timezone.now()
@@ -392,6 +434,10 @@ def approve_verification_request(*, actor, verification_request, request_id=None
         raise InvalidWorkflowTransition(
             "Todos os documentos complementares precisam de aprovação individual."
         )
+    if item.documents.filter(
+        status__in=[InstructorDocument.Status.PENDING, InstructorDocument.Status.UNDER_REVIEW]
+    ).exists():
+        raise InvalidWorkflowTransition("Revise individualmente os documentos anexados.")
     for requirement in item.requirements_snapshot:
         if (
             requirement["required"]

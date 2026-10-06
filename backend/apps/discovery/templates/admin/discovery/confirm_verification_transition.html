@@ -6,6 +6,7 @@
   <p>Status atual: <strong>{{ item.get_status_display }}</strong></p>
   <p>Esta é uma decisão interna auditada. Ela não autoriza nem publica o instrutor.</p>
   {% if operation == "approve" %}
+    <p>Você pode conferir e aprovar os anexos pendentes nesta mesma tela. A verificação só será concluída se todos os requisitos aplicáveis forem satisfeitos.</p>
     <h2>Checklist de análise</h2>
     {% if review_checklist %}
       <ul>{% for pending in review_checklist %}<li>{{ pending }}</li>{% endfor %}</ul>
@@ -15,8 +16,8 @@
     {% if review_documents %}
       <h2>Documentos privados atribuídos à revisão</h2>
       <ul>{% for document in review_documents %}
-        <li>{{ document.document_label }} — {{ document.get_status_display }} —
-          <a href="{% url 'instructor-document-download' document.pk %}">Visualizar com autorização e auditoria</a>
+        <li>{{ document.document_label }} — {{ document.get_status_display }} — {{ document.get_scan_status_display }} —
+          <a href="{% url 'instructor-document-download' document.pk %}" target="_blank" rel="noopener">Visualizar com autorização e auditoria</a>
         </li>
       {% endfor %}</ul>
     {% endif %}

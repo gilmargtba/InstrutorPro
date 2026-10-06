@@ -152,13 +152,19 @@ class InstructorProfileAdmin(admin.ModelAdmin):
                 self.message_user(request, "Informe o motivo da decisão.", messages.ERROR)
             else:
                 try:
-                    service(
+                    record = service(
                         actor=request.user,
                         profile=profile,
                         reason=reason,
                         request_id=getattr(request, "request_id", None),
                     )
                     self.message_user(request, f"{label}: decisão auditada.", messages.SUCCESS)
+                    if record.notice_status == PublicationDecision.NoticeStatus.PENDING:
+                        self.message_user(
+                            request,
+                            "Aviso por e-mail pendente; acompanhe em Decisões de publicação.",
+                            messages.INFO,
+                        )
                 except (WorkflowPermissionDenied, InvalidWorkflowTransition) as exc:
                     self.message_user(request, str(exc), messages.ERROR)
             return HttpResponseRedirect(back)
@@ -290,6 +296,15 @@ class SubmittedDocumentInline(admin.TabularInline):
 
 
 class VerificationApprovalForm(forms.Form):
+    reviewed_document_ids = forms.MultipleChoiceField(
+        label="Documentos conferidos e aprovados nesta decisão",
+        required=False,
+        widget=forms.CheckboxSelectMultiple,
+        help_text=(
+            "Abra cada arquivo privado e marque apenas o que você conferiu. "
+            "Documentos já aprovados não precisam ser marcados novamente."
+        ),
+    )
     verification_method = forms.CharField(
         label="Método da consulta",
         max_length=40,
@@ -311,6 +326,15 @@ class VerificationApprovalForm(forms.Form):
         label="Confirmo que consultei esta fonte agora e revisei os documentos aplicáveis.",
         required=True,
     )
+
+    def __init__(self, *args, pending_documents=(), **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["reviewed_document_ids"].choices = [
+            (str(document.pk), f"{document.document_label} — {document.original_name}")
+            for document in pending_documents
+        ]
+        if not pending_documents:
+            del self.fields["reviewed_document_ids"]
 
 
 class VerificationRejectionForm(forms.Form):
@@ -595,6 +619,23 @@ class ProfessionalVerificationRequestAdmin(admin.ModelAdmin):
             raise PermissionDenied
         label, service = services[operation]
         back = reverse("admin:discovery_professionalverificationrequest_change", args=[item.pk])
+        review_documents = (
+            list(item.documents.all())
+            if operation == "approve"
+            and item.reviewer_id == request.user.id
+            and request.user.has_perm("marketplace.review_instructor_document")
+            else []
+        )
+        pending_documents = [
+            document
+            for document in review_documents
+            if document.scan_status == InstructorDocument.ScanStatus.CLEAN
+            and document.status
+            in {
+                InstructorDocument.Status.PENDING,
+                InstructorDocument.Status.UNDER_REVIEW,
+            }
+        ]
         form_class = {
             "approve": VerificationApprovalForm,
             "reject": VerificationRejectionForm,
@@ -609,7 +650,11 @@ class ProfessionalVerificationRequestAdmin(admin.ModelAdmin):
             else {"rejection_reason_code": item.rejection_reason_code}
         )
         form = (
-            form_class(request.POST if request.method == "POST" else None, initial=initial)
+            form_class(
+                request.POST if request.method == "POST" else None,
+                initial=initial,
+                **({"pending_documents": pending_documents} if operation == "approve" else {}),
+            )
             if form_class
             else None
         )
@@ -624,6 +669,9 @@ class ProfessionalVerificationRequestAdmin(admin.ModelAdmin):
                             source=form.cleaned_data["verification_source"],
                             notes=form.cleaned_data["internal_notes"],
                             consultation_confirmed=form.cleaned_data["consultation_confirmed"],
+                            reviewed_document_ids=form.cleaned_data.get(
+                                "reviewed_document_ids", ()
+                            ),
                             request_id=getattr(request, "request_id", None),
                         )
                     elif operation == "reject":
@@ -660,13 +708,7 @@ class ProfessionalVerificationRequestAdmin(admin.ModelAdmin):
                 "opts": self.model._meta,
                 "form": form,
                 "review_checklist": review_checklist(item),
-                "review_documents": (
-                    item.documents.filter(scan_status=InstructorDocument.ScanStatus.CLEAN)
-                    if operation == "approve"
-                    and item.reviewer_id == request.user.id
-                    and request.user.has_perm("marketplace.review_instructor_document")
-                    else []
-                ),
+                "review_documents": review_documents,
             },
         )
 
@@ -769,7 +811,7 @@ class ProfessionalVerificationRequestAdmin(admin.ModelAdmin):
         self._run(request, queryset, start_verification_review)
 
 
-@admin.register(LocationPublicationAuthorization, ProfessionalVerification, PublicationDecision)
+@admin.register(LocationPublicationAuthorization, ProfessionalVerification)
 class WorkflowHistoryAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
@@ -779,6 +821,30 @@ class WorkflowHistoryAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+
+@admin.register(PublicationDecision)
+class PublicationDecisionAdmin(WorkflowHistoryAdmin):
+    list_display = ("profile", "decision", "notice_status", "notice_sent_at", "created_at")
+    list_filter = ("decision", "notice_status")
+    readonly_fields = (
+        "profile",
+        "decision",
+        "actor",
+        "reason",
+        "verification",
+        "before",
+        "after",
+        "notice_status",
+        "notice_recipient",
+        "notice_attempts",
+        "notice_attempted_at",
+        "notice_sent_at",
+        "created_at",
+    )
+
+    def has_view_permission(self, request, obj=None):
+        return can_manage_publication(request.user) or super().has_view_permission(request, obj)
 
 
 admin.site.site_header = "Administração InstrutorProCNH"

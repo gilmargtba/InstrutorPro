@@ -16,6 +16,7 @@ from apps.discovery.models import (
     InstructorProfile,
     InstructorServiceArea,
     ProfessionalVerificationRequest,
+    PublicationDecision,
 )
 from apps.discovery.services import InvalidWorkflowTransition, approve_publication
 from apps.discovery.verification_services import (
@@ -393,10 +394,14 @@ def test_verified_real_request_requires_territorial_gate_then_manual_publication
         approved_by=admin,
         approved_at=timezone.now(),
     )
-    approve_publication(actor=admin, profile=profile, reason="ADMIN_REVIEWED_PUBLICATION")
+    decision = approve_publication(
+        actor=admin, profile=profile, reason="ADMIN_REVIEWED_PUBLICATION"
+    )
     profile.refresh_from_db()
     assert profile.profile_status == InstructorProfile.Status.APPROVED
     assert profile.publication_status == InstructorProfile.PublicationStatus.APPROVED
+    assert decision.notice_status == PublicationDecision.NoticeStatus.PENDING
+    assert decision.notice_recipient == owner.email
     assert AuditEvent.objects.filter(
         action="discovery.publication_approve", target_id=profile.id
     ).exists()

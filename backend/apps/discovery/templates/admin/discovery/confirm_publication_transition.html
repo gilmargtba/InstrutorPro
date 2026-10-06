@@ -7,6 +7,7 @@
 <p><strong>Publicação atual:</strong> {{ profile.get_publication_status_display }}</p>
 {% if operation == "publish" %}
 <p>A publicação só ocorrerá se a verificação, a área autorizada e o gate regulatório da UF ainda estiverem válidos. Ela não é automática.</p>
+<p>Após a publicação, o sistema enviará um e-mail ao endereço cadastrado do instrutor informando que o perfil está disponível. A entrega pode ser acompanhada em Decisões de publicação. Nenhuma mensagem automática de WhatsApp será enviada.</p>
 {% else %}
 <p>Esta decisão retira o perfil das buscas públicas e será auditada.</p>
 {% endif %}

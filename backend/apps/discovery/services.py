@@ -349,6 +349,14 @@ def decide_publication(*, actor, profile, decision, reason, request_id=None):
         verification=verification,
         before=before,
         after=after,
+        notice_status=(
+            PublicationDecision.NoticeStatus.PENDING
+            if decision == "APPROVE" and not p.is_demo and p.person.account.email
+            else PublicationDecision.NoticeStatus.NOT_APPLICABLE
+        ),
+        notice_recipient=(
+            p.person.account.email if decision == "APPROVE" and not p.is_demo else ""
+        ),
     )
     _audit(
         actor,
@@ -360,6 +368,10 @@ def decide_publication(*, actor, profile, decision, reason, request_id=None):
         request_id,
         decision_id=str(record.id),
     )
+    if record.notice_status == PublicationDecision.NoticeStatus.PENDING:
+        from .publication_notifications import queue_publication_notice
+
+        transaction.on_commit(lambda: queue_publication_notice(record.pk))
     return record
 
 

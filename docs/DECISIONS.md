@@ -2,6 +2,20 @@
 
 Este documento é a fonte oficial de decisões consolidadas, contradições resolvidas e questões em aberto. Uma recomendação marcada como aberta não é uma decisão aceita.
 
+### Decisão do proprietário de 05/10/2026 — revisão mais simples e aviso após publicação
+
+O revisor pode abrir os documentos privados, marcar individualmente os anexos
+conferidos e concluir a verificação interna na mesma tela administrativa. A
+aprovação de arquivos continua humana, autorizada, auditada e condicionada ao
+scanner; método e fonte efetivamente consultados continuam obrigatórios. O
+atalho não aprova UF nem publica o perfil.
+
+Após **publicação manual** de um instrutor real elegível, o sistema envia e-mail
+transacional ao endereço cadastrado informando que o perfil está disponível.
+Aprovação da verificação interna, isoladamente, não gera mensagem de "cadastro
+liberado"; não existe envio automático de WhatsApp. Falha no transporte não
+reverte a decisão de publicação e fica visível para acompanhamento/retry.
+
 ### Decisão do proprietário de 01/10/2026 — ativação independente de descoberta pública
 
 Busca nacional, perfil público elegível e contato voluntário por WhatsApp foram
