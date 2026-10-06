@@ -504,6 +504,30 @@ def test_search_accepts_arbitrary_radius_and_unlimited_distance(actor):
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize("category", ["A", "C", "D", "E"])
+def test_search_accepts_published_categories_with_matching_active_offer(actor, category):
+    profile, *_ = make_profile(actor, categories=[category])
+    InstructorOffer.objects.create(
+        instructor=profile,
+        category=category,
+        price_amount="120.00",
+        duration_minutes=50,
+        data_mode=DataMode.SYNTHETIC,
+    )
+    params = {"latitude": -30.0346, "longitude": -51.2177, "category": category}
+    response = APIClient().get("/api/v1/instructors/search/", params)
+    assert response.status_code == 200
+    assert response.json()["count"] == 1
+    assert response.json()["results"][0]["price_amount"] == 120.0
+    assert (
+        APIClient().get("/api/v1/instructors/search/", {**params, "category": "B"}).json()["count"]
+        == 0
+    )
+    InstructorOffer.objects.filter(instructor=profile, category=category).update(is_active=False)
+    assert APIClient().get("/api/v1/instructors/search/", params).json()["count"] == 0
+
+
+@pytest.mark.django_db
 def test_unlimited_search_excludes_profile_without_public_point(actor):
     _, area, *_ = make_profile(actor)
     area.public_service_location = None
@@ -558,6 +582,7 @@ def test_national_summary_counts_only_published_instructors(actor):
         {"latitude": 91, "longitude": 0, "radius_km": 5, "category": "B"},
         {"latitude": 0, "longitude": 0, "radius_km": 0, "category": "B"},
         {"latitude": 0, "longitude": 0, "radius_km": 5001, "category": "B"},
+        {"latitude": 0, "longitude": 0, "category": "F"},
     ],
 )
 def test_invalid_api(params):

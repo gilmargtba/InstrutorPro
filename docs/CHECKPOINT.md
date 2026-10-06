@@ -1,5 +1,17 @@
 # Checkpoint do Projeto
 
+## Categorias A–E no FREE e busca nacional — 06/10/2026
+
+- Decisão comercial registrada: FREE não limita categorias e PRO não substitui
+  verificação, prontidão de UF ou publicação manual.
+- A API de busca aceita A–E e exige oferta ativa da categoria consultada;
+  o preço exibido vem dessa oferta, não de outra categoria do mesmo perfil.
+- O mapa restaura a categoria do link, inicia com “Qualquer distância (Brasil)”
+  e não filtra veículo sem escolha do aluno. A busca continua limitada em
+  quantidade de resultados, ordenada pela distância ao ponto informado.
+- Nenhuma UF, perfil ou oferta foi ativada automaticamente. Mudança local ainda
+  não enviada nem implantada na VPS.
+
 ## Busca pública com raio flexível — 06/10/2026
 
 - A busca aceita raio inteiro de 1 a 5000 km ou distância irrestrita quando

@@ -11,7 +11,7 @@ describe('InstructorSearchProvider radius', () => {
 
   const filters: SearchFilters = {
     location: 'Goiatuba', radius: null, category: 'B', transmission: '',
-    vehicleAvailable: true, maxPrice: null, ordering: 'distance',
+    vehicleAvailable: null, maxPrice: null, ordering: 'distance',
   };
 
   it('omits radius and state for a countrywide search', () => {
@@ -20,6 +20,7 @@ describe('InstructorSearchProvider radius', () => {
       request.url === '/instructors/search/');
     expect(request.request.params.has('radius_km')).toBeFalse();
     expect(request.request.params.has('uf')).toBeFalse();
+    expect(request.request.params.has('vehicle_available')).toBeFalse();
     expect(request.request.params.get('category')).toBe('B');
     request.flush({count: 0, results: []});
   });
@@ -29,6 +30,15 @@ describe('InstructorSearchProvider radius', () => {
     const request = TestBed.inject(HttpTestingController).expectOne(request =>
       request.url === '/instructors/search/');
     expect(request.request.params.get('radius_km')).toBe('137');
+    request.flush({count: 0, results: []});
+  });
+
+  it('sends category A and vehicle choice only when selected', () => {
+    TestBed.inject(InstructorSearchProvider).search(-18, -49, {...filters, category: 'A', vehicleAvailable: false}).subscribe();
+    const request = TestBed.inject(HttpTestingController).expectOne(request =>
+      request.url === '/instructors/search/');
+    expect(request.request.params.get('category')).toBe('A');
+    expect(request.request.params.get('vehicle_available')).toBe('false');
     request.flush({count: 0, results: []});
   });
 });

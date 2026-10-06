@@ -27,6 +27,14 @@ describe('InstructorMapComponent geolocation', () => {
     }).compileComponents();
   });
 
+  it('defaults to a countrywide search without an implicit vehicle filter', () => {
+    const fixture = TestBed.createComponent(InstructorMapComponent);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.anyDistance).toBeTrue();
+    expect(fixture.componentInstance.filters.radius).toBeNull();
+    expect(fixture.componentInstance.filters.vehicleAvailable).toBeNull();
+  });
+
   it('searches with coordinates only after explicit permission', () => {
     const fixture = TestBed.createComponent(InstructorMapComponent);
     const api = TestBed.inject(InstructorSearchProvider);
@@ -115,6 +123,7 @@ describe('InstructorMapComponent geolocation', () => {
     const component = fixture.componentInstance;
     const search = spyOn(TestBed.inject(InstructorSearchProvider), 'search');
     component.filters.location = 'Goiatuba';
+    component.setAnyDistance(false);
     component.filters.radius = null;
     component.search();
     expect(search).not.toHaveBeenCalled();
@@ -127,6 +136,16 @@ describe('InstructorMapComponent geolocation', () => {
     const fixture = TestBed.createComponent(InstructorMapComponent);
     fixture.detectChanges();
     expect(fixture.componentInstance.filters.radius).toBe(137);
+    expect(fixture.componentInstance.anyDistance).toBeFalse();
+  });
+
+  it('restores category A from a search link', () => {
+    const route = TestBed.inject(ActivatedRoute);
+    spyOn(route.snapshot.queryParamMap, 'get').and.callFake(key => key === 'categoria' ? 'A' : null);
+    const fixture = TestBed.createComponent(InstructorMapComponent);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.filters.category).toBe('A');
+    expect(fixture.componentInstance.filters.radius).toBeNull();
   });
 
   it('restores unlimited distance from a search link', () => {

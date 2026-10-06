@@ -275,7 +275,7 @@ class SearchParameters(serializers.Serializer):
     longitude = serializers.FloatField(min_value=-180, max_value=180)
     uf = serializers.ChoiceField(choices=sorted(BRAZIL_UFS), required=False)
     radius_km = serializers.IntegerField(min_value=1, max_value=5000, required=False)
-    category = serializers.ChoiceField(choices=["B"])
+    category = serializers.ChoiceField(choices=["A", "B", "C", "D", "E"])
     transmission = serializers.ChoiceField(choices=["MANUAL", "AUTOMATIC"], required=False)
     vehicle_available = serializers.BooleanField(required=False)
     max_price = serializers.DecimalField(
@@ -396,7 +396,7 @@ class InstructorSearchView(APIView):
                 "categories": row.categories,
                 "transmission": row.transmission_options[0],
                 "vehicle_available": row.vehicle_available,
-                **self._commercial_summary(row),
+                **self._commercial_summary(row, params.validated_data["category"]),
                 "availability_summary": row.availability_summary,
                 "demo": row.is_demo,
                 "city": row.service_area.city,
@@ -429,12 +429,14 @@ class InstructorSearchView(APIView):
         return Response({"count": len(results), "results": results})
 
     @staticmethod
-    def _commercial_summary(row):
+    def _commercial_summary(row, category=None):
         expected_mode = DataMode.SYNTHETIC if row.is_demo else DataMode.REAL
         offers = [
             offer
             for offer in row.offers.all()
-            if offer.is_active and offer.data_mode == expected_mode
+            if offer.is_active
+            and offer.data_mode == expected_mode
+            and (category is None or offer.category == category)
         ]
         offer = min(offers, key=lambda item: item.price_amount)
         vehicle = getattr(row, "vehicle", None)

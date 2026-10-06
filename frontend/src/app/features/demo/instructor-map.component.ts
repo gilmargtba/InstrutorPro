@@ -104,7 +104,11 @@ import { BRAZIL_UFS } from '../../shared/brazil-ufs';
             <label>
               Categoria
               <select name="category" [(ngModel)]="filters.category">
+                <option value="A">Categoria A</option>
                 <option value="B">Categoria B</option>
+                <option value="C">Categoria C</option>
+                <option value="D">Categoria D</option>
+                <option value="E">Categoria E</option>
               </select>
             </label>
             <label>
@@ -113,6 +117,14 @@ import { BRAZIL_UFS } from '../../shared/brazil-ufs';
                 <option value="">Manual ou automático</option>
                 <option value="MANUAL">Manual</option>
                 <option value="AUTOMATIC">Automático</option>
+              </select>
+            </label>
+            <label>
+              Veículo do instrutor
+              <select name="vehicleAvailable" [(ngModel)]="filters.vehicleAvailable">
+                <option [ngValue]="null">Qualquer opção</option>
+                <option [ngValue]="true">Disponível</option>
+                <option [ngValue]="false">Não disponível</option>
               </select>
             </label>
             <label>
@@ -153,7 +165,7 @@ import { BRAZIL_UFS } from '../../shared/brazil-ufs';
         } @else if (searched && !items.length) {
           <div class="map-message empty">
             <span>Ainda não encontramos instrutores disponíveis nesta região.</span>
-            <button type="button" (click)="increaseRadius()">Aumentar raio</button>
+            @if (!anyDistance) {<button type="button" (click)="increaseRadius()">Aumentar raio</button>}
             <button type="button" (click)="filtersOpen=true">Alterar filtros</button>
             <button type="button" (click)="backToIntro()">Buscar outra região</button>
             <a routerLink="/aluno/demanda">Informar minha necessidade</a>
@@ -244,10 +256,10 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
 
   filters: SearchFilters = {
     location: '',
-    radius: 10,
+    radius: null,
     category: 'B',
     transmission: '',
-    vehicleAvailable: true,
+    vehicleAvailable: null,
     maxPrice: null,
     ordering: 'distance',
   };
@@ -258,7 +270,7 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
   error = false;
   filtersOpen = false;
   drawerOpen = true;
-  anyDistance = false;
+  anyDistance = true;
   view: 'map' | 'list' = 'map';
   suggestions: GeocodingResult[] = [];
   locationMessage = '';
@@ -279,6 +291,10 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
       const item = this.items.find((candidate) => candidate.id === id);
       if (item) this.select(item);
     });
+    const routedCategory = this.route.snapshot.queryParamMap.get('categoria');
+    if (routedCategory && ['A', 'B', 'C', 'D', 'E'].includes(routedCategory)) {
+      this.filters.category = routedCategory;
+    }
     const routedRadius = this.route.snapshot.queryParamMap.get('raio');
     if (routedRadius === 'todos') {
       this.setAnyDistance(true);
@@ -286,6 +302,7 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
       const radius = Number(routedRadius);
       if (Number.isInteger(radius) && radius >= 1 && radius <= 5000) {
         this.filters.radius = radius;
+        this.anyDistance = false;
       }
     }
     const routedLocation = this.route.snapshot.queryParamMap.get('local');

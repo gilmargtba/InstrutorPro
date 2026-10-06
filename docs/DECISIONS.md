@@ -2,6 +2,17 @@
 
 Este documento é a fonte oficial de decisões consolidadas, contradições resolvidas e questões em aberto. Uma recomendação marcada como aberta não é uma decisão aceita.
 
+### Decisão do proprietário de 06/10/2026 — categorias no FREE e alcance da busca
+
+O plano FREE não impõe limite comercial de categorias. A busca pública pode
+filtrar A, B, C, D ou E, mas só retorna instrutor com categoria declarada,
+oferta ativa da mesma categoria e todos os gates existentes de verificação,
+prontidão territorial e publicação manual. PRO não compra elegibilidade,
+verificação ou publicação. A busca pode ser feita sem limite de distância no
+Brasil; ponto inicial serve para ordenar por proximidade, não para restringir
+UF. Permanecem o limite técnico de resultados e os filtros escolhidos pelo
+aluno. Nenhuma categoria/UF ou perfil é aprovado automaticamente.
+
 ### Decisão do proprietário de 05/10/2026 — painel único de aprovação/publicação
 
 O Admin do perfil real reúne cadastro, documentos privados, verificação,
