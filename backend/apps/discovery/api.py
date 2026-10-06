@@ -275,7 +275,7 @@ class SearchParameters(serializers.Serializer):
     longitude = serializers.FloatField(min_value=-180, max_value=180)
     uf = serializers.ChoiceField(choices=sorted(BRAZIL_UFS), required=False)
     radius_km = serializers.IntegerField(min_value=1, max_value=5000, required=False)
-    category = serializers.ChoiceField(choices=["A", "B", "C", "D", "E"])
+    category = serializers.ChoiceField(choices=["A", "B", "C", "D", "E"], required=False)
     transmission = serializers.ChoiceField(choices=["MANUAL", "AUTOMATIC"], required=False)
     vehicle_available = serializers.BooleanField(required=False)
     max_price = serializers.DecimalField(
@@ -291,6 +291,7 @@ class InstructorResult(serializers.Serializer):
     longitude = serializers.FloatField()
     distance_km = serializers.FloatField()
     categories = serializers.ListField(child=serializers.CharField())
+    offer_category = serializers.CharField()
     transmission = serializers.CharField()
     vehicle_available = serializers.BooleanField()
     price_amount = serializers.DecimalField(max_digits=8, decimal_places=2)
@@ -366,7 +367,7 @@ class InstructorSearchView(APIView):
 
     @extend_schema(
         parameters=[
-            OpenApiParameter(name, str, required=name in {"latitude", "longitude", "category"})
+            OpenApiParameter(name, str, required=name in {"latitude", "longitude"})
             for name in [
                 "latitude",
                 "longitude",
@@ -396,7 +397,7 @@ class InstructorSearchView(APIView):
                 "categories": row.categories,
                 "transmission": row.transmission_options[0],
                 "vehicle_available": row.vehicle_available,
-                **self._commercial_summary(row, params.validated_data["category"]),
+                **self._commercial_summary(row, params.validated_data.get("category")),
                 "availability_summary": row.availability_summary,
                 "demo": row.is_demo,
                 "city": row.service_area.city,
@@ -412,7 +413,7 @@ class InstructorSearchView(APIView):
             request=request,
             event_type=MarketplaceEvent.Type.SEARCH_PERFORMED,
             source=request.query_params.get("source", "manual"),
-            category=params.validated_data["category"],
+            category=params.validated_data.get("category", ""),
             city=city,
             uf=uf,
         )
@@ -422,7 +423,7 @@ class InstructorSearchView(APIView):
                 event_type=MarketplaceEvent.Type.SEARCH_RESULT_IMPRESSION,
                 instructor=row,
                 source=request.query_params.get("source", "manual"),
-                category=params.validated_data["category"],
+                category=params.validated_data.get("category", ""),
                 city=row.service_area.city,
                 uf=row.service_area.uf,
             )
@@ -436,12 +437,14 @@ class InstructorSearchView(APIView):
             for offer in row.offers.all()
             if offer.is_active
             and offer.data_mode == expected_mode
+            and offer.category in row.categories
             and (category is None or offer.category == category)
         ]
         offer = min(offers, key=lambda item: item.price_amount)
         vehicle = getattr(row, "vehicle", None)
         return {
             "price_amount": offer.price_amount,
+            "offer_category": offer.category,
             "price_from": len(offers) > 1,
             "duration_minutes": offer.duration_minutes,
             "vehicle": (
@@ -561,7 +564,7 @@ class WhatsAppContactView(APIView):
     permission_classes = [AllowAny]
 
     class Input(serializers.Serializer):
-        category = serializers.ChoiceField(choices=["A", "B"], default="B")
+        category = serializers.ChoiceField(choices=["A", "B", "C", "D", "E"], default="B")
         source = serializers.CharField(max_length=40, default="profile")
 
     @extend_schema(request=Input, responses=WhatsAppContactResponse)
@@ -579,6 +582,16 @@ class WhatsAppContactView(APIView):
         if not row.is_demo and not enabled("REAL_WHATSAPP_CONTACT"):
             raise PermissionDenied("Contato real por WhatsApp não está autorizado.")
         category = serializer.validated_data["category"]
+        expected_mode = DataMode.SYNTHETIC if row.is_demo else DataMode.REAL
+        if (
+            category not in row.categories
+            or not row.offers.filter(
+                category=category, is_active=True, data_mode=expected_mode
+            ).exists()
+        ):
+            raise serializers.ValidationError(
+                {"category": "Categoria sem oferta ativa publicada para este instrutor."}
+            )
         _, unique = record_marketplace_event(
             request=request,
             event_type=MarketplaceEvent.Type.WHATSAPP_CONTACT_CLICKED,

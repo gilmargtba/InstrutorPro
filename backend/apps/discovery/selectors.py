@@ -50,7 +50,7 @@ def search_published_instructors(
     latitude,
     longitude,
     uf=None,
-    category,
+    category=None,
     radius_km=None,
     transmission=None,
     vehicle_available=None,
@@ -60,9 +60,10 @@ def search_published_instructors(
     data_mode = "SYNTHETIC" if settings.SYNTHETIC_MARKETPLACE_ENABLED else "REAL"
     origin = Point(float(longitude), float(latitude), srid=4326)
     queryset = published_instructor_profiles().filter(
-        categories__contains=[category],
         service_area__public_service_location__isnull=False,
     )
+    if category:
+        queryset = queryset.filter(categories__contains=[category])
     if radius_km is not None:
         queryset = queryset.filter(
             service_area__public_service_location__distance_lte=(origin, D(km=radius_km))
@@ -73,14 +74,23 @@ def search_published_instructors(
         queryset = queryset.filter(transmission_options__contains=[transmission])
     if vehicle_available is not None:
         queryset = queryset.filter(vehicle_available=vehicle_available)
+    offer_filter = Q(offers__is_active=True, offers__data_mode=data_mode)
+    if category:
+        offer_filter &= Q(offers__category=category)
+    else:
+        eligible_categories = Q()
+        for offered_category in ("A", "B", "C", "D", "E"):
+            eligible_categories |= Q(
+                **{
+                    "categories__contains": [offered_category],
+                    "offers__category": offered_category,
+                }
+            )
+        offer_filter &= eligible_categories
     queryset = queryset.annotate(
         minimum_price=Min(
             "offers__price_amount",
-            filter=Q(
-                offers__is_active=True,
-                offers__category=category,
-                offers__data_mode=data_mode,
-            ),
+            filter=offer_filter,
         )
     ).filter(minimum_price__isnull=False)
     if max_price is not None:

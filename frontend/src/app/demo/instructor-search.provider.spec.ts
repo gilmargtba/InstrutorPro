@@ -25,6 +25,14 @@ describe('InstructorSearchProvider radius', () => {
     request.flush({count: 0, results: []});
   });
 
+  it('omits category when the visitor searches all categories', () => {
+    TestBed.inject(InstructorSearchProvider).search(-18, -49, {...filters, category: ''}).subscribe();
+    const request = TestBed.inject(HttpTestingController).expectOne(request =>
+      request.url === '/instructors/search/');
+    expect(request.request.params.has('category')).toBeFalse();
+    request.flush({count: 0, results: []});
+  });
+
   it('sends any valid chosen radius', () => {
     TestBed.inject(InstructorSearchProvider).search(-18, -49, {...filters, radius: 137}).subscribe();
     const request = TestBed.inject(HttpTestingController).expectOne(request =>

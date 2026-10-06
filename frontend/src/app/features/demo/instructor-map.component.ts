@@ -104,6 +104,7 @@ import { BRAZIL_UFS } from '../../shared/brazil-ufs';
             <label>
               Categoria
               <select name="category" [(ngModel)]="filters.category">
+                <option value="">Todas as categorias</option>
                 <option value="A">Categoria A</option>
                 <option value="B">Categoria B</option>
                 <option value="C">Categoria C</option>
@@ -164,7 +165,8 @@ import { BRAZIL_UFS } from '../../shared/brazil-ufs';
           </div>
         } @else if (searched && !items.length) {
           <div class="map-message empty">
-            <span>Ainda não encontramos instrutores disponíveis nesta região.</span>
+            <span>Nenhum instrutor encontrado com os filtros atuais.</span>
+            @if (filters.category) {<button type="button" (click)="showAllCategories()">Ver todas as categorias</button>}
             @if (!anyDistance) {<button type="button" (click)="increaseRadius()">Aumentar raio</button>}
             <button type="button" (click)="filtersOpen=true">Alterar filtros</button>
             <button type="button" (click)="backToIntro()">Buscar outra região</button>
@@ -257,7 +259,7 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
   filters: SearchFilters = {
     location: '',
     radius: null,
-    category: 'B',
+    category: '',
     transmission: '',
     vehicleAvailable: null,
     maxPrice: null,
@@ -369,7 +371,7 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
   private searchFromPoint(point:GeocodingResult) {
         this.map.focus(point.latitude, point.longitude, 12);
         this.suggestions = [];
-        void this.router.navigate([], {queryParams:{local:point.label,uf:point.uf,categoria:this.filters.category,raio:this.filters.radius ?? 'todos'},replaceUrl:true});
+        void this.router.navigate([], {queryParams:{local:point.label,uf:point.uf,categoria:this.filters.category || null,raio:this.filters.radius ?? 'todos'},replaceUrl:true});
         this.api.search(point.latitude, point.longitude, this.filters).subscribe({
           next: (response) => {
             this.items = response.results;
@@ -411,10 +413,15 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
 
   contact(item: SearchInstructor) {
     this.contactError='';
-    this.api.whatsapp(item.id,this.filters.category,'search-card').subscribe({
+    this.api.whatsapp(item.id,item.offer_category,'search-card').subscribe({
       next: response => window.location.assign(response.destination_url),
       error: () => {this.contactError='Não foi possível abrir o WhatsApp agora.';this.changeDetector.detectChanges();},
     });
+  }
+
+  showAllCategories() {
+    this.filters.category = '';
+    this.search();
   }
 
   setView(view: 'map' | 'list') {

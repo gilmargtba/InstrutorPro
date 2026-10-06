@@ -113,7 +113,7 @@ describe('InstructorMapComponent geolocation', () => {
     component.setAnyDistance(true);
     expect(component.filters.radius).toBeNull();
     expect(component.anyDistance).toBeTrue();
-    expect(component.filters.category).toBe('B');
+    expect(component.filters.category).toBe('');
     component.setAnyDistance(false);
     expect(component.filters.radius).toBe(10);
   });

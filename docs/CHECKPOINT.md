@@ -1,5 +1,19 @@
 # Checkpoint do Projeto
 
+## Correção do zero no mapa local após contagem nacional — 06/10/2026
+
+- A contagem nacional incluía o perfil GO com oferta ativa A, mas o mapa local
+  selecionava B por padrão; isso produzia zero no clique apesar do perfil estar
+  publicado. A busca local agora inicia em todas as categorias e preserva o
+  filtro quando A–E é escolhido explicitamente, inclusive em links antigos.
+- Sem categoria, a API só aceita oferta ativa de categoria declarada, devolve
+  `offer_category` correspondente ao preço e o botão WhatsApp usa essa
+  categoria. Um resultado vazio filtrado oferece “Ver todas as categorias”.
+  Nenhum perfil, oferta, documento ou UF foi aprovado automaticamente.
+- Validação local: 371 testes backend, 57 frontend, build Angular de produção,
+  Ruff, Django check e migration check passaram; sem migration nova. Permanecem
+  avisos preexistentes de orçamento do bundle/SCSS. Deploy: pendente nesta fatia.
+
 ## Deploy da busca A–E e raio irrestrito — 06/10/2026
 
 - `origin/main` e VPS receberam, por fast-forward, `7f5fc50` e `3d58a84`.

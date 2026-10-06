@@ -528,6 +528,41 @@ def test_search_accepts_published_categories_with_matching_active_offer(actor, c
 
 
 @pytest.mark.django_db
+def test_search_without_category_finds_only_declared_active_offer(actor):
+    profile, *_ = make_profile(actor, categories=["A"])
+    InstructorOffer.objects.create(
+        instructor=profile,
+        category="A",
+        price_amount="120.00",
+        duration_minutes=50,
+        data_mode=DataMode.SYNTHETIC,
+    )
+    params = {"latitude": -30.0346, "longitude": -51.2177}
+    endpoint = "/api/v1/instructors/search/"
+    response = APIClient().get(endpoint, params)
+    assert response.status_code == 200
+    assert response.json()["count"] == 1
+    assert response.json()["results"][0]["offer_category"] == "A"
+    assert response.json()["results"][0]["price_amount"] == 120.0
+    assert APIClient().get(endpoint, {**params, "category": "B"}).json()["count"] == 0
+    InstructorOffer.objects.filter(instructor=profile, category="A").update(is_active=False)
+    assert APIClient().get(endpoint, params).json()["count"] == 0
+
+
+@pytest.mark.django_db
+def test_whatsapp_refuses_category_without_active_offer(actor):
+    profile, *_ = make_profile(actor, categories=["A"])
+    InstructorContactChannel.objects.create(
+        instructor=profile,
+        whatsapp_e164="+5551999990001",
+        data_mode=DataMode.SYNTHETIC,
+    )
+    endpoint = f"/api/v1/instructors/{profile.id}/whatsapp-contact/"
+    response = APIClient().post(endpoint, {"category": "A", "source": "search-card"})
+    assert response.status_code == 400
+
+
+@pytest.mark.django_db
 def test_unlimited_search_excludes_profile_without_public_point(actor):
     _, area, *_ = make_profile(actor)
     area.public_service_location = None
