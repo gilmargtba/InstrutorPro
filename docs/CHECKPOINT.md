@@ -13,8 +13,15 @@
   publicação, até três tentativas e retry pelo worker. Não há WhatsApp
   automático nem envio retroativo para publicações antigas.
 - Migration aditiva `discovery.0011` guarda estado de entrega. Validação local:
-  351 testes backend, Django check, migration check e Ruff passaram; deploy
-  ainda pendente. Nenhuma flag, aprovação ou dado real foi alterado.
+  351 testes backend, Django check, migration check e Ruff passaram.
+- Deploy de `e72d712` na VPS concluído após backup validado do banco e dos
+  documentos privados em `/home/gilmar/backups/instrutorpro/production/`.
+  Backend, worker e scheduler ficaram saudáveis; Django check, migration check,
+  migration `discovery.0011` e readiness pública passaram. O worker registrou
+  as tarefas de envio e retry. Conferência posterior: três perfis reais,
+  nenhum publicamente visível, nenhum aviso gerado e nenhuma UF aprovada.
+  SMTP está configurado, mas a entrega a um destinatário real só poderá ser
+  confirmada após uma publicação manual elegível.
 
 ## Complementação documental da verificação real — 04/10/2026
 
