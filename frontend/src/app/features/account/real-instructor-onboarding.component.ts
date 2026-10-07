@@ -9,10 +9,20 @@ import { GeocodingResult, InstructorSearchProvider } from '../../demo/instructor
 @Component({
   selector: 'app-real-instructor-onboarding',
   imports: [FormsModule],
-  template: `<section class="page narrow"><p class="eyebrow">Cadastro profissional</p><h1>Complete seu cadastro profissional</h1><p>Seu perfil ficará <strong>não verificado e não publicado</strong> até análise. Documentos e foto serão solicitados somente quando o armazenamento privado estiver disponível.</p>
+  template: `<section class="page narrow"><p class="eyebrow">Cadastro profissional</p><h1>Complete seu cadastro profissional</h1><p>Seu perfil ficará <strong>não verificado e não publicado</strong> até análise. Documentos profissionais e foto de perfil são enviados separadamente para revisão privada.</p>
   <form #onboardingForm="ngForm" class="onboarding" (ngSubmit)="submit(onboardingForm.valid)">
     <label>Nome público<input name="displayName" [(ngModel)]="form.instructor_display_name" required maxlength="120"></label>
     <label>Apresentação<textarea name="bio" [(ngModel)]="form.bio" required maxlength="2000"></textarea></label>
+    <fieldset class="photo-fieldset"><legend>Foto do perfil (opcional)</legend>
+      <p>Envie uma foto sua em JPEG ou PNG, até 5 MB. Ela fica privada até análise e só aparece ao público depois de aprovada e se seu perfil estiver publicado.</p>
+      <button type="button" class="button secondary" (click)="loadPhotoStatus()">Ver situação da foto</button>
+      @if(photoStatus()){<p role="status">Situação: {{photoStatusLabel(photoStatus())}}. @if(photoPreviewUrl()){<a [href]="photoPreviewUrl()" target="_blank" rel="noopener">Ver minha foto privada</a>}</p>}
+      @if(photoAvailable() === false){<p role="status">O envio de foto está indisponível neste momento.</p>}
+      <label>Selecionar foto<input type="file" accept="image/jpeg,image/png" (change)="selectPhoto($event)"></label>
+      <label class="check"><input type="checkbox" name="photoAuthorization" [(ngModel)]="photoAuthorized"> Autorizo a exibição desta foto no meu perfil público após revisão e publicação.</label>
+      <button type="button" class="button secondary" [disabled]="!selectedPhoto||!photoAuthorized||photoSending()||photoAvailable()===false" (click)="uploadPhoto()">{{photoSending()?'Enviando…':'Enviar foto para revisão'}}</button>
+      @if(photoMessage()){<p role="status">{{photoMessage()}}</p>}
+    </fieldset>
     <fieldset><legend>Categorias</legend><div class="category-options">@for(option of categoryOptions;track option){<label class="check"><input type="checkbox" [name]="'category-'+option" [checked]="categories.includes(option)" (change)="toggleCategory(option)"> Categoria {{option}}</label>}</div></fieldset>
     <label>Transmissão<select name="transmission" [(ngModel)]="transmission" required><option value="MANUAL">Manual</option><option value="AUTOMATIC">Automática</option></select></label>
     <label>WhatsApp profissional<input name="whatsapp" [(ngModel)]="form.whatsapp" placeholder="+5564999999999" pattern="[+]55[1-9][0-9]{9,10}" required><small>Use +55, DDD e número, somente com algarismos. Ex.: +5564999999999.</small></label>
@@ -36,7 +46,7 @@ import { GeocodingResult, InstructorSearchProvider } from '../../demo/instructor
     </fieldset>
     <button class="button primary" [disabled]="sending()||onboardingForm.invalid">Concluir cadastro</button>@if(message()){<p role="alert">{{message()}}</p>}
   </form></section>`,
-  styles: [`.onboarding{display:grid;gap:1rem}.onboarding label{display:grid;gap:.35rem;font-weight:700}.onboarding input,.onboarding select,.onboarding textarea{padding:.75rem;border:1px solid #bad4d1;border-radius:.7rem}.onboarding input[readonly]{background:#eef5f4;color:#345}.onboarding textarea{min-height:7rem}.onboarding fieldset{display:grid;grid-template-columns:1fr 1fr;gap:1rem;padding:1.2rem;border:1px solid #d6e5e3;border-radius:1rem}.onboarding fieldset>p,.onboarding fieldset legend,.check,.full,.location-search,.location-result,.location-options,.public-location-map,.map-help,.category-options{grid-column:1/-1}.category-options{display:grid;grid-template-columns:repeat(5,1fr);gap:.5rem}.full small,.map-help{font-weight:400;color:#456}.check{grid-template-columns:auto 1fr!important}.location-options{display:grid;gap:.5rem}.location-options button{padding:.7rem;text-align:left;border:1px solid #bad4d1;border-radius:.65rem;background:#fff;color:#123f5f;cursor:pointer}.public-location-map{height:320px;border:1px solid #bad4d1;border-radius:.9rem;overflow:hidden}.map-help{margin-top:-.5rem}@media(max-width:650px){.onboarding fieldset{grid-template-columns:1fr}.category-options{grid-template-columns:1fr 1fr}.public-location-map{height:260px}}`],
+  styles: [`.onboarding{display:grid;gap:1rem}.onboarding label{display:grid;gap:.35rem;font-weight:700}.onboarding input,.onboarding select,.onboarding textarea{padding:.75rem;border:1px solid #bad4d1;border-radius:.7rem}.onboarding input[readonly]{background:#eef5f4;color:#345}.onboarding textarea{min-height:7rem}.onboarding fieldset{display:grid;grid-template-columns:1fr 1fr;gap:1rem;padding:1.2rem;border:1px solid #d6e5e3;border-radius:1rem}.onboarding fieldset>p,.onboarding fieldset legend,.check,.full,.location-search,.location-result,.location-options,.public-location-map,.map-help,.category-options{grid-column:1/-1}.photo-fieldset{grid-template-columns:1fr!important}.photo-fieldset .button{justify-self:start}.category-options{display:grid;grid-template-columns:repeat(5,1fr);gap:.5rem}.full small,.map-help{font-weight:400;color:#456}.check{grid-template-columns:auto 1fr!important}.location-options{display:grid;gap:.5rem}.location-options button{padding:.7rem;text-align:left;border:1px solid #bad4d1;border-radius:.65rem;background:#fff;color:#123f5f;cursor:pointer}.public-location-map{height:320px;border:1px solid #bad4d1;border-radius:.9rem;overflow:hidden}.map-help{margin-top:-.5rem}@media(max-width:650px){.onboarding fieldset{grid-template-columns:1fr}.category-options{grid-template-columns:1fr 1fr}.public-location-map{height:260px}}`],
 })
 export class RealInstructorOnboardingComponent implements AfterViewInit, OnDestroy {
   @ViewChild('publicMap') private publicMapElement?: ElementRef<HTMLDivElement>;
@@ -54,6 +64,13 @@ export class RealInstructorOnboardingComponent implements AfterViewInit, OnDestr
   message = signal('');
   locationMessage = signal('');
   locationResults = signal<GeocodingResult[]>([]);
+  photoStatus = signal('');
+  photoPreviewUrl = signal<string|null>(null);
+  photoAvailable = signal<boolean|null>(null);
+  photoMessage = signal('');
+  photoSending = signal(false);
+  selectedPhoto: File|null = null;
+  photoAuthorized = false;
   publicLocationQuery = '';
   categories = ['B'];
   transmission = 'MANUAL';
@@ -79,6 +96,14 @@ export class RealInstructorOnboardingComponent implements AfterViewInit, OnDestr
   private renderMapPoint(){if(!this.map||!this.hasPublicLocation())return;const point=L.latLng(this.form.service_latitude,this.form.service_longitude);if(this.marker)this.marker.setLatLng(point);else this.marker=L.circleMarker(point,{radius:11,color:'#fff',weight:3,fillColor:'#f97316',fillOpacity:1,className:'public-location-pin'}).addTo(this.map);this.map.setView(point,13)}
 
   toggleCategory(category:string){this.categories=this.categories.includes(category)?this.categories.filter(value=>value!==category):[...this.categories,category].sort()}
+
+  loadPhotoStatus(){this.http.get<{upload_available:boolean;latest_status:string|null;private_preview_url:string|null}>('/instructor/profile-photo/').subscribe({next:state=>{this.photoAvailable.set(state.upload_available);this.photoStatus.set(state.latest_status||'Nenhuma foto enviada');this.photoPreviewUrl.set(state.private_preview_url)},error:()=>this.photoMessage.set('Não foi possível consultar a situação da foto.')})}
+
+  photoStatusLabel(value:string){return ({PENDING:'Aguardando revisão',APPROVED:'Aprovada',REJECTED:'Rejeitada',REPLACEMENT_REQUESTED:'Substituição solicitada'} as Record<string,string>)[value]||value}
+
+  selectPhoto(event:Event){const file=(event.target as HTMLInputElement).files?.[0]||null;this.selectedPhoto=null;this.photoMessage.set('');if(!file)return;if(!['image/jpeg','image/png'].includes(file.type)||file.size===0||file.size>5*1024*1024){this.photoMessage.set('Selecione JPEG ou PNG de até 5 MB.');return}this.selectedPhoto=file}
+
+  uploadPhoto(){if(!this.selectedPhoto||!this.photoAuthorized)return;this.photoSending.set(true);this.photoMessage.set('');const payload=new FormData();payload.append('file',this.selectedPhoto);payload.append('publication_authorized','true');this.http.post<{upload_available:boolean;latest_status:string;private_preview_url:string}>('/instructor/profile-photo/',payload).subscribe({next:state=>{this.photoSending.set(false);this.selectedPhoto=null;this.photoStatus.set(state.latest_status);this.photoPreviewUrl.set(state.private_preview_url);this.photoMessage.set('Foto recebida em armazenamento privado. Aguarde a revisão antes da exibição pública.')},error:e=>{this.photoSending.set(false);this.photoMessage.set(e?.error?.file?.[0]||'Não foi possível enviar a foto. Tente novamente.')}})}
 
   submit(valid:boolean|null=true){if(!valid){this.message.set('Revise os campos obrigatórios e o formato do WhatsApp.');return}if(!this.categories.length){this.message.set('Selecione pelo menos uma categoria.');return}this.sending.set(true);this.message.set('');const payload={...this.form,categories:this.categories,transmission_options:[this.transmission],vehicle:{...this.form.vehicle,category:this.categories[0],transmission:this.transmission}};if(!this.hasPublicLocation()){delete payload.service_latitude;delete payload.service_longitude;payload.service_location_authorized=false}this.http.patch('/account/me/',payload).subscribe({next:()=>void this.router.navigateByUrl('/profissional/instrutor/status'),error:e=>{this.sending.set(false);this.message.set(this.errorMessage(e))}})}
 

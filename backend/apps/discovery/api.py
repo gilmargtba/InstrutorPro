@@ -31,6 +31,7 @@ from apps.marketplace.models import (
     InstructorDocument,
     MarketplaceEvent,
 )
+from apps.marketplace.profile_photos import photo_status, upload_real_profile_photo
 from apps.marketplace.real_documents import (
     DocumentUploadError,
     applicable_requirements,
@@ -77,6 +78,36 @@ class ProfessionalDocumentInput(serializers.Serializer):
     document_type = serializers.ChoiceField(
         choices=InstructorDocument.DocumentType.choices, required=False
     )
+
+
+class ProfilePhotoInput(serializers.Serializer):
+    file = serializers.FileField(write_only=True)
+    publication_authorized = serializers.BooleanField()
+
+
+class InstructorProfilePhotoView(APIView):
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def get(self, request):
+        return Response(photo_status(_verification_profile(request)))
+
+    @extend_schema(request=ProfilePhotoInput, responses={201: OpenApiTypes.OBJECT})
+    def post(self, request):
+        profile = _verification_profile(request)
+        serializer = ProfilePhotoInput(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            upload_real_profile_photo(
+                actor=request.user,
+                profile=profile,
+                upload=serializer.validated_data["file"],
+                publication_authorized=serializer.validated_data["publication_authorized"],
+                request_id=getattr(request, "request_id", None),
+            )
+        except DocumentUploadError as exc:
+            raise serializers.ValidationError({"file": str(exc)}) from exc
+        return Response(photo_status(profile), status=201)
 
 
 def _verification_profile(request):
@@ -462,7 +493,11 @@ class InstructorSearchView(APIView):
     @staticmethod
     def _photo_url(row):
         photo = (
-            row.profile_photos.filter(status="APPROVED", publication_authorized_at__isnull=False)
+            row.profile_photos.filter(
+                status="APPROVED",
+                publication_authorized_at__isnull=False,
+                data_mode=DataMode.SYNTHETIC if row.is_demo else DataMode.REAL,
+            )
             .order_by("-uploaded_at")
             .first()
         )
@@ -497,13 +532,20 @@ class PublicProfilePhotoView(APIView):
     def get(self, request, pk):
         from apps.marketplace.models import ProfilePhoto
 
+        eligibility = (
+            {"instructor__publication_status": "APPROVED"}
+            if settings.SYNTHETIC_MARKETPLACE_ENABLED
+            else {"instructor_id__in": published_instructor_profiles().values("pk")}
+        )
         photo = get_object_or_404(
             ProfilePhoto,
             pk=pk,
             status=ProfilePhoto.Status.APPROVED,
             publication_authorized_at__isnull=False,
-            instructor__publication_status="APPROVED",
-            data_mode="SYNTHETIC",
+            data_mode=(
+                DataMode.SYNTHETIC if settings.SYNTHETIC_MARKETPLACE_ENABLED else DataMode.REAL
+            ),
+            **eligibility,
         )
         response = FileResponse(photo.file.open("rb"), content_type=photo.mime_type)
         response["Cache-Control"] = "public, max-age=300"

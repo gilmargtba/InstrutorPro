@@ -64,4 +64,24 @@ describe('RealInstructorOnboardingComponent',()=>{
     http.expectOne('/account/me/').flush({error:{code:'INVALID',message:'Entrada inválida',details:{whatsapp:['Informe um número válido no formato +55, DDD e número.'],vehicle:{year:['Informe um ano válido.']}}}},{status:400,statusText:'Bad Request'});
     expect(component.message()).toContain('WhatsApp: Informe um número válido');expect(component.message()).toContain('Ano: Informe um ano válido.');expect(component.message()).not.toBe('Entrada inválida');
   });
+  it('uploads the optional photo separately with explicit public-use authorization',()=>{
+    const component=TestBed.createComponent(RealInstructorOnboardingComponent).componentInstance;
+    const http=TestBed.inject(HttpTestingController);
+    http.expectOne('/account/me/').flush({instructor:{display_name:'Instrutora Piloto'}});
+    component.loadPhotoStatus();
+    http.expectOne('/instructor/profile-photo/').flush({upload_available:true,latest_status:null,private_preview_url:null});
+    expect(component.photoStatus()).toBe('Nenhuma foto enviada');
+    component.selectedPhoto=new File(['\x89PNG\r\n\x1a\nphoto'], 'perfil.png', {type:'image/png'});
+    component.uploadPhoto();
+    http.expectNone('/instructor/profile-photo/');
+    component.photoAuthorized=true;
+    component.uploadPhoto();
+    const request=http.expectOne('/instructor/profile-photo/');
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body instanceof FormData).toBeTrue();
+    expect(request.request.body.get('publication_authorized')).toBe('true');
+    request.flush({upload_available:true,latest_status:'PENDING',private_preview_url:'/api/v1/marketplace/profile-photos/id/download/'});
+    expect(component.photoStatus()).toBe('PENDING');
+    expect(component.photoMessage()).toContain('Aguarde a revisão');
+  });
 });

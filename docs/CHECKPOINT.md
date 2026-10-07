@@ -1,5 +1,20 @@
 # Checkpoint do Projeto
 
+## Foto opcional do instrutor real — 07/10/2026
+
+- A tela de cadastro profissional oferece envio separado de JPEG/PNG até 5 MB,
+  com consentimento específico para exibição após revisão e publicação. O
+  instrutor consulta o estado e acessa a própria foto por rota privada auditada.
+- O backend valida assinatura/MIME/tamanho, exige storage privado e ClamAV
+  disponíveis, bloqueia arquivo não limpo e segundo anexo pendente, e registra
+  auditoria. A revisão humana existente no Admin decide a foto; a rota pública
+  de dados reais exige foto aprovada, consentimento e elegibilidade/publicação
+  efetiva do perfil. Nenhum gate de publicação é dispensado.
+- Validação local: 373 testes backend, Ruff, Django check, migration check,
+  58 testes Angular e build de produção passaram; sem migration nova.
+  Avisos preexistentes de orçamento do bundle/SCSS permanecem.
+  Publicação no remoto e deploy permanecem pendentes nesta fatia.
+
 ## Correção do zero no mapa local após contagem nacional — 06/10/2026
 
 - A contagem nacional incluía o perfil GO com oferta ativa A, mas o mapa local

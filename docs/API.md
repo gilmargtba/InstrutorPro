@@ -29,6 +29,8 @@ Somente o titular em DRAFT envia/remove; submissão exige todos os anexos CLEAN.
 Download de evidência REAL permanece restrito ao revisor responsável durante UNDER_REVIEW.
 Detalhes operacionais em `PROFESSIONAL_DOCUMENT_UPLOAD_HOTFIX.md`.
 
+`GET /api/v1/instructor/profile-photo/` informa ao próprio instrutor real se o envio está disponível, o estado do anexo mais recente e o link privado auditado. `POST` na mesma rota recebe multipart `file` (JPEG/PNG até 5 MB) e `publication_authorized=true`; exige armazenamento privado e ClamAV operantes. Uma foto pendente impede outro envio até revisão humana. O anexo é independente dos documentos profissionais e nunca aprova o perfil. `GET /api/v1/instructors/profile-photos/{uuid}/` libera somente foto aprovada, autorizada e vinculada a perfil efetivamente elegível/publicado no modo de dados corrente.
+
 ## CODEX 02E — onboarding sintético
 
 `POST /api/v1/demo/instructor-onboarding/` aceita somente o formulário DEMO das cinco

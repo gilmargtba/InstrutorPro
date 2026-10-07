@@ -5,6 +5,7 @@ from .api import (
     DemoInstructorOnboardingSubmitView,
     DemoInstructorOnboardingView,
     GeocodingView,
+    InstructorProfilePhotoView,
     InstructorSearchView,
     InstructorStateSummaryView,
     MapTileView,
@@ -19,6 +20,11 @@ from .api import (
 )
 
 urlpatterns = [
+    path(
+        "instructor/profile-photo/",
+        InstructorProfilePhotoView.as_view(),
+        name="instructor-profile-photo",
+    ),
     path(
         "instructor/verification/documents/",
         ProfessionalVerificationDocumentView.as_view(),
