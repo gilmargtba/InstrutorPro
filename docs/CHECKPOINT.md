@@ -1,5 +1,20 @@
 # Checkpoint do Projeto
 
+## Ofertas explícitas para múltiplas categorias — 07/10/2026
+
+- O cadastro real agora coleta preço e duração próprios para cada categoria
+  selecionada (por exemplo A e B) e envia as ofertas em um pedido transacional.
+  Valores não são copiados entre categorias. A conta pode consultar suas ofertas
+  por categoria; o salvamento audita apenas alterações efetivas.
+- A aprovação manual existente exige oferta ativa para cada categoria declarada
+  e mantém separados verificação profissional, prontidão da UF e publicação.
+  Cadastrar A+B não aprova automaticamente nenhuma categoria ou perfil.
+- Corrigida a leitura da própria conta quando a área já existe, mas o ponto
+  público ainda não foi definido: latitude/longitude retornam nulos, sem erro 500.
+- Validação local: 375 testes backend e 59 frontend, build Angular de produção,
+  Ruff e Django check passaram; nenhuma migration nova. Permanecem avisos
+  preexistentes de orçamento do bundle/SCSS. Não enviado à VPS.
+
 ## Foto opcional do instrutor real — 07/10/2026
 
 - A tela de cadastro profissional oferece envio separado de JPEG/PNG até 5 MB,

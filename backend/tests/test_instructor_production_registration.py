@@ -2,14 +2,17 @@ import re
 
 import pytest
 from django.core import mail
+from django.core.exceptions import PermissionDenied
 from django.core.management import call_command
 from django.test import override_settings
 from rest_framework.test import APIClient
 
 from apps.accounts.models import Account
+from apps.audit.models import AuditEvent
 from apps.discovery.models import InstructorProfile, InstructorServiceArea
 from apps.marketplace.capabilities import enabled
 from apps.marketplace.models import InstructorContactChannel, InstructorOffer, InstructorVehicle
+from apps.marketplace.offer_services import save_owner_category_offers
 from apps.people.models import Person, RoleAssignment
 from apps.privacy.models import LegalAcceptanceRecord
 
@@ -89,8 +92,10 @@ def test_instructor_production_e2e_without_regulatory_readiness_or_geocoder():
             "categories": ["A", "C"],
             "transmission_options": ["MANUAL", "AUTOMATIC"],
             "whatsapp": "+5568999990001",
-            "price_amount": "120.00",
-            "duration_minutes": 60,
+            "offers": [
+                {"category": "A", "price_amount": "120.00", "duration_minutes": 60},
+                {"category": "C", "price_amount": "150.00", "duration_minutes": 90},
+            ],
             "instructor_city": "Rio Branco",
             "instructor_uf": "AC",
             "service_radius_km": 20,
@@ -111,7 +116,35 @@ def test_instructor_production_e2e_without_regulatory_readiness_or_geocoder():
     assert (area.city, area.uf, area.public_service_location) == ("Rio Branco", "AC", None)
     assert not area.location_authorized
     assert InstructorContactChannel.objects.filter(instructor=profile).exists()
-    assert InstructorOffer.objects.filter(instructor=profile, category="A").exists()
+    assert list(
+        InstructorOffer.objects.filter(instructor=profile)
+        .order_by("category")
+        .values_list("category", "price_amount", "duration_minutes")
+    ) == [("A", 120, 60), ("C", 150, 90)]
+    assert (
+        AuditEvent.objects.filter(
+            action="marketplace.instructor_offer.owner_saved", actor=account
+        ).count()
+        == 2
+    )
+    replay = client.patch(
+        "/api/v1/account/me/",
+        {
+            "offers": [
+                {"category": "A", "price_amount": "120.00", "duration_minutes": 60},
+                {"category": "C", "price_amount": "150.00", "duration_minutes": 90},
+            ]
+        },
+        format="json",
+    )
+    assert replay.status_code == 200
+    assert InstructorOffer.objects.filter(instructor=profile).count() == 2
+    assert (
+        AuditEvent.objects.filter(
+            action="marketplace.instructor_offer.owner_saved", actor=account
+        ).count()
+        == 2
+    )
     assert InstructorVehicle.objects.filter(instructor=profile, category="A").exists()
     assert profile.verification_status == "NOT_STARTED"
     assert profile.publication_status == "UNPUBLISHED"
@@ -119,6 +152,65 @@ def test_instructor_production_e2e_without_regulatory_readiness_or_geocoder():
     assert not enabled("REAL_AUTOMATIC_PUBLICATION")
     assert not enabled("REAL_PAYMENTS")
     assert not enabled("REAL_PRO_BILLING")
+
+
+@pytest.mark.django_db
+@override_settings(**PRODUCTION_REGISTRATION)
+def test_category_offers_reject_duplicate_or_undeclared_categories_without_partial_save():
+    owner = Account.objects.create_user(username="offer-owner", password="test-password-123")
+    profile = InstructorProfile.objects.create(
+        person=Person.objects.create(account=owner),
+        display_name="Instrutora AB",
+        categories=["A", "B"],
+        is_demo=False,
+    )
+    client = APIClient()
+    client.force_authenticate(owner)
+    url = "/api/v1/account/me/"
+    duplicate = client.patch(
+        url,
+        {
+            "offers": [
+                {"category": "A", "price_amount": "100.00", "duration_minutes": 60},
+                {"category": "A", "price_amount": "110.00", "duration_minutes": 60},
+            ]
+        },
+        format="json",
+    )
+    assert duplicate.status_code == 400
+    duplicate_profile = client.patch(
+        url,
+        {
+            "categories": ["A", "A"],
+            "offers": [{"category": "A", "price_amount": "100.00", "duration_minutes": 60}],
+        },
+        format="json",
+    )
+    assert duplicate_profile.status_code == 400
+    undeclared = client.patch(
+        url,
+        {
+            "offers": [
+                {"category": "A", "price_amount": "100.00", "duration_minutes": 60},
+                {"category": "C", "price_amount": "120.00", "duration_minutes": 90},
+            ]
+        },
+        format="json",
+    )
+    assert undeclared.status_code == 400
+    assert not InstructorOffer.objects.filter(instructor=profile).exists()
+    outsider = Account.objects.create_user(
+        username="other-offer-owner",
+        email="other-offer-owner@example.invalid",
+        password="test-password-123",
+    )
+    with pytest.raises(PermissionDenied):
+        save_owner_category_offers(
+            actor=outsider,
+            profile=profile,
+            offers=[{"category": "A", "price_amount": 100, "duration_minutes": 60}],
+        )
+    assert not InstructorOffer.objects.filter(instructor=profile).exists()
 
 
 @pytest.mark.django_db

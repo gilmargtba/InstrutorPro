@@ -15,6 +15,7 @@ from apps.discovery.models import (
     ProfessionalVerificationRequest,
     PublicationDecision,
 )
+from apps.discovery.selectors import search_published_instructors
 from apps.discovery.verification_services import start_verification_review
 from apps.marketplace.models import (
     DataMode,
@@ -258,6 +259,45 @@ def test_offer_b_requires_explicit_category_price_duration_and_audit():
         action="discovery.instructor_offer.admin_saved", target_id=offer.pk
     ).exists()
     assert profile.offers.get(category="A").price_amount == 120
+
+
+@pytest.mark.django_db
+@override_settings(**SETTINGS)
+def test_human_publication_accepts_a_and_b_only_after_b_has_its_own_offer():
+    web, _, action, profile, readiness, item, document = scenario()
+    profile.refresh_from_db()
+    profile.categories = ["A", "B"]
+    profile.save(update_fields=["categories"])
+    blocked = web.post(action, combined_data(document), follow=True)
+    assert "Oferta B inexistente ou inativa" in blocked.content.decode()
+    assert not PublicationDecision.objects.filter(profile=profile).exists()
+    assert readiness.status == readiness.Status.REVIEW_REQUIRED
+    saved = web.post(
+        action,
+        {
+            "operation": "save_offer",
+            "offer_category": "B",
+            "offer_price": "150.00",
+            "offer_duration": "90",
+            "offer_active": "on",
+            "offer_reason": "Categoria B conferida separadamente",
+        },
+    )
+    assert saved.status_code == 302
+    approved = web.post(action, combined_data(document))
+    assert approved.status_code == 302
+    profile.refresh_from_db()
+    assert profile.publication_status == profile.PublicationStatus.APPROVED
+    assert set(profile.offers.filter(is_active=True).values_list("category", flat=True)) == {
+        "A",
+        "B",
+    }
+    assert PublicationDecision.objects.filter(profile=profile, decision="APPROVE").count() == 1
+    for category in ("A", "B"):
+        results = list(
+            search_published_instructors(latitude=-18.02, longitude=-49.35, category=category)
+        )
+        assert [row.pk for row in results] == [profile.pk]
 
 
 @pytest.mark.django_db

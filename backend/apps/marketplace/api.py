@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.gis.geos import Point
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.mail import send_mail
 from django.db import transaction
 from django.db.models import Count
@@ -45,6 +46,7 @@ from .models import (
     StudentDemand,
     StudentProfile,
 )
+from .offer_services import save_owner_category_offers
 from .saas import assign_free_plan, current_subscription, has_entitlement, instructor_analytics
 from .services import transition_lesson_request
 
@@ -585,6 +587,12 @@ class SessionMeView(APIView):
         return Response(payload)
 
 
+class OwnCategoryOfferInput(serializers.Serializer):
+    category = serializers.ChoiceField(choices=["A", "B", "C", "D", "E"])
+    price_amount = serializers.DecimalField(max_digits=8, decimal_places=2, min_value=1)
+    duration_minutes = serializers.IntegerField(min_value=30, max_value=240)
+
+
 class OwnAccountInput(serializers.Serializer):
     student_display_name = serializers.CharField(max_length=120, required=False)
     instructor_display_name = serializers.CharField(max_length=120, required=False)
@@ -610,6 +618,7 @@ class OwnAccountInput(serializers.Serializer):
         max_digits=8, decimal_places=2, min_value=1, required=False
     )
     duration_minutes = serializers.IntegerField(min_value=30, max_value=240, required=False)
+    offers = OwnCategoryOfferInput(many=True, required=False, allow_empty=False)
     instructor_city = serializers.CharField(max_length=100, required=False)
     instructor_uf = serializers.CharField(min_length=2, max_length=2, required=False)
     service_latitude = serializers.FloatField(min_value=-90, max_value=90, required=False)
@@ -637,6 +646,16 @@ class OwnAccountInput(serializers.Serializer):
             if invalid:
                 raise serializers.ValidationError(
                     {"categories": "Categorias permitidas: A, B, C, D e E."}
+                )
+            if len(attrs["categories"]) != len(set(attrs["categories"])):
+                raise serializers.ValidationError({"categories": "Não repita a mesma categoria."})
+        if "offers" in attrs:
+            offered = [item["category"] for item in attrs["offers"]]
+            if len(offered) != len(set(offered)):
+                raise serializers.ValidationError({"offers": "Não repita a mesma categoria."})
+            if "price_amount" in attrs or "duration_minutes" in attrs:
+                raise serializers.ValidationError(
+                    {"offers": "Use ofertas por categoria ou preço único, não ambos."}
                 )
         return attrs
 
@@ -679,7 +698,11 @@ def _own_account_payload(user):
         area = getattr(instructor, "service_area", None)
         contact = getattr(instructor, "contact_channel", None)
         vehicle = getattr(instructor, "vehicle", None)
-        offer = instructor.offers.filter(is_active=True).order_by("created_at").first()
+        mode = DataMode.SYNTHETIC if instructor.is_demo else DataMode.REAL
+        category_offers = instructor.offers.filter(data_mode=mode).order_by(
+            "category", "created_at"
+        )
+        offer = category_offers.filter(is_active=True).first()
         payload["instructor"] = {
             "display_name": instructor.display_name,
             "bio": instructor.bio,
@@ -691,10 +714,23 @@ def _own_account_payload(user):
             "whatsapp": contact.whatsapp_e164 if contact else "",
             "price_amount": str(offer.price_amount) if offer else "",
             "duration_minutes": offer.duration_minutes if offer else None,
+            "offers": [
+                {
+                    "category": item.category,
+                    "price_amount": str(item.price_amount),
+                    "duration_minutes": item.duration_minutes,
+                    "is_active": item.is_active,
+                }
+                for item in category_offers
+            ],
             "city": area.city if area else "",
             "uf": area.uf if area else "",
-            "service_latitude": area.public_service_location.y if area else None,
-            "service_longitude": area.public_service_location.x if area else None,
+            "service_latitude": (
+                area.public_service_location.y if area and area.public_service_location else None
+            ),
+            "service_longitude": (
+                area.public_service_location.x if area and area.public_service_location else None
+            ),
             "service_radius_km": area.radius_km if area else None,
             "service_location_authorized": area.location_authorized if area else False,
             "vehicle": (
@@ -896,6 +932,16 @@ class OwnAccountView(APIView):
                     raise serializers.ValidationError(
                         "Preço e duração são obrigatórios para criar a primeira oferta."
                     )
+            if "offers" in data:
+                try:
+                    save_owner_category_offers(
+                        actor=request.user,
+                        profile=instructor,
+                        offers=data["offers"],
+                        request_id=getattr(request, "request_id", None),
+                    )
+                except (DjangoValidationError, ValueError) as exc:
+                    raise serializers.ValidationError({"offers": str(exc)}) from exc
             if "vehicle" in data:
                 vehicle = (
                     InstructorVehicle.objects.select_for_update()
