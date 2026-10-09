@@ -10,7 +10,11 @@
   categoria nem permitem contato por essa categoria; nenhuma oferta é criada
   ou copiada automaticamente. Os testes cobrem perfil A+B com apenas oferta A.
 - Validação local: 375 testes backend passaram; Ruff, Django check e migration
-  check aprovados. Sem migration nova. Ainda não enviado ao remoto/VPS.
+  check aprovados. Sem migration nova. Commit `b3102a6` enviado a `origin/main`
+  e aplicado na VPS em 08/10/2026 após backup validado de banco e documentos
+  privados (`20261009T022720Z`). Backend reconstruído e saudável; nenhuma
+  migration pendente, Django check sem erros, health e login Admin HTTP 200.
+  Nenhuma oferta, UF ou publicação foi decidida pelo deploy.
 
 ## Ofertas explícitas para múltiplas categorias — 07/10/2026
 
