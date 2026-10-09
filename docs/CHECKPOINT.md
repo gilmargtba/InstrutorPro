@@ -1,5 +1,17 @@
 # Checkpoint do Projeto
 
+## Publicação com categorias declaradas sem oferta individual — 08/10/2026
+
+- A decisão do proprietário desvincula a publicação manual da exigência de
+  oferta para todas as categorias declaradas. O painel ainda exige ao menos
+  uma oferta real ativa de categoria cadastrada, além de todos os gates de
+  conta, documentos, verificação, UF, área, contato e decisão humana.
+- Categorias sem oferta permanecem no cadastro, mas não aparecem na busca por
+  categoria nem permitem contato por essa categoria; nenhuma oferta é criada
+  ou copiada automaticamente. Os testes cobrem perfil A+B com apenas oferta A.
+- Validação local: 375 testes backend passaram; Ruff, Django check e migration
+  check aprovados. Sem migration nova. Ainda não enviado ao remoto/VPS.
+
 ## Ofertas explícitas para múltiplas categorias — 07/10/2026
 
 - O cadastro real agora coleta preço e duração próprios para cada categoria
@@ -13,7 +25,9 @@
   público ainda não foi definido: latitude/longitude retornam nulos, sem erro 500.
 - Validação local: 375 testes backend e 59 frontend, build Angular de produção,
   Ruff e Django check passaram; nenhuma migration nova. Permanecem avisos
-  preexistentes de orçamento do bundle/SCSS. Não enviado à VPS.
+  preexistentes de orçamento do bundle/SCSS. Commit `5772966` enviado à VPS
+  em 08/10/2026 após backup validado do banco e documentos privados; serviços
+  ativos, migrations sem pendências e smoke HTTP 200.
 
 ## Foto opcional do instrutor real — 07/10/2026
 
@@ -28,7 +42,7 @@
 - Validação local: 373 testes backend, Ruff, Django check, migration check,
   58 testes Angular e build de produção passaram; sem migration nova.
   Avisos preexistentes de orçamento do bundle/SCSS permanecem.
-  Publicação no remoto e deploy permanecem pendentes nesta fatia.
+  Enviado e implantado na VPS em 08/10/2026 no commit `5772966`.
 
 ## Correção do zero no mapa local após contagem nacional — 06/10/2026
 

@@ -123,9 +123,6 @@ def approval_panel(profile, actor):
         blockers.append("Área pública de atendimento não autorizada ou sem localização")
     if not active_categories:
         blockers.append("Nenhuma oferta real ativa para categoria cadastrada")
-    for category in profile.categories:
-        if category in CATEGORIES and category not in active_categories:
-            blockers.append(f"Oferta {category} inexistente ou inativa")
     if not contact_ok:
         blockers.append("WhatsApp profissional não configurado/ativo")
     if not enabled("REAL_MARKETPLACE_SEARCH"):

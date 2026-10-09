@@ -4,6 +4,13 @@ Este documento é a fonte oficial de decisões consolidadas, contradições reso
 
 ### Decisão do proprietário de 06/10/2026 — categorias no FREE e alcance da busca
 
+Atualização de 08/10/2026: a aprovação/publicação manual do perfil não exige
+oferta para cada categoria declarada. É suficiente haver ao menos uma oferta
+real ativa de categoria declarada, além dos demais gates de elegibilidade.
+Uma categoria cadastrada sem oferta ativa não fica disponível na busca nem no
+contato; sua oferta futura requer preço e duração próprios. Não há criação de
+oferta ou aprovação regulatória automática.
+
 O plano FREE não impõe limite comercial de categorias. A busca pública pode
 filtrar A, B, C, D ou E, mas só retorna instrutor com categoria declarada,
 oferta ativa da mesma categoria e todos os gates existentes de verificação,
