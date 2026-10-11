@@ -1,5 +1,20 @@
 # Checkpoint do Projeto
 
+## Cadastro de instrutor sem resposta ao clicar — 11/10/2026
+
+- Em produção, `MT` consta no catálogo e `REAL_INSTRUCTOR_REGISTRATION` está
+  habilitado. A geocodificação pública de Cuiabá retorna `MT`; a prontidão
+  `INSTRUCTOR_PUBLICATION` de MT segue `REVIEW_REQUIRED`, o que bloqueia
+  publicação, não cadastro. Nenhuma aprovação de UF foi alterada.
+- O botão “Criar conta” ficava desabilitado quando o formulário era inválido,
+  sem indicar o motivo. Agora o clique lista os campos a corrigir e impede o
+  POST até o formulário ser válido. Falhas ao carregar Termos ou Política
+  também são mostradas em vez de deixar o botão silenciosamente inativo.
+- Validação local: 68 testes Angular e build de produção passaram; permanecem
+  apenas os avisos preexistentes de orçamento de bundle/SCSS. Sem mudança de
+  backend, migration ou gate de elegibilidade. Push/deploy desta correção
+  pendentes de autorização específica.
+
 ## Download do APK Android no site — 11/10/2026
 
 - A rota pública `/baixar-app` e o link na navegação apresentam o download
@@ -12,9 +27,14 @@
   `applicationId=br.com.instrutorprocnh.app`). SHA-256:
   `D23707AF7B05E2C2E9C164C14434785036DC713D7DD6B695C3E35F993B43900E`.
 - O APK fica em `releases/android/InstrutorProCNH-android.apk`, ignorado pelo
-  Git. Produção monta esse diretório somente leitura no Nginx. Publicação na
-  VPS e teste físico em aparelho ainda pendentes. É necessário guardar backup
-  seguro da chave e da senha antes de depender desta assinatura para updates.
+  Git. Produção monta esse diretório somente leitura no Nginx. Após autorização
+  expressa do proprietário para seguir sem backup externo, os commits `6302330`
+  e `f8ef5e3` foram enviados a `origin/main` e implantados na VPS em 11/10.
+  Backup de banco/documentos validado (`20261011T195405Z`); frontend e Nginx
+  saudáveis, download público HTTP 200 com MIME e tamanho corretos, demais
+  caminhos de `/downloads/` HTTP 404. O teste físico em aparelho permanece
+  pendente. A chave ainda precisa de backup independente para garantir updates
+  após perda deste computador/perfil Windows.
 - O APK debug anterior usa `CN=Android Debug` e não deve ser distribuído pelo
   site. Instalações debug existentes não recebem update por esta nova chave de
   release; precisam ser removidas antes da instalação de release.

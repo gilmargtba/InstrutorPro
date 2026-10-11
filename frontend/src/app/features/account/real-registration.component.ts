@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { BRAZIL_UFS } from '../../shared/brazil-ufs';
 
@@ -8,7 +8,7 @@ import { BRAZIL_UFS } from '../../shared/brazil-ufs';
   selector: 'app-real-registration',
   imports: [FormsModule, RouterLink],
   template: `<section class="page narrow"><p class="eyebrow">Cadastro profissional</p><h1>Criar conta de {{role==='STUDENT'?'aluno':'instrutor'}}</h1>
-  <form #registrationForm="ngForm" class="account-form" (ngSubmit)="submit(registrationForm.valid)">
+  <form #registrationForm="ngForm" class="account-form" (ngSubmit)="submit(registrationForm)">
     <label>Nome<input name="name" [(ngModel)]="form.display_name" required maxlength="120"></label>
     <label>Usuário<input name="username" [(ngModel)]="form.username" required></label>
     <label>E-mail<input name="email" [(ngModel)]="form.email" type="email" required></label>
@@ -18,7 +18,7 @@ import { BRAZIL_UFS } from '../../shared/brazil-ufs';
     <label>Confirmar senha<input name="confirmation" [(ngModel)]="form.password_confirmation" type="password" minlength="10" required></label>
     <label class="check"><input name="terms" [(ngModel)]="form.terms_accepted" type="checkbox" required> Li e aceito os <a [routerLink]="termsPath" target="_blank">Termos de Uso</a>.</label>
     <label class="check"><input name="privacy" [(ngModel)]="form.privacy_acknowledged" type="checkbox" required> Declaro que tive acesso à <a routerLink="/privacidade" target="_blank">Política de Privacidade</a>.</label>
-    <button class="button primary" [disabled]="sending()||!versionsReady()||registrationForm.invalid">Criar conta</button>
+    <button class="button primary" [disabled]="sending()||!versionsReady()">Criar conta</button>
     @if(message()){<p role="alert">{{message()}}</p>}
   </form></section>`,
   styles:[`.account-form{display:grid;gap:1rem}.account-form label{display:grid;gap:.35rem;font-weight:700}.account-form input{padding:.75rem;border:1px solid #bad4d1;border-radius:.7rem}.check{grid-template-columns:auto 1fr;align-items:start}.check input{margin-top:.25rem}`]
@@ -32,10 +32,10 @@ export class RealRegistrationComponent {
   form:any={role:this.role,username:'',email:'',password:'',password_confirmation:'',display_name:'',birth_date:'',city:'',uf:'',terms_version:'',privacy_version:'',terms_accepted:false,privacy_acknowledged:false};
   constructor(){
     const audience=this.role.toLowerCase();
-    this.http.get<any>(`/legal/documents/${audience}/`).subscribe(terms=>{this.form.terms_version=terms.version;this.ready()});
-    this.http.get<any>('/privacy/notice/').subscribe(privacy=>{this.form.privacy_version=privacy.version;this.ready()});
+    this.http.get<any>(`/legal/documents/${audience}/`).subscribe({next:terms=>{this.form.terms_version=terms.version;this.ready()},error:()=>this.message.set('Não foi possível carregar os Termos de Uso. Recarregue a página para tentar novamente.')});
+    this.http.get<any>('/privacy/notice/').subscribe({next:privacy=>{this.form.privacy_version=privacy.version;this.ready()},error:()=>this.message.set('Não foi possível carregar a Política de Privacidade. Recarregue a página para tentar novamente.')});
   }
   private ready(){this.versionsReady.set(!!this.form.terms_version&&!!this.form.privacy_version)}
-  submit(valid:boolean|null=true){if(!valid){this.message.set('Revise os campos: a senha deve ter pelo menos 10 caracteres.');return}this.sending.set(true);this.message.set('');const request={...this.form};if(this.role==='INSTRUCTOR'){delete request.city;delete request.uf}this.http.post('/marketplace/accounts/register/',request).subscribe({next:()=>this.router.navigateByUrl(this.role==='INSTRUCTOR'?'/profissional/instrutor/onboarding':'/minha-conta'),error:e=>{this.sending.set(false);this.message.set(this.errorMessage(e))}})}
+  submit(registrationForm:NgForm){if(registrationForm.invalid){registrationForm.form.markAllAsTouched();const labels:Record<string,string>={name:'Nome',username:'Usuário',email:'E-mail',birth:'Data de nascimento',city:'Cidade',uf:'UF',password:'Senha (mínimo de 10 caracteres)',confirmation:'Confirmar senha',terms:'Termos de Uso',privacy:'Política de Privacidade'};const invalid=Object.entries(registrationForm.controls).filter(([,control])=>control.invalid).map(([field])=>labels[field]||field);this.message.set(`Revise os campos: ${invalid.join(', ')}.`);return}this.sending.set(true);this.message.set('');const request={...this.form};if(this.role==='INSTRUCTOR'){delete request.city;delete request.uf}this.http.post('/marketplace/accounts/register/',request).subscribe({next:()=>this.router.navigateByUrl(this.role==='INSTRUCTOR'?'/profissional/instrutor/onboarding':'/minha-conta'),error:e=>{this.sending.set(false);this.message.set(this.errorMessage(e))}})}
   private errorMessage(error:any){const payload=error?.error?.error;const details=payload?.details;if(details&&typeof details==='object'){const labels:Record<string,string>={display_name:'Nome',username:'Usuário',email:'E-mail',birth_date:'Data de nascimento',password:'Senha',password_confirmation:'Confirmação de senha',terms_accepted:'Termos de Uso',privacy_acknowledged:'Política de Privacidade',city:'Cidade',uf:'UF'};const messages=Object.entries(details).flatMap(([field,values])=>(Array.isArray(values)?values:[values]).filter(value=>typeof value==='string').map(value=>`${labels[field]||'Cadastro'}: ${value}`));if(messages.length)return messages.join(' ')}return payload?.message||error?.error?.detail||'Não foi possível concluir o cadastro agora. Tente novamente.'}
 }
