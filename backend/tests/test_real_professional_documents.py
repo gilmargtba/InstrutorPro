@@ -8,6 +8,7 @@ from django.utils import timezone
 from rest_framework.test import APIClient
 
 from apps.accounts.models import Account
+from apps.audit.models import AuditEvent
 from apps.discovery.models import (
     InstructorProfile,
     InstructorServiceArea,
@@ -145,6 +146,133 @@ def sample_file(
     name="evidence.pdf", content=b"%PDF-1.4\nsynthetic test data", mime="application/pdf"
 ):
     return SimpleUploadedFile(name, content, content_type=mime)
+
+
+@pytest.mark.django_db
+@override_settings(**{**ENABLED, "REAL_VISUAL_IDENTITY_REVIEW_ENABLED": False})
+def test_visual_review_photo_is_disabled_until_privacy_gate(tmp_path):
+    with override_settings(MEDIA_ROOT=tmp_path):
+        owner, instructor = profile("photo-disabled-owner")
+        save_verification_draft(actor=owner, profile=instructor, cpf="52998224725")
+        client = APIClient()
+        client.force_authenticate(owner)
+        state = client.get("/api/v1/instructor/verification/").json()
+        assert state["visual_review_available"] is False
+        response = client.post(
+            "/api/v1/instructor/verification/documents/",
+            {
+                "document_type": "SELFIE_WITH_CNH",
+                "manual_identity_review_authorized": "true",
+                "file": sample_file("visual.jpg", b"\xff\xd8\xff\xe0private-test", "image/jpeg"),
+            },
+            format="multipart",
+        )
+        assert response.status_code == 400
+        assert not InstructorDocument.objects.exists()
+
+
+@pytest.mark.django_db
+@override_settings(**{**ENABLED, "REAL_VISUAL_IDENTITY_REVIEW_ENABLED": True})
+def test_visual_review_photo_requires_owner_confirmation_and_image_and_stays_private(tmp_path):
+    with override_settings(MEDIA_ROOT=tmp_path):
+        owner, instructor = profile("photo-with-cnh-owner")
+        save_verification_draft(actor=owner, profile=instructor, cpf="52998224725")
+        client = APIClient()
+        client.force_authenticate(owner)
+        endpoint = "/api/v1/instructor/verification/documents/"
+
+        def jpeg():
+            return sample_file("visual.jpg", b"\xff\xd8\xff\xe0private-test", "image/jpeg")
+
+        assert (
+            client.post(
+                endpoint,
+                {"document_type": "SELFIE_WITH_CNH", "file": jpeg()},
+                format="multipart",
+            ).status_code
+            == 400
+        )
+        assert (
+            client.post(
+                endpoint,
+                {
+                    "document_type": "SELFIE_WITH_CNH",
+                    "manual_identity_review_authorized": "true",
+                    "file": sample_file(),
+                },
+                format="multipart",
+            ).status_code
+            == 400
+        )
+        assert not InstructorDocument.objects.exists()
+
+        with patch("apps.marketplace.real_documents.scan_with_clamd", return_value="CLEAN"):
+            response = client.post(
+                endpoint,
+                {
+                    "document_type": "SELFIE_WITH_CNH",
+                    "manual_identity_review_authorized": "true",
+                    "file": jpeg(),
+                },
+                format="multipart",
+            )
+        assert response.status_code == 201
+        document = InstructorDocument.objects.get()
+        assert document.manual_identity_review_authorized_at is not None
+        assert document.scan_status == document.ScanStatus.CLEAN
+        assert document.status == document.Status.PENDING
+        assert response.json()["documents"][0]["label"] == "Foto com CNH para conferência visual"
+        assert AuditEvent.objects.filter(
+            action="marketplace.professional_document.uploaded",
+            target_id=document.pk,
+            metadata__visual_review_notice_version="INSTRUCTOR-CNH-VISUAL-REVIEW-1",
+        ).exists()
+        assert instructor.publication_status == instructor.PublicationStatus.UNPUBLISHED
+        anonymous = APIClient()
+        assert anonymous.get(
+            f"/api/v1/marketplace/instructor-documents/{document.pk}/download/"
+        ).status_code in {401, 403}
+
+
+@pytest.mark.django_db
+@override_settings(**{**ENABLED, "REAL_VISUAL_IDENTITY_REVIEW_ENABLED": True})
+def test_visual_review_photo_is_listed_on_same_human_review_screen(tmp_path):
+    with override_settings(MEDIA_ROOT=tmp_path):
+        owner, instructor = profile("photo-review-owner")
+        analyst = reviewer("photo-review-analyst", can_access_document=True)
+        save_verification_draft(actor=owner, profile=instructor, cpf="52998224725")
+        client = APIClient()
+        client.force_authenticate(owner)
+        with patch("apps.marketplace.real_documents.scan_with_clamd", return_value="CLEAN"):
+            response = client.post(
+                "/api/v1/instructor/verification/documents/",
+                {
+                    "document_type": "SELFIE_WITH_CNH",
+                    "manual_identity_review_authorized": "true",
+                    "file": sample_file(
+                        "visual.png", b"\x89PNG\r\n\x1a\nprivate-test", "image/png"
+                    ),
+                },
+                format="multipart",
+            )
+        assert response.status_code == 201
+        submitted = client.post("/api/v1/instructor/verification/submit/", {}, format="json")
+        assert submitted.status_code == 201
+        item = ProfessionalVerificationRequest.objects.get(profile=instructor)
+        start_verification_review(actor=analyst, verification_request=item)
+        from django.test.client import Client
+        from django.urls import reverse
+
+        web = Client()
+        web.force_login(analyst)
+        page = web.get(
+            reverse("admin:discovery_verification_request_transition", args=[item.pk, "approve"])
+        )
+        assert page.status_code == 200
+        content = page.content.decode()
+        assert "Foto com CNH para conferência visual" in content
+        assert "compare visualmente rosto e documento" in content
+        assert "Visualizar com autorização e auditoria" in content
 
 
 @pytest.mark.parametrize(

@@ -2,6 +2,29 @@
 
 Este documento é a fonte oficial de decisões consolidadas, contradições resolvidas e questões em aberto. Uma recomendação marcada como aberta não é uma decisão aceita.
 
+### Decisão do proprietário de 11/10/2026 — foto com CNH para revisão visual
+
+O envio voluntário de uma foto do rosto segurando a CNH pode integrar a mesma
+solicitação documental do instrutor. A finalidade é conferência **visual humana**
+por revisor autorizado, com confirmação específica do titular, arquivo privado,
+antimalware, acesso auditado e retenção documental. Não há extração de template,
+comparação biométrica automática ou consulta oficial implícita. A foto sozinha
+não comprova credenciamento, não aprova a solicitação nem publica o perfil.
+Antes de implantar em produção, atualizar o aviso de privacidade versionado para
+essa finalidade e verificar a base legal, a retenção e a avaliação de risco com
+o responsável por privacidade. O gate de elegibilidade permanece inalterado.
+
+### Decisão do proprietário de 11/10/2026 — prazo de análise e e-mail de verificação
+
+Após envio completo da solicitação profissional, a interface comunica prazo
+**estimado** de análise de 24 a 48 horas. Pendências documentais, indisponibilidade
+externa ou necessidade de nova conferência podem ampliar esse prazo; ele não
+autoriza aprovação automática. Quando a verificação interna real for aprovada
+por um revisor, enviar e-mail transacional ao instrutor, com estado auditável e
+tentativas de reenvio. O e-mail esclarece que verificação interna não é
+credenciamento oficial nem publicação na busca. O aviso de publicação existente
+continua separado e só é enviado quando o perfil estiver efetivamente público.
+
 ### Decisão do proprietário de 10/10/2026 — app mobile do aluno
 
 O aplicativo oficial inicial é um cliente Android/iOS do Angular existente via

@@ -78,6 +78,7 @@ class ProfessionalDocumentInput(serializers.Serializer):
     document_type = serializers.ChoiceField(
         choices=InstructorDocument.DocumentType.choices, required=False
     )
+    manual_identity_review_authorized = serializers.BooleanField(required=False, default=False)
 
 
 class ProfilePhotoInput(serializers.Serializer):
@@ -138,9 +139,13 @@ def _verification_payload(profile):
         "can_start_supplement": can_start_document_supplement(profile, item),
         "documents_enabled": documents_enabled,
         "document_upload_available": documents_enabled,
+        "visual_review_available": (
+            documents_enabled and settings.REAL_VISUAL_IDENTITY_REVIEW_ENABLED
+        ),
         "document_types": [
             {"value": value, "label": label}
             for value, label in InstructorDocument.DocumentType.choices
+            if value != InstructorDocument.DocumentType.SELFIE_WITH_CNH
         ]
         if documents_enabled
         else [],
@@ -270,6 +275,7 @@ class ProfessionalVerificationDocumentView(APIView):
                 verification_request=item,
                 requirement=requirement,
                 document_type=data.get("document_type", ""),
+                manual_identity_review_authorized=data["manual_identity_review_authorized"],
                 upload=upload,
                 request_id=getattr(request, "request_id", None),
             )

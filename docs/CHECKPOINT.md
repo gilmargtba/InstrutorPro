@@ -1,5 +1,37 @@
 # Checkpoint do Projeto
 
+## Foto com CNH na revisão documental — 11/10/2026
+
+- O instrutor pode optar por capturar/selecionar JPEG ou PNG do rosto com a CNH
+  na tela de documentos; a API exige confirmação específica e registra seu
+  instante/versão auditável. PDF ou falta de confirmação são recusados.
+- O arquivo usa o mesmo storage privado, quarentena, ClamAV e download por
+  autorização dos demais documentos. O revisor vê a foto na mesma solicitação
+  e deve conferir visualmente; não há reconhecimento facial automático.
+- Após salvar o perfil, o fluxo leva diretamente à etapa de documentos. A foto
+  não verifica o instrutor nem altera a publicação; decisão humana, UF e demais
+  gates continuam obrigatórios.
+- Antes de ativar em produção: atualizar aviso de privacidade versionado para
+  essa finalidade e validar base legal, retenção e risco. A flag
+  `REAL_VISUAL_IDENTITY_REVIEW_ENABLED=false` mantém a capacidade desativada
+  por padrão mesmo após deploy de código. Validação local: 386 testes backend,
+  71 frontend, Ruff, Django check, migrations check e build de produção passaram.
+  O código não foi enviado à VPS nesta entrega.
+
+## Prazo estimado e e-mail de aprovação interna — 11/10/2026
+
+- Solicitações profissionais completas exibem prazo estimado de 24 a 48 horas,
+  com ressalva para pendências. Nenhum vencimento força aprovação automática.
+- A decisão humana `VERIFIED` de perfil real gera aviso por e-mail independente
+  do aviso de publicação. O envio usa destinatário congelado na decisão,
+  agendamento pós-commit, estado persistido, auditoria e retry periódico; falha
+  de transporte não desfaz a aprovação. Sem SMTP operacional, permanece pendente.
+- O e-mail distingue verificação interna, credenciamento oficial e publicação
+  na busca. O Admin exibe estado/tentativas do aviso. Nenhuma regra de
+  elegibilidade, UF, documento ou publicação foi relaxada.
+- A entrega depende de deploy específico; não afirmar que e-mails estão saindo
+  da VPS antes de validar o SMTP real.
+
 ## Cadastro de instrutor sem resposta ao clicar — 11/10/2026
 
 - O fluxo de conta e onboarding não exige prontidão regulatória para salvar

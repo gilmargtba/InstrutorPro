@@ -28,6 +28,15 @@ Fonte oficial do programa de privacidade, revisada em **22/07/2026** contra a LG
 2. Aceite de termos e consentimento LGPD são atos distintos. Aceitar contrato, aviso de privacidade ou política obrigatória não cria consentimento nem autoriza finalidade opcional.
 3. Cookies, SDKs e pixels não estritamente necessários permanecem ausentes ou desativados até escolha granular. Publicidade comportamental, enriquecimento de perfil e venda de dados ficam fora do MVP.
 4. Biometria, reconhecimento facial, cópia de cartão, tracking contínuo, IA sobre dados pessoais e decisão adversa baseada somente em perfil/score ficam fora do MVP.
+
+O fluxo opcional de foto do instrutor segurando a CNH, decidido em 11/10/2026,
+é apenas evidência privada para conferência visual humana. Não extrai template
+biométrico nem executa reconhecimento facial automático; não concede
+elegibilidade ou publicação. O titular confirma especificamente esse uso no
+envio; a plataforma registra a versão do aviso e o momento da confirmação.
+Antes da ativação em produção, a finalidade precisa constar do aviso de
+privacidade versionado e receber revisão de base legal, retenção e riscos pelo
+responsável por privacidade. A confirmação na interface não substitui tal revisão.
 5. Documento, CPF, endereço residencial, coordenada exata, dado financeiro, credencial e evidência nunca são públicos nem usados como identificador de URL, label de métrica ou conteúdo de log.
 6. Transferência internacional só ocorre com hipótese legal, mecanismo válido, transparência e fluxo posterior documentados; contrato de fornecedor ou alegação de conformidade com GDPR, isoladamente, não bastam.
 7. No MVP, cadastro operacional e coleta de dados de menores em demanda, mapa ou marketplace falham fechados; não se adota biometria para aferir idade. `OPEN-014` permanece gate de eventual expansão, e um aviso “18+” não afasta por si só o ECA Digital.

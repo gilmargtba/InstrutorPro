@@ -15,6 +15,7 @@
     {% endif %}
     {% if review_documents %}
       <h2>Documentos privados atribuídos à revisão</h2>
+      <p>Se houver foto com CNH, compare visualmente rosto e documento. Não trate a foto como reconhecimento facial automático nem como prova isolada de credenciamento.</p>
       <ul>{% for document in review_documents %}
         <li>{{ document.document_label }} — {{ document.get_status_display }} — {{ document.get_scan_status_display }} —
           <a href="{% url 'instructor-document-download' document.pk %}" target="_blank" rel="noopener">Visualizar com autorização e auditoria</a>

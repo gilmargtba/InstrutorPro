@@ -15,6 +15,30 @@ describe('ProfessionalVerificationComponent',()=>{
     expect(fixture.nativeElement.textContent).not.toContain('CLEAN');
     expect(fixture.nativeElement.textContent).not.toContain('Nenhum documento foi configurado');
   });
+  it('shows the 24 to 48 hour estimate only for a submitted request',()=>{
+    const fixture=TestBed.createComponent(ProfessionalVerificationComponent);const http=TestBed.inject(HttpTestingController);
+    http.expectOne('/instructor/verification/').flush({status:'SUBMITTED',cpf_masked:'***.***.***-25',can_edit:false,documents:[]});
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('24 a 48 horas');
+    expect(fixture.nativeElement.textContent).toContain('A aprovação não é automática');
+  });
+  it('requests explicit visual-review confirmation for a private CNH photo upload',()=>{
+    const fixture=TestBed.createComponent(ProfessionalVerificationComponent);const http=TestBed.inject(HttpTestingController);
+    http.expectOne('/instructor/verification/').flush({status:'DRAFT',cpf_masked:'***.***.***-25',can_edit:true,document_upload_available:true,visual_review_available:true,requirements:[],document_types:[],documents:[]});
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Não há reconhecimento facial automático');
+    const input=fixture.nativeElement.querySelector('input[aria-label="Capturar ou escolher foto com a CNH"]') as HTMLInputElement;
+    expect(input.disabled).toBeTrue();
+    fixture.componentInstance.manualVisualReviewAuthorized=true;
+    const file=new File(['\xff\xd8\xff\xe0photo'],'visual.jpg',{type:'image/jpeg'});
+    fixture.componentInstance.uploadDocument(null,{target:{files:[file],value:'visual.jpg'}} as unknown as Event,'SELFIE_WITH_CNH');
+    const request=http.expectOne('/instructor/verification/documents/');
+    expect(request.request.body.get('document_type')).toBe('SELFIE_WITH_CNH');
+    expect(request.request.body.get('manual_identity_review_authorized')).toBe('true');
+    request.flush({status:'DRAFT',cpf_masked:'***.***.***-25',can_edit:true,document_upload_available:true,visual_review_available:true,documents:[{id:'photo',label:'Foto com CNH para conferência visual',original_name:'visual.jpg',scan_status:'CLEAN'}]});
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Foto com CNH para conferência visual');
+  });
   it('does not send an invalid CPF',()=>{
     const fixture=TestBed.createComponent(ProfessionalVerificationComponent);const http=TestBed.inject(HttpTestingController);
     http.expectOne('/instructor/verification/').flush({status:'DRAFT',cpf_masked:'',submitted_at:null,review_started_at:null,decided_at:null,message:'',can_edit:true});

@@ -15,6 +15,7 @@ type VerificationState = {
   can_start_supplement?: boolean;
   documents_enabled?: boolean;
   document_upload_available?: boolean;
+  visual_review_available?: boolean;
   document_types?: {value:string;label:string}[];
   requirements?: {id:string;label:string;required:boolean}[];
   documents?: {id:string;requirement_id:string|null;scan_status:string;status:string;label:string;original_name:string}[];
@@ -28,6 +29,9 @@ type VerificationState = {
     @if(state(); as current){
       <article class="notice">
         <h2>{{label(current.status)}}</h2>
+        @if(current.status === 'SUBMITTED' || current.status === 'UNDER_REVIEW'){
+          <p role="status">Prazo estimado de análise: 24 a 48 horas após o envio completo. Se houver pendências ou necessidade de nova conferência, o prazo pode ser maior. A aprovação não é automática.</p>
+        }
         @if(current.cpf_masked){<p>CPF informado: <strong>{{current.cpf_masked}}</strong></p>}
         @if(current.message){<p>{{current.message}}</p>}
         @if(current.can_edit){
@@ -48,6 +52,12 @@ type VerificationState = {
               <p>Envie documentos profissionais que ajudem na análise da sua solicitação de verificação.</p>
               <p>Os anexos voluntários não são uma lista de exigências oficiais e não aprovam o cadastro automaticamente.</p>
               <p>Para credenciamento, selecione “Certificado/credenciamento”. Para CNH, selecione “Outro documento profissional”.</p>
+              @if(current.visual_review_available){
+                <h4>Foto com a CNH para conferência visual (opcional)</h4>
+                <p>Se desejar, use a câmera do celular ou computador, ou escolha uma foto JPEG/PNG de até 5 MB mostrando seu rosto e a CNH. O arquivo fica privado; um revisor autorizado fará somente a comparação visual. Não há reconhecimento facial automático, e a foto não aprova o credenciamento nem publica seu perfil.</p>
+                <label class="consent"><input type="checkbox" name="manualVisualReviewAuthorization" [(ngModel)]="manualVisualReviewAuthorized"> Solicito a conferência visual privada desta foto com minha CNH para a análise profissional.</label>
+                <input type="file" accept="image/jpeg,image/png" capture="user" [disabled]="sending || !current.cpf_masked || !manualVisualReviewAuthorized" (change)="uploadDocument(null,$event,'SELFIE_WITH_CNH')" aria-label="Capturar ou escolher foto com a CNH">
+              }
               <label>Tipo de documento
                 <select name="documentType" [(ngModel)]="documentType">
                   @for(type of current.document_types || []; track type.value){<option [value]="type.value">{{type.label}}</option>}
@@ -75,6 +85,7 @@ type VerificationState = {
               <p class="privacy">@if(!current.cpf_masked){Salve primeiro o CPF. }Arquivos aceitos: PDF, JPEG ou PNG, até 5 MB. Documentos não são publicados.</p>
             } @else {<p>Documentos ainda não estão sendo solicitados nesta etapa.</p>}
             <h3>4. Revisão e envio</h3>
+            <p>Após o envio completo, a análise costuma levar de 24 a 48 horas. Você receberá um e-mail quando a verificação interna for aprovada. A publicação na busca é uma etapa separada.</p>
             <label class="consent"><input type="checkbox" name="confirmed" [(ngModel)]="confirmed"> @if(current.is_supplement){Confirmo que os anexos são meus e solicito nova revisão humana.}@else{Confirmo que o CPF é meu e autorizo seu uso para esta verificação.}</label>
             @if(!current.is_supplement){<button class="button secondary" type="button" [disabled]="sending || !confirmed" (click)="saveDraft()">Salvar rascunho</button>}
             <button class="button primary" [disabled]="sending || !confirmed">{{current.is_supplement?'Enviar documentos para análise':'Enviar solicitação de verificação'}}</button>
@@ -101,7 +112,7 @@ type VerificationState = {
 export class ProfessionalVerificationComponent {
   private http=inject(HttpClient);
   state=signal<VerificationState|undefined>(undefined);
-  error=signal(''); cpf=''; confirmed=false;
+  error=signal(''); cpf=''; confirmed=false; manualVisualReviewAuthorized=false;
   private busy=signal(false);
   get sending(){return this.busy()}
   set sending(value:boolean){this.busy.set(value)}
@@ -121,12 +132,16 @@ export class ProfessionalVerificationComponent {
     this.sending=true;
     this.http.patch<VerificationState>('/instructor/verification/',{cpf:this.cpf}).subscribe({next:value=>{this.sending=false;this.cpf='';this.state.set(value)},error:error=>this.fail(error)});
   }
-  uploadDocument(requirementId:string|null,event:Event){
+  uploadDocument(requirementId:string|null,event:Event,documentType?:string){
     const file=(event.target as HTMLInputElement).files?.[0];
     if(!file)return;
+    if(documentType==='SELFIE_WITH_CNH' && !this.manualVisualReviewAuthorized){
+      this.error.set('Confirme o uso privado da foto para conferência visual.');return;
+    }
     this.sending=true;this.error.set('');
     const data=new FormData();
-    if(requirementId){data.append('requirement_id',requirementId)}else{data.append('document_type',this.documentType)}
+    if(requirementId){data.append('requirement_id',requirementId)}else{data.append('document_type',documentType||this.documentType)}
+    if(documentType==='SELFIE_WITH_CNH')data.append('manual_identity_review_authorized','true');
     data.append('file',file);
     (event.target as HTMLInputElement).value='';
     this.http.post<VerificationState>('/instructor/verification/documents/',data).subscribe({next:value=>{this.sending=false;this.state.set(value)},error:error=>this.fail(error)});

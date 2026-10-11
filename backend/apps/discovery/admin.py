@@ -469,6 +469,9 @@ class ProfessionalVerificationRequestAdmin(admin.ModelAdmin):
         "workflow_actions",
         "public_message",
         "review_checklist_display",
+        "approval_notice_status",
+        "approval_notice_attempts",
+        "approval_notice_sent_at",
     )
     fieldsets = (
         (
@@ -506,6 +509,16 @@ class ProfessionalVerificationRequestAdmin(admin.ModelAdmin):
         (
             "Decisão",
             {"fields": ("review_checklist_display", "public_message", "workflow_actions")},
+        ),
+        (
+            "Aviso por e-mail após aprovação interna",
+            {
+                "fields": (
+                    "approval_notice_status",
+                    "approval_notice_attempts",
+                    "approval_notice_sent_at",
+                )
+            },
         ),
     )
 

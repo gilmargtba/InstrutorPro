@@ -373,6 +373,7 @@ class InstructorDocument(models.Model):
         PROFESSIONAL_CREDENTIAL = "PROFESSIONAL_CREDENTIAL", "Credencial profissional"
         PROFESSIONAL_CERTIFICATE = "PROFESSIONAL_CERTIFICATE", "Certificado/credenciamento"
         OTHER_PROFESSIONAL = "OTHER_PROFESSIONAL", "Outro documento profissional"
+        SELFIE_WITH_CNH = "SELFIE_WITH_CNH", "Foto com CNH para conferência visual"
 
     class Status(models.TextChoices):
         PENDING = "PENDING", "Pendente"
@@ -409,6 +410,7 @@ class InstructorDocument(models.Model):
         blank=True,
     )
     document_type = models.CharField(max_length=32, choices=DocumentType.choices, blank=True)
+    manual_identity_review_authorized_at = models.DateTimeField(null=True, blank=True)
 
     @property
     def document_label(self):
@@ -482,10 +484,16 @@ class InstructorDocument(models.Model):
                         "PROFESSIONAL_CREDENTIAL",
                         "PROFESSIONAL_CERTIFICATE",
                         "OTHER_PROFESSIONAL",
+                        "SELFIE_WITH_CNH",
                     ],
                     verification_request__isnull=False,
                 ),
                 name="ck_document_requirement_or_generic",
+            ),
+            models.CheckConstraint(
+                condition=~Q(document_type="SELFIE_WITH_CNH")
+                | Q(manual_identity_review_authorized_at__isnull=False),
+                name="ck_selfie_visual_review_authorized",
             ),
         ]
 

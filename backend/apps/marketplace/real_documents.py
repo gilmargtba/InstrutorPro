@@ -23,6 +23,9 @@ class DocumentUploadError(ValueError):
     pass
 
 
+VISUAL_REVIEW_NOTICE_VERSION = "INSTRUCTOR-CNH-VISUAL-REVIEW-1"
+
+
 ALLOWED_FORMATS = {
     ".pdf": ("application/pdf", b"%PDF-"),
     ".png": ("image/png", b"\x89PNG\r\n\x1a\n"),
@@ -130,16 +133,41 @@ def _audit(actor, document, action, request_id=None):
         target_type="marketplace.InstructorDocument",
         target_id=document.pk,
         request_id=rid,
-        metadata={"verification_request_id": str(document.verification_request_id)},
+        metadata={
+            "verification_request_id": str(document.verification_request_id),
+            **(
+                {"visual_review_notice_version": VISUAL_REVIEW_NOTICE_VERSION}
+                if document.document_type == InstructorDocument.DocumentType.SELFIE_WITH_CNH
+                and action == "uploaded"
+                else {}
+            ),
+        },
     )
 
 
 def upload_professional_document(
-    *, actor, verification_request, upload, requirement=None, document_type="", request_id=None
+    *,
+    actor,
+    verification_request,
+    upload,
+    requirement=None,
+    document_type="",
+    manual_identity_review_authorized=False,
+    request_id=None,
 ):
     if not upload_available():
         raise DocumentUploadError("Envio de documentos indisponível.")
     metadata = inspect_real_upload(upload)
+    is_visual_review_photo = document_type == InstructorDocument.DocumentType.SELFIE_WITH_CNH
+    if is_visual_review_photo:
+        if not settings.REAL_VISUAL_IDENTITY_REVIEW_ENABLED:
+            raise DocumentUploadError("Conferência visual por foto indisponível nesta etapa.")
+        if requirement is not None or not manual_identity_review_authorized:
+            raise DocumentUploadError("Confirme o uso privado da foto para conferência visual.")
+        if metadata["mime_type"] not in {"image/jpeg", "image/png"}:
+            raise DocumentUploadError("A foto com CNH deve ser JPEG ou PNG.")
+    elif manual_identity_review_authorized:
+        raise DocumentUploadError("A confirmação visual só se aplica à foto com CNH.")
     with transaction.atomic():
         item = (
             ProfessionalVerificationRequest.objects.select_for_update()
@@ -164,6 +192,9 @@ def upload_professional_document(
             verification_request=item,
             requirement=requirement,
             document_type=document_type,
+            manual_identity_review_authorized_at=(
+                timezone.now() if is_visual_review_photo else None
+            ),
             file=upload,
             size_bytes=upload.size,
             data_mode=DataMode.REAL,

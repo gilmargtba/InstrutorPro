@@ -115,6 +115,10 @@ CELERY_RESULT_BACKEND = REDIS_URL
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 300
 CELERY_BEAT_SCHEDULE = {
+    "verification-approval-notice-retry-five-minutes": {
+        "task": "discovery.retry_verification_approval_notices",
+        "schedule": 300.0,
+    },
     "publication-notice-retry-five-minutes": {
         "task": "discovery.retry_publication_notices",
         "schedule": 300.0,
@@ -185,6 +189,7 @@ REAL_MARKETPLACE_ANALYTICS = _env_flag("REAL_MARKETPLACE_ANALYTICS")
 REAL_INSTRUCTOR_REGISTRATION = _env_flag("REAL_INSTRUCTOR_REGISTRATION")
 REAL_PROFESSIONAL_VERIFICATION = _env_flag("REAL_PROFESSIONAL_VERIFICATION")
 REAL_DOCUMENT_UPLOADS = _env_flag("REAL_DOCUMENT_UPLOADS")
+REAL_VISUAL_IDENTITY_REVIEW_ENABLED = _env_flag("REAL_VISUAL_IDENTITY_REVIEW_ENABLED")
 PROFESSIONAL_DOCUMENT_UPLOAD_MODE = os.getenv("PROFESSIONAL_DOCUMENT_UPLOAD_MODE", "DISABLED")
 CLAMD_HOST = os.getenv("CLAMD_HOST", "")
 CLAMD_PORT = int(os.getenv("CLAMD_PORT", "3310"))

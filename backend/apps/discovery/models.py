@@ -223,6 +223,14 @@ class ProfessionalVerificationRequest(ProtectedStateModel):
         VERIFIED = "VERIFIED", "Verificada"
         REJECTED = "REJECTED", "Rejeitada"
 
+    class NoticeStatus(models.TextChoices):
+        NOT_APPLICABLE = "NOT_APPLICABLE", "Não aplicável"
+        PENDING = "PENDING", "Pendente"
+        SENDING = "SENDING", "Enviando"
+        SENT = "SENT", "Enviado"
+        FAILED = "FAILED", "Falhou"
+        SKIPPED = "SKIPPED", "Cancelado"
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     profile = models.ForeignKey(
         InstructorProfile, on_delete=models.PROTECT, related_name="verification_requests"
@@ -254,6 +262,13 @@ class ProfessionalVerificationRequest(ProtectedStateModel):
         on_delete=models.PROTECT,
         related_name="decided_professional_verification_requests",
     )
+    approval_notice_status = models.CharField(
+        max_length=20, choices=NoticeStatus.choices, default=NoticeStatus.NOT_APPLICABLE
+    )
+    approval_notice_recipient = models.EmailField(blank=True)
+    approval_notice_attempts = models.PositiveSmallIntegerField(default=0)
+    approval_notice_attempted_at = models.DateTimeField(null=True, blank=True)
+    approval_notice_sent_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     requirements_snapshot = models.JSONField(default=list, blank=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -487,6 +487,15 @@ def approve_verification_request(*, actor, verification_request, request_id=None
         actor=actor,
         reason="ADMIN_PROFESSIONAL_VERIFICATION_APPROVED",
     )
+    if not profile.is_demo:
+        item.approval_notice_status = item.NoticeStatus.PENDING
+        item.approval_notice_recipient = profile.person.account.email
+        item.save(
+            update_fields=["approval_notice_status", "approval_notice_recipient", "updated_at"]
+        )
+        from .verification_notifications import queue_verification_approval_notice
+
+        transaction.on_commit(lambda: queue_verification_approval_notice(item.pk))
     _audit(actor, "approved", item, "ADMIN_APPROVED", request_id)
     return item
 

@@ -199,6 +199,8 @@ def test_admin_can_record_consultation_and_approve_in_one_audited_step():
     item.refresh_from_db()
     profile.refresh_from_db()
     assert item.status == item.Status.VERIFIED
+    assert item.approval_notice_status == item.NoticeStatus.PENDING
+    assert item.approval_notice_recipient == "quick-review-owner@example.invalid"
     assert admin_config.triage_status(item) == "Concluída"
     assert item.checked_at is not None and item.decision_by == analyst
     assert profile.verification_status == profile.VerificationStatus.VERIFIED
