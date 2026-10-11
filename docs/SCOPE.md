@@ -2,6 +2,16 @@
 
 Este documento é a fonte oficial de fronteiras. Outros documentos podem detalhar, mas não incluir funcionalidade por conta própria.
 
+## Emenda mobile do proprietário — 10/10/2026
+
+O app Android/iOS do **aluno** pode reutilizar o Angular existente via Capacitor
+para busca anônima, mapa/lista, perfil público e contato voluntário por WhatsApp
+pela API de produção. Esta decisão substitui apenas o adiamento do app nativo
+abaixo; não altera os gates de elegibilidade, publicação, UF, oferta e privacidade
+do backend. O app não inclui Admin, painel profissional, PRO, pagamento de aula
+ou aprovação regulatória. A implementação iOS pode ser entregue pronta para
+Xcode quando o ambiente de compilação for Windows.
+
 ## Emenda comercial do proprietário — 29/09/2026
 
 O MVP comercial é **geração de leads**, não uma intermediação financeira da aula:

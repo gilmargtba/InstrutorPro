@@ -355,6 +355,7 @@ class PublicInstructorProfileResponse(serializers.Serializer):
     verified_claims = serializers.ListField(child=serializers.CharField())
     synthetic = serializers.BooleanField()
     price_amount = serializers.DecimalField(max_digits=8, decimal_places=2)
+    offer_category = serializers.CharField()
     price_from = serializers.BooleanField()
     duration_minutes = serializers.IntegerField()
     vehicle = serializers.DictField(allow_null=True)
@@ -558,25 +559,34 @@ class PublicInstructorProfileView(InstructorSearchView):
 
     @extend_schema(responses=PublicInstructorProfileResponse)
     def get(self, request, pk):
+        category = request.query_params.get("category")
+        if category is not None:
+            category_input = serializers.ChoiceField(choices=["A", "B", "C", "D", "E"])
+            category = category_input.run_validation(category)
+        offer_filters = {
+            "offers__is_active": True,
+            "offers__data_mode": (
+                DataMode.SYNTHETIC if settings.SYNTHETIC_MARKETPLACE_ENABLED else DataMode.REAL
+            ),
+        }
+        if category:
+            offer_filters["offers__category"] = category
+        queryset = published_instructor_profiles().filter(**offer_filters)
+        if category:
+            queryset = queryset.filter(categories__contains=[category])
         row = get_object_or_404(
-            published_instructor_profiles()
-            .filter(
-                offers__is_active=True,
-                offers__data_mode=(
-                    DataMode.SYNTHETIC if settings.SYNTHETIC_MARKETPLACE_ENABLED else DataMode.REAL
-                ),
-            )
-            .select_related("service_area", "vehicle")
+            queryset.select_related("service_area", "vehicle")
             .prefetch_related("offers", "profile_photos", "documents__requirement")
             .distinct(),
             pk=pk,
         )
+        commercial_summary = self._commercial_summary(row, category)
         record_marketplace_event(
             request=request,
             event_type=MarketplaceEvent.Type.INSTRUCTOR_PROFILE_VIEWED,
             instructor=row,
             source=request.query_params.get("source", "profile"),
-            category=request.query_params.get("category", row.categories[0]),
+            category=commercial_summary["offer_category"],
             city=row.service_area.city,
             uf=row.service_area.uf,
         )
@@ -597,7 +607,7 @@ class PublicInstructorProfileView(InstructorSearchView):
                 "profile_photo_url": self._photo_url(row),
                 "verified_claims": self._verified_claims(row),
                 "synthetic": row.is_demo,
-                **self._commercial_summary(row),
+                **commercial_summary,
             }
         )
 

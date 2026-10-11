@@ -550,6 +550,27 @@ def test_search_without_category_finds_only_declared_active_offer(actor):
 
 
 @pytest.mark.django_db
+def test_public_profile_preserves_selected_active_offer_category(actor):
+    profile, *_ = make_profile(actor, categories=["A", "B"])
+    offer_a = InstructorOffer.objects.create(
+        instructor=profile,
+        category="A",
+        price_amount="120.00",
+        duration_minutes=50,
+        data_mode=DataMode.SYNTHETIC,
+    )
+    endpoint = f"/api/v1/instructors/{profile.id}/"
+    selected = APIClient().get(endpoint, {"category": "A"})
+    assert selected.status_code == 200
+    assert selected.json()["offer_category"] == "A"
+    assert selected.json()["price_amount"] == 120.0
+    offer_a.is_active = False
+    offer_a.save(update_fields=["is_active"])
+    assert APIClient().get(endpoint, {"category": "A"}).status_code == 404
+    assert APIClient().get(endpoint, {"category": "B"}).json()["offer_category"] == "B"
+
+
+@pytest.mark.django_db
 def test_whatsapp_refuses_category_without_active_offer(actor):
     profile, *_ = make_profile(actor, categories=["A"])
     InstructorContactChannel.objects.create(

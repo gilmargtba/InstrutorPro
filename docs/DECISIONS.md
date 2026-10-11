@@ -2,6 +2,17 @@
 
 Este documento é a fonte oficial de decisões consolidadas, contradições resolvidas e questões em aberto. Uma recomendação marcada como aberta não é uma decisão aceita.
 
+### Decisão do proprietário de 10/10/2026 — app mobile do aluno
+
+O aplicativo oficial inicial é um cliente Android/iOS do Angular existente via
+Capacitor, usando exclusivamente a API HTTPS de produção e a mesma regra
+server-side de busca/publicação. Localização é opcional, sob ação do aluno e não
+persistida pelo app; cidade/UF/CEP continua disponível. Categorias suportadas
+são A–E, sem categoria AB separada. O app expõe apenas descoberta anônima,
+perfil público, WhatsApp e privacidade. Admin, aprovação, PRO e pagamento não
+integram o app do aluno. O bundle ID candidato, na ausência de identificador
+prévio no repositório, é `br.com.instrutorprocnh.app`.
+
 ### Decisão do proprietário de 06/10/2026 — categorias no FREE e alcance da busca
 
 Atualização de 08/10/2026: a aprovação/publicação manual do perfil não exige

@@ -12,16 +12,20 @@ import {
 } from '../../demo/instructor-search.provider';
 import { LeafletMapProvider } from '../../demo/map.provider';
 import { BRAZIL_UFS } from '../../shared/brazil-ufs';
+import { environment } from '../../../environments/environment';
+import { publicMediaUrl } from '../../core/api-url';
+import { StudentLocationService } from '../../core/student-location.service';
+import { WhatsappLinkService } from '../../core/whatsapp-link.service';
 
 @Component({
   selector: 'app-instructor-map',
   imports: [FormsModule, RouterLink],
   template: `
     <section class="search-experience" [class.results-open]="searched">
-      <div class="demo-ribbon">
+      @if (!production) {<div class="demo-ribbon">
         <i class="pi pi-sparkles"></i>
         Experiência demonstrativa · profissionais e ofertas sintéticos
-      </div>
+      </div>}
 
       <div class="search-hero">
         <p class="eyebrow">Encontre seu instrutor</p>
@@ -170,7 +174,7 @@ import { BRAZIL_UFS } from '../../shared/brazil-ufs';
             @if (!anyDistance) {<button type="button" (click)="increaseRadius()">Aumentar raio</button>}
             <button type="button" (click)="filtersOpen=true">Alterar filtros</button>
             <button type="button" (click)="backToIntro()">Buscar outra região</button>
-            <a routerLink="/aluno/demanda">Informar minha necessidade</a>
+            @if (!mobile) {<a routerLink="/aluno/demanda">Informar minha necessidade</a>}
           </div>
         }
         @if(contactError){<p class="contact-error" role="alert">{{contactError}}</p>}
@@ -209,13 +213,12 @@ import { BRAZIL_UFS } from '../../shared/brazil-ufs';
                     (keydown.enter)="select(instructor)"
                   >
                     <div class="result-avatar" aria-hidden="true">
-                      @if(instructor.profile_photo_url){<img [src]="instructor.profile_photo_url" alt="">}@else { {{ initials(instructor.display_name) }} }
+                      @if(instructor.profile_photo_url){<img [src]="photoUrl(instructor.profile_photo_url)" alt="">}@else { {{ initials(instructor.display_name) }} }
                     </div>
                     <div class="result-copy">
                       <strong>{{ instructor.display_name }}</strong>
                       @if(instructor.verified_claims.includes('CREDENTIAL_VERIFIED')){<em class="verified"><i class="pi pi-verified"></i> Credenciamento verificado</em>}
                       <span>{{ instructor.distance_km }} km de você</span>
-                      <small>Novo no InstrutorProCNH</small>
                       <small>
                         Categoria {{ instructor.categories.join(', ') }} ·
                         {{ instructor.transmission === 'MANUAL' ? 'Manual' : 'Automático' }}
@@ -228,6 +231,7 @@ import { BRAZIL_UFS } from '../../shared/brazil-ufs';
                       <small>{{instructor.duration_minutes}} min por aula</small>
                       <a
                         [routerLink]="['/aluno/instrutores', instructor.id]"
+                        [queryParams]="{categoria: instructor.offer_category}"
                         (click)="$event.stopPropagation()"
                       >Ver perfil</a>
                       <button type="button" class="whatsapp" (click)="$event.stopPropagation(); contact(instructor)"><i class="pi pi-whatsapp"></i> Chamar no WhatsApp</button>
@@ -240,7 +244,7 @@ import { BRAZIL_UFS } from '../../shared/brazil-ufs';
         </div>
 
         <p class="map-credit">
-          © OpenStreetMap · coordenadas representam regiões sintéticas de atendimento.
+          © OpenStreetMap · coordenadas representam áreas aproximadas de atendimento.
         </p>
       </div>
     </section>
@@ -255,6 +259,10 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly changeDetector = inject(ChangeDetectorRef);
+  private readonly location = inject(StudentLocationService);
+  private readonly whatsapp = inject(WhatsappLinkService);
+  readonly production = environment.production;
+  readonly mobile = environment.mobile;
 
   filters: SearchFilters = {
     location: '',
@@ -311,6 +319,9 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
     if (routedLocation) {
       this.filters.location = routedLocation;
       this.search();
+    } else if (this.mobile) {
+      const position = this.location.takePending();
+      if (position) this.searchFromCoordinates(position.latitude, position.longitude);
     }
   }
 
@@ -397,13 +408,22 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
   }
   useMyLocation() {
     this.locationMessage='Localizando…';
-    if(!navigator.geolocation){this.locationMessage='Geolocalização não disponível. Use a busca manual.';return;}
-    navigator.geolocation.getCurrentPosition(position=>{
-      this.locationMessage='Buscando instrutores próximos à localização autorizada.';
-      this.searched=true;this.loading=true;this.map.focus(position.coords.latitude,position.coords.longitude,12);
-      this.api.search(position.coords.latitude,position.coords.longitude,this.filters).subscribe({next:response=>{this.items=response.results;this.loading=false;this.map.render(this.items,null);this.changeDetector.detectChanges()},error:()=>this.fail()});
-    },()=>{this.locationMessage='Localização não autorizada. Você pode continuar pela busca manual.';this.changeDetector.detectChanges();},
-    {enableHighAccuracy:false,timeout:10000,maximumAge:300000});
+    void this.location.currentPosition().then(position => {
+      this.searchFromCoordinates(position.latitude, position.longitude);
+    }).catch(() => {
+      this.locationMessage='Localização não autorizada. Você pode continuar pela busca manual.';
+      this.changeDetector.detectChanges();
+    });
+  }
+
+  private searchFromCoordinates(latitude:number, longitude:number) {
+    this.locationMessage='Buscando instrutores próximos à localização autorizada.';
+    this.searched=true;this.loading=true;this.error=false;this.scrollToResults();
+    this.map.focus(latitude,longitude,12);
+    this.api.search(latitude,longitude,this.filters).subscribe({
+      next:response=>{this.items=response.results;this.loading=false;this.map.render(this.items,null);this.changeDetector.detectChanges()},
+      error:()=>this.fail(),
+    });
   }
 
   select(item: SearchInstructor) {
@@ -414,7 +434,9 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
   contact(item: SearchInstructor) {
     this.contactError='';
     this.api.whatsapp(item.id,item.offer_category,'search-card').subscribe({
-      next: response => window.location.assign(response.destination_url),
+      next: response => { void this.whatsapp.open(response.destination_url).catch(() => {
+        this.contactError='Não foi possível abrir o WhatsApp agora.';this.changeDetector.detectChanges();
+      }); },
       error: () => {this.contactError='Não foi possível abrir o WhatsApp agora.';this.changeDetector.detectChanges();},
     });
   }
@@ -456,6 +478,8 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
       .map((part) => part[0])
       .join('');
   }
+
+  photoUrl(path:string):string { return publicMediaUrl(path) ?? ''; }
 
   private scrollToResults() {
     setTimeout(() => document.getElementById('resultado-busca')?.scrollIntoView({ behavior: 'smooth' }));

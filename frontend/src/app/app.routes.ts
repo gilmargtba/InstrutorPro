@@ -16,8 +16,9 @@ import { RealRegistrationComponent } from './features/account/real-registration.
 import { RealInstructorOnboardingComponent } from './features/account/real-instructor-onboarding.component';
 import { PasswordResetConfirmComponent, PasswordResetRequestComponent } from './features/account/password-reset.component';
 import { ProfessionalVerificationComponent } from './features/account/professional-verification.component';
+import { MobileStudentHomeComponent } from './features/home/mobile-student-home.component';
 
-export const routes: Routes = [
+const webRoutes: Routes = [
   { path:'', component:HomeComponent, title:'InstrutorProCNH — Sua jornada para a CNH' },
   { path:'entrar', component:LoginComponent, title:'Entrar — InstrutorProCNH' },
   { path:'recuperar-senha', component:PasswordResetRequestComponent, title:'Recuperar senha — InstrutorProCNH' },
@@ -57,3 +58,14 @@ export const routes: Routes = [
   ]),
   { path:'**', redirectTo:'' },
 ];
+
+export const mobileRoutes: Routes = [
+  { path: '', component: MobileStudentHomeComponent, title: 'Encontre instrutores — InstrutorProCNH' },
+  { path: 'aluno/instrutores', redirectTo: 'aluno/instrutores/mapa', pathMatch: 'full' },
+  { path: 'aluno/instrutores/mapa', component: InstructorMapComponent, title: 'Buscar instrutores — InstrutorProCNH' },
+  { path: 'aluno/instrutores/:id', component: PublicInstructorProfileComponent, title: 'Perfil do instrutor — InstrutorProCNH' },
+  { path: 'privacidade', component: PrivacyPolicyComponent, title: 'Política de Privacidade — InstrutorProCNH' },
+  { path: '**', redirectTo: '' },
+];
+
+export const routes: Routes = environment.mobile ? mobileRoutes : webRoutes;

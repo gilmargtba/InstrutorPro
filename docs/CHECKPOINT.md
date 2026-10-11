@@ -1,5 +1,25 @@
 # Checkpoint do Projeto
 
+## App mobile do aluno — 10/10/2026
+
+- Angular compartilhado com o web e projeto Capacitor 8 gerados para Android e
+  iOS, com configuração mobile separada e API HTTPS de produção. Navegação
+  nativa só contém descoberta anônima, perfil público e privacidade; localização
+  é pedida sob toque, com fallback de cidade/UF/CEP. WhatsApp usa evento do
+  backend e abre o app quando disponível, senão o endereço HTTPS validado.
+- O perfil respeita a categoria da oferta ativa selecionada na busca; categoria
+  sem oferta ativa não é exibida nesse caminho. Nenhum gate de verificação,
+  oferta, UF ou publicação foi flexibilizado. Não há pagamento no app.
+- Android debug compilado localmente em
+  `frontend/android/app/build/outputs/apk/debug/app-debug.apk`; iOS gerado e
+  sincronizado, pendente de compilação/assinatura em Xcode/macOS. O APK não foi
+  testado em aparelho porque o ADB não encontrou dispositivo conectado.
+- Testes: Angular 64 aprovados e build web/mobile de produção aprovado
+  (avisos preexistentes de orçamento). Backend em container com PostGIS/GDAL:
+  376 testes, Ruff e Django check aprovados. Smoke anônimo HTTPS de produção:
+  health OK, Brasília/DF, Goiânia/GO, São Paulo/SP, busca A em Goiatuba com
+  resultados publicados e perfil público acessível. Sem migration.
+
 ## Publicação com categorias declaradas sem oferta individual — 08/10/2026
 
 - A decisão do proprietário desvincula a publicação manual da exigência de
