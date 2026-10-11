@@ -1,5 +1,17 @@
 # Checkpoint do Projeto
 
+## Ícone do app mobile — 11/10/2026
+
+- O ícone padrão do Capacitor foi substituído pelo símbolo da marca
+  InstrutorProCNH, derivado do SVG já usado pelo site. Foram atualizados os
+  tamanhos Android normal, redondo e adaptativo e o ícone iOS 1024 × 1024.
+- O Android passou a `versionCode` 2 / `versionName` 1.0.1 para atualizar a
+  instalação de homologação anterior. `assembleDebug` passou; o novo APK fica
+  em `frontend/android/app/build/outputs/apk/debug/app-debug.apk`.
+- A alteração é apenas de identidade visual; não muda API, elegibilidade,
+  publicação, pagamentos nem requer novo deploy da VPS. A instalação em aparelho
+  e a compilação iOS em Xcode continuam pendentes de teste físico.
+
 ## App mobile do aluno — 10/10/2026
 
 - Angular compartilhado com o web e projeto Capacitor 8 gerados para Android e
