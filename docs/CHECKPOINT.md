@@ -2,6 +2,9 @@
 
 ## Cadastro de instrutor sem resposta ao clicar — 11/10/2026
 
+- O fluxo de conta e onboarding não exige prontidão regulatória para salvar
+  cidade/UF. Regressões isoladas confirmam AC e MT ponta a ponta e a gravação
+  de cidade/UF nas 27 UFs, sem geocodificação ou publicação automática.
 - Em produção, `MT` consta no catálogo e `REAL_INSTRUCTOR_REGISTRATION` está
   habilitado. A geocodificação pública de Cuiabá retorna `MT`; a prontidão
   `INSTRUCTOR_PUBLICATION` de MT segue `REVIEW_REQUIRED`, o que bloqueia
@@ -9,11 +12,12 @@
 - O botão “Criar conta” ficava desabilitado quando o formulário era inválido,
   sem indicar o motivo. Agora o clique lista os campos a corrigir e impede o
   POST até o formulário ser válido. Falhas ao carregar Termos ou Política
-  também são mostradas em vez de deixar o botão silenciosamente inativo.
-- Validação local: 68 testes Angular e build de produção passaram; permanecem
-  apenas os avisos preexistentes de orçamento de bundle/SCSS. Sem mudança de
-  backend, migration ou gate de elegibilidade. Push/deploy desta correção
-  pendentes de autorização específica.
+  também são mostradas em vez de deixar o botão silenciosamente inativo. O
+  botão “Concluir cadastro” do onboarding igualmente informa campos inválidos.
+- Validação local: 69 testes Angular, build de produção e 3 testes backend
+  focados passaram; permanecem apenas os avisos preexistentes de orçamento de
+  bundle/SCSS. Sem mudança de regra backend, migration ou gate de elegibilidade.
+  Push/deploy desta correção pendentes de autorização específica.
 
 ## Download do APK Android no site — 11/10/2026
 

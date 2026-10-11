@@ -15,6 +15,7 @@ from apps.marketplace.models import InstructorContactChannel, InstructorOffer, I
 from apps.marketplace.offer_services import save_owner_category_offers
 from apps.people.models import Person, RoleAssignment
 from apps.privacy.models import LegalAcceptanceRecord
+from apps.territories.models import FederativeUnit, RegulatoryReadiness
 
 PRODUCTION_REGISTRATION = {
     "SYNTHETIC_MARKETPLACE_ENABLED": False,
@@ -57,7 +58,8 @@ def national_territories(db):
 
 @pytest.mark.django_db
 @override_settings(**PRODUCTION_REGISTRATION)
-def test_instructor_production_e2e_without_regulatory_readiness_or_geocoder():
+@pytest.mark.parametrize(("city", "uf"), [("Rio Branco", "AC"), ("Cuiabá", "MT")])
+def test_instructor_production_e2e_without_regulatory_readiness_or_geocoder(city, uf):
     client = APIClient()
     response = client.post(
         "/api/v1/marketplace/accounts/register/", signup_payload(), format="json"
@@ -96,8 +98,8 @@ def test_instructor_production_e2e_without_regulatory_readiness_or_geocoder():
                 {"category": "A", "price_amount": "120.00", "duration_minutes": 60},
                 {"category": "C", "price_amount": "150.00", "duration_minutes": 90},
             ],
-            "instructor_city": "Rio Branco",
-            "instructor_uf": "AC",
+            "instructor_city": city,
+            "instructor_uf": uf,
             "service_radius_km": 20,
             "service_location_authorized": False,
             "vehicle": {
@@ -113,7 +115,7 @@ def test_instructor_production_e2e_without_regulatory_readiness_or_geocoder():
     assert onboarding.status_code == 200
     profile.refresh_from_db()
     area = InstructorServiceArea.objects.get(profile=profile)
-    assert (area.city, area.uf, area.public_service_location) == ("Rio Branco", "AC", None)
+    assert (area.city, area.uf, area.public_service_location) == (city, uf, None)
     assert not area.location_authorized
     assert InstructorContactChannel.objects.filter(instructor=profile).exists()
     assert list(
@@ -152,6 +154,32 @@ def test_instructor_production_e2e_without_regulatory_readiness_or_geocoder():
     assert not enabled("REAL_AUTOMATIC_PUBLICATION")
     assert not enabled("REAL_PAYMENTS")
     assert not enabled("REAL_PRO_BILLING")
+
+
+@pytest.mark.django_db
+@override_settings(**PRODUCTION_REGISTRATION)
+def test_instructor_city_and_uf_can_be_saved_in_all_27_states_without_publication():
+    owner = Account.objects.create_user(username="nationwide-owner", password="test-password-123")
+    profile = InstructorProfile.objects.create(
+        person=Person.objects.create(account=owner),
+        display_name="Instrutora Nacional",
+        is_demo=False,
+    )
+    client = APIClient()
+    client.force_authenticate(owner)
+    for uf in FederativeUnit.objects.order_by("code").values_list("code", flat=True):
+        city = f"Cidade de teste {uf}"
+        response = client.patch(
+            "/api/v1/account/me/",
+            {"instructor_city": city, "instructor_uf": uf},
+            format="json",
+        )
+        assert response.status_code == 200, uf
+        area = InstructorServiceArea.objects.get(profile=profile)
+        assert (area.city, area.uf) == (city, uf)
+        assert not area.location_authorized
+    assert FederativeUnit.objects.count() == 27
+    assert not RegulatoryReadiness.objects.exists()
 
 
 @pytest.mark.django_db

@@ -55,6 +55,16 @@ describe('RealInstructorOnboardingComponent',()=>{
     component.submit();
     const request=http.expectOne('/account/me/');expect(request.request.body.instructor_city).toBe('Rio Branco');expect(request.request.body.instructor_uf).toBe('AC');expect(request.request.body.service_latitude).toBeUndefined();expect(request.request.body.service_location_authorized).toBeFalse();request.flush({});
   });
+  it('shows validation feedback when Concluir cadastro is clicked with missing fields',async()=>{
+    const fixture=TestBed.createComponent(RealInstructorOnboardingComponent);const http=TestBed.inject(HttpTestingController);
+    http.expectOne('/account/me/').flush({instructor:{display_name:'Instrutora MT'}});
+    fixture.detectChanges();await fixture.whenStable();fixture.detectChanges();
+    const button=fixture.nativeElement.querySelector('button.button.primary') as HTMLButtonElement;
+    expect(button.disabled).toBeFalse();
+    button.click();fixture.detectChanges();
+    expect(fixture.componentInstance.message()).toContain('Revise os campos obrigatórios');
+    http.expectNone('/account/me/');
+  });
   it('shows the exact API validation reason instead of the generic message',()=>{
     const component=TestBed.createComponent(RealInstructorOnboardingComponent).componentInstance;
     const http=TestBed.inject(HttpTestingController);
