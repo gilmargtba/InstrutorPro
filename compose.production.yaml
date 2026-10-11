@@ -94,6 +94,7 @@ services:
     restart: unless-stopped
     volumes:
       - demo_static_data:/var/www/django-static:ro
+      - ./releases/android:/usr/share/nginx/html/downloads:ro
     depends_on:
       backend: {condition: service_healthy}
     networks: [public, private]

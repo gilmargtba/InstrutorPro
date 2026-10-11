@@ -55,6 +55,21 @@ commit aprovado → artefato imutável → staging
 - release note inclui commit, migrations, flags, risco, observação e rollback;
 - mudança financeira/privacidade crítica requer aprovadores correspondentes.
 
+### Distribuição direta do APK Android
+
+O site só oferece `/downloads/InstrutorProCNH-android.apk` quando existe um
+APK release no volume `releases/android` da VPS. O Nginx responde 404 para
+outros caminhos nessa pasta e não usa fallback SPA para download ausente. O
+APK é artefato local ignorado pelo Git; chave de assinatura e senha nunca vão
+ao repositório nem ao volume público. `scripts/build-android-release.ps1`
+gera/usa chave fora do repositório no perfil Windows, compila, assina e valida
+pacote, identificador e `debuggable=false`. Antes de publicar, preservar backup
+seguro e independente da chave e de sua senha, conferir SHA-256 e fazer teste
+de instalação em aparelho. O par chave/senha protegido por DPAPI só é recuperável
+no mesmo perfil Windows; perder a chave impede atualizações de instalações
+assinadas por ela. Não publicar APK debug como release. Uma instalação debug
+anterior exige desinstalação para trocar de assinatura.
+
 ## Health, logs e telemetria
 
 - liveness prova processo; readiness prova dependências estritamente necessárias sem causar carga;

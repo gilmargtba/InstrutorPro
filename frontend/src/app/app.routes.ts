@@ -17,9 +17,11 @@ import { RealInstructorOnboardingComponent } from './features/account/real-instr
 import { PasswordResetConfirmComponent, PasswordResetRequestComponent } from './features/account/password-reset.component';
 import { ProfessionalVerificationComponent } from './features/account/professional-verification.component';
 import { MobileStudentHomeComponent } from './features/home/mobile-student-home.component';
+import { AppDownloadComponent } from './features/home/app-download.component';
 
 const webRoutes: Routes = [
   { path:'', component:HomeComponent, title:'InstrutorProCNH — Sua jornada para a CNH' },
+  { path:'baixar-app', component:AppDownloadComponent, title:'Baixar app Android — InstrutorProCNH' },
   { path:'entrar', component:LoginComponent, title:'Entrar — InstrutorProCNH' },
   { path:'recuperar-senha', component:PasswordResetRequestComponent, title:'Recuperar senha — InstrutorProCNH' },
   { path:'redefinir-senha', component:PasswordResetConfirmComponent, title:'Redefinir senha — InstrutorProCNH' },

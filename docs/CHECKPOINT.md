@@ -1,5 +1,27 @@
 # Checkpoint do Projeto
 
+## Download do APK Android no site — 11/10/2026
+
+- A rota pública `/baixar-app` e o link na navegação apresentam o download
+  somente quando o APK assinado está servido em
+  `/downloads/InstrutorProCNH-android.apk`. Ausência do arquivo retorna 404,
+  sem fallback para o Angular nem anúncio enganoso de disponibilidade.
+- Foi criada chave de release fora do Git no perfil local do Windows, com senha
+  protegida por DPAPI. O APK 1.0.1 (`versionCode` 2) foi compilado, alinhado,
+  assinado e validado (`apksigner verify`; `debuggable=false`;
+  `applicationId=br.com.instrutorprocnh.app`). SHA-256:
+  `D23707AF7B05E2C2E9C164C14434785036DC713D7DD6B695C3E35F993B43900E`.
+- O APK fica em `releases/android/InstrutorProCNH-android.apk`, ignorado pelo
+  Git. Produção monta esse diretório somente leitura no Nginx. Publicação na
+  VPS e teste físico em aparelho ainda pendentes. É necessário guardar backup
+  seguro da chave e da senha antes de depender desta assinatura para updates.
+- O APK debug anterior usa `CN=Android Debug` e não deve ser distribuído pelo
+  site. Instalações debug existentes não recebem update por esta nova chave de
+  release; precisam ser removidas antes da instalação de release.
+- Testes Angular 66/66, build web e mobile de produção aprovados. Sem migration
+  ou alteração de API/backend. O orçamento de bundle e o estilo do mapa ainda
+  emitem avisos preexistentes.
+
 ## Ícone do app mobile — 11/10/2026
 
 - O ícone padrão do Capacitor foi substituído pelo símbolo da marca

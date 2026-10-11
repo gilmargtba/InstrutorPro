@@ -18,3 +18,4 @@ frontend/dist/
 *.log
 celerybeat-schedule*
 backups/
+releases/android/*.apk
