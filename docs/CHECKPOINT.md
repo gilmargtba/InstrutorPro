@@ -1382,3 +1382,18 @@ Marketplace (M3) somente após M2 aceito. Google é gate opcional M2.1. Pagament
 - isto não habilita a busca real nem comprova entrega de e-mail, MapTiler, foto real ou jornada humana
   na VPS. `REAL_MARKETPLACE_SEARCH` deve continuar desativado até aprovação territorial explícita e
   validação técnica de produção. Nenhum dado profissional fictício foi criado para liberar o fluxo.
+
+### Deploy — localização no cadastro e revisão visual opcional (11/10/2026)
+
+- `origin/main` e a VPS receberam `4ef5b31`, incluindo centralização do mapa de atendimento por
+  cidade/UF, validação de coordenadas no Brasil e revisão visual opcional de foto com CNH;
+- antes do deploy, backup validado do banco (`instrutorpro-20261012T014643Z.dump`) e dos documentos
+  privados (`private-documents-20261012T014643Z.tar`) em
+  `/home/gilmar/backups/instrutorpro/production/`;
+- `git pull --ff-only`, rebuild de backend/worker/scheduler/frontend e migrations
+  `discovery.0012` e `marketplace.0013` concluídos na VPS; Django check e migration check passaram;
+- backend, banco, Redis e ClamAV saudáveis; demais serviços ativos. Home, onboarding e readiness
+  responderam HTTP 200, e readiness confirmou banco disponível;
+- `REAL_VISUAL_IDENTITY_REVIEW_ENABLED` segue desativada por padrão na VPS. A implantação do código
+  não ativa coleta da foto com CNH nem comprova envio de e-mail; publicação continua sujeita aos
+  gates de elegibilidade existentes.
