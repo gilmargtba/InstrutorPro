@@ -1,5 +1,22 @@
 # Checkpoint do Projeto
 
+## Pré-validação e fila rápida de instrutores — 12/10/2026
+
+- Solicitação real enviada agenda triagem determinística e reprocessamento
+  periódico de pendências. O status privado `precheck_status` e as mensagens
+  `precheck_issues` orientam o instrutor; a fila Admin prioriza casos prontos
+  para conferência humana e mostra bloqueios sem expor CPF/documentos.
+- Upload oferece tipo explícito CNH. Scan antimalware, armazenamento privado,
+  acesso auditado e revisão documental individual permanecem. A triagem
+  verifica metadados e completude, não a autenticidade/legibilidade do conteúdo
+  nem identidade facial; a foto com CNH continua sob a flag de privacidade.
+- O administrador responsável pode assumir uma solicitação enviada e decidir
+  verificação, UF e publicação em uma transação no painel existente, somente
+  após confirmações humanas específicas. Falha em qualquer gate reverte tudo.
+  Ação de solicitar correção mantém o instrutor fora da busca até nova decisão.
+- Nenhum perfil ou UF real foi aprovado automaticamente e nenhum pagamento foi
+  alterado. Deploy e validação de produção devem ser registrados separadamente.
+
 ## Cadastro — mapa localizado por cidade/UF — 11/10/2026
 
 - Ao completar cidade e UF no onboarding real, a interface consulta a

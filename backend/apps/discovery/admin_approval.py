@@ -151,6 +151,7 @@ def approval_panel(profile, actor):
         "readiness": readiness,
         "regulatory_missing": regulatory_evidence_missing(readiness),
         "verification": verification,
+        "precheck": verification.get_precheck_status_display() if verification else "Não iniciada",
         "documents": documents,
         "pending_documents": pending_documents,
         "offers": offers,
@@ -171,8 +172,16 @@ def approval_panel(profile, actor):
         "can_review": can_review(actor),
         "can_decide_verification": bool(
             verification
-            and verification.status == ProfessionalVerificationRequest.Status.UNDER_REVIEW
-            and verification.reviewer_id == actor.id
+            and (
+                (
+                    verification.status == ProfessionalVerificationRequest.Status.UNDER_REVIEW
+                    and verification.reviewer_id == actor.id
+                )
+                or (
+                    verification.status == ProfessionalVerificationRequest.Status.SUBMITTED
+                    and verification.reviewer_id in (None, actor.id)
+                )
+            )
             and can_review(actor)
         ),
         "can_publish": can_manage_publication(actor),
@@ -215,7 +224,11 @@ def _verify(actor, panel, data, request_id):
     item = panel["verification"]
     if item is None:
         raise InvalidWorkflowTransition("Não existe solicitação profissional para analisar.")
-    if item.status != item.Status.UNDER_REVIEW:
+    if item.status == item.Status.SUBMITTED:
+        item, _ = start_verification_review(
+            actor=actor, verification_request=item, request_id=request_id
+        )
+    elif item.status != item.Status.UNDER_REVIEW:
         raise InvalidWorkflowTransition("A solicitação não está pronta para análise.")
     record_review_and_approve(
         actor=actor,
@@ -320,7 +333,7 @@ def execute_approval_action(*, actor, profile, data, request_id=None):
         start_verification_review(
             actor=actor, verification_request=panel["verification"], request_id=request_id
         )
-    elif operation == "reject_verification":
+    elif operation in {"reject_verification", "request_correction"}:
         if panel["verification"] is None:
             raise InvalidWorkflowTransition("Solicitação de verificação inexistente.")
         reject_verification_request(

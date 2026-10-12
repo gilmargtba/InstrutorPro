@@ -370,6 +370,7 @@ class DocumentRequirement(models.Model):
 
 class InstructorDocument(models.Model):
     class DocumentType(models.TextChoices):
+        DRIVER_LICENSE = "DRIVER_LICENSE", "CNH"
         PROFESSIONAL_CREDENTIAL = "PROFESSIONAL_CREDENTIAL", "Credencial profissional"
         PROFESSIONAL_CERTIFICATE = "PROFESSIONAL_CERTIFICATE", "Certificado/credenciamento"
         OTHER_PROFESSIONAL = "OTHER_PROFESSIONAL", "Outro documento profissional"
@@ -481,6 +482,7 @@ class InstructorDocument(models.Model):
                 condition=Q(requirement__isnull=False)
                 | Q(
                     document_type__in=[
+                        "DRIVER_LICENSE",
                         "PROFESSIONAL_CREDENTIAL",
                         "PROFESSIONAL_CERTIFICATE",
                         "OTHER_PROFESSIONAL",

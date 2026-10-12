@@ -2,6 +2,18 @@
 
 Este documento é a fonte oficial de decisões consolidadas, contradições resolvidas e questões em aberto. Uma recomendação marcada como aberta não é uma decisão aceita.
 
+### Decisão operacional de 12/10/2026 — pré-validação determinística
+
+A solicitação real enviada recebe uma triagem assíncrona de completude cadastral,
+CPF privado, CNH declarada, credencial profissional, arquivo/scan, categorias,
+ofertas, área autorizada e contato. O resultado é apenas orientativo e contém
+códigos de pendência, sem dados pessoais; não reconhece rosto, autenticidade ou
+legibilidade do conteúdo e não decide aptidão. A CNH precisa ser identificada
+explicitamente no upload; anexos antigos genéricos não são presumidos CNH.
+Revisor autorizado pode solicitar correção ou, após conferir as fontes e cada
+documento, tomar decisões humanas de verificação, UF e publicação no painel
+único. A busca só inclui perfis que já satisfazem todos os gates existentes.
+
 ### Decisão do proprietário de 11/10/2026 — foto com CNH para revisão visual
 
 O envio voluntário de uma foto do rosto segurando a CNH pode integrar a mesma

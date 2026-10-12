@@ -38,6 +38,7 @@
   {% endif %}
   {% if approval_panel.verification %}
     <h3>Verificação profissional</h3>
+    <p>Pré-validação: {{ approval_panel.precheck }}. Resultado auxiliar; documentos, identidade e elegibilidade exigem decisão humana.</p>
     <p>Solicitação: {{ approval_panel.verification.get_status_display }} · Revisor: {{ approval_panel.verification.reviewer|default:"não atribuído" }}</p>
     {% if approval_panel.documents %}<ul>{% for document in approval_panel.documents %}<li>
       {{ document.document_label }} — {{ document.get_status_display }} — {{ document.get_scan_status_display }}
@@ -59,7 +60,7 @@
     {% if approval_panel.verification.status == 'SUBMITTED' and approval_panel.can_review %}
       <p><button type="submit" name="operation" value="start_review">Assumir análise nesta tela</button></p>
     {% endif %}
-    {% if approval_panel.verification.status == 'UNDER_REVIEW' and approval_panel.can_decide_verification %}
+    {% if approval_panel.can_decide_verification %}
       <h3>Decisão profissional</h3>
       {% if approval_panel.pending_documents %}<p>Abra cada documento antes de marcar:</p>
         {% for document in approval_panel.pending_documents %}<label style="display:block"><input type="checkbox" name="reviewed_document_ids" value="{{ document.pk }}"> Conferi {{ document.document_label }} — {{ document.original_name }}</label>{% endfor %}
@@ -70,6 +71,7 @@
       <label><input type="checkbox" name="confirm_verification"> Conferi pessoalmente a fonte e os documentos aplicáveis</label>
       <button type="submit" name="operation" value="approve_verification">APROVAR VERIFICAÇÃO</button><br>
       <label>Motivo da rejeição <select name="rejection_reason_code"><option value="">Selecione</option><option value="REQUIREMENT_MISSING">Requisito ausente</option><option value="DOCUMENT_UNREADABLE">Documento ilegível</option><option value="DOCUMENT_MISMATCH">Documento divergente</option><option value="OFFICIAL_AUTHORIZATION_NOT_CONFIRMED">Autorização não confirmada</option><option value="INFORMATION_INCONSISTENT">Informações inconsistentes</option></select></label>
+      <button type="submit" name="operation" value="request_correction">SOLICITAR CORREÇÃO</button>
       <button type="submit" name="operation" value="reject_verification">REJEITAR VERIFICAÇÃO</button>
     {% endif %}
     {% if approval_panel.can_offer %}
@@ -88,6 +90,7 @@
       <label><input type="checkbox" name="confirm_publish"> Confirmo a decisão humana de publicar este instrutor real</label><br>
       <button type="submit" name="operation" value="publish">PUBLICAR AGORA</button>
       <button class="default" type="submit" name="operation" value="approve_publish">APROVAR E PUBLICAR INSTRUTOR</button>
+      {% if approval_panel.verification.status == 'SUBMITTED' and approval_panel.can_decide_verification %}<button class="default" type="submit" name="operation" value="approve_publish">ANALISAR E PUBLICAR</button>{% endif %}
       <p>O botão combinado só executa as revisões da UF e da verificação se as confirmações específicas acima estiverem marcadas; tudo é revertido se qualquer gate falhar.</p>
     {% endif %}
   </form>

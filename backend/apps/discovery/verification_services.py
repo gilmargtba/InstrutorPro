@@ -269,11 +269,25 @@ def submit_verification_request(*, actor, profile, request_id=None):
             profile.save(update_fields=["verification_status"])
     current.status = ProfessionalVerificationRequest.Status.SUBMITTED
     current.submitted_at = timezone.now()
+    current.precheck_status = ProfessionalVerificationRequest.PrecheckStatus.IN_PROGRESS
+    current.precheck_issues = []
+    current.precheck_checked_at = None
     with allow_critical_state_mutation():
         current.save(
-            update_fields=["status", "submitted_at", "requirements_snapshot", "updated_at"]
+            update_fields=[
+                "status",
+                "submitted_at",
+                "requirements_snapshot",
+                "precheck_status",
+                "precheck_issues",
+                "precheck_checked_at",
+                "updated_at",
+            ]
         )
     _audit(actor, "submitted", current, "OWNER_SUBMITTED", request_id)
+    from .instructor_precheck import queue_instructor_precheck
+
+    transaction.on_commit(lambda: queue_instructor_precheck(current.pk))
     return current, True
 
 

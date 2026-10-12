@@ -20,7 +20,7 @@ gera verificação, publicação ou autorização oficial automaticamente.
 upload voluntário quando o gate técnico está ativo.
 
 `POST /api/v1/instructor/verification/documents/` recebe multipart `file` e
-`document_type` (`PROFESSIONAL_CREDENTIAL`, `PROFESSIONAL_CERTIFICATE`, `OTHER_PROFESSIONAL`),
+`document_type` (`DRIVER_LICENSE`, `PROFESSIONAL_CREDENTIAL`, `PROFESSIONAL_CERTIFICATE`, `OTHER_PROFESSIONAL`),
 ou `requirement_id` de regra territorial aplicável. Não informar ambos.
 UUID/tipo inválidos recebem 400. Documento retorna tipo/label, nome original seguro,
 data, `requirement_id` opcional e resultado antimalware. Não retorna URL pública.

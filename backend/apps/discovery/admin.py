@@ -4,6 +4,7 @@ from django import forms
 from django.conf import settings
 from django.contrib import admin, messages
 from django.core.exceptions import PermissionDenied, ValidationError
+from django.db.models import Case, IntegerField, Value, When
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.middleware.csrf import get_token
 from django.template.response import TemplateResponse
@@ -15,6 +16,7 @@ from apps.marketplace.models import InstructorDocument
 from apps.people.identifiers import decrypt_identifier, mask_cpf
 
 from .admin_approval import approval_panel, execute_approval_action
+from .instructor_precheck import PRECHECK_MESSAGES
 from .models import (
     InstructorProfile,
     InstructorServiceArea,
@@ -436,6 +438,7 @@ class ProfessionalVerificationRequestAdmin(admin.ModelAdmin):
         "service_uf",
         "service_city",
         "submitted_date",
+        "precheck_result",
         "status_badge",
         "reviewer",
         "triage_status",
@@ -443,6 +446,7 @@ class ProfessionalVerificationRequestAdmin(admin.ModelAdmin):
     )
     list_filter = (
         "status",
+        "precheck_status",
         "profile__service_area__uf",
         "profile__service_area__city",
         "submitted_at",
@@ -469,6 +473,9 @@ class ProfessionalVerificationRequestAdmin(admin.ModelAdmin):
         "workflow_actions",
         "public_message",
         "review_checklist_display",
+        "precheck_status",
+        "precheck_result_detail",
+        "precheck_checked_at",
         "approval_notice_status",
         "approval_notice_attempts",
         "approval_notice_sent_at",
@@ -493,6 +500,10 @@ class ProfessionalVerificationRequestAdmin(admin.ModelAdmin):
                     "updated_at",
                 )
             },
+        ),
+        (
+            "Pré-validação automática (não é aprovação)",
+            {"fields": ("precheck_status", "precheck_result_detail", "precheck_checked_at")},
         ),
         (
             "Análise profissional",
@@ -528,6 +539,39 @@ class ProfessionalVerificationRequestAdmin(admin.ModelAdmin):
             .get_queryset(request)
             .select_related("profile__person__account", "profile__service_area", "reviewer")
             .prefetch_related("documents")
+            .annotate(
+                precheck_priority=Case(
+                    When(precheck_status="READY_FOR_HUMAN_REVIEW", then=Value(0)),
+                    When(precheck_status="IN_PROGRESS", then=Value(1)),
+                    When(precheck_status="NEEDS_CORRECTION", then=Value(2)),
+                    default=Value(3),
+                    output_field=IntegerField(),
+                )
+            )
+            .order_by("precheck_priority", "submitted_at", "created_at")
+        )
+
+    def changelist_view(self, request, extra_context=None):
+        return super().changelist_view(
+            request,
+            extra_context={**(extra_context or {}), "title": "Validação rápida de instrutores"},
+        )
+
+    @admin.display(description="Pré-validação", ordering="precheck_priority")
+    def precheck_result(self, obj):
+        return obj.get_precheck_status_display()
+
+    @admin.display(description="Orientações da pré-validação")
+    def precheck_result_detail(self, obj):
+        if not obj:
+            return ""
+        messages = [
+            PRECHECK_MESSAGES[code] for code in obj.precheck_issues if code in PRECHECK_MESSAGES
+        ]
+        return (
+            "; ".join(messages)
+            if messages
+            else "Sem pendências estruturais; conferir documentos e fonte manualmente."
         )
 
     def _can_edit_review_metadata(self, request, obj):

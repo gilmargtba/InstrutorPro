@@ -122,6 +122,8 @@ def _verification_profile(request):
 def _verification_payload(profile):
     item = profile.verification_requests.order_by("-created_at").first()
     documents_enabled = upload_available()
+    from .instructor_precheck import PRECHECK_MESSAGES
+
     return {
         "status": item.status if item else ProfessionalVerificationRequest.Status.DRAFT,
         "cpf_masked": mask_cpf(profile.person.cpf_last2),
@@ -129,6 +131,12 @@ def _verification_payload(profile):
         "review_started_at": item.review_started_at if item else None,
         "decided_at": item.decided_at if item else None,
         "message": item.public_message if item else "",
+        "precheck_status": item.precheck_status if item else "NOT_STARTED",
+        "precheck_issues": [
+            PRECHECK_MESSAGES[code]
+            for code in (item.precheck_issues if item else [])
+            if code in PRECHECK_MESSAGES
+        ],
         "can_edit": not item
         or item.status == ProfessionalVerificationRequest.Status.DRAFT
         or (

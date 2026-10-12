@@ -231,6 +231,12 @@ class ProfessionalVerificationRequest(ProtectedStateModel):
         FAILED = "FAILED", "Falhou"
         SKIPPED = "SKIPPED", "Cancelado"
 
+    class PrecheckStatus(models.TextChoices):
+        NOT_STARTED = "NOT_STARTED", "Ainda não iniciada"
+        IN_PROGRESS = "IN_PROGRESS", "Em pré-validação"
+        READY_FOR_HUMAN_REVIEW = "READY_FOR_HUMAN_REVIEW", "Pronta para análise humana"
+        NEEDS_CORRECTION = "NEEDS_CORRECTION", "Correção necessária"
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     profile = models.ForeignKey(
         InstructorProfile, on_delete=models.PROTECT, related_name="verification_requests"
@@ -269,6 +275,14 @@ class ProfessionalVerificationRequest(ProtectedStateModel):
     approval_notice_attempts = models.PositiveSmallIntegerField(default=0)
     approval_notice_attempted_at = models.DateTimeField(null=True, blank=True)
     approval_notice_sent_at = models.DateTimeField(null=True, blank=True)
+    precheck_status = models.CharField(
+        max_length=24,
+        choices=PrecheckStatus.choices,
+        default=PrecheckStatus.NOT_STARTED,
+        db_index=True,
+    )
+    precheck_issues = models.JSONField(default=list, blank=True)
+    precheck_checked_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     requirements_snapshot = models.JSONField(default=list, blank=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -115,6 +115,10 @@ CELERY_RESULT_BACKEND = REDIS_URL
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 300
 CELERY_BEAT_SCHEDULE = {
+    "instructor-precheck-retry-five-minutes": {
+        "task": "discovery.retry_instructor_prechecks",
+        "schedule": 300.0,
+    },
     "verification-approval-notice-retry-five-minutes": {
         "task": "discovery.retry_verification_approval_notices",
         "schedule": 300.0,

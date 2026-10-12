@@ -78,6 +78,28 @@ def test_generic_upload_with_zero_approved_requirements_in_every_uf(tmp_path, uf
 
 
 @pytest.mark.django_db
+@override_settings(**ENABLED)
+def test_cnh_document_type_upload_is_private_and_requires_human_review(tmp_path):
+    with override_settings(MEDIA_ROOT=tmp_path):
+        owner, instructor = profile("cnh-owner")
+        save_verification_draft(actor=owner, profile=instructor, cpf="52998224725")
+        client = APIClient()
+        client.force_authenticate(owner)
+        with patch("apps.marketplace.real_documents.scan_with_clamd", return_value="CLEAN"):
+            response = client.post(
+                "/api/v1/instructor/verification/documents/",
+                {"document_type": "DRIVER_LICENSE", "file": sample_file()},
+                format="multipart",
+            )
+        assert response.status_code == 201
+        document = InstructorDocument.objects.get(instructor=instructor)
+        assert document.document_type == InstructorDocument.DocumentType.DRIVER_LICENSE
+        assert document.scan_status == InstructorDocument.ScanStatus.CLEAN
+        assert document.status == InstructorDocument.Status.PENDING
+        assert "file" not in response.json()["documents"][0]
+
+
+@pytest.mark.django_db
 @pytest.mark.parametrize("scan_result", ["PENDING", "BLOCKED"])
 @override_settings(**ENABLED)
 def test_generic_nonclean_file_cannot_accompany_submission(tmp_path, scan_result):

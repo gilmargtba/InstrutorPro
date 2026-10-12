@@ -36,7 +36,7 @@ SETTINGS = {
 }
 
 
-def scenario(*, evidence=True, offer=True):
+def scenario(*, evidence=True, offer=True, start_review=True):
     owner = Account.objects.create_user(
         username="owner-one-screen", email="owner@example.invalid", password="test-password-123"
     )
@@ -106,7 +106,8 @@ def scenario(*, evidence=True, offer=True):
     item = ProfessionalVerificationRequest.objects.create(
         profile=profile, status=ProfessionalVerificationRequest.Status.SUBMITTED
     )
-    start_verification_review(actor=admin, verification_request=item)
+    if start_review:
+        start_verification_review(actor=admin, verification_request=item)
     document = InstructorDocument.objects.create(
         instructor=profile,
         verification_request=item,
@@ -139,6 +140,39 @@ def combined_data(document):
         "confirm_publish": "on",
         "publication_reason": "Publicação humana após elegibilidade",
     }
+
+
+@pytest.mark.django_db
+@override_settings(**SETTINGS)
+def test_submitted_request_can_be_reviewed_and_published_in_one_human_action():
+    web, change, action, profile, readiness, item, document = scenario(start_review=False)
+    page = web.get(change)
+    assert page.status_code == 200
+    assert "ANALISAR E PUBLICAR" in page.content.decode()
+    response = web.post(action, combined_data(document), follow=True)
+    assert response.status_code == 200
+    for obj in (profile, readiness, item, document):
+        obj.refresh_from_db()
+    assert item.status == item.Status.VERIFIED
+    assert item.reviewer.username == "gilmar"
+    assert readiness.status == readiness.Status.APPROVED
+    assert document.status == document.Status.APPROVED
+    assert profile.publication_status == profile.PublicationStatus.APPROVED
+
+
+@pytest.mark.django_db
+@override_settings(**SETTINGS)
+def test_submitted_request_review_rolls_back_when_offer_is_missing():
+    web, _, action, profile, readiness, item, document = scenario(start_review=False, offer=False)
+    response = web.post(action, combined_data(document), follow=True)
+    assert response.status_code == 200
+    for obj in (profile, readiness, item, document):
+        obj.refresh_from_db()
+    assert item.status == item.Status.SUBMITTED
+    assert item.reviewer_id is None
+    assert readiness.status == readiness.Status.REVIEW_REQUIRED
+    assert document.status == document.Status.PENDING
+    assert profile.publication_status == profile.PublicationStatus.UNPUBLISHED
 
 
 @pytest.mark.django_db

@@ -10,6 +10,8 @@ type VerificationState = {
   review_started_at: string|null;
   decided_at: string|null;
   message: string;
+  precheck_status?: 'NOT_STARTED'|'IN_PROGRESS'|'READY_FOR_HUMAN_REVIEW'|'NEEDS_CORRECTION';
+  precheck_issues?: string[];
   can_edit: boolean;
   is_supplement?: boolean;
   can_start_supplement?: boolean;
@@ -34,6 +36,14 @@ type VerificationState = {
         }
         @if(current.cpf_masked){<p>CPF informado: <strong>{{current.cpf_masked}}</strong></p>}
         @if(current.message){<p>{{current.message}}</p>}
+        @if(current.status === 'SUBMITTED' || current.status === 'UNDER_REVIEW'){
+          <h3>Situação da pré-validação</h3>
+          <p role="status">{{precheckLabel(current.precheck_status)}}</p>
+          @if(current.precheck_issues?.length){<ul>@for(issue of current.precheck_issues; track issue){<li>{{issue}}</li>}</ul>}
+          @if(current.precheck_status === 'NEEDS_CORRECTION'){<p>Se a solicitação já foi enviada, aguarde a devolução pelo revisor antes de reenviar os documentos corrigidos.</p>}
+          <p>Esta checagem não aprova a verificação nem publica o perfil. A legibilidade e a validade dos documentos são conferidas por uma pessoa.</p>
+          <button type="button" (click)="load()">Atualizar situação</button>
+        }
         @if(current.can_edit){
           <form (ngSubmit)="submit()">
             @if(current.is_supplement){
@@ -51,7 +61,7 @@ type VerificationState = {
               <h3>3. Documentos profissionais</h3>
               <p>Envie documentos profissionais que ajudem na análise da sua solicitação de verificação.</p>
               <p>Os anexos voluntários não são uma lista de exigências oficiais e não aprovam o cadastro automaticamente.</p>
-              <p>Para credenciamento, selecione “Certificado/credenciamento”. Para CNH, selecione “Outro documento profissional”.</p>
+              <p>Para credenciamento, selecione “Certificado/credenciamento”. Para a CNH, selecione “CNH”.</p>
               @if(current.visual_review_available){
                 <h4>Foto com a CNH para conferência visual (opcional)</h4>
                 <p>Se desejar, use a câmera do celular ou computador, ou escolha uma foto JPEG/PNG de até 5 MB mostrando seu rosto e a CNH. O arquivo fica privado; um revisor autorizado fará somente a comparação visual. Não há reconhecimento facial automático, e a foto não aprova o credenciamento nem publica seu perfil.</p>
@@ -122,6 +132,7 @@ export class ProfessionalVerificationComponent {
   constructor(){this.load()}
   load(){this.http.get<VerificationState>('/instructor/verification/').subscribe({next:value=>this.state.set(value),error:()=>this.error.set('Não foi possível carregar a verificação profissional.')})}
   label(value:string){return value==='SUBMITTED'?'Solicitação enviada':value==='UNDER_REVIEW'?'Em análise':value==='VERIFIED'?'Verificação concluída':value==='REJECTED'?'Solicitação não concluída':'Nova solicitação'}
+  precheckLabel(value?:string){return value==='IN_PROGRESS'?'Em pré-validação':value==='READY_FOR_HUMAN_REVIEW'?'Pronta para análise humana':value==='NEEDS_CORRECTION'?'Correção necessária':'Aguardando pré-validação'}
   formatCpf(){const digits=this.cpf.replace(/\D/g,'').slice(0,11);this.cpf=digits.replace(/^(\d{3})(\d)/,'$1.$2').replace(/^(\d{3})\.(\d{3})(\d)/,'$1.$2.$3').replace(/(\d{3})(\d{1,2})$/,'$1-$2')}
   private validCpf(){const d=this.cpf.replace(/\D/g,'');if(d.length!==11||/^([0-9])\1+$/.test(d))return false;for(let size=9;size<=10;size++){let total=0;for(let i=0;i<size;i++)total+=Number(d[i])*(size+1-i);let check=(total*10)%11;if(check===10)check=0;if(check!==Number(d[size]))return false}return true}
   documentFor(requirementId:string){return this.state()?.documents?.find(document=>document.requirement_id===requirementId)}
