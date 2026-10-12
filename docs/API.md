@@ -273,6 +273,12 @@ Aceite obrigatório registra contrato/termo exato em `LegalAcceptanceRecord`; co
 - `PATCH /api/v1/account/me/` permite ao titular real completar dados não documentais, WhatsApp,
   primeira oferta e veículo quando as capabilities correspondentes estiverem ativas; campos de
   papel, verificação e publicação são rejeitados por mass assignment;
+- quando latitude/longitude públicas são informadas, a API exige que o ponto
+  aproximado esteja dentro da malha da UF declarada no Brasil. Ponto fora da UF
+  retorna erro de validação; cidade/UF podem ser salvas sem coordenada se o
+  serviço de geocodificação estiver indisponível. Ao trocar cidade/UF, o ponto
+  público anterior é removido e a autorização anterior é revogada; a nova área
+  exige autorização explícita;
 - a verificação administrativa real não recebe arquivo: registra operador, autoridade, método e
   referência mínima permitida. A publicação permanece uma decisão manual separada e auditada.
 - `POST /api/v1/marketplace/password-reset/request/` responde genericamente para impedir enumeração

@@ -27,9 +27,11 @@ from apps.discovery.models import InstructorProfile, InstructorServiceArea
 from apps.discovery.services import (
     grant_service_location_authorization,
     invalidate_after_owner_sensitive_edit,
+    revoke_service_location_authorization,
 )
 from apps.people.models import Person, RoleAssignment
 from apps.privacy.models import LegalAcceptanceRecord, LegalDocument, PrivacyNotice
+from apps.territories.geo_boundaries import public_point_in_uf
 from apps.territories.models import FederativeUnit
 
 from .capabilities import enabled
@@ -870,12 +872,42 @@ class OwnAccountView(APIView):
                         round(data["service_latitude"], 2),
                         srid=4326,
                     )
+                    declared_uf = data.get("instructor_uf", area.uf if area else "")
+                    if not public_point_in_uf(latitude=point.y, longitude=point.x, uf=declared_uf):
+                        raise serializers.ValidationError(
+                            {
+                                "service_area": (
+                                    "Localidade não encontrada nesta UF do Brasil. "
+                                    "Busque sua cidade e marque um ponto dentro dela."
+                                )
+                            }
+                        )
                 if area:
-                    area.city = data.get("instructor_city", area.city)
-                    area.uf = data.get("instructor_uf", area.uf).upper()
+                    new_city = data.get("instructor_city", area.city)
+                    new_uf = data.get("instructor_uf", area.uf).upper()
+                    city_or_uf_changed = new_city != area.city or new_uf != area.uf
+                    location_changed = city_or_uf_changed or (
+                        point is not None and point != area.public_service_location
+                    )
+                    if area.location_authorized and (
+                        location_changed or data.get("service_location_authorized") is False
+                    ):
+                        revoke_service_location_authorization(
+                            actor=request.user,
+                            service_area=area,
+                            reason="OWNER_PUBLIC_SERVICE_AREA_CHANGED",
+                            request_id=getattr(request, "request_id", None),
+                        )
+                        area.location_authorized = False
+                    if location_changed:
+                        sensitive.add("service_area")
+                    area.city = new_city
+                    area.uf = new_uf
                     area.radius_km = data.get("service_radius_km", area.radius_km)
                     if point:
                         area.public_service_location = point
+                    elif city_or_uf_changed:
+                        area.public_service_location = None
                     area.save(update_fields=["city", "uf", "radius_km", "public_service_location"])
                 else:
                     area = InstructorServiceArea.objects.create(

@@ -1,6 +1,6 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { TestBed } from '@angular/core/testing';
+import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { RealInstructorOnboardingComponent } from './real-instructor-onboarding.component';
 
@@ -22,6 +22,34 @@ describe('RealInstructorOnboardingComponent',()=>{
     const request=http.expectOne(req=>req.url==='/geocoding/search/'&&req.params.get('q')==='Goiatuba, GO, Brasil');
     request.flush({provider:'maptiler',results:[{id:'municipality.1',label:'Goiatuba, Goiás, Brasil',latitude:-18.0125,longitude:-49.3547,place_type:'municipality',city:'Goiatuba',uf:'GO',bbox:null}]});
     expect(component.form.service_latitude).toBe(-18.01);expect(component.form.service_longitude).toBe(-49.35);expect(component.locationMessage()).toContain('Goiatuba');
+  });
+  it('automatically locates the map after city and UF are completed',fakeAsync(()=>{
+    const component=TestBed.createComponent(RealInstructorOnboardingComponent).componentInstance;
+    const http=TestBed.inject(HttpTestingController);
+    http.expectOne('/account/me/').flush({instructor:{display_name:'Instrutora Piloto'}});
+    component.form.instructor_city='Goiatuba';component.form.instructor_uf='GO';component.onLocationFieldsChanged();
+    tick(450);
+    http.expectOne(req=>req.url==='/geocoding/search/'&&req.params.get('q')==='Goiatuba, GO, Brasil').flush({provider:'maptiler',results:[{id:'municipality.1',label:'Goiatuba, Goiás, Brasil',latitude:-18.0125,longitude:-49.3547,place_type:'municipality',city:'Goiatuba',uf:'GO',bbox:null}]});
+    expect(component.form.service_latitude).toBe(-18.01);expect(component.form.service_longitude).toBe(-49.35);
+  }));
+  it('ignores a stale city result after the UF changes',()=>{
+    const component=TestBed.createComponent(RealInstructorOnboardingComponent).componentInstance;
+    const http=TestBed.inject(HttpTestingController);
+    http.expectOne('/account/me/').flush({instructor:{display_name:'Instrutora Piloto'}});
+    component.form.instructor_city='Goiatuba';component.form.instructor_uf='GO';component.findPublicLocation();
+    const oldResult=http.expectOne(req=>req.url==='/geocoding/search/');
+    component.form.instructor_uf='MT';component.clearPublicLocation();
+    oldResult.flush({provider:'maptiler',results:[{id:'municipality.1',label:'Goiatuba, Goiás, Brasil',latitude:-18.0125,longitude:-49.3547,place_type:'municipality',city:'Goiatuba',uf:'GO',bbox:null}]});
+    expect(component.form.service_latitude).toBeNull();
+  });
+  it('rejects a map point outside Brazil before changing the public coordinates',()=>{
+    const component=TestBed.createComponent(RealInstructorOnboardingComponent).componentInstance;
+    const http=TestBed.inject(HttpTestingController);
+    http.expectOne('/account/me/').flush({instructor:{display_name:'Instrutora Piloto'}});
+    component.form.instructor_city='Goiatuba';component.form.instructor_uf='GO';component.findPublicLocation();
+    http.expectOne(req=>req.url==='/geocoding/search/').flush({provider:'maptiler',results:[{id:'municipality.1',label:'Goiatuba, Goiás, Brasil',latitude:-18.0125,longitude:-49.3547,place_type:'municipality',city:'Goiatuba',uf:'GO',bbox:null}]});
+    (component as any).selectMapPoint({lat:40,lng:-49,distanceTo:()=>0});
+    expect(component.form.service_latitude).toBe(-18.01);expect(component.locationMessage()).toContain('não encontrada no Brasil');
   });
   it('searches an optional public neighborhood or landmark without storing the query',()=>{
     const component=TestBed.createComponent(RealInstructorOnboardingComponent).componentInstance;

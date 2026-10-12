@@ -436,12 +436,13 @@ def grant_service_location_authorization(
 
 @transaction.atomic
 def revoke_service_location_authorization(*, actor, service_area, reason, request_id=None):
-    _manager(actor)
     a = (
         InstructorServiceArea.objects.select_for_update()
-        .select_related("profile")
+        .select_related("profile__person__account")
         .get(pk=service_area.pk)
     )
+    if actor != a.profile.person.account and not can_manage_publication(actor):
+        raise WorkflowPermissionDenied("Ator não autorizado para revogar a localização")
     current = (
         a.authorization_history.filter(revoked_at__isnull=True).order_by("-authorized_at").first()
     )

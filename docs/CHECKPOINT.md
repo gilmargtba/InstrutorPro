@@ -1,5 +1,21 @@
 # Checkpoint do Projeto
 
+## Cadastro — mapa localizado por cidade/UF — 11/10/2026
+
+- Ao completar cidade e UF no onboarding real, a interface consulta a
+  geocodificação existente e centraliza o mapa automaticamente na localidade;
+  o instrutor pode ajustar o ponto público com um clique. Enquanto não há
+  localidade válida, o mapa nacional fica coberto por orientação de preenchimento.
+- Respostas antigas de busca não sobrescrevem cidade/UF recém-alteradas. O
+  backend recusa latitude/longitude fora da malha da UF brasileira informada,
+  usando cópia da malha IBGE já utilizada no frontend. Cidade/UF ainda podem
+  ser salvas sem coordenadas quando a geocodificação falhar. Mudança de cidade,
+  UF ou ponto revoga a autorização anterior e, se necessário, remove o ponto
+  antigo; novo consentimento e revisão são exigidos. Não há publicação automática.
+- Validação local: 396 testes backend, 74 frontend, build de produção, Ruff,
+  Django check e migrations check passaram. Nenhum push/deploy foi solicitado
+  nesta entrega.
+
 ## Foto com CNH na revisão documental — 11/10/2026
 
 - O instrutor pode optar por capturar/selecionar JPEG ou PNG do rosto com a CNH

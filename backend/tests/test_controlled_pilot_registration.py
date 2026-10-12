@@ -24,6 +24,7 @@ from apps.marketplace.models import (
 )
 from apps.people.models import Person, RoleAssignment
 from apps.privacy.models import LegalAcceptanceRecord
+from apps.territories.geo_boundaries import public_point_in_uf
 from apps.territories.models import FederativeUnit, RegulatoryReadiness
 from apps.territories.policies import (
     INSTRUCTOR_PROVIDER_TYPE,
@@ -333,6 +334,99 @@ def test_real_instructor_onboarding_rejects_unknown_uf():
         format="json",
     )
     assert response.status_code == 400
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    ("latitude", "longitude", "uf"),
+    [
+        (0, 0, "GO"),
+        (-40, -50, "RS"),
+        (-16.6869, -49.2648, "SP"),
+    ],
+)
+@override_settings(**PILOT)
+def test_real_instructor_onboarding_rejects_point_outside_declared_brazilian_uf(
+    latitude, longitude, uf
+):
+    client = APIClient()
+    assert (
+        client.post(
+            "/api/v1/marketplace/accounts/register/", payload("INSTRUCTOR"), format="json"
+        ).status_code
+        == 201
+    )
+
+    response = client.patch(
+        "/api/v1/account/me/",
+        {
+            "instructor_city": "Cidade informada",
+            "instructor_uf": uf,
+            "service_latitude": latitude,
+            "service_longitude": longitude,
+            "service_location_authorized": True,
+        },
+        format="json",
+    )
+
+    assert response.status_code == 400
+    assert "Localidade não encontrada" in str(response.json())
+    assert not InstructorServiceArea.objects.filter(
+        profile__person__account__username="real-instructor"
+    ).exists()
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    ("latitude", "longitude", "uf"),
+    [
+        (-15.7939, -47.8828, "DF"),
+        (-16.6869, -49.2648, "GO"),
+        (-23.5505, -46.6333, "SP"),
+        (-22.9068, -43.1729, "RJ"),
+        (-27.5949, -48.5482, "SC"),
+        (-3.1190, -60.0217, "AM"),
+    ],
+)
+def test_uf_boundary_contains_representative_brazilian_cities(latitude, longitude, uf):
+    assert public_point_in_uf(latitude=latitude, longitude=longitude, uf=uf)
+
+
+@pytest.mark.django_db
+@override_settings(**PILOT)
+def test_changing_city_without_new_point_removes_old_public_location_and_authorization():
+    client = APIClient()
+    assert (
+        client.post(
+            "/api/v1/marketplace/accounts/register/", payload("INSTRUCTOR"), format="json"
+        ).status_code
+        == 201
+    )
+    first = client.patch(
+        "/api/v1/account/me/",
+        {
+            "instructor_city": "Goiânia",
+            "instructor_uf": "GO",
+            "service_latitude": -16.6869,
+            "service_longitude": -49.2648,
+            "service_location_authorized": True,
+        },
+        format="json",
+    )
+    assert first.status_code == 200
+
+    moved = client.patch(
+        "/api/v1/account/me/",
+        {"instructor_city": "Cuiabá", "instructor_uf": "MT"},
+        format="json",
+    )
+
+    assert moved.status_code == 200
+    area = InstructorServiceArea.objects.get(profile__person__account__username="real-instructor")
+    assert (area.city, area.uf) == ("Cuiabá", "MT")
+    assert area.public_service_location is None
+    assert area.location_authorized is False
+    assert area.authorization_history.filter(revoked_at__isnull=True).count() == 0
 
 
 @pytest.mark.django_db
