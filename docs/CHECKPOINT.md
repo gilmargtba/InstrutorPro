@@ -15,7 +15,14 @@
   após confirmações humanas específicas. Falha em qualquer gate reverte tudo.
   Ação de solicitar correção mantém o instrutor fora da busca até nova decisão.
 - Nenhum perfil ou UF real foi aprovado automaticamente e nenhum pagamento foi
-  alterado. Deploy e validação de produção devem ser registrados separadamente.
+  alterado. Validação: 404 testes backend, 74 frontend, Ruff, Django check,
+  migrations check e build Angular de produção passaram.
+- `8984822` foi enviado a `origin/main` e aplicado na VPS após backup validado
+  do banco e dos documentos privados em 12/10/2026. As migrations
+  `discovery.0013` e `marketplace.0014` estão aplicadas; backend, frontend,
+  worker e scheduler foram reconstruídos/reiniciados. Health respondeu OK,
+  página pública e busca válida responderam 200. Uma solicitação existente foi
+  triada pelo worker como `NEEDS_CORRECTION`, sem decisão automática.
 
 ## Cadastro — mapa localizado por cidade/UF — 11/10/2026
 
