@@ -1,0 +1,12 @@
+{% extends "admin/change_list.html" %}
+
+{% block content %}
+<div class="module" style="padding:16px;margin-bottom:16px;border-left:4px solid #187f83">
+  <h2>Fotos de perfil não são aprovação do instrutor</h2>
+  <p>A aprovação da foto libera somente a imagem. Documentos, verificação profissional, revisão da UF e publicação seguem decisões separadas.</p>
+  {% if can_open_verification_queue %}<a class="button" href="{% url 'admin:discovery_professionalverificationrequest_changelist' %}">1. Abrir fila de verificação</a>{% endif %}
+  {% if can_open_instructor_profiles %}<a class="button" href="{% url 'admin:discovery_instructorprofile_changelist' %}?is_demo__exact=0&amp;publication_status__exact=UNPUBLISHED">2. Abrir perfis reais não publicados</a>{% endif %}
+  {% if not is_responsible_admin %}<p><strong>Conta atual:</strong> a decisão final combinada de verificação, UF e publicação é reservada ao administrador responsável configurado. Este acesso não é ampliado ao aprovar uma foto.</p>{% endif %}
+</div>
+{{ block.super }}
+{% endblock %}

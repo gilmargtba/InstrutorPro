@@ -186,7 +186,7 @@ def test_panel_shows_all_blockers_and_never_approves_on_get():
     assert "UF GO sem aprovação regulatória vigente" in content
     assert "Nenhuma oferta real ativa" in content
     assert "link da fonte oficial" in content
-    assert "APROVAR E PUBLICAR INSTRUTOR" in content
+    assert "ANALISAR E PUBLICAR" in content
     readiness.refresh_from_db()
     profile.refresh_from_db()
     item.refresh_from_db()

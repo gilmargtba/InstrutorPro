@@ -1,5 +1,18 @@
 # Checkpoint do Projeto
 
+## Admin de aprovação mais direto — 12/10/2026
+
+- A lista de fotos agora explica que aprovar uma foto não verifica nem publica
+  o instrutor, mostra nomes em vez de UUIDs e oferece atalhos para a fila de
+  verificação e os perfis reais quando a conta tem permissão de visualização.
+- A tela existente de aprovação do perfil destaca uma única ação principal,
+  `ANALISAR E PUBLICAR`, e recolhe ações separadas e edição de oferta em
+  seções opcionais. Documentos, consulta profissional, decisão da UF e
+  publicação continuam exigindo confirmação humana e auditoria.
+- A conta `FOCUS` mostrada na captura não recebe poderes novos: a decisão
+  combinada continua limitada ao administrador responsável configurado.
+  Esta alteração de interface não foi enviada à VPS sem autorização de deploy.
+
 ## Pré-validação e fila rápida de instrutores — 12/10/2026
 
 - Solicitação real enviada agenda triagem determinística e reprocessamento

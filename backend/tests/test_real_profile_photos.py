@@ -3,7 +3,8 @@ from unittest.mock import patch
 import pytest
 from django.contrib.auth.models import Permission
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import override_settings
+from django.test import Client, override_settings
+from django.urls import reverse
 from rest_framework.test import APIClient
 
 from apps.accounts.models import Account
@@ -36,6 +37,43 @@ def owner_and_profile():
 
 def photo(name="perfil.png", content=b"\x89PNG\r\n\x1a\nprivate-test-data", mime="image/png"):
     return SimpleUploadedFile(name, content, content_type=mime)
+
+
+@pytest.mark.django_db
+def test_photo_admin_explains_separate_approval_and_only_links_authorized_profiles():
+    _, profile = owner_and_profile()
+    ProfilePhoto.objects.create(
+        instructor=profile,
+        file="private/test-photo.png",
+        original_name="perfil.png",
+        mime_type="image/png",
+        size_bytes=64,
+        sha256="a" * 64,
+        data_mode="REAL",
+    )
+    staff = Account.objects.create_user(
+        username="focus", email="focus@example.invalid", password="test-password-123", is_staff=True
+    )
+    staff.user_permissions.add(
+        Permission.objects.get(content_type__app_label="marketplace", codename="view_profilephoto")
+    )
+    web = Client()
+    web.force_login(staff)
+    response = web.get(reverse("admin:marketplace_profilephoto_changelist"))
+    assert response.status_code == 200
+    content = response.content.decode()
+    assert "Fotos de perfil não são aprovação do instrutor" in content
+    assert "decisão final combinada" in content
+    assert "Instrutor Real" in content
+    assert "Abrir análise do instrutor" not in content
+    staff.user_permissions.add(
+        Permission.objects.get(
+            content_type__app_label="discovery", codename="view_instructorprofile"
+        )
+    )
+    response = web.get(reverse("admin:marketplace_profilephoto_changelist"))
+    assert response.status_code == 200
+    assert "Abrir análise do instrutor" in response.content.decode()
 
 
 @pytest.mark.django_db

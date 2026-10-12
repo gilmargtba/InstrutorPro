@@ -228,7 +228,9 @@ class InstructorVehicleAdmin(admin.ModelAdmin):
 
 @admin.register(ProfilePhoto)
 class ProfilePhotoAdmin(admin.ModelAdmin):
-    list_display = ("instructor", "status", "publication_notice_version", "uploaded_at")
+    change_list_template = "admin/marketplace/profilephoto/change_list.html"
+    list_display = ("instructor_name", "status", "uploaded_at")
+    list_select_related = ("instructor",)
     list_filter = ("status", "data_mode")
     readonly_fields = (
         "secure_preview",
@@ -245,6 +247,43 @@ class ProfilePhotoAdmin(admin.ModelAdmin):
         "status",
     )
     actions = ("approve_photos", "reject_photos", "request_replacement")
+
+    def get_list_display(self, request):
+        columns = super().get_list_display(request)
+        if self._can_open_profiles(request):
+            return (*columns, "instructor_approval_link")
+        return columns
+
+    @staticmethod
+    def _can_open_profiles(request):
+        return request.user.has_perm("discovery.view_instructorprofile") or request.user.has_perm(
+            "discovery.change_instructorprofile"
+        )
+
+    def changelist_view(self, request, extra_context=None):
+        can_open_profiles = self._can_open_profiles(request)
+        can_open_requests = request.user.has_perm(
+            "discovery.view_professionalverificationrequest"
+        ) or request.user.has_perm("discovery.change_professionalverificationrequest")
+        context = {
+            **(extra_context or {}),
+            "can_open_instructor_profiles": can_open_profiles,
+            "can_open_verification_queue": can_open_requests,
+            "is_responsible_admin": request.user.username
+            == getattr(settings, "REGULATORY_RESPONSIBLE_ADMIN", "gilmar"),
+        }
+        return super().changelist_view(request, extra_context=context)
+
+    @admin.display(description="Instrutor", ordering="instructor__display_name")
+    def instructor_name(self, obj):
+        return obj.instructor.display_name
+
+    @admin.display(description="Próximo passo")
+    def instructor_approval_link(self, obj):
+        if obj.instructor.is_demo:
+            return "Perfil sintético"
+        url = reverse("admin:discovery_instructorprofile_change", args=[obj.instructor_id])
+        return format_html('<a href="{}">Abrir análise do instrutor</a>', url)
 
     @admin.display(description="Foto privada")
     def secure_preview(self, obj):
