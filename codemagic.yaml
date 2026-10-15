@@ -1,0 +1,101 @@
+# Codemagic reads this file from the repository root. Both workflows are manual.
+# The Capacitor 8 iOS project uses Swift Package Manager, not CocoaPods.
+workflows:
+  ios-simulator:
+    name: iOS simulator (unsigned)
+    instance_type: mac_mini_m2
+    max_build_duration: 120
+    environment:
+      xcode: "26.0"
+      node: 24.15.0
+    triggering:
+      events: []
+    scripts:
+      - name: Install Angular and Capacitor dependencies
+        script: |
+          set -eu
+          cd "$CM_BUILD_DIR/frontend"
+          npm ci
+      - name: Build mobile Angular app and sync iOS
+        script: |
+          set -eu
+          cd "$CM_BUILD_DIR/frontend"
+          npm run build:mobile
+          test -f dist/instrutorpro/browser/index.html
+          npx cap sync ios
+      - name: Verify Xcode project and scheme
+        script: |
+          set -eu
+          cd "$CM_BUILD_DIR/frontend/ios/App"
+          test -f App.xcodeproj/project.pbxproj
+          xcodebuild -list -json -project App.xcodeproj | python3 -c 'import json,sys; schemes=json.load(sys.stdin)["project"]["schemes"]; assert "App" in schemes, f"Expected App scheme; found {schemes}"'
+      - name: Build unsigned simulator app
+        script: |
+          set -eu
+          cd "$CM_BUILD_DIR/frontend/ios/App"
+          xcodebuild build \
+            -project App.xcodeproj \
+            -scheme App \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath "$CM_BUILD_DIR/build/ios-simulator" \
+            CODE_SIGNING_ALLOWED=NO
+          test -d "$CM_BUILD_DIR/build/ios-simulator/Build/Products/Debug-iphonesimulator/App.app"
+    artifacts:
+      - build/ios-simulator/Build/Products/Debug-iphonesimulator/*.app
+      - /tmp/xcodebuild_logs/*.log
+
+  ios-testflight:
+    name: iOS signed IPA (future TestFlight)
+    instance_type: mac_mini_m2
+    max_build_duration: 120
+    # Create this named App Store Connect API integration in Codemagic first.
+    integrations:
+      app_store_connect: instrutorpro_app_store_connect
+    environment:
+      xcode: "26.0"
+      node: 24.15.0
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: br.com.instrutorprocnh.app
+    triggering:
+      events: []
+    scripts:
+      - name: Install Angular and Capacitor dependencies
+        script: |
+          set -eu
+          cd "$CM_BUILD_DIR/frontend"
+          npm ci
+      - name: Build mobile Angular app and sync iOS
+        script: |
+          set -eu
+          cd "$CM_BUILD_DIR/frontend"
+          npm run build:mobile
+          test -f dist/instrutorpro/browser/index.html
+          npx cap sync ios
+      - name: Verify Xcode project and scheme
+        script: |
+          set -eu
+          cd "$CM_BUILD_DIR/frontend/ios/App"
+          test -f App.xcodeproj/project.pbxproj
+          xcodebuild -list -json -project App.xcodeproj | python3 -c 'import json,sys; schemes=json.load(sys.stdin)["project"]["schemes"]; assert "App" in schemes, f"Expected App scheme; found {schemes}"'
+      - name: Apply Apple signing profiles from Codemagic
+        script: |
+          set -eu
+          xcode-project use-profiles --project "$CM_BUILD_DIR/frontend/ios/App/App.xcodeproj"
+      - name: Build signed IPA
+        script: |
+          set -eu
+          cd "$CM_BUILD_DIR"
+          xcode-project build-ipa \
+            --project "$CM_BUILD_DIR/frontend/ios/App/App.xcodeproj" \
+            --scheme App
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        submit_to_app_store: false
