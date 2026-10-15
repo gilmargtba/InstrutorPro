@@ -56,6 +56,23 @@
   combinada continua limitada ao administrador responsável configurado.
   Esta alteração de interface não foi enviada à VPS sem autorização de deploy.
 
+## Build iOS no Codemagic — 15/10/2026
+
+- `codemagic.yaml` na raiz define dois workflows manuais em macOS M2 com
+  Xcode 26.0 e Node 24.15.0. O primeiro gera `App.app` de simulador sem
+  assinatura; o segundo prepara IPA assinado para futura distribuição.
+- O projeto real usa `frontend/ios/App/App.xcodeproj`, target/scheme esperado
+  `App`, Swift Package Manager (`CapApp-SPM`) e iOS mínimo 15. Não há Podfile:
+  não executar `pod install`. O workflow confere o scheme com `xcodebuild -list`
+  antes de compilar; a disponibilidade final só pode ser comprovada no macOS.
+- Ambos usam `npm ci`, build Angular mobile e `cap sync ios`. O IPA futuro exige
+  certificado e provisioning profile App Store no painel Codemagic, além de
+  integração App Store Connect chamada `instrutorpro_app_store_connect` para
+  envio ao TestFlight; nenhum segredo entrou no repositório. YAML validado
+  localmente; build Angular mobile e `cap sync ios` passaram no Windows (dois
+  avisos de orçamento já existentes). O proprietário informou build de
+  simulador macOS bem-sucedido; não houve distribuição iOS.
+
 ## Pré-validação e fila rápida de instrutores — 12/10/2026
 
 - Solicitação real enviada agenda triagem determinística e reprocessamento
