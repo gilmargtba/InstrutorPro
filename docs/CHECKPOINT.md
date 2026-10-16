@@ -1,5 +1,16 @@
 # Checkpoint do Projeto
 
+## Aprovação do instrutor — atalho para revisão da UF — 15/10/2026
+
+- O painel do perfil real destaca no topo os campos regulatórios faltantes e
+  oferece atalho direto para editar as evidências da UF em outra aba, somente
+  a quem possui permissão regulatória. Após salvar, o revisor atualiza o perfil
+  e segue a decisão humana existente.
+- Preencher campos não aprova a UF nem publica o instrutor. Fonte oficial,
+  norma-base, vigência e evidências continuam exigindo conferência humana;
+  contas sem permissão recebem orientação sem link de edição.
+- Alteração local, sem push/deploy e sem modificação de dados de produção.
+
 ## Admin de aprovação mais direto — 12/10/2026
 
 - A lista de fotos agora explica que aprovar uma foto não verifica nem publica

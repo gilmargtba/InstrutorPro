@@ -186,6 +186,9 @@ def test_panel_shows_all_blockers_and_never_approves_on_get():
     assert "UF GO sem aprovação regulatória vigente" in content
     assert "Nenhuma oferta real ativa" in content
     assert "link da fonte oficial" in content
+    assert "Próximo passo: completar a revisão da UF GO" in content
+    assert reverse("admin:territories_regulatoryreadiness_change", args=[readiness.pk]) in content
+    assert "Salve a evidência na nova aba" in content
     assert "ANALISAR E PUBLICAR" in content
     readiness.refresh_from_db()
     profile.refresh_from_db()
@@ -193,6 +196,20 @@ def test_panel_shows_all_blockers_and_never_approves_on_get():
     assert readiness.status == readiness.Status.REVIEW_REQUIRED
     assert profile.publication_status == profile.PublicationStatus.UNPUBLISHED
     assert item.status == item.Status.UNDER_REVIEW
+
+
+@pytest.mark.django_db
+@override_settings(**SETTINGS)
+def test_regulatory_shortcut_is_hidden_without_regulatory_permission():
+    web, change, _, _, readiness, _, _ = scenario(evidence=False)
+    admin = Account.objects.get(username="gilmar")
+    admin.user_permissions.remove(
+        Permission.objects.get(codename="change_regulatoryreadiness")
+    )
+    content = web.get(change).content.decode()
+    assert "Peça a um administrador com permissão regulatória" in content
+    edit_url = reverse("admin:territories_regulatoryreadiness_change", args=[readiness.pk])
+    assert edit_url not in content
 
 
 @pytest.mark.django_db

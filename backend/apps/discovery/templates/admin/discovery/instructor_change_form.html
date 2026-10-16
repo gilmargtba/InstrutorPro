@@ -3,6 +3,19 @@
 {% if approval_panel %}
 <section class="module" style="padding:18px;margin-bottom:18px;border:2px solid #187f83">
   <h2>APROVAÇÃO E PUBLICAÇÃO — {{ approval_panel.profile.display_name }}</h2>
+  {% if approval_panel.readiness.status == 'REVIEW_REQUIRED' and approval_panel.regulatory_missing %}
+    <div class="messagelist warning" style="padding:12px;margin-bottom:16px">
+      <strong>Próximo passo: completar a revisão da UF {{ approval_panel.area.uf }}.</strong>
+      <p>Faltam: {{ approval_panel.regulatory_missing|join:", " }}.</p>
+      {% if approval_panel.readiness_edit_url %}
+        <a class="button" href="{{ approval_panel.readiness_edit_url }}" target="_blank" rel="noopener noreferrer">ABRIR EVIDÊNCIAS DA UF {{ approval_panel.area.uf }}</a>
+        <p>Salve a evidência na nova aba e atualize esta página para continuar.</p>
+      {% else %}
+        <p>Peça a um administrador com permissão regulatória para registrar a evidência.</p>
+      {% endif %}
+      <p>Preencher campos não aprova a UF: confira também a norma-base, a vigência e a fonte oficial antes da decisão humana.</p>
+    </div>
+  {% endif %}
   <p><strong>Fluxo rápido:</strong> confira os documentos privados, registre método e fonte da consulta, confirme a UF somente se estiver pendente e use <strong>ANALISAR E PUBLICAR</strong>. Se houver divergência, use <strong>SOLICITAR CORREÇÃO</strong>. Nenhuma etapa é aprovada automaticamente.</p>
   <p><strong>PRONTO PARA PUBLICAÇÃO:
     {% if approval_panel.ready_to_publish %}<span style="color:#087443">SIM</span>{% else %}<span style="color:#a04410">NÃO</span>{% endif %}
