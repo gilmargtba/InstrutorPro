@@ -15,6 +15,15 @@ describe('ProfessionalVerificationComponent',()=>{
     expect(fixture.nativeElement.textContent).not.toContain('CLEAN');
     expect(fixture.nativeElement.textContent).not.toContain('Nenhum documento foi configurado');
   });
+  it('shows applicant blockers separately from the human UF decision',()=>{
+    const fixture=TestBed.createComponent(ProfessionalVerificationComponent);const http=TestBed.inject(HttpTestingController);
+    http.expectOne('/instructor/verification/').flush({status:'DRAFT',cpf_masked:'***.***.***-25',can_edit:true,document_upload_available:true,requirements:[],documents:[],submission_blockers:['Anexe sua CNH selecionando o tipo de documento CNH.']});
+    fixture.detectChanges();
+    const content=fixture.nativeElement.textContent;
+    expect(content).toContain('Pendências antes do envio');
+    expect(content).toContain('Anexe sua CNH');
+    expect(content).toContain('UF ainda pendente não impede o cadastro');
+  });
   it('shows the 24 to 48 hour estimate only for a submitted request',()=>{
     const fixture=TestBed.createComponent(ProfessionalVerificationComponent);const http=TestBed.inject(HttpTestingController);
     http.expectOne('/instructor/verification/').flush({status:'SUBMITTED',cpf_masked:'***.***.***-25',can_edit:false,documents:[]});

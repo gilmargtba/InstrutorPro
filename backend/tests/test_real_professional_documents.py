@@ -2,6 +2,7 @@ from unittest.mock import patch
 
 import pytest
 from django.contrib.auth.models import Permission
+from django.contrib.gis.geos import Point
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import override_settings
 from django.utils import timezone
@@ -21,9 +22,15 @@ from apps.discovery.verification_services import (
     start_verification_review,
 )
 from apps.marketplace.documents import review_document
-from apps.marketplace.models import DocumentRequirement, InstructorDocument
+from apps.marketplace.models import (
+    DataMode,
+    DocumentRequirement,
+    InstructorContactChannel,
+    InstructorDocument,
+    InstructorOffer,
+)
 from apps.marketplace.real_documents import DocumentUploadError, inspect_real_upload
-from apps.people.models import Person
+from apps.people.models import Person, RoleAssignment
 
 ENABLED = {
     "REAL_PRODUCTION_AUTHORIZATION": "FULL_PRODUCTION",
@@ -68,10 +75,9 @@ def test_generic_upload_with_zero_approved_requirements_in_every_uf(tmp_path, uf
         assert document.retention_status == "POLICY_PENDING"
         assert document.file.name.startswith("professional-documents/")
         assert response.json()["documents"][0]["label"] == "Credencial profissional"
-        assert (
-            client.post("/api/v1/instructor/verification/submit/", {}, format="json").status_code
-            == 201
-        )
+        blocked = client.post("/api/v1/instructor/verification/submit/", {}, format="json")
+        assert blocked.status_code == 400
+        assert "CNH" in str(blocked.json())
         instructor.refresh_from_db()
         assert instructor.verification_status != "VERIFIED"
         assert instructor.publication_status == "UNPUBLISHED"
@@ -149,6 +155,79 @@ def profile(username):
     )
     InstructorServiceArea.objects.create(profile=instructor, city="Goiânia", uf="GO")
     return account, instructor
+
+
+def complete_submission(profile, *, excluded_document=None):
+    """Supply applicant-controlled prerequisites for tests of later review steps."""
+    RoleAssignment.objects.get_or_create(
+        person=profile.person,
+        role=RoleAssignment.Role.INSTRUCTOR,
+        defaults={"granted_by": profile.person.account, "grant_reason": "TEST"},
+    )
+    InstructorServiceArea.objects.filter(profile=profile).update(
+        public_service_location=Point(-49.37, -18.01, srid=4326),
+        location_authorized=True,
+    )
+    InstructorOffer.objects.get_or_create(
+        instructor=profile, category="B", data_mode=DataMode.REAL,
+        defaults={"price_amount": "70.00", "duration_minutes": 50},
+    )
+    InstructorContactChannel.objects.get_or_create(
+        instructor=profile,
+        defaults={"whatsapp_e164": "+5562999999999", "data_mode": DataMode.REAL},
+    )
+    item = ProfessionalVerificationRequest.objects.get(profile=profile, status="DRAFT")
+    present = set(item.documents.values_list("document_type", flat=True))
+    needed = {
+        InstructorDocument.DocumentType.DRIVER_LICENSE,
+        InstructorDocument.DocumentType.PROFESSIONAL_CREDENTIAL,
+    }
+    for kind in needed - present:
+        if kind == excluded_document:
+            continue
+        InstructorDocument.objects.create(
+            instructor=profile, verification_request=item, document_type=kind,
+            file=f"private/test-{kind}.pdf", original_name=f"test-{kind}.pdf",
+            mime_type="application/pdf", size_bytes=128, sha256="a" * 64,
+            scan_status=InstructorDocument.ScanStatus.CLEAN, data_mode=DataMode.REAL,
+        )
+
+
+@pytest.mark.django_db
+@override_settings(**ENABLED)
+def test_submission_requires_applicant_evidence_but_not_prior_uf_approval():
+    owner, instructor = profile("complete-submission-ce")
+    InstructorServiceArea.objects.filter(profile=instructor).update(uf="CE", city="Fortaleza")
+    save_verification_draft(actor=owner, profile=instructor, cpf="52998224725")
+    client = APIClient()
+    client.force_authenticate(owner)
+    pending = client.get("/api/v1/instructor/verification/").json()["submission_blockers"]
+    assert any("CNH" in issue for issue in pending)
+    assert any("WhatsApp" in issue for issue in pending)
+    blocked = client.post("/api/v1/instructor/verification/submit/", {}, format="json")
+    assert blocked.status_code == 400
+    assert "CNH" in str(blocked.json())
+    complete_submission(instructor)
+    assert client.get("/api/v1/instructor/verification/").json()["submission_blockers"] == []
+    submitted = client.post("/api/v1/instructor/verification/submit/", {}, format="json")
+    assert submitted.status_code == 201
+    instructor.refresh_from_db()
+    assert instructor.publication_status == InstructorProfile.PublicationStatus.UNPUBLISHED
+
+
+@pytest.mark.django_db
+@override_settings(**{**ENABLED, "CLAMD_HOST": ""})
+def test_configured_document_outage_keeps_request_as_draft():
+    owner, instructor = profile("submission-scanner-outage")
+    save_verification_draft(actor=owner, profile=instructor, cpf="52998224725")
+    client = APIClient()
+    client.force_authenticate(owner)
+    state = client.get("/api/v1/instructor/verification/").json()
+    assert state["document_upload_available"] is False
+    assert "temporariamente indisponível" in state["submission_blockers"][0]
+    blocked = client.post("/api/v1/instructor/verification/submit/", {}, format="json")
+    assert blocked.status_code == 400
+    assert ProfessionalVerificationRequest.objects.get(profile=instructor).status == "DRAFT"
 
 
 def approved_requirement():
@@ -278,6 +357,7 @@ def test_visual_review_photo_is_listed_on_same_human_review_screen(tmp_path):
                 format="multipart",
             )
         assert response.status_code == 201
+        complete_submission(instructor)
         submitted = client.post("/api/v1/instructor/verification/submit/", {}, format="json")
         assert submitted.status_code == 201
         item = ProfessionalVerificationRequest.objects.get(profile=instructor)
@@ -352,10 +432,9 @@ def test_verified_owner_can_submit_private_supplement_for_human_review(tmp_path)
             ).status_code
             == 200
         )
-        assert (
-            client.post("/api/v1/instructor/verification/submit/", {}, format="json").status_code
-            == 201
-        )
+        with override_settings(REAL_DOCUMENT_UPLOADS=False):
+            response = client.post("/api/v1/instructor/verification/submit/", {}, format="json")
+            assert response.status_code == 201
         original = ProfessionalVerificationRequest.objects.get(profile=instructor)
         start_verification_review(actor=analyst, verification_request=original)
         record_review_and_approve(
@@ -527,6 +606,7 @@ def test_clean_private_upload_can_submit_with_frozen_rule_snapshot(tmp_path):
         assert document.scan_status == document.ScanStatus.CLEAN
         assert document.file.name.startswith("professional-documents/")
         assert not document.file.url.startswith("/media/")
+        complete_submission(instructor)
         submitted = client.post("/api/v1/instructor/verification/submit/", {}, format="json")
         assert submitted.status_code == 201
         item = ProfessionalVerificationRequest.objects.get(profile=instructor)
@@ -650,6 +730,7 @@ def test_only_assigned_authorized_reviewer_can_download_clean_file(tmp_path):
         assert client.get(url).status_code in {401, 403}
         client.force_authenticate(owner)
         item = ProfessionalVerificationRequest.objects.get(profile=instructor)
+        complete_submission(instructor)
         assert (
             client.post("/api/v1/instructor/verification/submit/", {}, format="json").status_code
             == 201

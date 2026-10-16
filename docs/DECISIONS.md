@@ -2,6 +2,19 @@
 
 Este documento é a fonte oficial de decisões consolidadas, contradições resolvidas e questões em aberto. Uma recomendação marcada como aberta não é uma decisão aceita.
 
+### Decisão operacional de 15/10/2026 — envio completo pelo instrutor
+
+Quando o envio real de documentos está habilitado, a solicitação inicial de
+verificação só entra na fila após o instrutor fornecer os dados estruturais sob
+seu controle: CPF válido, CNH e credencial/certificado em arquivos seguros,
+categoria e oferta ativa, cidade/UF, área pública aproximada autorizada e
+WhatsApp profissional. O rascunho continua disponível e a API apresenta as
+pendências antes do envio. Complementações de uma verificação anterior mantêm
+seu fluxo próprio. Evidência normativa, vigência, fonte e decisão regulatória
+da UF são responsabilidade do revisor autorizado: UF pendente não impede
+cadastro nem envio completo, mas continua impedindo publicação. Este gate de
+completude não confere autenticidade, identidade, aptidão ou autorização oficial.
+
 ### Decisão operacional de 12/10/2026 — pré-validação determinística
 
 A solicitação real enviada recebe uma triagem assíncrona de completude cadastral,

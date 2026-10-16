@@ -12,6 +12,7 @@ type VerificationState = {
   message: string;
   precheck_status?: 'NOT_STARTED'|'IN_PROGRESS'|'READY_FOR_HUMAN_REVIEW'|'NEEDS_CORRECTION';
   precheck_issues?: string[];
+  submission_blockers?: string[];
   can_edit: boolean;
   is_supplement?: boolean;
   can_start_supplement?: boolean;
@@ -95,6 +96,11 @@ type VerificationState = {
               <p class="privacy">@if(!current.cpf_masked){Salve primeiro o CPF. }Arquivos aceitos: PDF, JPEG ou PNG, até 5 MB. Documentos não são publicados.</p>
             } @else {<p>Documentos ainda não estão sendo solicitados nesta etapa.</p>}
             <h3>4. Revisão e envio</h3>
+            @if(!current.is_supplement){
+              <p><strong>Para enviar à análise:</strong> informe CPF, anexe CNH e credencial/certificado profissional em arquivos aprovados pela verificação de segurança, e complete categoria, oferta ativa, cidade/UF, ponto público autorizado e WhatsApp no perfil.</p>
+              @if(current.submission_blockers?.length){<div role="status"><strong>Pendências antes do envio:</strong><ul>@for(issue of current.submission_blockers; track issue){<li>{{issue}}</li>}</ul></div>}
+              <p>Você pode salvar um rascunho. A conferência dos documentos e das regras da UF é feita pela equipe; uma UF ainda pendente não impede o cadastro, mas impede a publicação até a decisão humana.</p>
+            }
             <p>Após o envio completo, a análise costuma levar de 24 a 48 horas. Você receberá um e-mail quando a verificação interna for aprovada. A publicação na busca é uma etapa separada.</p>
             <label class="consent"><input type="checkbox" name="confirmed" [(ngModel)]="confirmed"> @if(current.is_supplement){Confirmo que os anexos são meus e solicito nova revisão humana.}@else{Confirmo que o CPF é meu e autorizo seu uso para esta verificação.}</label>
             @if(!current.is_supplement){<button class="button secondary" type="button" [disabled]="sending || !confirmed" (click)="saveDraft()">Salvar rascunho</button>}

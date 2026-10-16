@@ -12,6 +12,7 @@ from uuid import uuid4
 
 from django.conf import settings
 from django.contrib.auth.models import Permission
+from django.contrib.gis.geos import Point
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management.base import BaseCommand, CommandError
 from django.core.signals import request_finished
@@ -22,8 +23,10 @@ from rest_framework.test import APIClient
 from apps.accounts.models import Account
 from apps.discovery.models import InstructorProfile, InstructorServiceArea
 from apps.discovery.verification_services import save_verification_draft, start_verification_review
+from apps.marketplace.models import DataMode, InstructorContactChannel, InstructorOffer
 from apps.marketplace.real_documents import (
     DocumentUploadError,
+    applicable_requirements,
     inspect_real_upload,
     scan_with_clamd,
 )
@@ -208,11 +211,24 @@ class Command(BaseCommand):
             grant_reason="TECHNICAL_SMOKE_ROLLBACK_ONLY",
         )
         person = Person.objects.create(account=owner)
+        RoleAssignment.objects.create(
+            person=person, role="INSTRUCTOR", granted_by=owner,
+            grant_reason="TECHNICAL_SMOKE_ROLLBACK_ONLY",
+        )
         instructor = InstructorProfile.objects.create(
             person=person, display_name="Technical smoke", categories=["B"], is_demo=False
         )
         area = InstructorServiceArea.objects.create(
-            profile=instructor, city="Teste técnico", uf="GO"
+            profile=instructor, city="Goiatuba", uf="GO",
+            public_service_location=Point(-49.37, -18.01, srid=4326),
+            location_authorized=True,
+        )
+        InstructorOffer.objects.create(
+            instructor=instructor, category="B", price_amount="70.00",
+            duration_minutes=50, data_mode=DataMode.REAL,
+        )
+        InstructorContactChannel.objects.create(
+            instructor=instructor, whatsapp_e164="+5562999999999", data_mode=DataMode.REAL,
         )
         item = save_verification_draft(actor=owner, profile=instructor, cpf=synthetic_cpf())
         client = APIClient()
@@ -278,10 +294,22 @@ class Command(BaseCommand):
             "Pending evidence submitted",
         )
         pending.delete()
-        # An approved mandatory territorial rule may require further documents in real production.
-        # The technical request uses a transaction-local empty category list, not a fabricated rule.
-        instructor.categories = []
-        instructor.save(update_fields=["categories"])
+        for document_type in ("DRIVER_LICENSE", "PROFESSIONAL_CREDENTIAL"):
+            expect(
+                client.post(
+                    url, {"document_type": document_type, "file": sample()}, format="multipart"
+                ).status_code == 201,
+                f"Clean {document_type} upload failed",
+            )
+        # Use only real approved requirements; never fabricate an approval or rule.
+        for requirement in applicable_requirements(instructor).filter(required=True):
+            expect(
+                client.post(
+                    url, {"requirement_id": str(requirement.pk), "file": sample()},
+                    format="multipart",
+                ).status_code == 201,
+                f"Required document upload failed: {requirement.pk}",
+            )
         expect(
             client.post("/api/v1/instructor/verification/submit/", {}, format="json").status_code
             == 201,

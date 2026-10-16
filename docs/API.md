@@ -18,6 +18,13 @@ gera verificação, publicação ou autorização oficial automaticamente.
 `GET /api/v1/instructor/verification/` informa `document_upload_available`,
 `document_types` e `requirements` separadamente. Zero requisitos aprovados não impede
 upload voluntário quando o gate técnico está ativo.
+Para um rascunho inicial com upload real habilitado, também informa
+`submission_blockers: string[]`: pendências legíveis de dados e documentos que o
+próprio instrutor pode corrigir. Não inclui prontidão regulatória da UF nem
+substitui a análise humana. `POST /api/v1/instructor/verification/submit/`
+responde 400 com `detail` e mantém o rascunho quando faltam esses itens;
+o mesmo vale para indisponibilidade técnica do upload real configurado.
+Complementações de solicitação já verificada seguem seu contrato próprio.
 
 `POST /api/v1/instructor/verification/documents/` recebe multipart `file` e
 `document_type` (`DRIVER_LICENSE`, `PROFESSIONAL_CREDENTIAL`, `PROFESSIONAL_CERTIFICATE`, `OTHER_PROFESSIONAL`),

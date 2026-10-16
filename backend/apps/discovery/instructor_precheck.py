@@ -39,6 +39,31 @@ PRECHECK_MESSAGES = {
     "WHATSAPP_MISSING": "Informe seu WhatsApp profissional.",
 }
 
+# Applicant-controlled prerequisites only. UF regulatory evidence and human document
+# decisions are deliberately absent: they belong to the authorized reviewer.
+SUBMISSION_BLOCKERS = {
+    "REGISTRATION_INCOMPLETE",
+    "CPF_INVALID",
+    "CNH_MISSING",
+    "DOCUMENT_MISSING",
+    "PROFESSIONAL_CREDENTIAL_MISSING",
+    "FILE_INVALID",
+    "FILE_SCAN_PENDING",
+    "FILE_BLOCKED",
+    "CATEGORIES_MISSING",
+    "OFFER_MISSING",
+    "LOCATION_MISSING",
+    "SERVICE_AREA_MISSING",
+    "WHATSAPP_MISSING",
+}
+
+
+def submission_blockers(item):
+    """Return only issues the applicant can correct before human review."""
+    return [
+        code for code in InstructorValidationService.issues(item) if code in SUBMISSION_BLOCKERS
+    ]
+
 
 class InstructorValidationService:
     @staticmethod

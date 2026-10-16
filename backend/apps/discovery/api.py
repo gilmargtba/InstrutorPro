@@ -122,7 +122,23 @@ def _verification_profile(request):
 def _verification_payload(profile):
     item = profile.verification_requests.order_by("-created_at").first()
     documents_enabled = upload_available()
-    from .instructor_precheck import PRECHECK_MESSAGES
+    from .instructor_precheck import PRECHECK_MESSAGES, submission_blockers
+
+    can_edit = not item or item.status == ProfessionalVerificationRequest.Status.DRAFT or (
+        item.status == ProfessionalVerificationRequest.Status.REJECTED
+        and not item.previous_verified_request_id
+    )
+    pending_submission = []
+    if can_edit and not (item and item.previous_verified_request_id):
+        if enabled("REAL_DOCUMENT_UPLOADS") and not documents_enabled:
+            pending_submission = [
+                "Envio de documentos temporariamente indisponível. "
+                "Salve o rascunho e tente novamente."
+            ]
+        elif item and documents_enabled:
+            pending_submission = [
+                PRECHECK_MESSAGES[code] for code in submission_blockers(item)
+            ]
 
     return {
         "status": item.status if item else ProfessionalVerificationRequest.Status.DRAFT,
@@ -137,12 +153,8 @@ def _verification_payload(profile):
             for code in (item.precheck_issues if item else [])
             if code in PRECHECK_MESSAGES
         ],
-        "can_edit": not item
-        or item.status == ProfessionalVerificationRequest.Status.DRAFT
-        or (
-            item.status == ProfessionalVerificationRequest.Status.REJECTED
-            and not item.previous_verified_request_id
-        ),
+        "can_edit": can_edit,
+        "submission_blockers": pending_submission,
         "is_supplement": bool(item and item.previous_verified_request_id),
         "can_start_supplement": can_start_document_supplement(profile, item),
         "documents_enabled": documents_enabled,

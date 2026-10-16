@@ -32,6 +32,24 @@
   testes focados após o ajuste final de privacidade, Ruff e Django check.
   Inicialmente validada localmente; publicação registrada acima.
 
+## Envio de solicitação completa pelo instrutor — 15/10/2026
+
+- Na modalidade real com upload habilitado, a API impede o envio inicial à fila
+  quando faltam dados controláveis pelo instrutor (CPF, CNH, credencial,
+  categoria/oferta, área autorizada e contato). O GET da verificação devolve
+  pendências legíveis e o site distingue rascunho, envio e revisão humana.
+- A revisão normativa da UF não é exigida do instrutor e não bloqueia seu
+  cadastro/envio; permanece gate independente antes da publicação na busca.
+  Complementações já verificadas não recebem retroativamente o novo checklist.
+- Se o upload real está configurado mas indisponível, o rascunho permanece salvo
+  e a API explica a indisponibilidade, sem enviar uma solicitação incompleta.
+- Alteração local, sem push/deploy e sem qualquer aprovação automática de UF,
+  documento ou perfil.
+- Validação: 407 testes backend antes da proteção adicional de indisponibilidade,
+  51 testes focados depois dela, 75 testes frontend, build Angular, Ruff,
+  Django check e migrations check passaram. O build mantém dois avisos de
+  orçamento preexistentes.
+
 ## Aprovação do instrutor — atalho para revisão da UF — 15/10/2026
 
 - O painel do perfil real destaca no topo os campos regulatórios faltantes e

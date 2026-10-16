@@ -221,6 +221,14 @@ def submit_verification_request(*, actor, profile, request_id=None):
         )
     if current.previous_verified_request_id and not upload_available():
         raise InvalidWorkflowTransition("Envio de documentos indisponível nesta etapa.")
+    if (
+        not current.previous_verified_request_id
+        and enabled("REAL_DOCUMENT_UPLOADS")
+        and not upload_available()
+    ):
+        raise InvalidWorkflowTransition(
+            "Envio de documentos temporariamente indisponível. Salve o rascunho e tente novamente."
+        )
     if current.documents.exclude(scan_status=InstructorDocument.ScanStatus.CLEAN).exists():
         raise InvalidWorkflowTransition(
             "Aguarde a verificação de segurança ou remova arquivos recusados."
@@ -249,6 +257,14 @@ def submit_verification_request(*, actor, profile, request_id=None):
             }
             for requirement in requirements
         ]
+        from .instructor_precheck import PRECHECK_MESSAGES, submission_blockers
+
+        blockers = submission_blockers(current)
+        if blockers:
+            raise InvalidWorkflowTransition(
+                "Antes de enviar para análise, corrija: "
+                + " ".join(PRECHECK_MESSAGES[code] for code in blockers)
+            )
     allowed_profile_states = {
         InstructorProfile.Status.DRAFT,
         InstructorProfile.Status.REJECTED,
