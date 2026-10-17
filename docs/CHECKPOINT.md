@@ -1,5 +1,21 @@
 # Checkpoint do Projeto
 
+## Revisão administrativa de instrutores — 17/10/2026
+
+- O painel do perfil real agora destaca o primeiro passo de assumir a solicitação,
+  mostra uma lista única dos documentos enviados ao perfil (incluindo solicitações
+  anteriores) e abre apenas os arquivos limpos da solicitação ativa atribuída ao
+  revisor. O download continua privado, autorizado e auditado; pedidos anteriores
+  servem apenas para localizar o histórico, sem atalho para contornar o acesso.
+- A tela separa pendências do instrutor (área/UF, localização, WhatsApp e oferta)
+  das decisões humanas do Admin. Sem área informada não há UF a revisar; a
+  evidência normativa e a vigência continuam obrigatórias antes de aprovar a UF.
+- Corrigido o indicador que mostrava documentos como prontos quando a solicitação
+  não continha arquivo algum. Nenhuma verificação, UF ou perfil foi aprovado
+  automaticamente. Validação: 412 testes backend na primeira revisão, 67
+  testes focados após o ajuste final de privacidade, Ruff e Django check.
+  Alteração somente local, sem push ou deploy.
+
 ## Aprovação do instrutor — atalho para revisão da UF — 15/10/2026
 
 - O painel do perfil real destaca no topo os campos regulatórios faltantes e

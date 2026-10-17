@@ -1,3 +1,4 @@
+from datetime import timedelta
 from uuid import uuid4
 
 import pytest
@@ -9,6 +10,7 @@ from django.utils import timezone
 
 from apps.accounts.models import Account
 from apps.audit.models import AuditEvent
+from apps.discovery.admin_approval import approval_panel
 from apps.discovery.models import (
     InstructorProfile,
     InstructorServiceArea,
@@ -144,11 +146,83 @@ def combined_data(document):
 
 @pytest.mark.django_db
 @override_settings(**SETTINGS)
+def test_missing_documents_are_not_reported_as_ready():
+    web, _, _, profile, _, _, document = scenario()
+    document.delete()
+    panel = approval_panel(profile, Account.objects.get(username="gilmar"))
+    assert panel["documents_ok"] is False
+    assert "Documentos sem scanner limpo ou revisão individual" in panel["blockers"]
+    assert not panel["document_inventory"]
+
+
+@pytest.mark.django_db
+@override_settings(**SETTINGS)
+def test_reviewer_finds_files_and_must_assume_request_before_private_download():
+    web, change, action, _, _, item, document = scenario(start_review=False)
+    download_url = reverse("instructor-document-download", args=[document.pk])
+    page = web.get(change)
+    content = page.content.decode()
+    assert "credential.pdf" not in content
+    assert "Arquivos enviados ao perfil: 1" in content
+    assert "ASSUMIR ANÁLISE E LIBERAR VISUALIZAÇÃO PRIVADA" in content
+    assert download_url not in content
+
+    response = web.post(action, {"operation": "start_review"}, follow=True)
+    assert response.status_code == 200
+    item.refresh_from_db()
+    assert item.status == item.Status.UNDER_REVIEW
+    assert "credential.pdf" in response.content.decode()
+    assert download_url in response.content.decode()
+
+
+@pytest.mark.django_db
+@override_settings(**SETTINGS)
+def test_older_document_is_locatable_but_not_downloadable_from_current_request():
+    web, change, _, profile, _, _, _ = scenario()
+    older_request = ProfessionalVerificationRequest.objects.create(
+        profile=profile, status=ProfessionalVerificationRequest.Status.REJECTED
+    )
+    ProfessionalVerificationRequest.objects.filter(pk=older_request.pk).update(
+        created_at=timezone.now() - timedelta(days=2)
+    )
+    older = InstructorDocument.objects.create(
+        instructor=profile,
+        verification_request=older_request,
+        document_type=InstructorDocument.DocumentType.DRIVER_LICENSE,
+        file=f"private-test/{uuid4()}.pdf",
+        original_name="older-cnh.pdf",
+        mime_type="application/pdf",
+        size_bytes=8,
+        sha256="1" * 64,
+        scan_status=InstructorDocument.ScanStatus.CLEAN,
+        data_mode=DataMode.REAL,
+    )
+    content = web.get(change).content.decode()
+    assert "older-cnh.pdf" in content
+    assert reverse("instructor-document-download", args=[older.pk]) not in content
+
+
+@pytest.mark.django_db
+@override_settings(**SETTINGS)
+def test_document_inventory_is_hidden_without_document_review_permission():
+    web, change, _, _, _, _, document = scenario()
+    reviewer = Account.objects.get(username="gilmar")
+    reviewer.user_permissions.remove(
+        Permission.objects.get(codename="review_instructor_document")
+    )
+    content = web.get(change).content.decode()
+    assert "credential.pdf" not in content
+    assert reverse("instructor-document-download", args=[document.pk]) not in content
+    assert "Somente um revisor com permissão" in content
+
+
+@pytest.mark.django_db
+@override_settings(**SETTINGS)
 def test_submitted_request_can_be_reviewed_and_published_in_one_human_action():
     web, change, action, profile, readiness, item, document = scenario(start_review=False)
     page = web.get(change)
     assert page.status_code == 200
-    assert "ANALISAR E PUBLICAR" in page.content.decode()
+    assert "ASSUMIR ANÁLISE E LIBERAR VISUALIZAÇÃO PRIVADA" in page.content.decode()
     response = web.post(action, combined_data(document), follow=True)
     assert response.status_code == 200
     for obj in (profile, readiness, item, document):

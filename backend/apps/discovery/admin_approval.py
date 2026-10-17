@@ -10,6 +10,7 @@ from django.utils import timezone
 
 from apps.audit.models import AuditEvent
 from apps.marketplace.capabilities import enabled
+from apps.marketplace.documents import can_review_document
 from apps.marketplace.models import DataMode, InstructorDocument, InstructorOffer
 from apps.territories.models import RegulatoryReadiness
 from apps.territories.policies import (
@@ -102,10 +103,28 @@ def approval_panel(profile, actor):
         and (not profile.verified_until or profile.verified_until > timezone.now())
     )
     documents = list(verification.documents.select_related("requirement")) if verification else []
-    documents_ok = all(
+    documents_ok = bool(documents) and all(
         document.scan_status == InstructorDocument.ScanStatus.CLEAN
         and document.status == InstructorDocument.Status.APPROVED
         for document in documents
+    )
+    can_review_request = can_review(actor)
+    can_review_documents = can_review_request and can_review_document(actor)
+    can_open_documents = bool(
+        can_review_documents
+        and verification
+        and verification.status == ProfessionalVerificationRequest.Status.UNDER_REVIEW
+        and verification.reviewer_id == actor.id
+    )
+    # Only the assigned reviewer sees file metadata. Older uploads can be
+    # located, but cannot be downloaded through the current request.
+    document_inventory = (
+        list(
+            profile.documents.select_related("verification_request", "requirement")
+            .order_by("-uploaded_at", "-pk")
+        )
+        if can_open_documents
+        else []
     )
     area_ok = bool(area and area.location_authorized and area.public_service_location)
     blockers = []
@@ -153,6 +172,10 @@ def approval_panel(profile, actor):
         "verification": verification,
         "precheck": verification.get_precheck_status_display() if verification else "Não iniciada",
         "documents": documents,
+        "document_count": profile.documents.count() if can_review_documents else None,
+        "document_inventory": document_inventory,
+        "can_open_documents": can_open_documents,
+        "can_review_documents": can_review_documents,
         "pending_documents": pending_documents,
         "offers": offers,
         "category_rows": [
@@ -169,20 +192,10 @@ def approval_panel(profile, actor):
         "blockers": blockers,
         "ready_to_publish": not blockers and profile.publication_status != "APPROVED",
         "public": published_instructor_profiles().filter(pk=profile.pk).exists(),
-        "can_review": can_review(actor),
+        "can_review": can_review_request,
         "can_decide_verification": bool(
             verification
-            and (
-                (
-                    verification.status == ProfessionalVerificationRequest.Status.UNDER_REVIEW
-                    and verification.reviewer_id == actor.id
-                )
-                or (
-                    verification.status == ProfessionalVerificationRequest.Status.SUBMITTED
-                    and verification.reviewer_id in (None, actor.id)
-                )
-            )
-            and can_review(actor)
+            and can_open_documents
         ),
         "can_publish": can_manage_publication(actor),
         "can_regulatory": actor.has_perm("territories.change_regulatoryreadiness"),
