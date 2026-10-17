@@ -32,6 +32,25 @@
   testes focados após o ajuste final de privacidade, Ruff e Django check.
   Inicialmente validada localmente; publicação registrada acima.
 
+## Integração PWA e preparação iOS — 17/10/2026
+
+- Branch local `codex/pwa-mobile-integration` baseada em `origin/codemagic-ios`, com
+  os três commits locais posteriores de Admin/verificação preservados por
+  cherry-pick. Sem push, merge, VPS ou deploy.
+- Site Angular preparado como PWA instalável no Safari, com ícone da marca,
+  manifesto, safe areas, instruções de instalação, atualização consentida e
+  service worker que só guarda assets públicos e uma página offline genérica.
+  Detalhes e gates em `docs/PWA_MOBILE_AUDIT.md`.
+- O app Capacitor continua intencionalmente com busca anônima do aluno; login,
+  upload e cadastro autenticados permanecem no web até uma solução segura de
+  sessão nativa. Push VAPID/APNs e agendamento real não foram ativados.
+- Codemagic mantém simulador e IPA futuro, sem envio automático à Apple. O
+  proprietário informou build de simulador bem-sucedido; não foi reexecutado
+  localmente no Windows.
+- Validação local: 75 testes Angular, builds web/mobile, `cap sync ios`, build
+  Android debug e 4 testes do cache PWA passaram. Os avisos de orçamento
+  Angular preexistentes permanecem.
+
 ## Envio de solicitação completa pelo instrutor — 15/10/2026
 
 - Na modalidade real com upload habilitado, a API impede o envio inicial à fila
@@ -86,10 +105,31 @@
 - Ambos usam `npm ci`, build Angular mobile e `cap sync ios`. O IPA futuro exige
   certificado e provisioning profile App Store no painel Codemagic, além de
   integração App Store Connect chamada `instrutorpro_app_store_connect` para
+<<<<<<< HEAD
   envio ao TestFlight; nenhum segredo entrou no repositório. YAML validado
   localmente; build Angular mobile e `cap sync ios` passaram no Windows (dois
   avisos de orçamento já existentes). O proprietário informou build de
   simulador macOS bem-sucedido; não houve distribuição iOS.
+=======
+  assinatura futura; nenhum segredo entrou no repositório. O envio automático
+  ao TestFlight foi removido em 17/10/2026. YAML validado localmente; build
+  Angular mobile e `cap sync ios` passaram no Windows (dois avisos de
+  orçamento já existentes). O proprietário relatou build de simulador macOS
+  bem-sucedido; não foi reexecutado nesta branch nem houve distribuição iOS.
+
+## Admin de aprovação mais direto — 12/10/2026
+
+- A lista de fotos agora explica que aprovar uma foto não verifica nem publica
+  o instrutor, mostra nomes em vez de UUIDs e oferece atalhos para a fila de
+  verificação e os perfis reais quando a conta tem permissão de visualização.
+- A tela existente de aprovação do perfil destaca uma única ação principal,
+  `ANALISAR E PUBLICAR`, e recolhe ações separadas e edição de oferta em
+  seções opcionais. Documentos, consulta profissional, decisão da UF e
+  publicação continuam exigindo confirmação humana e auditoria.
+- A conta `FOCUS` mostrada na captura não recebe poderes novos: a decisão
+  combinada continua limitada ao administrador responsável configurado.
+  Esta alteração de interface não foi enviada à VPS sem autorização de deploy.
+>>>>>>> 717a08e (feat(pwa): prepare secure iPhone install and mobile release flow)
 
 ## Pré-validação e fila rápida de instrutores — 12/10/2026
 

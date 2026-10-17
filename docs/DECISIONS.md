@@ -2,6 +2,17 @@
 
 Este documento é a fonte oficial de decisões consolidadas, contradições resolvidas e questões em aberto. Uma recomendação marcada como aberta não é uma decisão aceita.
 
+### Direção de 17/10/2026 — frontend compartilhado e PWA
+
+O proprietário solicitou manter um só Angular para web/PWA, Android e futuro
+iOS nativo, sem duplicar regras ou contornar elegibilidade. O web/PWA pode
+oferecer os fluxos autenticados existentes com sessão e CSRF de mesma origem;
+o app Capacitor preserva por ora o escopo de descoberta anônima do aluno da
+decisão de 10/10/2026. Expandir autenticação, documentos ou jornadas de
+instrutor no nativo depende de desenho e teste de sessão segura, privacidade e
+revisão dos gates; não basta habilitar rotas. Push e envio à Apple são opções
+futuras, não ativação automática.
+
 ### Decisão operacional de 15/10/2026 — envio completo pelo instrutor
 
 Quando o envio real de documentos está habilitado, a solicitação inicial de

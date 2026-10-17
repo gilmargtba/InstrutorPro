@@ -18,6 +18,8 @@ describe('AppDownloadComponent', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('a[download]')).toBeNull();
     expect(fixture.nativeElement.textContent).toContain('ainda não está disponível');
+    expect(fixture.nativeElement.textContent).toContain('Adicionar à Tela de Início');
+    expect(fixture.nativeElement.textContent).toContain('não um aplicativo da App Store');
   });
 
   it('offers only the exact local APK when present with the expected MIME', async () => {

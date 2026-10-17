@@ -7,7 +7,8 @@
     "build": "ng build",
     "build:mobile": "ng build --configuration production,mobile",
     "mobile:sync": "npm run build:mobile && cap sync",
-    "test": "ng test --watch=false"
+    "test": "ng test --watch=false",
+    "test:pwa": "node --test scripts/test-pwa.mjs"
   },
   "dependencies": {
     "@angular/common": "^22.1.3",
