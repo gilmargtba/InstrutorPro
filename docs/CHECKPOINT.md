@@ -1,5 +1,21 @@
 # Checkpoint do Projeto
 
+## Deploy do painel de revisão administrativa — 17/10/2026
+
+- Os três commits de Admin foram selecionados sobre `origin/main`, sem incluir
+  PWA/iOS nem a alteração pendente do envio de cadastro. A branch exata passou
+  em 410 testes backend, Ruff, Django check e migrations check.
+- `origin/main` recebeu `68d883b`; a VPS avançou por `git pull --ff-only`
+  após backup validado de PostgreSQL e documentos privados em
+  `/home/gilmar/backups/instrutorpro/production/` (`20261017T162723Z`). Não
+  houve migration nova. Backend, worker e scheduler foram reconstruídos; o
+  frontend foi somente reiniciado para renovar o IP do backend no Nginx.
+- Health do backend e smoke HTTPS de readiness, busca pública e login Admin
+  retornaram 200. Nenhuma UF, documento ou instrutor foi aprovado pelo deploy.
+  A edição local do gateway e os arquivos `.env` não versionados foram
+  preservados. O gateway não foi reiniciado: `nginx -t` aponta host ausente
+  `gestor_reposicao_api`, pendência operacional externa a esta fatia.
+
 ## Revisão administrativa de instrutores — 17/10/2026
 
 - O painel do perfil real agora destaca o primeiro passo de assumir a solicitação,
@@ -14,7 +30,7 @@
   não continha arquivo algum. Nenhuma verificação, UF ou perfil foi aprovado
   automaticamente. Validação: 412 testes backend na primeira revisão, 67
   testes focados após o ajuste final de privacidade, Ruff e Django check.
-  Alteração somente local, sem push ou deploy.
+  Inicialmente validada localmente; publicação registrada acima.
 
 ## Aprovação do instrutor — atalho para revisão da UF — 15/10/2026
 
