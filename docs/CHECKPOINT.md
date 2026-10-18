@@ -1,6 +1,6 @@
 # Checkpoint do Projeto
 
-## Preparação de publicação de cadastro e PWA — 18/10/2026
+## Deploy de cadastro completo e PWA — 18/10/2026
 
 - Os commits de workflow iOS manual, validação de envio completo do instrutor e
   PWA foram integrados sobre `origin/main` em branch exclusiva. Os conflitos
@@ -9,9 +9,20 @@
 - Validação desta integração: 412 testes backend em Docker local, 75 testes
   Angular, 4 testes do service worker, builds web e mobile, Ruff, Django check
   e migrations check aprovados. O build mantém avisos preexistentes de orçamento.
-- Push e deploy ainda dependem da conferência final desta fatia. Nenhuma flag
-  de coleta visual, pagamento ou publicação automática é ativada por estes
-  commits; UF, documentos e instrutor seguem sujeitos à revisão humana.
+- `origin/main` e a VPS receberam `f543471` por push e `git pull --ff-only`.
+  Antes do pull, o backup validado do banco e dos documentos privados foi
+  salvo em `/home/gilmar/backups/instrutorpro/production/` com marcador
+  `20261018T032622Z`. Backend, worker, scheduler e frontend foram atualizados;
+  nenhuma migration nova foi aplicada, e Django check passou na VPS.
+- Backend, banco, Redis e ClamAV terminaram saudáveis. HTTPS respondeu 200
+  para página inicial, readiness, login Admin, estados dos instrutores,
+  página de download, manifesto e service worker. Manifesto e service worker
+  têm MIME correto e `Cache-Control: no-cache`. O gateway não foi reiniciado,
+  e a edição local preexistente dele permaneceu intocada.
+- Nenhuma flag de coleta visual, pagamento ou publicação automática foi ativada
+  por estes commits; UF, documentos e instrutor seguem sujeitos à revisão
+  humana. Instalação e sessão no Safari de um iPhone real ainda não foram
+  ensaiadas; o workflow IPA não publica automaticamente na Apple.
 
 ## Deploy do painel de revisão administrativa — 17/10/2026
 
