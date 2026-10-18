@@ -1,5 +1,18 @@
 # Checkpoint do Projeto
 
+## Preparação de publicação de cadastro e PWA — 18/10/2026
+
+- Os commits de workflow iOS manual, validação de envio completo do instrutor e
+  PWA foram integrados sobre `origin/main` em branch exclusiva. Os conflitos
+  eram apenas registros concorrentes deste checkpoint; nenhuma regra foi
+  removida. A configuração iOS não envia builds automaticamente à Apple.
+- Validação desta integração: 412 testes backend em Docker local, 75 testes
+  Angular, 4 testes do service worker, builds web e mobile, Ruff, Django check
+  e migrations check aprovados. O build mantém avisos preexistentes de orçamento.
+- Push e deploy ainda dependem da conferência final desta fatia. Nenhuma flag
+  de coleta visual, pagamento ou publicação automática é ativada por estes
+  commits; UF, documentos e instrutor seguem sujeitos à revisão humana.
+
 ## Deploy do painel de revisão administrativa — 17/10/2026
 
 - Os três commits de Admin foram selecionados sobre `origin/main`, sem incluir
@@ -105,31 +118,11 @@
 - Ambos usam `npm ci`, build Angular mobile e `cap sync ios`. O IPA futuro exige
   certificado e provisioning profile App Store no painel Codemagic, além de
   integração App Store Connect chamada `instrutorpro_app_store_connect` para
-<<<<<<< HEAD
-  envio ao TestFlight; nenhum segredo entrou no repositório. YAML validado
-  localmente; build Angular mobile e `cap sync ios` passaram no Windows (dois
-  avisos de orçamento já existentes). O proprietário informou build de
-  simulador macOS bem-sucedido; não houve distribuição iOS.
-=======
   assinatura futura; nenhum segredo entrou no repositório. O envio automático
   ao TestFlight foi removido em 17/10/2026. YAML validado localmente; build
   Angular mobile e `cap sync ios` passaram no Windows (dois avisos de
   orçamento já existentes). O proprietário relatou build de simulador macOS
   bem-sucedido; não foi reexecutado nesta branch nem houve distribuição iOS.
-
-## Admin de aprovação mais direto — 12/10/2026
-
-- A lista de fotos agora explica que aprovar uma foto não verifica nem publica
-  o instrutor, mostra nomes em vez de UUIDs e oferece atalhos para a fila de
-  verificação e os perfis reais quando a conta tem permissão de visualização.
-- A tela existente de aprovação do perfil destaca uma única ação principal,
-  `ANALISAR E PUBLICAR`, e recolhe ações separadas e edição de oferta em
-  seções opcionais. Documentos, consulta profissional, decisão da UF e
-  publicação continuam exigindo confirmação humana e auditoria.
-- A conta `FOCUS` mostrada na captura não recebe poderes novos: a decisão
-  combinada continua limitada ao administrador responsável configurado.
-  Esta alteração de interface não foi enviada à VPS sem autorização de deploy.
->>>>>>> 717a08e (feat(pwa): prepare secure iPhone install and mobile release flow)
 
 ## Pré-validação e fila rápida de instrutores — 12/10/2026
 
