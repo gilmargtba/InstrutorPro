@@ -1,5 +1,19 @@
 # Checkpoint do Projeto
 
+## CFC privado — 18/10/2026
+
+- Implementado localmente, sem push ou deploy: card profissional para CFC,
+  painel privado com quantidade declarada, pré-cadastro individual de contas
+  inativas e ativação com senha/aceites pelo próprio instrutor. O Admin deve
+  provisionar CFC e responsável; autoinscrição pública permanece fechada.
+- Vínculo não confere verificação, aprovação de UF, oferta ou publicação.
+  Contas existentes não são vinculadas automaticamente. Testes de SMTP real e
+  jornada humana ainda são pendências antes de habilitação operacional.
+- Validação local: 418 testes backend (incluindo seis casos de CFC), 77 testes
+  Angular, migrations check e Django check sem pendências, Ruff limpo e build
+  Angular de produção concluído. Os avisos de orçamento do bundle e de Zone.js
+  já existiam.
+
 ## Deploy de cadastro completo e PWA — 18/10/2026
 
 - Os commits de workflow iOS manual, validação de envio completo do instrutor e

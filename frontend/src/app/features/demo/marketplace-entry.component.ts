@@ -40,10 +40,10 @@ export class LoginComponent {
       return;
     }
     this.sending.set(true);
-    this.http.post<{roles:string[];is_staff:boolean}>('/marketplace/session/login/', {email:this.email.trim(),password:this.password}).subscribe({
+    this.http.post<{roles:string[];is_staff:boolean;has_cfc_access:boolean}>('/marketplace/session/login/', {email:this.email.trim(),password:this.password}).subscribe({
       next:r=>{
         this.sending.set(false);
-        const target=r.is_staff?'/admin/':r.roles.includes('INSTRUCTOR')?'/instrutor':r.roles.includes('STUDENT')?'/aluno/painel':'/';
+        const target=r.is_staff?'/admin/':r.has_cfc_access?'/cfc':r.roles.includes('INSTRUCTOR')?'/instrutor':r.roles.includes('STUDENT')?'/aluno/painel':'/';
         if(target==='/admin/')window.location.assign(target);else void this.router.navigate([target]);
       },
       error:(failure: HttpErrorResponse)=>{

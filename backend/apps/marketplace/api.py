@@ -401,7 +401,15 @@ class SessionLoginView(APIView):
                 person__account=user, revoked_at__isnull=True
             ).values_list("role", flat=True)
         )
-        return Response({"account_id": user.id, "roles": roles, "is_staff": user.is_staff})
+        from apps.organizations.models import CFCMembership
+
+        has_cfc_access = CFCMembership.objects.filter(
+            person__account=user, is_active=True, cfc__is_active=True
+        ).exists()
+        return Response({
+            "account_id": user.id, "roles": roles, "is_staff": user.is_staff,
+            "has_cfc_access": has_cfc_access,
+        })
 
 
 class PasswordResetRequestSerializer(serializers.Serializer):

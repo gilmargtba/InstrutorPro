@@ -1,5 +1,16 @@
 # Modelo de Domínio
 
+## Vínculo privado CFC–instrutor
+
+`CFC` é organização distinta da operadora e de `Clinic`; `CFCMembership`
+autoriza o painel privado do responsável. `CFCInstructorLink` liga um CFC a
+uma conta individual em `PENDING → ACCEPTED`. O pré-cadastro mantém a conta
+inativa, sem senha utilizável e sem perfil; a ativação pelo próprio instrutor
+cria `Person`, `RoleAssignment(INSTRUCTOR)`, `InstructorProfile(DRAFT)` e
+`LegalAcceptanceRecord` versionado. A contagem declarada pelo CFC é informativa,
+separada das contagens de pré-cadastros e contas ativadas. Nenhum desses estados
+altera verificação profissional, elegibilidade regulatória ou publicação.
+
 ## CODEX 02E — workflow profissional DEMO auditado
 
 O workflow sintético possui transições explícitas e transacionais:

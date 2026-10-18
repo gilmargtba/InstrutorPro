@@ -1,5 +1,14 @@
 # Backlog Priorizado
 
+## CFC-001 — painel privado e pré-cadastro individual (18/10/2026)
+
+- [x] entidade CFC separada, responsável autorizado e contagens privadas;
+- [x] pré-cadastro inativo por nome/e-mail, convite e ativação pelo próprio instrutor;
+- [x] perfil inicial não publicado e aceite jurídico individual;
+- [ ] autoinscrição pública do CFC depende de termos e política de adesão;
+- [ ] associação de conta de instrutor já existente exige fluxo de aceite separado;
+- [ ] validar envio SMTP e jornada com CFC/instrutor reais antes de produção.
+
 ## CODEX 02E — concluído em 24/08/2026
 
 - [x] serviços auditados para perfil, verificação, publicação e localização;

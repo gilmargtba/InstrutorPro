@@ -13,6 +13,7 @@ PII_FIELD_ENCRYPTION_KEY = "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA="
 PII_FINGERPRINT_KEY = "test-only-fingerprint-key-with-32-bytes-minimum"
 DEMAND_MAP_MIN_AGGREGATION_COUNT = 3
 REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"] = {  # noqa: F405
+    "cfc_pre_registration": "10000/minute",
     "registration": "10000/minute",
     "login": "10000/minute",
     "password_reset": "10000/minute",

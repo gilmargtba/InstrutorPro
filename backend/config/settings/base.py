@@ -236,6 +236,9 @@ DEFAULT_FROM_EMAIL = os.getenv("DJANGO_DEFAULT_FROM_EMAIL", "no-reply@instrutorp
 FRONTEND_PUBLIC_URL = os.getenv("FRONTEND_PUBLIC_URL", "http://localhost:4200").rstrip("/")
 
 REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"] = {
+    "cfc_pre_registration": os.getenv(
+        "CFC_PRE_REGISTRATION_THROTTLE_RATE", "10000/minute" if APP_ENV == "TEST" else "60/hour"
+    ),
     "registration": os.getenv(
         "REGISTRATION_THROTTLE_RATE", "10000/minute" if APP_ENV == "TEST" else "5/hour"
     ),

@@ -2,6 +2,18 @@
 
 Este documento é a fonte oficial de decisões consolidadas, contradições resolvidas e questões em aberto. Uma recomendação marcada como aberta não é uma decisão aceita.
 
+### Decisão do proprietário de 18/10/2026 — CFC pré-cadastra instrutores
+
+O CFC informa sua quantidade de instrutores e cria um pré-cadastro por pessoa,
+em vez de apenas convidar uma conta já existente. Por segurança, o CFC não
+define nem conhece a senha final e não aceita termos em nome do instrutor.
+O titular confirma o vínculo e ativa a conta por link de e-mail. Até isso
+ocorrer, a conta é inativa e o perfil não existe. Mesmo depois da ativação,
+verificação, UF, ofertas e publicação mantêm decisões separadas. Contas já
+existentes não são assumidas automaticamente pelo CFC. Autoinscrição pública
+de CFC permanece aberta até existirem termos e política de adesão próprios;
+o primeiro acesso é provisionado pelo Admin.
+
 ### Direção de 17/10/2026 — frontend compartilhado e PWA
 
 O proprietário solicitou manter um só Angular para web/PWA, Android e futuro

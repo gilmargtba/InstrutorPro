@@ -2,6 +2,16 @@
 
 Este documento é a fonte oficial de fronteiras. Outros documentos podem detalhar, mas não incluir funcionalidade por conta própria.
 
+## Emenda CFC do proprietário — 18/10/2026
+
+O CFC terá um painel privado para informar quantos instrutores integra e iniciar
+o pré-cadastro individual por nome/e-mail. A conta nasce inativa e sem senha
+utilizável; cada instrutor define sua senha, aceita seus próprios termos e o
+vínculo com o CFC antes de acessar o onboarding. A habilitação inicial do CFC
+e de seus responsáveis é administrativa enquanto termos específicos da
+organização não forem aprovados. O vínculo não verifica, credencia, aprova UF,
+cria oferta nem publica instrutor. Busca e contato seguem os gates individuais.
+
 ## Emenda mobile do proprietário — 10/10/2026
 
 O app Android/iOS do **aluno** pode reutilizar o Angular existente via Capacitor

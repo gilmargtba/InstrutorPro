@@ -133,3 +133,64 @@ class ClinicMembership(models.Model):
 
     def __str__(self):
         return f"{self.clinic_id}:{self.person_id}"
+
+
+class CFC(models.Model):
+    """Training centre; never the marketplace controller or an instructor identity."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    display_name = models.CharField("nome do CFC", max_length=150)
+    cnpj = models.CharField("CNPJ", max_length=14, unique=True, validators=[validate_cnpj])
+    declared_instructor_count = models.PositiveIntegerField("instrutores informados", default=0)
+    is_active = models.BooleanField("acesso ao painel autorizado", default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "CFC"
+        verbose_name_plural = "CFCs"
+
+    def __str__(self):
+        return self.display_name
+
+    def clean(self):
+        super().clean()
+        self.cnpj = normalize_cnpj(self.cnpj)
+
+
+class CFCMembership(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    cfc = models.ForeignKey(CFC, on_delete=models.PROTECT, related_name="memberships")
+    person = models.ForeignKey(Person, on_delete=models.PROTECT, related_name="cfc_memberships")
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "responsável pelo CFC"
+        verbose_name_plural = "responsáveis pelos CFCs"
+        constraints = [models.UniqueConstraint(fields=["cfc", "person"], name="uq_cfc_person")]
+
+    def __str__(self):
+        return f"{self.cfc_id}:{self.person_id}"
+
+
+class CFCInstructorLink(models.Model):
+    class Status(models.TextChoices):
+        PENDING = "PENDING", "Aguardando instrutor"
+        ACCEPTED = "ACCEPTED", "Aceito pelo instrutor"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    cfc = models.ForeignKey(CFC, on_delete=models.PROTECT, related_name="instructor_links")
+    account = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="cfc_instructor_link"
+    )
+    display_name = models.CharField("nome informado", max_length=120)
+    status = models.CharField(max_length=12, choices=Status.choices, default=Status.PENDING)
+    invited_at = models.DateTimeField(auto_now_add=True)
+    accepted_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = "pré-cadastro de instrutor do CFC"
+        verbose_name_plural = "pré-cadastros de instrutores dos CFCs"
+
+    def __str__(self):
+        return f"{self.cfc_id}:{self.account_id}"

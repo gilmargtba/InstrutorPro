@@ -1,7 +1,7 @@
 from django.contrib import admin, messages
 
 from .forms import PlatformOrganizationAdminForm
-from .models import PlatformOrganization
+from .models import CFC, CFCInstructorLink, CFCMembership, PlatformOrganization
 from .policies import can_manage_platform_organization, can_validate_platform_organization
 from .services import (
     EDITABLE_FIELDS,
@@ -139,3 +139,37 @@ class PlatformOrganizationAdmin(admin.ModelAdmin):
                 f"{success} organização(ões) validada(s) e auditada(s).",
                 messages.SUCCESS,
             )
+
+
+@admin.register(CFC)
+class CFCAdmin(admin.ModelAdmin):
+    list_display = ("display_name", "cnpj", "declared_instructor_count", "is_active")
+    search_fields = ("display_name", "cnpj")
+    readonly_fields = ("created_at",)
+
+    def save_model(self, request, obj, form, change):
+        obj.full_clean()
+        super().save_model(request, obj, form, change)
+
+
+@admin.register(CFCMembership)
+class CFCMembershipAdmin(admin.ModelAdmin):
+    list_display = ("cfc", "person", "is_active", "created_at")
+    list_filter = ("is_active",)
+    autocomplete_fields = ("person",)
+    readonly_fields = ("created_at",)
+
+
+@admin.register(CFCInstructorLink)
+class CFCInstructorLinkAdmin(admin.ModelAdmin):
+    list_display = ("cfc", "display_name", "status", "invited_at", "accepted_at")
+    readonly_fields = ("cfc", "account", "display_name", "status", "invited_at", "accepted_at")
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
