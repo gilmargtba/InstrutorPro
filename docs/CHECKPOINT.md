@@ -1,5 +1,18 @@
 # Checkpoint do Projeto
 
+## Entrada CFC no menu web — 18/10/2026
+
+- O menu principal web passou a mostrar "CFC / Autoescola" com página própria
+  de orientação e acesso ao painel privado. O app nativo do aluno mantém sua
+  navegação restrita. A página não simula auto-cadastro público: a habilitação
+  inicial do CFC e do responsável continua administrativa até a aprovação dos
+  termos e da política de adesão da organização.
+- Nenhum CFC, responsável ou instrutor é criado por esta mudança de navegação;
+  vínculos e publicação continuam sujeitos às políticas já existentes.
+- Validação local: 78 testes Angular aprovados e build de produção concluído;
+  os avisos de orçamento do bundle persistem. Ainda sem push/deploy desta
+  alteração de navegação.
+
 ## CFC privado — 18/10/2026
 
 - Publicado em `origin/main` e na VPS no commit `c26ec13`: card profissional para CFC,

@@ -11,7 +11,7 @@ O titular confirma o vínculo e ativa a conta por link de e-mail. Até isso
 ocorrer, a conta é inativa e o perfil não existe. Mesmo depois da ativação,
 verificação, UF, ofertas e publicação mantêm decisões separadas. Contas já
 existentes não são assumidas automaticamente pelo CFC. Autoinscrição pública
-de CFC permanece aberta até existirem termos e política de adesão próprios;
+de CFC permanece fechada até existirem termos e política de adesão próprios;
 o primeiro acesso é provisionado pelo Admin.
 
 ### Direção de 17/10/2026 — frontend compartilhado e PWA

@@ -5,6 +5,7 @@
 - [x] entidade CFC separada, responsável autorizado e contagens privadas;
 - [x] pré-cadastro inativo por nome/e-mail, convite e ativação pelo próprio instrutor;
 - [x] perfil inicial não publicado e aceite jurídico individual;
+- [x] entrada pública CFC/Autoescola no menu web com acesso ao painel privado e informação clara sobre cadastro administrativo;
 - [ ] autoinscrição pública do CFC depende de termos e política de adesão;
 - [ ] associação de conta de instrutor já existente exige fluxo de aceite separado;
 - [ ] validar envio SMTP e jornada com CFC/instrutor reais antes de produção.

@@ -2,7 +2,19 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, provideRouter, Router } from '@angular/router';
-import { CFCDashboardComponent, CFCInstructorActivationComponent } from './cfc-pages.component';
+import { CFCDashboardComponent, CFCEntryComponent, CFCInstructorActivationComponent } from './cfc-pages.component';
+
+describe('CFCEntryComponent', () => {
+  it('shows the CFC access path without promising public self-registration', () => {
+    TestBed.configureTestingModule({imports: [CFCEntryComponent], providers: [provideRouter([])]});
+    const fixture = TestBed.createComponent(CFCEntryComponent);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    expect(root.textContent).toContain('O auto-cadastro público ainda não está disponível');
+    expect(root.querySelector('a[href="/entrar"]')).not.toBeNull();
+    expect(root.querySelector('a[href="/cfc"]')).not.toBeNull();
+  });
+});
 
 describe('CFCDashboardComponent', () => {
   beforeEach(() => TestBed.configureTestingModule({

@@ -24,6 +24,16 @@ type CfcLink = { id: string; display_name: string; email: string; status: 'PENDI
 export class ProfessionalLandingComponent {}
 
 @Component({
+  selector: 'app-cfc-entry',
+  imports: [RouterLink],
+  template: `<section class="page narrow"><header class="page-head"><div><p class="eyebrow">CFC / Autoescola</p><h1>Cadastro de CFC</h1><p>O cadastro inicial do CFC e de seu responsável é feito pela administração da plataforma. O auto-cadastro público ainda não está disponível.</p></div></header>
+    <article class="entry-card"><h2>Seu CFC já foi habilitado?</h2><p>Entre com a conta do responsável e acompanhe os instrutores pré-cadastrados no painel privado.</p><div class="entry-actions"><a class="button primary" routerLink="/entrar">Entrar como responsável</a><a class="button secondary" routerLink="/cfc">Abrir painel do CFC</a></div></article>
+    <p>Se o CFC ainda não foi habilitado, solicite o cadastro à administração da plataforma. Não envie CNH ou documentos pessoais por e-mail. Cada instrutor confirma o próprio vínculo antes de ativar sua conta; isso não aprova nem publica seu perfil.</p></section>`,
+  styles: [`.entry-card{padding:1.5rem;border:1px solid #c8dcd8;border-radius:1rem;background:#fff}.entry-actions{display:flex;flex-wrap:wrap;gap:.75rem;margin-top:1rem}`],
+})
+export class CFCEntryComponent {}
+
+@Component({
   selector: 'app-cfc-dashboard',
   imports: [FormsModule, RouterLink],
   template: `<section class="page wide"><header class="page-head"><div><p class="eyebrow">Painel privado do CFC</p><h1>Instrutores vinculados</h1></div><a routerLink="/profissional">Área profissional</a></header>
