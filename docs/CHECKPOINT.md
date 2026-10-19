@@ -2,7 +2,7 @@
 
 ## CFC privado — 18/10/2026
 
-- Implementado localmente, sem push ou deploy: card profissional para CFC,
+- Publicado em `origin/main` e na VPS no commit `c26ec13`: card profissional para CFC,
   painel privado com quantidade declarada, pré-cadastro individual de contas
   inativas e ativação com senha/aceites pelo próprio instrutor. O Admin deve
   provisionar CFC e responsável; autoinscrição pública permanece fechada.
@@ -13,6 +13,14 @@
   Angular, migrations check e Django check sem pendências, Ruff limpo e build
   Angular de produção concluído. Os avisos de orçamento do bundle e de Zone.js
   já existiam.
+- Backup validado antes do deploy: banco e documentos privados com marcador
+  `20261018T235536Z`. Migração CFC aplicada na inicialização do backend,
+  `migrate --check` aprovado. Em produção havia 0 CFCs, 0 convites pendentes
+  e 0 vínculos aceitos após o deploy; nenhum instrutor existente foi vinculado.
+- O gateway precisou de resolução dinâmica de upstreams após a recriação do
+  frontend. A configuração foi validada com `nginx -t`; readiness e `/cfc`
+  responderam 200, e a API privada CFC respondeu 403 sem autenticação.
+  Permanecem avisos conhecidos do Django/OpenAPI e orçamento do bundle.
 
 ## Deploy de cadastro completo e PWA — 18/10/2026
 
