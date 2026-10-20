@@ -49,4 +49,14 @@ describe('InstructorSearchProvider radius', () => {
     expect(request.request.params.get('vehicle_available')).toBe('false');
     request.flush({count: 0, results: []});
   });
+
+  it('scopes a city click to its city and UF without adding a radius', () => {
+    TestBed.inject(InstructorSearchProvider).search(-18, -49, filters, 'GO', 'Goiatuba').subscribe();
+    const request = TestBed.inject(HttpTestingController).expectOne(request =>
+      request.url === '/instructors/search/');
+    expect(request.request.params.get('uf')).toBe('GO');
+    expect(request.request.params.get('city')).toBe('Goiatuba');
+    expect(request.request.params.has('radius_km')).toBeFalse();
+    request.flush({count: 0, results: []});
+  });
 });

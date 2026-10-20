@@ -1,5 +1,20 @@
 # Checkpoint do Projeto
 
+## Seleção de cidade na busca nacional — 20/10/2026
+
+- A página nacional lista cidades com instrutores pesquisáveis por UF. Clicar
+  numa cidade abre o mapa local com geocodificação conferida pela mesma UF e
+  consulta explícita por cidade/UF; os marcadores e a lista usam a mesma API.
+  O marcador mostra a foto de perfil aprovada quando disponível, ou iniciais;
+  documentos privados não são usados no mapa.
+- A busca manual sem raio permanece nacional, conforme a decisão comercial.
+  As contagens exigem perfil publicado, ponto público e oferta ativa de uma
+  categoria declarada. Nenhum gate de verificação, UF ou publicação foi alterado.
+- Validação local: 419 testes backend, Django check, migrations check, Ruff
+  check geral, 83 testes Angular e build de produção aprovados. O format check
+  geral ainda aponta arquivos preexistentes fora desta fatia; os avisos de orçamento do bundle
+  permanecem. Sem push/deploy nem alteração na VPS.
+
 ## Busca no mapa com foco nos marcadores — 20/10/2026
 
 - A busca local abre o mapa em largura quase total e altura adaptada à tela,

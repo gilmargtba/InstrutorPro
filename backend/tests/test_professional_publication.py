@@ -624,10 +624,51 @@ def test_national_summary_counts_only_published_instructors(actor):
     assert response.status_code == 200
     assert response.json() == {
         "states": [
-            {"uf": "RS", "count": 2, "search_location": "Porto Alegre"},
-            {"uf": "SP", "count": 1, "search_location": "São Paulo"},
+            {
+                "uf": "RS",
+                "count": 2,
+                "search_location": "Porto Alegre",
+                "cities": [{"name": "Porto Alegre", "count": 2}],
+            },
+            {
+                "uf": "SP",
+                "count": 1,
+                "search_location": "São Paulo",
+                "cities": [{"name": "São Paulo", "count": 1}],
+            },
         ]
     }
+
+
+@pytest.mark.django_db
+def test_city_summary_and_city_search_only_include_matching_published_profiles(actor):
+    make_profile(actor)
+    _, area, *_ = make_profile(actor)
+    area.city = "Caxias do Sul"
+    area.public_service_location = Point(-51.18, -29.17, srid=4326)
+    area.save(update_fields=["city", "public_service_location"])
+    response = APIClient().get("/api/v1/instructors/states/")
+    assert response.status_code == 200
+    assert response.json()["states"][0]["cities"] == [
+        {"name": "Caxias do Sul", "count": 1},
+        {"name": "Porto Alegre", "count": 1},
+    ]
+    search = APIClient().get(
+        "/api/v1/instructors/search/",
+        {"latitude": -29.17, "longitude": -51.18, "uf": "RS", "city": "Caxias do Sul"},
+    )
+    assert search.status_code == 200
+    assert search.json()["count"] == 1
+    assert search.json()["results"][0]["city"] == "Caxias do Sul"
+    assert (
+        APIClient()
+        .get(
+            "/api/v1/instructors/search/",
+            {"latitude": -29.17, "longitude": -51.18, "uf": "SP", "city": "Caxias do Sul"},
+        )
+        .json()["count"]
+        == 0
+    )
 
 
 @pytest.mark.django_db

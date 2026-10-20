@@ -50,7 +50,7 @@ from .models import (
     ProfessionalVerificationRequest,
 )
 from .selectors import (
-    published_instructor_counts_by_uf,
+    published_instructor_counts_by_city,
     published_instructor_profiles,
     search_published_instructors,
 )
@@ -331,6 +331,7 @@ class SearchParameters(serializers.Serializer):
     latitude = serializers.FloatField(min_value=-90, max_value=90)
     longitude = serializers.FloatField(min_value=-180, max_value=180)
     uf = serializers.ChoiceField(choices=sorted(BRAZIL_UFS), required=False)
+    city = serializers.CharField(max_length=100, required=False, allow_blank=False)
     radius_km = serializers.IntegerField(min_value=1, max_value=5000, required=False)
     category = serializers.ChoiceField(choices=["A", "B", "C", "D", "E"], required=False)
     transmission = serializers.ChoiceField(choices=["MANUAL", "AUTOMATIC"], required=False)
@@ -396,6 +397,7 @@ class InstructorStateSummary(serializers.Serializer):
     uf = serializers.CharField()
     count = serializers.IntegerField()
     search_location = serializers.CharField()
+    cities = serializers.ListField(child=serializers.DictField())
 
 
 class GeocodingResponse(serializers.Serializer):
@@ -430,6 +432,7 @@ class InstructorSearchView(APIView):
                 "latitude",
                 "longitude",
                 "uf",
+                "city",
                 "radius_km",
                 "category",
                 "transmission",
@@ -692,13 +695,19 @@ class InstructorStateSummaryView(APIView):
 
     @extend_schema(responses=InstructorStateSummary(many=True))
     def get(self, request):
+        cities_by_uf = {}
+        for row in published_instructor_counts_by_city():
+            cities_by_uf.setdefault(row["service_area__uf"], []).append(
+                {"name": row["service_area__city"], "count": row["total"]}
+            )
         results = [
             {
-                "uf": row["service_area__uf"],
-                "count": row["total"],
-                "search_location": row["search_location"],
+                "uf": uf,
+                "count": sum(city["count"] for city in cities),
+                "search_location": cities[0]["name"],
+                "cities": cities,
             }
-            for row in published_instructor_counts_by_uf()
+            for uf, cities in sorted(cities_by_uf.items())
         ]
         return Response({"states": results})
 

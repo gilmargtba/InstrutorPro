@@ -102,6 +102,10 @@ Brasil; ponto inicial serve para ordenar por proximidade, não para restringir
 UF. Permanecem o limite técnico de resultados e os filtros escolhidos pelo
 aluno. Nenhuma categoria/UF ou perfil é aprovado automaticamente.
 
+Esclarecimento de 20/10/2026: o clique explícito em uma cidade da página
+nacional restringe aquela consulta à cidade e UF selecionadas. A busca manual
+sem esse recorte continua podendo alcançar todo o Brasil, sem limite de raio.
+
 ### Decisão do proprietário de 05/10/2026 — painel único de aprovação/publicação
 
 O Admin do perfil real reúne cadastro, documentos privados, verificação,

@@ -36,12 +36,23 @@ def published_instructor_profiles():
     return queryset.distinct()
 
 
-def published_instructor_counts_by_uf():
+def published_instructor_counts_by_city():
+    data_mode = "SYNTHETIC" if settings.SYNTHETIC_MARKETPLACE_ENABLED else "REAL"
+    eligible_offer = Q()
+    for category in ("A", "B", "C", "D", "E"):
+        eligible_offer |= Q(
+            categories__contains=[category],
+            offers__category=category,
+            offers__is_active=True,
+            offers__data_mode=data_mode,
+        )
     return (
         published_instructor_profiles()
-        .values("service_area__uf")
-        .annotate(total=Count("id"), search_location=Min("service_area__city"))
-        .order_by("service_area__uf")
+        .filter(service_area__public_service_location__isnull=False)
+        .filter(eligible_offer)
+        .values("service_area__uf", "service_area__city")
+        .annotate(total=Count("id", distinct=True))
+        .order_by("service_area__uf", "service_area__city")
     )
 
 
@@ -50,6 +61,7 @@ def search_published_instructors(
     latitude,
     longitude,
     uf=None,
+    city=None,
     category=None,
     radius_km=None,
     transmission=None,
@@ -70,6 +82,8 @@ def search_published_instructors(
         )
     if uf:
         queryset = queryset.filter(service_area__uf=uf)
+    if city:
+        queryset = queryset.filter(service_area__city__iexact=city)
     if transmission:
         queryset = queryset.filter(transmission_options__contains=[transmission])
     if vehicle_available is not None:

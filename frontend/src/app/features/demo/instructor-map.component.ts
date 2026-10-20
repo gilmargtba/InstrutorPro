@@ -295,6 +295,9 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
   pendingLocation: GeocodingResult | null = null;
   confirmedUf = '';
   contactError = '';
+  private cityScope = '';
+  private ufScope = '';
+  private scopedLocation = '';
   private readonly locationQueries = new Subject<string>();
 
   constructor() {
@@ -323,6 +326,13 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
       }
     }
     const routedLocation = this.route.snapshot.queryParamMap.get('local');
+    const routedCity = this.route.snapshot.queryParamMap.get('cidade');
+    const routedUf = this.route.snapshot.queryParamMap.get('uf');
+    if (routedLocation && routedCity && routedUf && this.brazilUfs.includes(routedUf as typeof BRAZIL_UFS[number])) {
+      this.cityScope = routedCity;
+      this.ufScope = routedUf;
+      this.scopedLocation = routedLocation;
+    }
     if (routedLocation) {
       this.filters.location = routedLocation;
       this.search();
@@ -334,6 +344,7 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
 
   search() {
     if (!this.filters.location.trim()) return;
+    if (this.cityScope && this.filters.location !== this.scopedLocation) this.clearCityScope();
     if (!this.anyDistance && (this.filters.radius === null || !Number.isInteger(this.filters.radius) || this.filters.radius < 1 || this.filters.radius > 5000)) {
       this.locationMessage = 'Informe um raio inteiro entre 1 e 5000 km ou selecione qualquer distância.';
       return;
@@ -349,7 +360,11 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
 
     this.api.geocode(this.filters.location).subscribe({
       next: (geocoding) => {
-        const point = geocoding.results[0];
+        const point = this.cityScope
+          ? geocoding.results.find(candidate =>
+              candidate.uf === this.ufScope &&
+              candidate.city.toLocaleLowerCase('pt-BR') === this.cityScope.toLocaleLowerCase('pt-BR'))
+          : geocoding.results[0];
         if (!point) { this.fail(); return; }
         this.acceptPoint(point);
       },
@@ -389,8 +404,12 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
   private searchFromPoint(point:GeocodingResult) {
         this.map.focus(point.latitude, point.longitude, 12);
         this.suggestions = [];
-        void this.router.navigate([], {queryParams:{local:point.label,uf:point.uf,categoria:this.filters.category || null,raio:this.filters.radius ?? 'todos'},replaceUrl:true});
-        this.api.search(point.latitude, point.longitude, this.filters).subscribe({
+        if (this.cityScope && point.uf !== this.ufScope) this.clearCityScope();
+        void this.router.navigate([], {queryParams:{local:this.cityScope ? this.scopedLocation : point.label,uf:point.uf,cidade:this.cityScope || null,categoria:this.filters.category || null,raio:this.filters.radius ?? 'todos'},replaceUrl:true});
+        const searchRequest = this.cityScope
+          ? this.api.search(point.latitude, point.longitude, this.filters, this.ufScope, this.cityScope)
+          : this.api.search(point.latitude, point.longitude, this.filters);
+        searchRequest.subscribe({
           next: (response) => {
             this.items = response.results;
             this.selected = null;
@@ -406,6 +425,7 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
 
   suggest(query:string) { if(query.trim().length >= 3) this.locationQueries.next(query.trim()); else this.suggestions=[]; }
   choose(place:GeocodingResult) {
+    this.clearCityScope();
     this.filters.location=place.label;
     this.suggestions=[];
     this.searched=true;
@@ -425,6 +445,7 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
   }
 
   private searchFromCoordinates(latitude:number, longitude:number) {
+    this.clearCityScope();
     this.locationMessage='Buscando instrutores próximos à localização autorizada.';
     this.searched=true;this.loading=true;this.error=false;this.scrollToResults();
     this.map.focus(latitude,longitude,12);
@@ -493,6 +514,12 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
   backToIntro() {
     this.searched = false;
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  private clearCityScope() {
+    this.cityScope = '';
+    this.ufScope = '';
+    this.scopedLocation = '';
   }
 
   initials(name: string) {

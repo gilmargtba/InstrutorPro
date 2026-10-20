@@ -13,7 +13,7 @@ describe('InstructorNationalMapComponent', () => {
     await TestBed.configureTestingModule({
       imports: [InstructorNationalMapComponent],
       providers: [
-        {provide: InstructorSearchProvider, useValue: {states: () => of({states: [{uf:'RS', count:3, search_location:'Porto Alegre'}]})}},
+        {provide: InstructorSearchProvider, useValue: {states: () => of({states: [{uf:'RS', count:3, search_location:'Porto Alegre', cities:[{name:'Porto Alegre',count:2},{name:'Caxias do Sul',count:1}]}]})}},
         {provide: Router, useValue: {navigate}},
       ],
     }).compileComponents();
@@ -24,9 +24,9 @@ describe('InstructorNationalMapComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('3 instrutores disponíveis');
-    fixture.componentInstance.openState('RS');
+    fixture.componentInstance.openCity('RS', 'Caxias do Sul');
     expect(navigate).toHaveBeenCalledWith(['/aluno/instrutores/mapa'], {
-      queryParams: {uf:'RS', local:'Porto Alegre'},
+      queryParams: {uf:'RS', local:'Caxias do Sul, RS', cidade:'Caxias do Sul'},
     });
     fixture.destroy();
   });

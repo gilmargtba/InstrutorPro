@@ -159,6 +159,44 @@ describe('InstructorMapComponent geolocation', () => {
     expect(fixture.componentInstance.anyDistance).toBeTrue();
   });
 
+  it('opens a clicked city with an explicit city and UF search', () => {
+    const route = TestBed.inject(ActivatedRoute);
+    spyOn(route.snapshot.queryParamMap, 'get').and.callFake(key => ({
+      local: 'Goiatuba, GO', cidade: 'Goiatuba', uf: 'GO',
+    })[key as 'local' | 'cidade' | 'uf'] ?? null);
+    const api = TestBed.inject(InstructorSearchProvider);
+    spyOn(api, 'geocode').and.returnValue(of({provider: 'MAPTILER', results: [{
+      id: 'place.1', label: 'Goiatuba, Goiás, Brasil', city: 'Goiatuba', uf: 'GO',
+      uf_resolution: 'RESOLVED', latitude: -18.01, longitude: -49.37,
+      place_type: 'place', bbox: null,
+    }]}));
+    const search = spyOn(api, 'search').and.returnValue(of(result));
+    const fixture = TestBed.createComponent(InstructorMapComponent);
+    fixture.detectChanges();
+    expect(search).toHaveBeenCalledWith(-18.01, -49.37, fixture.componentInstance.filters, 'GO', 'Goiatuba');
+    fixture.componentInstance.filters.location = 'Brasília';
+    fixture.componentInstance.search();
+    expect(search).toHaveBeenCalledWith(-18.01, -49.37, fixture.componentInstance.filters);
+  });
+
+  it('does not widen a clicked city search when geocoding resolves another UF', () => {
+    const route = TestBed.inject(ActivatedRoute);
+    spyOn(route.snapshot.queryParamMap, 'get').and.callFake(key => ({
+      local: 'Goiatuba, GO', cidade: 'Goiatuba', uf: 'GO',
+    })[key as 'local' | 'cidade' | 'uf'] ?? null);
+    const api = TestBed.inject(InstructorSearchProvider);
+    spyOn(api, 'geocode').and.returnValue(of({provider: 'MAPTILER', results: [{
+      id: 'place.2', label: 'Goiatuba, MG', city: 'Goiatuba', uf: 'MG',
+      uf_resolution: 'RESOLVED', latitude: -18, longitude: -49,
+      place_type: 'place', bbox: null,
+    }]}));
+    const search = spyOn(api, 'search').and.returnValue(of(result));
+    const fixture = TestBed.createComponent(InstructorMapComponent);
+    fixture.detectChanges();
+    expect(search).not.toHaveBeenCalled();
+    expect(fixture.componentInstance.error).toBeTrue();
+  });
+
   it('keeps the map unobstructed after search and opens the selected marker details', () => {
     const fixture = TestBed.createComponent(InstructorMapComponent);
     const component = fixture.componentInstance;
