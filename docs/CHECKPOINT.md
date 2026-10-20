@@ -1,5 +1,16 @@
 # Checkpoint do Projeto
 
+## Busca no mapa com foco nos marcadores — 20/10/2026
+
+- A busca local abre o mapa em largura quase total e altura adaptada à tela,
+  com a lista de resultados recolhida para não cobrir os marcadores. Selecionar
+  um marcador revela o card do instrutor e permite voltar à lista completa.
+- Permanecem inalterados a consulta PostGIS, os filtros, a geocodificação, o
+  contato voluntário e todos os gates de elegibilidade/publicação. A melhoria
+  é apenas de apresentação; não cria nem libera instrutores.
+- Validação local: 79 testes Angular aprovados e build de produção concluído,
+  com avisos de orçamento preexistentes. Sem push, deploy ou alteração na VPS.
+
 ## Entrada CFC no menu web — 18/10/2026
 
 - O menu principal web passou a mostrar "CFC / Autoescola" com página própria

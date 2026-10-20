@@ -102,6 +102,9 @@ import { WhatsappLinkService } from '../../core/whatsapp-link.service';
             <i class="pi pi-sliders-h"></i><span>Filtros</span>
           </button>
         </form>
+        @if (searched && locationMessage) {
+          <p class="search-feedback" role="status">{{ locationMessage }}</p>
+        }
 
         @if (filtersOpen) {
           <div class="filter-panel">
@@ -195,17 +198,20 @@ import { WhatsappLinkService } from '../../core/whatsapp-link.service';
             <header>
               <span class="drawer-handle" aria-hidden="true"></span>
               <div>
-                <strong>{{ items.length }} instrutores na região</strong>
+                <strong>{{ items.length }} {{ items.length === 1 ? 'instrutor encontrado' : 'instrutores encontrados' }}</strong>
                 <small>{{filters.ordering==='price'?'Ordenados por menor preço':'Ordenados por distância'}}</small>
               </div>
-              <button type="button" (click)="drawerOpen = !drawerOpen" [attr.aria-expanded]="drawerOpen">
+              @if (drawerOpen && selected && !showAllResults) {
+                <button type="button" class="show-all" (click)="openResultList()">Ver todos</button>
+              }
+              <button type="button" (click)="toggleDrawer()" [attr.aria-expanded]="drawerOpen" [attr.aria-label]="drawerOpen ? 'Fechar resultados' : 'Abrir resultados'">
                 <i class="pi" [class.pi-chevron-up]="!drawerOpen" [class.pi-chevron-down]="drawerOpen"></i>
               </button>
             </header>
 
             @if (drawerOpen || view === 'list') {
               <div class="result-cards">
-                @for (instructor of items; track instructor.id) {
+                @for (instructor of visibleItems; track instructor.id) {
                   <article
                     tabindex="0"
                     [class.selected]="selected?.id === instructor.id"
@@ -279,7 +285,8 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
   searched = false;
   error = false;
   filtersOpen = false;
-  drawerOpen = true;
+  drawerOpen = false;
+  showAllResults = true;
   anyDistance = true;
   view: 'map' | 'list' = 'map';
   suggestions: GeocodingResult[] = [];
@@ -388,7 +395,8 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
             this.items = response.results;
             this.selected = null;
             this.loading = false;
-            this.drawerOpen = true;
+            this.drawerOpen = false;
+            this.showAllResults = true;
             this.map.render(this.items, null);
             this.changeDetector.detectChanges();
           },
@@ -421,14 +429,29 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
     this.searched=true;this.loading=true;this.error=false;this.scrollToResults();
     this.map.focus(latitude,longitude,12);
     this.api.search(latitude,longitude,this.filters).subscribe({
-      next:response=>{this.items=response.results;this.loading=false;this.map.render(this.items,null);this.changeDetector.detectChanges()},
+      next:response=>{this.items=response.results;this.selected=null;this.loading=false;this.drawerOpen=false;this.showAllResults=true;this.map.render(this.items,null);this.changeDetector.detectChanges()},
       error:()=>this.fail(),
     });
   }
 
   select(item: SearchInstructor) {
     this.selected = item;
+    this.showAllResults = false;
+    this.drawerOpen = true;
     this.map.select(item.id);
+  }
+
+  get visibleItems(): SearchInstructor[] {
+    return this.showAllResults || !this.selected ? this.items : [this.selected];
+  }
+
+  openResultList() {
+    this.showAllResults = true;
+  }
+
+  toggleDrawer() {
+    this.drawerOpen = !this.drawerOpen;
+    if (this.drawerOpen) this.showAllResults = true;
   }
 
   contact(item: SearchInstructor) {
@@ -449,6 +472,7 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
   setView(view: 'map' | 'list') {
     this.view = view;
     this.drawerOpen = view === 'list';
+    if (view === 'list') this.showAllResults = true;
     if (view === 'map') this.map.refresh();
   }
 

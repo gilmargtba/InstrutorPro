@@ -2,7 +2,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 
-import { InstructorSearchProvider } from '../../demo/instructor-search.provider';
+import { InstructorSearchProvider, SearchInstructor } from '../../demo/instructor-search.provider';
 import { LeafletMapProvider } from '../../demo/map.provider';
 import { InstructorMapComponent } from './instructor-map.component';
 
@@ -157,5 +157,37 @@ describe('InstructorMapComponent geolocation', () => {
     fixture.detectChanges();
     expect(fixture.componentInstance.filters.radius).toBeNull();
     expect(fixture.componentInstance.anyDistance).toBeTrue();
+  });
+
+  it('keeps the map unobstructed after search and opens the selected marker details', () => {
+    const fixture = TestBed.createComponent(InstructorMapComponent);
+    const component = fixture.componentInstance;
+    const api = TestBed.inject(InstructorSearchProvider);
+    const instructor = (id: string, display_name: string): SearchInstructor => ({
+      id, display_name, latitude: -18.01, longitude: -49.37, distance_km: 1,
+      categories: ['B'], offer_category: 'B', transmission: 'MANUAL',
+      vehicle_available: true, price_amount: 90, price_from: false,
+      duration_minutes: 60, vehicle: null, availability_summary: '', demo: false,
+      profile_photo_url: null, verified_claims: [], city: 'Goiatuba', uf: 'GO',
+    });
+    const first = instructor('first', 'Primeiro');
+    const second = instructor('second', 'Segundo');
+    spyOn(api, 'geocode').and.returnValue(of({provider: 'MAPTILER', results: [{
+      id: 'place.1', label: 'Goiatuba, GO', city: 'Goiatuba', uf: 'GO',
+      uf_resolution: 'RESOLVED', latitude: -18.01, longitude: -49.37,
+      place_type: 'place', bbox: null,
+    }]}));
+    spyOn(api, 'search').and.returnValue(of({count: 2, results: [first, second]}));
+    fixture.detectChanges();
+    component.filters.location = 'Goiatuba';
+    component.search();
+    expect(component.drawerOpen).toBeFalse();
+    expect(component.visibleItems).toEqual([first, second]);
+
+    component.select(second);
+    expect(component.drawerOpen).toBeTrue();
+    expect(component.visibleItems).toEqual([second]);
+    component.openResultList();
+    expect(component.visibleItems).toEqual([first, second]);
   });
 });
