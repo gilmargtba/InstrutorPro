@@ -50,11 +50,24 @@ import { BrazilDemandMapComponent } from './brazil-demand-map.component';
             <p class="hint"><i class="pi pi-info-circle"></i> Estados sem número permanecem visíveis, mas ainda não têm instrutores publicados.</p>
           </aside>
         </div>
+        @if (cities().length) {
+          <section class="city-directory" aria-labelledby="city-directory-title">
+            <h2 id="city-directory-title">Cidades com instrutores disponíveis</h2>
+            <p>Selecione uma cidade para abrir a busca no mapa. A lista inclui apenas perfis publicados e aptos à busca nesta plataforma.</p>
+            <div class="city-links">
+              @for (city of cities(); track city.uf + ':' + city.name) {
+                <button type="button" (click)="openCity(city.uf, city.name)" [attr.aria-label]="'Buscar instrutores em ' + city.name + ', ' + city.uf">
+                  {{ city.name }} ({{ city.uf }}) <span>{{ city.count }}</span>
+                </button>
+              }
+            </div>
+          </section>
+        }
       }
     </section>
   `,
   styles: [`
-    .national-search{max-width:82rem;margin:auto;padding:2rem 1.25rem 4rem}.national-search>header{max-width:48rem;margin-bottom:1.5rem}.national-search h1{margin:.25rem 0;font-size:clamp(2.2rem,5vw,4.6rem);line-height:1;color:#103f63}.national-search header p:last-child{font-size:1.1rem;color:#527083}.national-grid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(18rem,.8fr);overflow:hidden;border:1px solid #cee0de;border-radius:1.4rem;background:#fff}.national-grid aside{padding:2rem}.national-grid aside>small{color:#0b7d82;font-weight:800;letter-spacing:.08em}.national-grid aside h2{margin:.5rem 0;color:#103f63}.national-grid aside>p{color:#587181}.state-cities{margin:.8rem 0;padding:.8rem;border:1px solid #d5e5e2;border-radius:.8rem}.state-cities>strong{color:#103f63}.national-grid aside button{display:grid;grid-template-columns:1fr auto auto;align-items:center;width:100%;margin:.4rem 0;padding:.65rem .8rem;border:0;border-radius:.6rem;background:#eef8f6;color:#103f63;text-align:left;cursor:pointer}.national-grid aside button:hover,.national-grid aside button:focus{background:#d8f0eb;outline:2px solid #07888d}.national-grid aside button b{margin-right:1rem;color:#07888d;font-size:1.1rem}.hint{padding-top:.7rem;border-top:1px solid #e4eeec;font-size:.82rem}.state-message{padding:3rem;border-radius:1rem;background:#eef8f6;text-align:center}.state-message.error{background:#fff0ed;color:#933}.state-message button{margin-left:.5rem}.demo-flag{display:inline-flex;margin-bottom:1rem;padding:.4rem .7rem;border-radius:2rem;background:#fff0e7;color:#b64b12;font-size:.75rem;font-weight:800}@media(max-width:900px){.national-grid{grid-template-columns:1fr}.national-grid aside{padding:1.25rem}}
+    .national-search{max-width:82rem;margin:auto;padding:2rem 1.25rem 4rem}.national-search>header{max-width:48rem;margin-bottom:1.5rem}.national-search h1{margin:.25rem 0;font-size:clamp(2.2rem,5vw,4.6rem);line-height:1;color:#103f63}.national-search header p:last-child{font-size:1.1rem;color:#527083}.national-grid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(18rem,.8fr);overflow:hidden;border:1px solid #cee0de;border-radius:1.4rem;background:#fff}.national-grid aside{padding:2rem}.national-grid aside>small{color:#0b7d82;font-weight:800;letter-spacing:.08em}.national-grid aside h2{margin:.5rem 0;color:#103f63}.national-grid aside>p{color:#587181}.state-cities{margin:.8rem 0;padding:.8rem;border:1px solid #d5e5e2;border-radius:.8rem}.state-cities>strong{color:#103f63}.national-grid aside button{display:grid;grid-template-columns:1fr auto auto;align-items:center;width:100%;margin:.4rem 0;padding:.65rem .8rem;border:0;border-radius:.6rem;background:#eef8f6;color:#103f63;text-align:left;cursor:pointer}.national-grid aside button:hover,.national-grid aside button:focus{background:#d8f0eb;outline:2px solid #07888d}.national-grid aside button b{margin-right:1rem;color:#07888d;font-size:1.1rem}.hint{padding-top:.7rem;border-top:1px solid #e4eeec;font-size:.82rem}.city-directory{margin-top:2rem}.city-directory h2{margin-bottom:.35rem;color:#103f63}.city-directory p{color:#587181}.city-links{display:flex;flex-wrap:wrap;gap:.6rem}.city-links button{padding:.65rem .85rem;border:1px solid #cee0de;border-radius:2rem;background:#fff;color:#103f63;cursor:pointer}.city-links button:hover,.city-links button:focus{background:#e1f4ef;outline:2px solid #07888d}.city-links span{margin-left:.35rem;color:#087f84;font-weight:800}.state-message{padding:3rem;border-radius:1rem;background:#eef8f6;text-align:center}.state-message.error{background:#fff0ed;color:#933}.state-message button{margin-left:.5rem}.demo-flag{display:inline-flex;margin-bottom:1rem;padding:.4rem .7rem;border-radius:2rem;background:#fff0e7;color:#b64b12;font-size:.75rem;font-weight:800}@media(max-width:900px){.national-grid{grid-template-columns:1fr}.national-grid aside{padding:1.25rem}}
   `],
 })
 export class InstructorNationalMapComponent {
@@ -65,6 +78,9 @@ export class InstructorNationalMapComponent {
   readonly loading = signal(true);
   readonly error = signal(false);
   readonly total = computed(() => this.states().reduce((sum, state) => sum + state.total, 0));
+  readonly cities = computed(() => this.states()
+    .flatMap(state => state.cities.map(([name, count]) => ({ name, count, uf: state.uf })))
+    .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR') || a.uf.localeCompare(b.uf)));
 
   constructor() { this.load(); }
 

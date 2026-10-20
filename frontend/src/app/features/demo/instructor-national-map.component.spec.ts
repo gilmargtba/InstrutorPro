@@ -24,7 +24,12 @@ describe('InstructorNationalMapComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('3 instrutores disponíveis');
-    fixture.componentInstance.openCity('RS', 'Caxias do Sul');
+    const cityButtons = [...fixture.nativeElement.querySelectorAll('.city-links button')] as HTMLButtonElement[];
+    expect(cityButtons.map(button => button.textContent?.trim())).toEqual([
+      'Caxias do Sul (RS) 1',
+      'Porto Alegre (RS) 2',
+    ]);
+    cityButtons[0].click();
     expect(navigate).toHaveBeenCalledWith(['/aluno/instrutores/mapa'], {
       queryParams: {uf:'RS', local:'Caxias do Sul, RS', cidade:'Caxias do Sul'},
     });

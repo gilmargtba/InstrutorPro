@@ -1,5 +1,18 @@
 # Checkpoint do Projeto
 
+## Diretório de cidades e ensaio local — 20/10/2026
+
+- A busca nacional passou a apresentar também uma lista alfabética de cidades
+  com instrutores disponíveis, em botões que abrem a consulta no mapa filtrada
+  pela cidade e UF. A lista vem da API de estados já existente; não inventa
+  cidades nem altera os critérios de elegibilidade ou publicação.
+- Validação: 83 testes Angular e build de produção aprovados; permanecem avisos
+  preexistentes de orçamento do bundle. Backend e frontend locais iniciados em
+  Docker; página `http://localhost:4200/aluno/instrutores`, readiness e API de
+  estados responderam 200. O banco local retornou `states: []`, portanto a
+  navegação com uma cidade foi verificada pelo teste automatizado, não por
+  dados reais locais. Nenhum push, deploy ou alteração na VPS.
+
 ## Seleção de cidade na busca nacional — 20/10/2026
 
 - A página nacional lista cidades com instrutores pesquisáveis por UF. Clicar
