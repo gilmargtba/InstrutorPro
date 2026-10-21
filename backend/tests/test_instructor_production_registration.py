@@ -43,7 +43,7 @@ def signup_payload(**overrides):
         "display_name": "Instrutora Nacional",
         "birth_date": "1990-01-01",
         "terms_version": "1.0",
-        "privacy_version": "2026-09-16",
+        "privacy_version": "2026-10-21",
         "terms_accepted": True,
         "privacy_acknowledged": True,
     }

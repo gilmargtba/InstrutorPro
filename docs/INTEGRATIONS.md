@@ -178,17 +178,19 @@ visitantes por natureza da API: não usar uma chave de servidor, restringi-la a
 Maps JavaScript API e aos referenciadores HTTPS autorizados. Configurar chave
 distinta para localhost; não usar a chave web para Android/iOS. Se configuração
 ou carregamento falhar, o mapa volta a Leaflet/MapTiler sem mudar os resultados
-da busca. O servidor nunca envia CNH, documentos privados ou dados de aluno ao
-Google; marcadores usam somente coordenadas públicas aproximadas já retornadas
-pela API. A conexão direta do navegador com Google ainda exige avaliação de
-privacidade, faturamento e termos antes de ativação em produção.
-O gateway publicado ainda envia `Referrer-Policy: same-origin`, o que pode
-impedir a validação da chave restrita por referenciador. O repositório prepara
-`strict-origin-when-cross-origin` somente para o domínio principal HTTPS:
-requisições a terceiros recebem a origem, sem caminho ou query. Os hosts IP e
-`www` conservam `same-origin`. A alteração precisa ser publicada e testada no
-domínio real antes de habilitar o provider; não usar chave irrestrita para
-contornar falha de referenciador.
+da busca. O servidor nunca envia CNH ou documentos privados ao Google;
+marcadores usam somente coordenadas públicas aproximadas já retornadas pela API.
+O navegador pode transmitir ao Google o IP, dados técnicos e a região
+visualizada, inclusive uma posição aproximada se o visitante autorizar GPS.
+O proprietário aprovou a divulgação desse fluxo na política pública em
+21/10/2026 e reconheceu que o orçamento Google gera alertas, não um teto
+automático de cobrança. A ativação continua pendente da chave na VPS e de
+um ensaio real.
+O gateway publicado envia `Referrer-Policy: strict-origin-when-cross-origin`
+somente no domínio principal HTTPS: requisições a terceiros recebem a origem,
+sem caminho ou query. Os hosts IP e
+`www` conservam `same-origin`. A alteração foi publicada e testada no domínio
+real; não usar chave irrestrita para contornar falha de referenciador.
 Ativação futura: habilitar Maps JavaScript API e faturamento no projeto Google,
 criar Map ID e chave de navegador exclusiva, restringir a chave à API e aos
 domínios web aprovados, configurar alertas/orçamento, validar a política de

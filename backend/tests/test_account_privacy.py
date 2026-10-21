@@ -144,6 +144,7 @@ def test_privacy_notice_is_public_minimal_and_versioned():
     response = APIClient().get("/api/v1/privacy/notice/")
     assert response.status_code == 200
     assert response.data["product"] == "InstrutorProCNH"
+    assert response.data["version"] == "2026-10-21"
     assert response.data["controller_cnpj"] == "10.280.826/0001-05"
     assert response.data["privacy_contact"] == "focusgtba@gmail.com"
     assert "cpf" not in response.data

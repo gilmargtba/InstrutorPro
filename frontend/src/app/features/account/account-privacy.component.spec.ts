@@ -77,6 +77,9 @@ describe("account and privacy", () => {
     TestBed.configureTestingModule({ imports: [PrivacyPolicyComponent] });
     const text = TestBed.createComponent(PrivacyPolicyComponent).nativeElement.textContent;
     expect(text).toContain("InstrutorProCNH");
+    expect(text).toContain("Versão 2026-10-21");
+    expect(text).toContain("Google Maps na busca web");
+    expect(text).toContain("localização aproximada se você autorizar o GPS");
     expect(text).toContain("10.280.826/0001-05");
     expect(text).toContain("focusgtba@gmail.com");
     expect(text).not.toContain("DPO:");

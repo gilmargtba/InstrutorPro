@@ -1,5 +1,22 @@
 # Checkpoint do Projeto
 
+## Deploy técnico e aviso Google Maps — 21/10/2026
+
+- A VPS foi atualizada do commit `6cd5fb2` para `79750a3`, após backup validado
+  do banco e dos documentos privados. A customização local do gateway para
+  outros sites foi preservada e testada com `nginx -t`. Backend, frontend,
+  worker, scheduler e gateway ficaram saudáveis; domínio e readiness responderam
+  HTTP 200. O domínio passou a enviar
+  `Referrer-Policy: strict-origin-when-cross-origin`.
+- O provider público ainda é `maptiler`: a chave Google e o Map ID não estão
+  configurados no `.env.production`; a flag segue desligada. A chave não foi
+  exposta no Git, em logs ou nesta documentação.
+- O proprietário aprovou a divulgação da conexão com Google e reconheceu que
+  o orçamento não bloqueia cobranças. A política web e o registro versionado do
+  aviso foram preparados como nova fatia; 421 testes backend, 92 testes Angular,
+  lint, migrações e build Angular passaram localmente. Ainda faltam CI,
+  deploy dessa fatia, configuração segura da chave e ensaio real do mapa.
+
 ## Publicação do código e CI do mapa — 21/10/2026
 
 - Os commits `5dbe4b7` e `f9ba82d` foram enviados a `origin/main` com autorização

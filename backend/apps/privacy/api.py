@@ -47,11 +47,11 @@ class PrivacyNoticeView(APIView):
             {
                 "product": "InstrutorProCNH",
                 "title": "Política de Privacidade e Proteção de Dados",
-                "version": notice.version if notice else "2026-09-16",
+                "version": notice.version if notice else "2026-10-21",
                 "last_updated": (
                     notice.published_at.date().isoformat()
                     if notice and notice.published_at
-                    else "2026-09-16"
+                    else "2026-10-21"
                 ),
                 "controller_cnpj": "10.280.826/0001-05",
                 "privacy_contact": "focusgtba@gmail.com",
