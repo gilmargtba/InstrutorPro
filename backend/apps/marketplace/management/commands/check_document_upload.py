@@ -212,23 +212,32 @@ class Command(BaseCommand):
         )
         person = Person.objects.create(account=owner)
         RoleAssignment.objects.create(
-            person=person, role="INSTRUCTOR", granted_by=owner,
+            person=person,
+            role="INSTRUCTOR",
+            granted_by=owner,
             grant_reason="TECHNICAL_SMOKE_ROLLBACK_ONLY",
         )
         instructor = InstructorProfile.objects.create(
             person=person, display_name="Technical smoke", categories=["B"], is_demo=False
         )
         area = InstructorServiceArea.objects.create(
-            profile=instructor, city="Goiatuba", uf="GO",
+            profile=instructor,
+            city="Goiatuba",
+            uf="GO",
             public_service_location=Point(-49.37, -18.01, srid=4326),
             location_authorized=True,
         )
         InstructorOffer.objects.create(
-            instructor=instructor, category="B", price_amount="70.00",
-            duration_minutes=50, data_mode=DataMode.REAL,
+            instructor=instructor,
+            category="B",
+            price_amount="70.00",
+            duration_minutes=50,
+            data_mode=DataMode.REAL,
         )
         InstructorContactChannel.objects.create(
-            instructor=instructor, whatsapp_e164="+5562999999999", data_mode=DataMode.REAL,
+            instructor=instructor,
+            whatsapp_e164="+5562999999999",
+            data_mode=DataMode.REAL,
         )
         item = save_verification_draft(actor=owner, profile=instructor, cpf=synthetic_cpf())
         client = APIClient()
@@ -298,16 +307,19 @@ class Command(BaseCommand):
             expect(
                 client.post(
                     url, {"document_type": document_type, "file": sample()}, format="multipart"
-                ).status_code == 201,
+                ).status_code
+                == 201,
                 f"Clean {document_type} upload failed",
             )
         # Use only real approved requirements; never fabricate an approval or rule.
         for requirement in applicable_requirements(instructor).filter(required=True):
             expect(
                 client.post(
-                    url, {"requirement_id": str(requirement.pk), "file": sample()},
+                    url,
+                    {"requirement_id": str(requirement.pk), "file": sample()},
                     format="multipart",
-                ).status_code == 201,
+                ).status_code
+                == 201,
                 f"Required document upload failed: {requirement.pk}",
             )
         expect(

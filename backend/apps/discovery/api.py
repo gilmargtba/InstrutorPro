@@ -124,9 +124,13 @@ def _verification_payload(profile):
     documents_enabled = upload_available()
     from .instructor_precheck import PRECHECK_MESSAGES, submission_blockers
 
-    can_edit = not item or item.status == ProfessionalVerificationRequest.Status.DRAFT or (
-        item.status == ProfessionalVerificationRequest.Status.REJECTED
-        and not item.previous_verified_request_id
+    can_edit = (
+        not item
+        or item.status == ProfessionalVerificationRequest.Status.DRAFT
+        or (
+            item.status == ProfessionalVerificationRequest.Status.REJECTED
+            and not item.previous_verified_request_id
+        )
     )
     pending_submission = []
     if can_edit and not (item and item.previous_verified_request_id):
@@ -136,9 +140,7 @@ def _verification_payload(profile):
                 "Salve o rascunho e tente novamente."
             ]
         elif item and documents_enabled:
-            pending_submission = [
-                PRECHECK_MESSAGES[code] for code in submission_blockers(item)
-            ]
+            pending_submission = [PRECHECK_MESSAGES[code] for code in submission_blockers(item)]
 
     return {
         "status": item.status if item else ProfessionalVerificationRequest.Status.DRAFT,

@@ -120,8 +120,9 @@ def approval_panel(profile, actor):
     # located, but cannot be downloaded through the current request.
     document_inventory = (
         list(
-            profile.documents.select_related("verification_request", "requirement")
-            .order_by("-uploaded_at", "-pk")
+            profile.documents.select_related("verification_request", "requirement").order_by(
+                "-uploaded_at", "-pk"
+            )
         )
         if can_open_documents
         else []
@@ -193,10 +194,7 @@ def approval_panel(profile, actor):
         "ready_to_publish": not blockers and profile.publication_status != "APPROVED",
         "public": published_instructor_profiles().filter(pk=profile.pk).exists(),
         "can_review": can_review_request,
-        "can_decide_verification": bool(
-            verification
-            and can_open_documents
-        ),
+        "can_decide_verification": bool(verification and can_open_documents),
         "can_publish": can_manage_publication(actor),
         "can_regulatory": actor.has_perm("territories.change_regulatoryreadiness"),
         "can_offer": actor.has_perm("marketplace.change_instructoroffer"),

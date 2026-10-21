@@ -169,7 +169,9 @@ def complete_submission(profile, *, excluded_document=None):
         location_authorized=True,
     )
     InstructorOffer.objects.get_or_create(
-        instructor=profile, category="B", data_mode=DataMode.REAL,
+        instructor=profile,
+        category="B",
+        data_mode=DataMode.REAL,
         defaults={"price_amount": "70.00", "duration_minutes": 50},
     )
     InstructorContactChannel.objects.get_or_create(
@@ -186,10 +188,16 @@ def complete_submission(profile, *, excluded_document=None):
         if kind == excluded_document:
             continue
         InstructorDocument.objects.create(
-            instructor=profile, verification_request=item, document_type=kind,
-            file=f"private/test-{kind}.pdf", original_name=f"test-{kind}.pdf",
-            mime_type="application/pdf", size_bytes=128, sha256="a" * 64,
-            scan_status=InstructorDocument.ScanStatus.CLEAN, data_mode=DataMode.REAL,
+            instructor=profile,
+            verification_request=item,
+            document_type=kind,
+            file=f"private/test-{kind}.pdf",
+            original_name=f"test-{kind}.pdf",
+            mime_type="application/pdf",
+            size_bytes=128,
+            sha256="a" * 64,
+            scan_status=InstructorDocument.ScanStatus.CLEAN,
+            data_mode=DataMode.REAL,
         )
 
 

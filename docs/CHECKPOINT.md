@@ -1,5 +1,21 @@
 # Checkpoint do Projeto
 
+## Publicação do código e CI do mapa — 21/10/2026
+
+- Os commits `5dbe4b7` e `f9ba82d` foram enviados a `origin/main` com autorização
+  do proprietário. O build Angular e 92 testes de interface passaram localmente;
+  o teste isolado do gateway retornou `GATEWAY_DOMAIN_TEST=PASS`.
+- O CI do commit `f9ba82d` falhou em `ruff format --check .`, a mesma etapa que
+  já falhava no commit anterior. Seis arquivos Python foram formatados sem
+  alteração de regra de negócio. A validação local passou com Ruff format/check
+  e 421 testes backend; a verificação de migrações não detectou mudanças.
+  A nova execução do CI deverá ser conferida após o envio da correção.
+- A VPS ainda não foi atualizada: o SSH por chave foi recusado nesta sessão.
+  A verificação pública continua mostrando `Referrer-Policy: same-origin` e
+  `provider: maptiler`. A chave Google não foi configurada na VPS nem exposta
+  no Git. Revisão de privacidade, orçamento específico/limite de gastos e
+  ensaio real permanecem pendentes antes de ativar a flag Google.
+
 ## Preparação do Google Maps para ativação web — 21/10/2026
 
 - O projeto Google Cloud `cana-monitor` tem faturamento vinculado à conta

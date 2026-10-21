@@ -207,9 +207,7 @@ def test_older_document_is_locatable_but_not_downloadable_from_current_request()
 def test_document_inventory_is_hidden_without_document_review_permission():
     web, change, _, _, _, _, document = scenario()
     reviewer = Account.objects.get(username="gilmar")
-    reviewer.user_permissions.remove(
-        Permission.objects.get(codename="review_instructor_document")
-    )
+    reviewer.user_permissions.remove(Permission.objects.get(codename="review_instructor_document"))
     content = web.get(change).content.decode()
     assert "credential.pdf" not in content
     assert reverse("instructor-document-download", args=[document.pk]) not in content
@@ -277,9 +275,7 @@ def test_panel_shows_all_blockers_and_never_approves_on_get():
 def test_regulatory_shortcut_is_hidden_without_regulatory_permission():
     web, change, _, _, readiness, _, _ = scenario(evidence=False)
     admin = Account.objects.get(username="gilmar")
-    admin.user_permissions.remove(
-        Permission.objects.get(codename="change_regulatoryreadiness")
-    )
+    admin.user_permissions.remove(Permission.objects.get(codename="change_regulatoryreadiness"))
     content = web.get(change).content.decode()
     assert "Peça a um administrador com permissão regulatória" in content
     edit_url = reverse("admin:territories_regulatoryreadiness_change", args=[readiness.pk])
