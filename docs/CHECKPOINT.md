@@ -1,5 +1,27 @@
 # Checkpoint do Projeto
 
+## Deploy da busca por cidade e mapa opcional — 21/10/2026
+
+- `origin/main` e a VPS avançaram por fast-forward de `6579eb3` para
+  `77d1bce`. Foram publicados os cinco commits pendentes de navegação CFC,
+  busca por cidade, apresentação do mapa e adaptador Google Maps opcional.
+- Antes do pull, o backup validado do banco e dos documentos privados foi salvo
+  em `/home/gilmar/backups/instrutorpro/production/` com marcador
+  `20261021T033258Z`. Os arquivos preexistentes não versionados e a edição
+  local do gateway foram preservados; banco e gateway não foram recriados.
+- Backend e frontend foram recompilados na VPS; backend, frontend, worker e
+  scheduler foram incluídos no comando de atualização, mas worker e scheduler
+  permaneceram em execução sem recriação. Django check, migrations check e
+  `nginx -t` passaram. HTTPS respondeu 200 para readiness, estados, configuração
+  do mapa, páginas de busca e CFC.
+- A API pública de estados retornou GO com dois instrutores: Formosa e Goiatuba.
+  A configuração do mapa retornou `provider: maptiler`: Google Maps permanece
+  desligado, sem chave, Map ID, teste real nem custo Google neste deploy.
+- O build Angular passou com avisos de orçamento conhecidos. `npm ci` informou
+  24 vulnerabilidades nas dependências (7 moderadas, 14 altas e 3 críticas),
+  ainda sem triagem/correção nesta fatia. Pendente validar Google Maps com chave
+  restrita, billing e revisão da `Referrer-Policy` antes da ativação.
+
 ## Google Maps opcional na busca web — 21/10/2026
 
 - A busca web dispõe de adaptador opcional para Maps JavaScript API, com
