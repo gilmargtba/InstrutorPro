@@ -1,5 +1,22 @@
 # Checkpoint do Projeto
 
+## Correção da ativação Google Maps web — 21/10/2026
+
+- O commit `37f9d0d` passou no CI e foi publicado na VPS após backup validado
+  de banco e documentos privados. A política pública e a API de aviso retornam
+  a versão `2026-10-21`; readiness e página de busca responderam HTTP 200.
+- A chave web restrita foi transferida do clipboard para `.env.production` por
+  SSH, sem aparecer no repositório, comandos ou logs. Uma cópia protegida do
+  ambiente anterior ficou em `/home/gilmar/backups/instrutorpro/config/`.
+  O backend está saudável e `/api/v1/map/browser-config/` retorna `google`
+  com Map ID configurado. MapTiler permanece para geocodificação e fallback.
+- No ensaio real, o navegador ainda exibiu Leaflet/MapTiler. A chamada Angular
+  da configuração recebia `/api/v1` duas vezes pelo interceptor HTTP e caía no
+  fallback silencioso. A correção passa somente o caminho relativo ao cliente
+  HTTP; o teste agora inclui o interceptor real para impedir regressão.
+  Os 92 testes Angular e o build web passaram localmente. Ainda faltam CI,
+  deploy desta correção e confirmação visual do Google Maps na busca pública.
+
 ## Deploy técnico e aviso Google Maps — 21/10/2026
 
 - A VPS foi atualizada do commit `6cd5fb2` para `79750a3`, após backup validado

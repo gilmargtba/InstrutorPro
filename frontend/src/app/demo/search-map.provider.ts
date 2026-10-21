@@ -2,7 +2,6 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
 import { Subscription, timeout } from 'rxjs';
 
-import { apiUrl } from '../core/api-url';
 import { environment } from '../../environments/environment';
 import { GoogleMapProvider } from './google-map.provider';
 import { LeafletMapProvider, MapProvider } from './map.provider';
@@ -35,7 +34,7 @@ export class SearchMapProvider implements MapProvider {
     this.host = element;
     this.onSelect = onSelect;
     if (environment.mobile) { this.activateLeaflet(generation); return; }
-    this.configRequest = this.http.get<BrowserMapConfig>(apiUrl('/map/browser-config/'))
+    this.configRequest = this.http.get<BrowserMapConfig>('/map/browser-config/')
       .pipe(timeout(3000)).subscribe({
         next: config => {
           if (generation !== this.generation) return;

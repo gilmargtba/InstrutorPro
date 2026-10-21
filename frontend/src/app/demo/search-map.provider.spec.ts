@@ -1,7 +1,8 @@
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
+import { apiInterceptor } from '../core/api.interceptor';
 import { GoogleMapProvider } from './google-map.provider';
 import { LeafletMapProvider } from './map.provider';
 import { SearchMapProvider } from './search-map.provider';
@@ -18,7 +19,7 @@ describe('SearchMapProvider', () => {
     google = jasmine.createSpyObj('GoogleMapProvider', ['mountReady', 'focus', 'render', 'select', 'refresh', 'destroy']);
     TestBed.configureTestingModule({
       providers: [
-        provideHttpClient(), provideHttpClientTesting(),
+        provideHttpClient(withInterceptors([apiInterceptor])), provideHttpClientTesting(),
         { provide: LeafletMapProvider, useValue: leaflet },
         { provide: GoogleMapProvider, useValue: google },
       ],
