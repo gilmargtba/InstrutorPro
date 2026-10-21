@@ -1,5 +1,28 @@
 # Checkpoint do Projeto
 
+## Google Maps opcional na busca web — 21/10/2026
+
+- A busca web dispõe de adaptador opcional para Maps JavaScript API, com
+  marcadores dos mesmos perfis publicados retornados pela API. PostGIS,
+  geocodificação, critérios de elegibilidade, publicação e fluxo Android/iOS
+  não foram alterados. Sem configuração ou em falha de carregamento, continua
+  Leaflet/MapTiler. O mapa nacional em GeoJSON e o mapa de cadastro do
+  instrutor permanecem como estavam.
+- `GET /api/v1/map/browser-config/` só retorna chave de navegador e Map ID se
+  `GOOGLE_MAPS_BROWSER_ENABLED=true` e ambos estiverem configurados fora do
+  repositório. A chave é pública no navegador por natureza da API e precisa
+  de restrição por referenciador HTTPS e Maps JavaScript API, além de revisão
+  contratual, LGPD, orçamento e alertas antes de ativação. Nenhuma chave foi
+  criada ou versionada; não houve cobrança ou chamada real ao Google.
+- Validação local: 87 testes Angular, builds web e mobile, 421 testes backend,
+  Django check, migrations check e Ruff dos arquivos alterados passaram. A
+  página local e o endpoint de configuração responderam 200 com MapTiler como
+  fallback. O format check de `api.py` ainda aponta dois trechos preexistentes
+  fora desta fatia; o build conserva avisos de tamanho conhecidos. Pendente ensaio
+  real com chave/Map ID restritos e conta de faturamento Google habilitada;
+  revisar também `Referrer-Policy: same-origin` do gateway antes de ativar a
+  chave restrita por referenciador. Sem push/deploy nem alteração na VPS.
+
 ## Diretório de cidades e ensaio local — 20/10/2026
 
 - A busca nacional passou a apresentar também uma lista alfabética de cidades

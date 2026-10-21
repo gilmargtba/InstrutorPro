@@ -237,6 +237,8 @@ h1 span { color: var(--teal); }
   backdrop-filter: blur(14px);
 }
 
+.map-stage.google-map .results-drawer { bottom: 2.6rem; }
+
 .results-drawer header {
   position: relative;
   display: flex;
@@ -339,6 +341,7 @@ h1 span { color: var(--teal); }
   .map-stage.list-view .result-cards { max-height: none; }
   .map-stage { height: max(28rem, calc(100dvh - 13rem)); }
   .results-drawer { right: .5rem; bottom: .5rem; left: .5rem; width: auto; }
+  .map-stage.google-map .results-drawer { bottom: 2.6rem; }
   .result-cards { grid-template-columns: 1fr; }
   .result-cards article { grid-template-columns: auto 1fr; }
   .result-action { grid-column: 2; align-items: flex-start; }

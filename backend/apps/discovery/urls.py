@@ -1,6 +1,7 @@
 from django.urls import path
 
 from .api import (
+    BrowserMapConfigView,
     DemoInstructorOnboardingDraftView,
     DemoInstructorOnboardingSubmitView,
     DemoInstructorOnboardingView,
@@ -66,6 +67,7 @@ urlpatterns = [
         name="public-profile-photo",
     ),
     path("geocoding/search/", GeocodingView.as_view(), name="geocoding-search"),
+    path("map/browser-config/", BrowserMapConfigView.as_view(), name="browser-map-config"),
     path("map/tiles/<int:zoom>/<int:x>/<int:y>.png", MapTileView.as_view(), name="map-tile"),
     path(
         "demo/instructor-onboarding/",

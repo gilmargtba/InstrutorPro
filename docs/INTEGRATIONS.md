@@ -167,6 +167,34 @@ mecanismo de transferência, retenção da consulta, endpoint europeu, restriç�
 budget/rate limit e testes de indisponibilidade. Nenhum segredo ou chamada real é ativado
 por esta decisão documental.
 
+### Camada visual opcional Google Maps (web)
+
+A busca pública web aceita, de forma inativa por padrão, Maps JavaScript API
+somente como mapa base e marcadores de perfis já publicados. O navegador obtém
+`/api/v1/map/browser-config/` sem cache; a resposta só inclui a chave pública
+e Map ID quando `GOOGLE_MAPS_BROWSER_ENABLED=true` e ambos os valores estão
+configurados fora do repositório. Essa chave de navegador será visível aos
+visitantes por natureza da API: não usar uma chave de servidor, restringi-la a
+Maps JavaScript API e aos referenciadores HTTPS autorizados. Configurar chave
+distinta para localhost; não usar a chave web para Android/iOS. Se configuração
+ou carregamento falhar, o mapa volta a Leaflet/MapTiler sem mudar os resultados
+da busca. O servidor nunca envia CNH, documentos privados ou dados de aluno ao
+Google; marcadores usam somente coordenadas públicas aproximadas já retornadas
+pela API. A conexão direta do navegador com Google ainda exige avaliação de
+privacidade, faturamento e termos antes de ativação em produção.
+O gateway atual envia `Referrer-Policy: same-origin`, o que pode impedir a
+validação de uma chave restrita por referenciador em chamadas ao Google. A
+política deve ser revisada com segurança/privacidade e testada com o domínio
+real antes de habilitar o provider; não usar chave irrestrita para contornar.
+Ativação futura: habilitar Maps JavaScript API e faturamento no projeto Google,
+criar Map ID e chave de navegador exclusiva, restringir a chave à API e aos
+domínios web aprovados, configurar alertas/orçamento, validar a política de
+referência e então definir `GOOGLE_MAPS_BROWSER_ENABLED=true`,
+`GOOGLE_MAPS_BROWSER_API_KEY` e `GOOGLE_MAPS_BROWSER_MAP_ID` no ambiente da
+VPS. Esses valores não devem entrar em Git. Ensaiar um carregamento real e o
+fallback antes de liberar tráfego. A chave web não substitui a configuração
+MapTiler usada para geocodificação e contingência.
+
 Revalidação em 29/08/2026: o plano Flex publicado custa US$ 30/mês e inclui 25 mil
 sessões de mapa, 3 mil sessões de busca e 500 mil requisições de API; os excedentes
 publicados são US$ 2,50/1.000 sessões e US$ 0,15/1.000 requisições. O endpoint

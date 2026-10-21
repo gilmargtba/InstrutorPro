@@ -2,6 +2,19 @@
 
 Este documento é a fonte oficial de decisões consolidadas, contradições resolvidas e questões em aberto. Uma recomendação marcada como aberta não é uma decisão aceita.
 
+### Solicitação do proprietário de 20/10/2026 — Google Maps na busca pública
+
+O proprietário pediu Google Maps para a visualização da busca de instrutores.
+O frontend web pode usar Maps JavaScript API como camada visual opcional;
+PostGIS, API de busca, geocodificação atual, elegibilidade e publicação não
+mudam. O app nativo continua no mapa atual até existir configuração própria
+testada para Android/iOS. A ativação real permanece aberta: exige chave de
+navegador restrita aos domínios e à Maps JavaScript API, Map ID, conta de
+faturamento, orçamento/alertas e revisão de privacidade, contratos e fluxo de
+dados com Google. Sem esses itens, MapTiler/Leaflet continua ativo. Essa
+solicitação não aprova faturamento, envio de dados adicionais ao Google ou
+deploy automático e não elimina as pendências da ADR-047.
+
 ### Decisão do proprietário de 18/10/2026 — CFC pré-cadastra instrutores
 
 O CFC informa sua quantidade de instrutores e cria um pré-cadastro por pessoa,

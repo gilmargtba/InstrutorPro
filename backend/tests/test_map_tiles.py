@@ -53,3 +53,26 @@ def test_fetch_map_tile_rejects_provider_failure(settings):
     with patch("apps.discovery.map_tiles.urlopen", side_effect=TimeoutError):
         with pytest.raises(MapTileUnavailable):
             fetch_map_tile(zoom=4, x=5, y=6)
+
+
+def test_browser_map_config_defaults_to_maptiler_without_exposing_key(client, settings):
+    settings.GOOGLE_MAPS_BROWSER_ENABLED = False
+    settings.GOOGLE_MAPS_BROWSER_API_KEY = "restricted-browser-key"
+    settings.GOOGLE_MAPS_BROWSER_MAP_ID = "map-id"
+    response = client.get("/api/v1/map/browser-config/")
+    assert response.status_code == 200
+    assert response.json() == {"provider": "maptiler"}
+    assert response["Cache-Control"] == "no-store"
+
+
+def test_browser_map_config_requires_key_and_map_id(client, settings):
+    settings.GOOGLE_MAPS_BROWSER_ENABLED = True
+    settings.GOOGLE_MAPS_BROWSER_API_KEY = "restricted-browser-key"
+    settings.GOOGLE_MAPS_BROWSER_MAP_ID = ""
+    assert client.get("/api/v1/map/browser-config/").json() == {"provider": "maptiler"}
+    settings.GOOGLE_MAPS_BROWSER_MAP_ID = "map-id"
+    assert client.get("/api/v1/map/browser-config/").json() == {
+        "provider": "google",
+        "api_key": "restricted-browser-key",
+        "map_id": "map-id",
+    }

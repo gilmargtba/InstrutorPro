@@ -422,6 +422,34 @@ class MapTileView(APIView):
         return response
 
 
+class BrowserMapConfigView(APIView):
+    permission_classes = [AllowAny]
+    authentication_classes = []
+
+    @extend_schema(responses={200: OpenApiTypes.OBJECT})
+    def get(self, request):
+        # Browser keys are public by design. Enable only after restricting this key
+        # to the Maps JavaScript API and the approved HTTPS referrers in Google Cloud.
+        enabled = all(
+            (
+                settings.GOOGLE_MAPS_BROWSER_ENABLED,
+                settings.GOOGLE_MAPS_BROWSER_API_KEY,
+                settings.GOOGLE_MAPS_BROWSER_MAP_ID,
+            )
+        )
+        payload = {"provider": "google" if enabled else "maptiler"}
+        if enabled:
+            payload.update(
+                {
+                    "api_key": settings.GOOGLE_MAPS_BROWSER_API_KEY,
+                    "map_id": settings.GOOGLE_MAPS_BROWSER_MAP_ID,
+                }
+            )
+        response = Response(payload)
+        response["Cache-Control"] = "no-store"
+        return response
+
+
 class InstructorSearchView(APIView):
     permission_classes = [AllowAny]
 

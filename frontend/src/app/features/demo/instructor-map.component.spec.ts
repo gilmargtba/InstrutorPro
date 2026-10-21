@@ -1,9 +1,10 @@
 import { ActivatedRoute, Router } from '@angular/router';
 import { TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
 import { of } from 'rxjs';
 
 import { InstructorSearchProvider, SearchInstructor } from '../../demo/instructor-search.provider';
-import { LeafletMapProvider } from '../../demo/map.provider';
+import { SearchMapProvider } from '../../demo/search-map.provider';
 import { InstructorMapComponent } from './instructor-map.component';
 
 describe('InstructorMapComponent geolocation', () => {
@@ -20,7 +21,7 @@ describe('InstructorMapComponent geolocation', () => {
       imports: [InstructorMapComponent],
       providers: [
         {provide: InstructorSearchProvider, useValue: {geocode: () => of({results: []}), search: () => of(result)}},
-        {provide: LeafletMapProvider, useValue: {mount: () => undefined, focus: () => undefined, render: () => undefined, select: () => undefined, refresh: () => undefined, destroy: () => undefined}},
+        {provide: SearchMapProvider, useValue: {source: signal('maptiler'), mount: () => undefined, focus: () => undefined, render: () => undefined, select: () => undefined, refresh: () => undefined, destroy: () => undefined}},
         {provide: ActivatedRoute, useValue: {snapshot: {queryParamMap: {get: () => null}}}},
         {provide: Router, useValue: {navigate: () => Promise.resolve(true)}},
       ],

@@ -10,7 +10,7 @@ import {
   SearchInstructor,
   GeocodingResult,
 } from '../../demo/instructor-search.provider';
-import { LeafletMapProvider } from '../../demo/map.provider';
+import { SearchMapProvider } from '../../demo/search-map.provider';
 import { BRAZIL_UFS } from '../../shared/brazil-ufs';
 import { environment } from '../../../environments/environment';
 import { publicMediaUrl } from '../../core/api-url';
@@ -191,7 +191,7 @@ import { WhatsappLinkService } from '../../core/whatsapp-link.service';
           </button>
         </div>
 
-        <div class="map-stage" [class.list-view]="view === 'list'">
+        <div class="map-stage" [class.list-view]="view === 'list'" [class.google-map]="mapSource() === 'google'">
           <div class="leaflet-map" #map></div>
 
           <section class="results-drawer" aria-live="polite">
@@ -250,7 +250,8 @@ import { WhatsappLinkService } from '../../core/whatsapp-link.service';
         </div>
 
         <p class="map-credit">
-          © OpenStreetMap · coordenadas representam áreas aproximadas de atendimento.
+          @if (mapSource() === 'maptiler') {© MapTiler · OpenStreetMap ·}
+          Coordenadas representam áreas aproximadas de atendimento.
         </p>
       </div>
     </section>
@@ -261,7 +262,8 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
   @ViewChild('map') mapElement!: ElementRef<HTMLElement>;
 
   private readonly api = inject(InstructorSearchProvider);
-  private readonly map = inject(LeafletMapProvider);
+  private readonly map = inject(SearchMapProvider);
+  readonly mapSource = this.map.source;
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly changeDetector = inject(ChangeDetectorRef);
