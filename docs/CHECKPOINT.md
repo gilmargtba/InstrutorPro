@@ -14,8 +14,10 @@
   da configuração recebia `/api/v1` duas vezes pelo interceptor HTTP e caía no
   fallback silencioso. A correção passa somente o caminho relativo ao cliente
   HTTP; o teste agora inclui o interceptor real para impedir regressão.
-  Os 92 testes Angular e o build web passaram localmente. Ainda faltam CI,
-  deploy desta correção e confirmação visual do Google Maps na busca pública.
+  Os 92 testes Angular, build web e CI do commit `8d6a059` passaram. O frontend
+  corrigido foi publicado e ficou saudável. Em navegador, a busca pública
+  exibiu o mapa Google e a pesquisa por Goiatuba/GO mostrou dois marcadores e
+  dois instrutores; a API de estados continua informando duas áreas em GO.
 
 ## Deploy técnico e aviso Google Maps — 21/10/2026
 

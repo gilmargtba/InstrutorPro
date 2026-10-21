@@ -185,10 +185,10 @@ visualizada, inclusive uma posição aproximada se o visitante autorizar GPS.
 O proprietário aprovou a divulgação desse fluxo na política pública em
 21/10/2026 e reconheceu que o orçamento Google gera alertas, não um teto
 automático de cobrança. A política está publicada; a chave restrita e o Map ID
-estão somente no ambiente privado da VPS. A API seleciona `google`, mas o
-primeiro ensaio no navegador caiu no fallback por URL duplicada no cliente
-HTTP. A correção está em validação; ainda não declarar a renderização Google
-concluída antes do novo ensaio real.
+estão somente no ambiente privado da VPS. A API seleciona `google`; uma URL
+duplicada pelo interceptor HTTP causou fallback no primeiro ensaio e foi
+corrigida no commit `8d6a059`. O ensaio após o deploy confirmou mapa Google,
+marcadores e lista de instrutores na busca pública por Goiatuba/GO.
 O gateway publicado envia `Referrer-Policy: strict-origin-when-cross-origin`
 somente no domínio principal HTTPS: requisições a terceiros recebem a origem,
 sem caminho ou query. Os hosts IP e
