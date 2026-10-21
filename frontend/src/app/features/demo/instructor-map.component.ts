@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, ViewChild, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { Subject, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
+import { Subject, Subscription, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
 
 import {
   InstructorSearchProvider,
@@ -301,9 +301,13 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
   private ufScope = '';
   private scopedLocation = '';
   private readonly locationQueries = new Subject<string>();
+  private readonly suggestionsRequest: Subscription;
+  private geocodingRequest?: Subscription;
+  private searchRequest?: Subscription;
+  private searchRevision = 0;
 
   constructor() {
-    this.locationQueries.pipe(
+    this.suggestionsRequest = this.locationQueries.pipe(
       debounceTime(350), distinctUntilChanged(), switchMap(query => this.api.geocode(query, 5))
     ).subscribe({next: response => this.suggestions=response.results, error:()=>this.suggestions=[]});
   }
@@ -351,6 +355,7 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
       this.locationMessage = 'Informe um raio inteiro entre 1 e 5000 km ou selecione qualquer distância.';
       return;
     }
+    const revision = this.beginSearch();
     this.searched = true;
     this.loading = true;
     this.error = false;
@@ -360,17 +365,19 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
     this.locationMessage = '';
     this.scrollToResults();
 
-    this.api.geocode(this.filters.location).subscribe({
+    this.geocodingRequest = this.api.geocode(this.filters.location).subscribe({
       next: (geocoding) => {
+        if (revision !== this.searchRevision) return;
         const point = this.cityScope
           ? geocoding.results.find(candidate =>
               candidate.uf === this.ufScope &&
               candidate.city.toLocaleLowerCase('pt-BR') === this.cityScope.toLocaleLowerCase('pt-BR'))
           : geocoding.results[0];
         if (!point) { this.fail(); return; }
-        this.acceptPoint(point);
+        this.acceptPoint(point, revision);
       },
       error: (response: HttpErrorResponse) => {
+        if (revision !== this.searchRevision) return;
         this.items = [];
         this.loading = false;
         this.error = response.status !== 404;
@@ -380,7 +387,7 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  private acceptPoint(point:GeocodingResult) {
+  private acceptPoint(point:GeocodingResult, revision:number) {
     if (!point.uf) {
       this.pendingLocation = point;
       this.loading = false;
@@ -389,7 +396,7 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
       this.changeDetector.detectChanges();
       return;
     }
-    this.searchFromPoint(point);
+    this.searchFromPoint(point, revision);
   }
 
   confirmLocationUf() {
@@ -400,10 +407,10 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
     this.loading = true;
     this.searched = true;
     this.scrollToResults();
-    this.searchFromPoint(point);
+    this.searchFromPoint(point, this.beginSearch());
   }
 
-  private searchFromPoint(point:GeocodingResult) {
+  private searchFromPoint(point:GeocodingResult, revision:number) {
         this.map.focus(point.latitude, point.longitude, 12);
         this.suggestions = [];
         if (this.cityScope && point.uf !== this.ufScope) this.clearCityScope();
@@ -411,22 +418,24 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
         const searchRequest = this.cityScope
           ? this.api.search(point.latitude, point.longitude, this.filters, this.ufScope, this.cityScope)
           : this.api.search(point.latitude, point.longitude, this.filters);
-        searchRequest.subscribe({
+        this.searchRequest = searchRequest.subscribe({
           next: (response) => {
+            if (revision !== this.searchRevision) return;
             this.items = response.results;
-            this.selected = null;
+            this.selected = this.items.length === 1 ? this.items[0] : null;
             this.loading = false;
-            this.drawerOpen = false;
-            this.showAllResults = true;
-            this.map.render(this.items, null);
+            this.drawerOpen = this.items.length === 1;
+            this.showAllResults = this.items.length !== 1;
+            this.map.render(this.items, this.selected?.id ?? null);
             this.changeDetector.detectChanges();
           },
-          error: () => this.fail(),
+          error: () => { if (revision === this.searchRevision) this.fail(); },
         });
   }
 
   suggest(query:string) { if(query.trim().length >= 3) this.locationQueries.next(query.trim()); else this.suggestions=[]; }
   choose(place:GeocodingResult) {
+    const revision = this.beginSearch();
     this.clearCityScope();
     this.filters.location=place.label;
     this.suggestions=[];
@@ -434,26 +443,28 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
     this.loading=true;
     this.error=false;
     this.scrollToResults();
-    this.acceptPoint(place);
+    this.acceptPoint(place, revision);
   }
   useMyLocation() {
+    const revision = this.beginSearch();
     this.locationMessage='Localizando…';
     void this.location.currentPosition().then(position => {
-      this.searchFromCoordinates(position.latitude, position.longitude);
+      if (revision === this.searchRevision) this.searchFromCoordinates(position.latitude, position.longitude, revision);
     }).catch(() => {
+      if (revision !== this.searchRevision) return;
       this.locationMessage='Localização não autorizada. Você pode continuar pela busca manual.';
       this.changeDetector.detectChanges();
     });
   }
 
-  private searchFromCoordinates(latitude:number, longitude:number) {
+  private searchFromCoordinates(latitude:number, longitude:number, revision=this.beginSearch()) {
     this.clearCityScope();
     this.locationMessage='Buscando instrutores próximos à localização autorizada.';
     this.searched=true;this.loading=true;this.error=false;this.scrollToResults();
     this.map.focus(latitude,longitude,12);
-    this.api.search(latitude,longitude,this.filters).subscribe({
-      next:response=>{this.items=response.results;this.selected=null;this.loading=false;this.drawerOpen=false;this.showAllResults=true;this.map.render(this.items,null);this.changeDetector.detectChanges()},
-      error:()=>this.fail(),
+    this.searchRequest = this.api.search(latitude,longitude,this.filters).subscribe({
+      next:response=>{if(revision!==this.searchRevision)return;this.items=response.results;this.selected=this.items.length===1?this.items[0]:null;this.loading=false;this.drawerOpen=this.items.length===1;this.showAllResults=this.items.length!==1;this.map.render(this.items,this.selected?.id??null);this.changeDetector.detectChanges()},
+      error:()=>{if(revision===this.searchRevision)this.fail()},
     });
   }
 
@@ -546,7 +557,15 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
     this.changeDetector.detectChanges();
   }
 
+  private beginSearch():number {
+    this.geocodingRequest?.unsubscribe();
+    this.searchRequest?.unsubscribe();
+    return ++this.searchRevision;
+  }
+
   ngOnDestroy() {
+    this.beginSearch();
+    this.suggestionsRequest.unsubscribe();
     this.map.destroy();
   }
 }

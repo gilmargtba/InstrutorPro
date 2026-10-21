@@ -45,7 +45,7 @@ export class SearchMapProvider implements MapProvider {
           }
           void this.google.mountReady(element, onSelect, config.api_key, config.map_id)
             .then(() => {
-              if (generation !== this.generation) { this.google.destroy(); return; }
+              if (generation !== this.generation) return;
               this.active = this.google;
               this.source.set('google');
               this.replay();
@@ -83,6 +83,7 @@ export class SearchMapProvider implements MapProvider {
     this.configRequest?.unsubscribe();
     this.configRequest = undefined;
     this.active?.destroy();
+    if (this.active !== this.google) this.google.destroy();
     this.active = undefined;
     this.host = undefined;
     this.point = undefined;

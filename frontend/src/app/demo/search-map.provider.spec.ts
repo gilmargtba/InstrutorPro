@@ -70,4 +70,25 @@ describe('SearchMapProvider', () => {
     http.expectOne('/api/v1/map/browser-config/').flush({}, { status: 503, statusText: 'Unavailable' });
     expect(leaflet.mount).toHaveBeenCalled();
   });
+
+  it('does not destroy a newer Google map when an older load finishes late', async () => {
+    let finishFirst!: () => void;
+    let finishSecond!: () => void;
+    google.mountReady.and.returnValues(
+      new Promise<void>(resolve => { finishFirst = resolve; }),
+      new Promise<void>(resolve => { finishSecond = resolve; }),
+    );
+    const config = { provider: 'google', api_key: 'restricted-browser-key', map_id: 'approved-map-id' };
+    map.mount(host, () => undefined);
+    http.expectOne('/api/v1/map/browser-config/').flush(config);
+    map.mount(host, () => undefined);
+    http.expectOne('/api/v1/map/browser-config/').flush(config);
+    finishSecond();
+    await Promise.resolve();
+    const destroyedBeforeStaleLoad = google.destroy.calls.count();
+    finishFirst();
+    await Promise.resolve();
+    expect(google.destroy.calls.count()).toBe(destroyedBeforeStaleLoad);
+    expect(map.source()).toBe('google');
+  });
 });

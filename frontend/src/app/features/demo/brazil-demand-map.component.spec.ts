@@ -32,4 +32,26 @@ describe('BrazilDemandMapComponent',()=>{
     expect(selected).toHaveBeenCalledWith('SP');
     fixture.destroy();
   });
+
+  it('refreshes the map when states arrive after the GeoJSON and labels an active GO',async()=>{
+    const goGeoJson={type:'FeatureCollection',features:[{type:'Feature',properties:{codarea:'52'},geometry:{type:'Polygon',coordinates:[[[-53,-19],[-46,-19],[-46,-13],[-53,-13],[-53,-19]]]}}]};
+    spyOn(globalThis,'fetch').and.resolveTo(new Response(JSON.stringify(goGeoJson),{status:200}));
+    await TestBed.configureTestingModule({imports:[BrazilDemandMapComponent]}).compileComponents();
+    const fixture=TestBed.createComponent(BrazilDemandMapComponent);
+    fixture.componentRef.setInput('states',[]);
+    const selected=jasmine.createSpy('selected');
+    fixture.componentInstance.stateSelected.subscribe(selected);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(fixture.nativeElement.querySelectorAll('.brazil-map-count').length).toBe(0);
+
+    fixture.componentRef.setInput('states',[{uf:'GO',total:2,searchLocation:'Formosa',cities:[['Formosa',1],['Goiatuba',1]]}]);
+    fixture.detectChanges();
+    await new Promise(resolve=>setTimeout(resolve,50));
+    const label=fixture.nativeElement.querySelector('.brazil-map-count') as HTMLElement;
+    expect(label?.textContent).toContain('GO');
+    label.click();
+    expect(selected).toHaveBeenCalledWith('GO');
+    fixture.destroy();
+  });
 });

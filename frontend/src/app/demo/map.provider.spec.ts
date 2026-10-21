@@ -24,3 +24,19 @@ describe('LeafletMapProvider approved photo markers', () => {
     host.remove();
   });
 });
+
+describe('LeafletMapProvider container resizing', () => {
+  it('observes the map container and disconnects when leaving the page', () => {
+    const observe = spyOn(ResizeObserver.prototype, 'observe').and.callThrough();
+    const disconnect = spyOn(ResizeObserver.prototype, 'disconnect').and.callThrough();
+    const provider = new LeafletMapProvider();
+    const host = document.createElement('div');
+    host.style.height = '300px';
+    document.body.appendChild(host);
+    provider.mount(host, () => undefined);
+    expect(observe).toHaveBeenCalledWith(host);
+    provider.destroy();
+    expect(disconnect).toHaveBeenCalled();
+    host.remove();
+  });
+});

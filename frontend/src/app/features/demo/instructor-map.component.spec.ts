@@ -1,7 +1,7 @@
 import { ActivatedRoute, Router } from '@angular/router';
 import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
-import { of } from 'rxjs';
+import { Subject, of } from 'rxjs';
 
 import { InstructorSearchProvider, SearchInstructor } from '../../demo/instructor-search.provider';
 import { SearchMapProvider } from '../../demo/search-map.provider';
@@ -228,5 +228,49 @@ describe('InstructorMapComponent geolocation', () => {
     expect(component.visibleItems).toEqual([second]);
     component.openResultList();
     expect(component.visibleItems).toEqual([first, second]);
+  });
+
+  it('shows a single instructor card as soon as the search finishes', () => {
+    const fixture = TestBed.createComponent(InstructorMapComponent);
+    const api = TestBed.inject(InstructorSearchProvider);
+    const one: SearchInstructor = {
+      id: 'published', display_name: 'Instrutor Publicado', latitude: -18.01,
+      longitude: -49.37, distance_km: 1, categories: ['B'], offer_category: 'B',
+      transmission: 'MANUAL', vehicle_available: true, price_amount: 90,
+      price_from: false, duration_minutes: 60, vehicle: null,
+      availability_summary: '', demo: false, profile_photo_url: null,
+      verified_claims: [], city: 'Goiatuba', uf: 'GO',
+    };
+    spyOn(api, 'geocode').and.returnValue(of({provider:'MAPTILER',results:[{
+      id:'place.1',label:'Goiatuba, GO',city:'Goiatuba',uf:'GO',
+      uf_resolution:'RESOLVED',latitude:-18.01,longitude:-49.37,place_type:'place',bbox:null,
+    }]}));
+    spyOn(api, 'search').and.returnValue(of({count:1,results:[one]}));
+    fixture.detectChanges();
+    fixture.componentInstance.filters.location='Goiatuba';
+    fixture.componentInstance.search();
+    expect(fixture.componentInstance.drawerOpen).toBeTrue();
+    expect(fixture.componentInstance.selected).toBe(one);
+  });
+
+  it('ignores a previous search result after the user starts another search', () => {
+    const fixture = TestBed.createComponent(InstructorMapComponent);
+    const api = TestBed.inject(InstructorSearchProvider);
+    spyOn(api, 'geocode').and.callFake(query => of({provider:'MAPTILER',results:[{
+      id:query,label:query,city:query,uf:'GO',uf_resolution:'RESOLVED',
+      latitude:-18.01,longitude:-49.37,place_type:'place',bbox:null,
+    }]}));
+    const first = new Subject<{count:number;results:SearchInstructor[]}>();
+    const second = new Subject<{count:number;results:SearchInstructor[]}>();
+    spyOn(api, 'search').and.returnValues(first, second);
+    fixture.detectChanges();
+    fixture.componentInstance.filters.location='Primeira';
+    fixture.componentInstance.search();
+    fixture.componentInstance.filters.location='Segunda';
+    fixture.componentInstance.search();
+    expect(first.observed).toBeFalse();
+    second.next({count:0,results:[]});
+    expect(fixture.componentInstance.loading).toBeFalse();
+    expect(fixture.componentInstance.items).toEqual([]);
   });
 });

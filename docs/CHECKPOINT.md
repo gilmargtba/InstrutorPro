@@ -1,5 +1,26 @@
 # Checkpoint do Projeto
 
+## Estabilidade do mapa e apresentação do instrutor — 21/10/2026
+
+- Corrigida a corrida entre o carregamento da malha GeoJSON e a chegada das
+  contagens da API: o mapa nacional atualiza cores, cliques e marcadores quando
+  as UFs chegam depois. UFs ativas fora das cinco posições inicialmente fixas,
+  como GO, recebem marcador calculado a partir da geometria da própria UF.
+- O mapa local Leaflet recalcula o tamanho quando seu contêiner muda. Buscas
+  sucessivas cancelam requisições anteriores para impedir que uma resposta
+  antiga substitua os resultados atuais. Quando há um único instrutor, o card
+  aparece assim que a busca termina, sem exigir clique no marcador.
+- Na VPS, medidas diagnósticas sem dados privados mostraram geocodificação em
+  0,07–0,29 s, busca em 0,08–0,13 s e perfil público em cerca de 0,06 s. O
+  primeiro tile do mapa levou cerca de 1 s; isso indica que a demora percebida
+  está principalmente na apresentação/carregamento visual, não no endpoint do
+  perfil. Os tempos são amostras pontuais, não uma garantia de desempenho.
+- Validação local: 92 testes Angular e builds web/mobile aprovados, com avisos
+  conhecidos de orçamento do bundle. Google Maps continua desativado porque
+  o titular ainda não criou projeto com faturamento, chave de navegador
+  restrita e Map ID. Não usar chave irrestrita nem `DEMO_MAP_ID` em produção.
+  Sem push, deploy ou alteração da VPS nesta fatia.
+
 ## Deploy da busca por cidade e mapa opcional — 21/10/2026
 
 - `origin/main` e a VPS avançaram por fast-forward de `6579eb3` para
