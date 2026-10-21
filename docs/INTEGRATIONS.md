@@ -182,10 +182,13 @@ da busca. O servidor nunca envia CNH, documentos privados ou dados de aluno ao
 Google; marcadores usam somente coordenadas públicas aproximadas já retornadas
 pela API. A conexão direta do navegador com Google ainda exige avaliação de
 privacidade, faturamento e termos antes de ativação em produção.
-O gateway atual envia `Referrer-Policy: same-origin`, o que pode impedir a
-validação de uma chave restrita por referenciador em chamadas ao Google. A
-política deve ser revisada com segurança/privacidade e testada com o domínio
-real antes de habilitar o provider; não usar chave irrestrita para contornar.
+O gateway publicado ainda envia `Referrer-Policy: same-origin`, o que pode
+impedir a validação da chave restrita por referenciador. O repositório prepara
+`strict-origin-when-cross-origin` somente para o domínio principal HTTPS:
+requisições a terceiros recebem a origem, sem caminho ou query. Os hosts IP e
+`www` conservam `same-origin`. A alteração precisa ser publicada e testada no
+domínio real antes de habilitar o provider; não usar chave irrestrita para
+contornar falha de referenciador.
 Ativação futura: habilitar Maps JavaScript API e faturamento no projeto Google,
 criar Map ID e chave de navegador exclusiva, restringir a chave à API e aos
 domínios web aprovados, configurar alertas/orçamento, validar a política de

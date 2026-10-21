@@ -1,5 +1,26 @@
 # Checkpoint do Projeto
 
+## Preparação do Google Maps para ativação web — 21/10/2026
+
+- O projeto Google Cloud `cana-monitor` tem faturamento vinculado à conta
+  `BEEPBEEP`. Existe orçamento mensal de R$ 50 com alertas em 50%, 90% e 100%,
+  aplicado à conta inteira e sem limite automático confirmado para o projeto.
+  O aviso de possível violação da política de uso aceitável continua visível;
+  não há evidência de que se refira especificamente a este projeto.
+- O proprietário criou uma chave web separada, restrita à Maps JavaScript API
+  e aos referenciadores HTTPS do domínio, e um Map ID. Nenhum valor de chave
+  foi gravado no repositório. A revisão de privacidade/termos e o ensaio real
+  continuam pendentes; isto não autoriza novas chamadas em produção.
+- A política de referência do gateway foi preparada localmente para enviar
+  somente a origem HTTPS em chamadas externas do domínio principal. IP e
+  `www` conservam `same-origin`. O teste isolado em Nginx 1.28 passou, inclusive
+  sintaxe, roteamento, redirecionamentos e os novos cabeçalhos.
+- `.env.production.example` documenta as três variáveis Google com a flag
+  desligada. `MAPTILER_API_KEY` continua necessária para geocodificação e
+  contingência. Tentativa de inventário SSH somente leitura na VPS falhou por
+  ausência de autenticação disponível nesta sessão. Sem push, alteração da
+  VPS ou ativação do provider nesta fatia.
+
 ## Estabilidade do mapa e apresentação do instrutor — 21/10/2026
 
 - Corrigida a corrida entre o carregamento da malha GeoJSON e a chegada das

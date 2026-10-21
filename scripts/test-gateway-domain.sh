@@ -9,6 +9,12 @@ for name in 179.199.136.4 instrutorprocnh.com.br; do
         -out "/etc/letsencrypt/live/$name/fullchain.pem" 2>/dev/null
 done
 cp /gateway.conf /etc/nginx/conf.d/default.conf
+# The throwaway container hosts its own upstream stubs on loopback. Avoid
+# depending on Docker service DNS, which is absent on the default bridge.
+sed -i \
+    -e 's/server frontend:8080 resolve;/server 127.0.0.1:8080;/' \
+    -e 's/server gestor_reposicao_api:8000 resolve;/server 127.0.0.1:8000;/' \
+    /etc/nginx/conf.d/default.conf
 cat > /etc/nginx/conf.d/test-upstreams.conf <<'EOF'
 server {
     listen 8080;
@@ -51,4 +57,10 @@ printf '%s' "$headers" | grep -q '^HTTP/.* 301'
 printf '%s' "$headers" | grep -qi 'location: https://instrutorprocnh.com.br/example?keep=1'
 nginx -s reload
 check https instrutorprocnh.com.br / 200
+headers=$(curl --noproxy '*' -ksSI --resolve instrutorprocnh.com.br:443:127.0.0.1 \
+    'https://instrutorprocnh.com.br/aluno/instrutores/mapa')
+printf '%s' "$headers" | grep -qi '^referrer-policy: strict-origin-when-cross-origin'
+headers=$(curl --noproxy '*' -ksSI --resolve www.instrutorprocnh.com.br:443:127.0.0.1 \
+    'https://www.instrutorprocnh.com.br/')
+printf '%s' "$headers" | grep -qi '^referrer-policy: same-origin'
 echo GATEWAY_DOMAIN_TEST=PASS

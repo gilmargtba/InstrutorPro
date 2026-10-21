@@ -23,6 +23,27 @@ restrita de produção, execute `./scripts/validate-production-config.sh`. A val
 imprime os segredos, não inicia o stack persistente e não concede autorização para dados
 reais. Todas as flags de cadastro, publicação e demanda permanecem desligadas.
 
+### Preparação do Google Maps na busca web
+
+O Google Maps é opcional e, por padrão, permanece desligado. Antes de ativá-lo,
+revisar os termos e a política de privacidade para o carregamento direto do
+Google pelo navegador, confirmar as restrições da chave à Maps JavaScript API
+e aos domínios HTTPS autorizados, além de definir orçamento/alertas de custo
+adequados ao projeto. O orçamento da conta de faturamento não equivale a um
+limite automático nem necessariamente se aplica só a este projeto.
+
+Publicar e testar primeiro a política
+`Referrer-Policy: strict-origin-when-cross-origin` do gateway no domínio
+principal. Então, inserir a chave diretamente no `.env.production` da VPS,
+nunca em Git, chat ou histórico de comandos. Configurar
+`GOOGLE_MAPS_BROWSER_API_KEY`, `GOOGLE_MAPS_BROWSER_MAP_ID` e somente por último
+`GOOGLE_MAPS_BROWSER_ENABLED=true`. Recriar o backend para carregar o ambiente
+e conferir `GET /api/v1/map/browser-config/` sem imprimir a chave. Testar o
+mapa no domínio real e o fallback em caso de erro; reverter a flag para
+`false` se a API Google falhar. Não remover `MAPTILER_API_KEY`: geocodificação,
+mapa do cadastro e fallback ainda dependem dela. Android/iOS não usam esta
+chave de navegador.
+
 ## Backup e restauração
 
 - executar backup PostgreSQL criptografado em storage segregado, com identidade mínima e
