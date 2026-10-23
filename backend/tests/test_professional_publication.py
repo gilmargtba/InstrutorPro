@@ -564,10 +564,18 @@ def test_public_profile_preserves_selected_active_offer_category(actor):
     assert selected.status_code == 200
     assert selected.json()["offer_category"] == "A"
     assert selected.json()["price_amount"] == 120.0
+    assert [option["category"] for option in selected.json()["lesson_options"]] == ["A", "B"]
+    assert selected.json()["lesson_options"][0] == {
+        "category": "A",
+        "price_amount": 120.0,
+        "duration_minutes": 50,
+    }
     offer_a.is_active = False
     offer_a.save(update_fields=["is_active"])
     assert APIClient().get(endpoint, {"category": "A"}).status_code == 404
-    assert APIClient().get(endpoint, {"category": "B"}).json()["offer_category"] == "B"
+    remaining = APIClient().get(endpoint, {"category": "B"}).json()
+    assert remaining["offer_category"] == "B"
+    assert [option["category"] for option in remaining["lesson_options"]] == ["B"]
 
 
 @pytest.mark.django_db

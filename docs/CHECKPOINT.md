@@ -1,5 +1,20 @@
 # Checkpoint do Projeto
 
+## Cartões de valores no perfil público — 23/10/2026
+
+- A página pública do instrutor apresenta “Planos e valores” em cartões por
+  categoria, reutilizando somente ofertas individuais ativas, da mesma origem
+  de dados e de categorias declaradas no perfil publicado. Cada cartão mostra
+  preço e duração por aula e inicia o contato auditado pelo WhatsApp para a
+  categoria escolhida. Não há checkout, reserva, pagamento ou aprovação nova.
+- A referência visual possui pacotes de múltiplas aulas, mas essa composição
+  ainda não foi modelada nem precificada pelo proprietário. Os cartões atuais
+  são aulas individuais; não afirmam incluir aluguel de veículo ou prova.
+- O build Angular e 93 testes de interface passaram. Ruff check/format passaram.
+  O pytest backend não iniciou no Windows por falta da biblioteca GDAL, e o
+  Docker local não respondeu; o teste backend acrescentado precisa rodar no CI
+  antes de qualquer deploy. Nenhuma alteração foi enviada à VPS ou ao GitHub.
+
 ## Correção da ativação Google Maps web — 21/10/2026
 
 - O commit `37f9d0d` passou no CI e foi publicado na VPS após backup validado

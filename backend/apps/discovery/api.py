@@ -388,6 +388,7 @@ class PublicInstructorProfileResponse(serializers.Serializer):
     price_from = serializers.BooleanField()
     duration_minutes = serializers.IntegerField()
     vehicle = serializers.DictField(allow_null=True)
+    lesson_options = serializers.ListField(child=serializers.DictField())
 
 
 class WhatsAppContactResponse(serializers.Serializer):
@@ -640,6 +641,18 @@ class PublicInstructorProfileView(InstructorSearchView):
             pk=pk,
         )
         commercial_summary = self._commercial_summary(row, category)
+        mode = DataMode.SYNTHETIC if row.is_demo else DataMode.REAL
+        lesson_options = {}
+        for offer in sorted(row.offers.all(), key=lambda item: (item.category, item.price_amount)):
+            if offer.is_active and offer.data_mode == mode and offer.category in row.categories:
+                lesson_options.setdefault(
+                    offer.category,
+                    {
+                        "category": offer.category,
+                        "price_amount": offer.price_amount,
+                        "duration_minutes": offer.duration_minutes,
+                    },
+                )
         record_marketplace_event(
             request=request,
             event_type=MarketplaceEvent.Type.INSTRUCTOR_PROFILE_VIEWED,
@@ -666,6 +679,7 @@ class PublicInstructorProfileView(InstructorSearchView):
                 "profile_photo_url": self._photo_url(row),
                 "verified_claims": self._verified_claims(row),
                 "synthetic": row.is_demo,
+                "lesson_options": list(lesson_options.values()),
                 **commercial_summary,
             }
         )
