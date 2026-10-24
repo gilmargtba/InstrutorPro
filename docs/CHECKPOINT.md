@@ -11,9 +11,18 @@
   ainda não foi modelada nem precificada pelo proprietário. Os cartões atuais
   são aulas individuais; não afirmam incluir aluguel de veículo ou prova.
 - O build Angular e 93 testes de interface passaram. Ruff check/format passaram.
-  O pytest backend não iniciou no Windows por falta da biblioteca GDAL, e o
-  Docker local não respondeu; o teste backend acrescentado precisa rodar no CI
-  antes de qualquer deploy. Nenhuma alteração foi enviada à VPS ou ao GitHub.
+  O pytest backend não iniciou no Windows por falta da biblioteca GDAL, mas o
+  CI do GitHub concluiu com sucesso para `02c788c`, incluindo pytest.
+- `02c788c` foi enviado a `origin/main` e aplicado na VPS por fast-forward.
+  Antes da atualização, `scripts/backup-production.sh` validou dump do banco
+  e arquivo dos documentos privados em
+  `/home/gilmar/backups/instrutorpro/production/` (`20261023T094535Z`).
+  Somente backend e frontend foram reconstruídos; configuração local do gateway,
+  banco, worker e scheduler permaneceram intactos. O backend ficou saudável.
+- Smoke HTTPS: readiness, página de busca e estados retornaram 200; a busca em
+  GO encontrou dois perfis e o perfil consultado retornou uma opção ativa da
+  categoria A em `lesson_options`. Não houve aprovação, cobrança ou alteração
+  de dados de instrutores pelo deploy.
 
 ## Correção da ativação Google Maps web — 21/10/2026
 
