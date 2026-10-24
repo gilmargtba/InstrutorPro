@@ -60,6 +60,18 @@ Preço PRO ainda precisa ser informado e a cobrança real precisa passar pelos
 gates financeiros da decisão de 01/10/2026. Nenhuma fatia PRO muda
 RegulatoryReadiness ou publicação.
 
+### PKG-001 — Pacotes comerciais de aulas (`em implementação local`)
+
+- **Objetivo:** cadastrar pacotes de 2/5/10 aulas, preservar ofertas individuais
+  e exibir somente pacotes ativos elegíveis no perfil já publicado.
+- **Dependências:** perfil publicável, oferta ativa por categoria e plano efetivo
+  da assinatura existente; PRO/PREMIUM sem cobrança real neste recorte.
+- **Aceite:** FREE 1, PRO 6, PREMIUM ilimitado; validação transacional sob lock;
+  preço do instrutor, valor/aula derivado, propriedade, auditoria e downgrade
+  sem exclusão ou mudança automática dos registros.
+- **Testes:** autorização, limite, categoria/veículo, upgrade/downgrade/expiração,
+  visibilidade pública, aulas individuais e concorrência.
+
 ## M0 — Governança e decisões
 
 ### GOV-001 — Fixar jurisdição e categoria (`P0`)

@@ -9,6 +9,7 @@ import { InstructorOnboardingComponent } from './features/demo/instructor-onboar
 import { StudentMarketplaceComponent } from './features/demo/student-marketplace.component';
 import { InstructorEntryComponent, InstructorPortalComponent, InstructorStatusComponent, LoginComponent, StudentDashboardComponent, StudentEntryComponent } from './features/demo/marketplace-entry.component';
 import { InstructorPerformanceComponent, InstructorPlanComponent, InstructorSaasDashboardComponent, LegalPlaceholderComponent } from './features/professional/saas-pages.component';
+import { LessonPackagesComponent } from './features/professional/lesson-packages.component';
 import { environment } from '../environments/environment';
 import { AccountPrivacyComponent, MyAccountComponent, PrivacyPolicyComponent } from './features/account/account-privacy.component';
 import { LegalTermsComponent } from './features/account/legal-terms.component';
@@ -40,6 +41,7 @@ const webRoutes: Routes = [
   { path:'instrutor', component:InstructorSaasDashboardComponent, title:'Visão geral do instrutor — InstrutorProCNH' },
   { path:'instrutor/desempenho', component:InstructorPerformanceComponent, title:'Desempenho — InstrutorProCNH' },
   { path:'instrutor/plano', component:InstructorPlanComponent, title:'Meu plano — InstrutorProCNH' },
+  { path:'instrutor/pacotes', component:LessonPackagesComponent, title:'Meus pacotes — InstrutorProCNH' },
   { path:'privacidade', component:PrivacyPolicyComponent, title:'Política de Privacidade — InstrutorProCNH' },
   { path:'minha-conta', component:MyAccountComponent, title:'Meus dados — InstrutorProCNH' },
   { path:'minha-conta/privacidade', component:AccountPrivacyComponent, title:'Privacidade e meus dados — InstrutorProCNH' },

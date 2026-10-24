@@ -159,6 +159,47 @@ class InstructorOffer(models.Model):
         ]
 
 
+class InstructorLessonPackage(models.Model):
+    """Optional commercial bundle; never an official record of lessons delivered."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    instructor = models.ForeignKey(
+        "discovery.InstructorProfile", on_delete=models.PROTECT, related_name="lesson_packages"
+    )
+    name = models.CharField(max_length=120)
+    category = models.CharField(max_length=1)
+    lesson_count = models.PositiveSmallIntegerField()
+    price_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    vehicle_included = models.BooleanField(default=False)
+    description = models.CharField(max_length=500, blank=True)
+    is_active = models.BooleanField(default=True)
+    data_mode = models.CharField(max_length=12, choices=DataMode.choices)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "pacote de aulas do instrutor"
+        verbose_name_plural = "pacotes de aulas dos instrutores"
+        ordering = ["created_at", "id"]
+        indexes = [
+            models.Index(
+                fields=["instructor", "is_active", "created_at"],
+                name="marketplace_package_active_idx",
+            )
+        ]
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(category__in=["A", "B", "C", "D", "E"]), name="ck_package_category"
+            ),
+            models.CheckConstraint(
+                condition=Q(lesson_count__in=[2, 5, 10]), name="ck_package_lesson_count"
+            ),
+            models.CheckConstraint(
+                condition=Q(price_amount__gt=0), name="ck_package_price_positive"
+            ),
+        ]
+
+
 class InstructorContactChannel(models.Model):
     """Private professional contact used only by the audited contact endpoint."""
 

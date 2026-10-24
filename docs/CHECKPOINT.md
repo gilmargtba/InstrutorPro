@@ -1,5 +1,22 @@
 # Checkpoint do Projeto
 
+## Pacotes de aulas por plano — validação para publicação, 24/10/2026
+
+- Branch `codex/lesson-packages`, baseada em `origin/main` (`6ae36dc`).
+  O proprietário autorizou push e deploy em 24/10; validar CI da branch antes
+  de integrar `main` e iniciar o deploy com backup.
+- Modelo e API de pacotes 2/5/10 aulas, com preço definido pelo instrutor,
+  limite de ativos por plano (Free 1, Pro 6, Premium sem limite), bloqueio
+  transacional e auditoria. Premium foi preparado como rascunho privado, sem
+  preço nem cobrança. O perfil público preserva as aulas individuais.
+- Política aprovada pelo proprietário: no downgrade/expiração, manter registros,
+  preços e status; mostrar os pacotes ativos mais antigos até o limite efetivo,
+  sem exclusão ou desativação automática.
+- Build Angular e 95 testes de interface passaram; Ruff check/format e
+  compilação Python passaram. Os testes Django e a conferência de migrations
+  ainda dependem do CI: Windows e WSL sem GDAL; Docker local indisponível.
+  Não integrar `main` nem publicar na VPS se o CI falhar.
+
 ## Cartões de valores no perfil público — 23/10/2026
 
 - A página pública do instrutor apresenta “Planos e valores” em cartões por

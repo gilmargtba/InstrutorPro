@@ -25,6 +25,7 @@ from apps.marketplace.analytics import (
     whatsapp_destination,
 )
 from apps.marketplace.capabilities import enabled
+from apps.marketplace.lesson_packages import package_data, package_visibility
 from apps.marketplace.models import (
     DataMode,
     DocumentRequirement,
@@ -389,6 +390,7 @@ class PublicInstructorProfileResponse(serializers.Serializer):
     duration_minutes = serializers.IntegerField()
     vehicle = serializers.DictField(allow_null=True)
     lesson_options = serializers.ListField(child=serializers.DictField())
+    lesson_packages = serializers.ListField(child=serializers.DictField())
 
 
 class WhatsAppContactResponse(serializers.Serializer):
@@ -653,6 +655,12 @@ class PublicInstructorProfileView(InstructorSearchView):
                         "duration_minutes": offer.duration_minutes,
                     },
                 )
+        _, _, _, visible_packages = package_visibility(row)
+        public_packages = [
+            package_data(package)
+            for package in visible_packages
+            if package.category in lesson_options
+        ]
         record_marketplace_event(
             request=request,
             event_type=MarketplaceEvent.Type.INSTRUCTOR_PROFILE_VIEWED,
@@ -680,6 +688,7 @@ class PublicInstructorProfileView(InstructorSearchView):
                 "verified_claims": self._verified_claims(row),
                 "synthetic": row.is_demo,
                 "lesson_options": list(lesson_options.values()),
+                "lesson_packages": public_packages,
                 **commercial_summary,
             }
         )

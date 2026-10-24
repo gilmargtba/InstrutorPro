@@ -29,10 +29,12 @@ describe('PublicInstructorProfileComponent lesson options', () => {
         { category: 'A', price_amount: 80, duration_minutes: 50 },
         { category: 'B', price_amount: 100, duration_minutes: 60 },
       ],
+      lesson_packages: [{ id: 'package-1', name: 'Cinco aulas', category: 'B', lesson_count: 5,
+        price_amount: 450, price_per_lesson: 90, vehicle_included: true, description: 'Pacote opcional' }],
     });
     fixture.detectChanges();
     const cards = fixture.nativeElement.querySelectorAll('.lesson-option');
-    expect(cards.length).toBe(2);
+    expect(cards.length).toBe(3);
     expect(cards[0].textContent).toContain('R$ 80,00');
     expect(cards[1].textContent).toContain('60 minutos');
     cards[1].querySelector('button').click();
@@ -40,5 +42,11 @@ describe('PublicInstructorProfileComponent lesson options', () => {
     expect(contact.request.body.category).toBe('B');
     contact.flush({ destination_url: 'https://wa.me/5564999999999' });
     expect(whatsapp.open).toHaveBeenCalledWith('https://wa.me/5564999999999');
+    expect(cards[2].textContent).toContain('Cinco aulas');
+    expect(cards[2].textContent).toContain('R$ 450,00');
+    cards[2].querySelector('button').click();
+    const packageContact = http.expectOne('/instructors/instructor-1/whatsapp-contact/');
+    expect(packageContact.request.body).toEqual({ category: 'B', source: 'public-package' });
+    packageContact.flush({ destination_url: 'https://wa.me/5564999999999' });
   });
 });

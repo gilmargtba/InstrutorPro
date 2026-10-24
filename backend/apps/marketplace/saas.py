@@ -53,6 +53,18 @@ def ensure_saas_catalog():
             "is_public": False,
         },
     )
+    Plan.objects.get_or_create(
+        code="PREMIUM",
+        defaults={
+            "name": "Premium",
+            "description": "Catálogo preparado; assinatura e cobrança não habilitadas.",
+            "status": Plan.Status.DRAFT,
+            "billing_interval": Plan.BillingInterval.MONTHLY,
+            "price_amount": None,
+            "display_order": 30,
+            "is_public": False,
+        },
+    )
     for plan, entries in ((free, FREE_ENTITLEMENTS), (pro, PRO_ENTITLEMENTS)):
         for code, name in entries.items():
             entitlement, _ = Entitlement.objects.get_or_create(code=code, defaults={"name": name})

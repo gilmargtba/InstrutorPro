@@ -1,8 +1,11 @@
+from decimal import Decimal
+
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.gis.geos import Point
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.mail import send_mail
 from django.db import transaction
@@ -36,10 +39,17 @@ from apps.territories.models import FederativeUnit
 
 from .capabilities import enabled
 from .documents import can_review_document
+from .lesson_packages import (
+    PackageLimitReached,
+    package_data,
+    package_visibility,
+    save_lesson_package,
+)
 from .models import (
     DataMode,
     InstructorContactChannel,
     InstructorDocument,
+    InstructorLessonPackage,
     InstructorOffer,
     InstructorVehicle,
     LessonRequest,
@@ -1082,6 +1092,90 @@ class InstructorSaaSSummaryView(APIView):
                 "metrics": metrics,
             }
         )
+
+
+class LessonPackageInput(serializers.Serializer):
+    name = serializers.CharField(max_length=120, trim_whitespace=True)
+    category = serializers.ChoiceField(choices=["A", "B", "C", "D", "E"])
+    lesson_count = serializers.ChoiceField(choices=[2, 5, 10])
+    price_amount = serializers.DecimalField(
+        max_digits=10, decimal_places=2, min_value=Decimal("0.01")
+    )
+    vehicle_included = serializers.BooleanField()
+    description = serializers.CharField(max_length=500, required=False, allow_blank=True)
+    is_active = serializers.BooleanField(required=False, default=True)
+
+
+def _package_error(exc):
+    if isinstance(exc, PackageLimitReached):
+        return Response(
+            {"code": "package_limit_reached", "detail": exc.messages[0]},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    return Response({"code": "invalid_package", "detail": "; ".join(exc.messages)}, status=400)
+
+
+class InstructorLessonPackageListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        instructor = _request_instructor(request)
+        plan_code, limit, active, visible = package_visibility(instructor)
+        visible_ids = {package.pk for package in visible}
+        packages = InstructorLessonPackage.objects.filter(instructor=instructor).order_by(
+            "created_at", "id"
+        )
+        return Response(
+            {
+                "plan_code": plan_code,
+                "active_count": len(active),
+                "active_limit": limit,
+                "packages": [
+                    {**package_data(package), "visible": package.pk in visible_ids}
+                    for package in packages
+                ],
+            }
+        )
+
+    @extend_schema(request=LessonPackageInput)
+    def post(self, request):
+        instructor = _request_instructor(request)
+        serializer = LessonPackageInput(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            package = save_lesson_package(
+                actor=request.user,
+                profile=instructor,
+                data=serializer.validated_data,
+                request_id=getattr(request, "request_id", None),
+            )
+        except DjangoValidationError as exc:
+            return _package_error(exc)
+        return Response(package_data(package), status=status.HTTP_201_CREATED)
+
+
+class InstructorLessonPackageDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(request=LessonPackageInput)
+    def patch(self, request, pk):
+        instructor = _request_instructor(request)
+        get_object_or_404(InstructorLessonPackage, pk=pk, instructor=instructor)
+        serializer = LessonPackageInput(data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        try:
+            package = save_lesson_package(
+                actor=request.user,
+                profile=instructor,
+                data=serializer.validated_data,
+                package_id=pk,
+                request_id=getattr(request, "request_id", None),
+            )
+        except ObjectDoesNotExist:
+            return Response({"code": "not_found", "detail": "Pacote não encontrado."}, status=404)
+        except DjangoValidationError as exc:
+            return _package_error(exc)
+        return Response(package_data(package))
 
 
 class InstructorAdvancedAnalyticsView(APIView):

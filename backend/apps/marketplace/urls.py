@@ -6,6 +6,8 @@ from .api import (
     DemandListCreateView,
     InstructorAdvancedAnalyticsView,
     InstructorDocumentDownloadView,
+    InstructorLessonPackageDetailView,
+    InstructorLessonPackageListView,
     InstructorSaaSSummaryView,
     LessonRequestListCreateView,
     LessonRequestTransitionView,
@@ -21,6 +23,8 @@ from .api import (
 )
 
 urlpatterns = [
+    path("marketplace/instructor/packages/", InstructorLessonPackageListView.as_view()),
+    path("marketplace/instructor/packages/<uuid:pk>/", InstructorLessonPackageDetailView.as_view()),
     path("marketplace/instructor/saas-summary/", InstructorSaaSSummaryView.as_view()),
     path("marketplace/instructor/advanced-analytics/", InstructorAdvancedAnalyticsView.as_view()),
     path("marketplace/session/login/", SessionLoginView.as_view()),

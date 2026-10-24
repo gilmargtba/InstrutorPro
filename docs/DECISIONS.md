@@ -1,5 +1,19 @@
 # Registro de Decisões e Questões Abertas
 
+### Decisão do proprietário de 23/10/2026 — pacotes de aulas por plano
+
+Pacotes comerciais de 2, 5 ou 10 aulas podem ser cadastrados, com preço total
+definido individualmente pelo instrutor e opção de veículo, sem checkout nem
+registro de aula oficial. FREE admite 1 pacote ativo, PRO 6 e PREMIUM ilimitados;
+o limite não restringe aulas individuais nem categorias. PRO continua sem preço
+e sem cobrança autorizada; PREMIUM é apenas catálogo privado/rascunho até gate
+financeiro próprio. No downgrade, cancelamento, atraso ou expiração, nenhum
+pacote ou preço é alterado: somente os ativos mais antigos até o limite do plano
+efetivo permanecem visíveis ao público. O instrutor pode trocar a prioridade
+desativando/reativando pacotes, sujeito ao limite para novas ativações. A
+aprovação de um pacote nunca substitui elegibilidade, oferta ativa na categoria
+ou publicação manual do perfil.
+
 Este documento é a fonte oficial de decisões consolidadas, contradições resolvidas e questões em aberto. Uma recomendação marcada como aberta não é uma decisão aceita.
 
 ### Solicitação do proprietário de 20/10/2026 — Google Maps na busca pública

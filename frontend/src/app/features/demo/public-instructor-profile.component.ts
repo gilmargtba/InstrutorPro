@@ -6,6 +6,7 @@ import { publicMediaUrl } from '../../core/api-url';
 import { WhatsappLinkService } from '../../core/whatsapp-link.service';
 
 interface LessonOption { category: string; price_amount: number; duration_minutes: number; }
+interface LessonPackage { id: string; name: string; category: string; lesson_count: number; price_amount: number; price_per_lesson: number; vehicle_included: boolean; description: string; }
 interface PublicProfile {
   id: string; display_name: string; bio: string; categories: string[]; transmission_options: string[];
   vehicle_available: boolean; availability_summary: string; profile_photo_url: string | null;
@@ -13,6 +14,7 @@ interface PublicProfile {
   price_amount: number; offer_category: string; price_from: boolean; duration_minutes: number;
   vehicle: { make: string; model: string; year: number; transmission: string } | null;
   lesson_options: LessonOption[];
+  lesson_packages?: LessonPackage[];
 }
 
 @Component({
@@ -55,6 +57,22 @@ interface PublicProfile {
               </section>
             }
           </div>
+          @if (profile.lesson_packages?.length) {
+            <h2>Pacotes de aulas</h2>
+            <p class="muted">Preço total informado pelo instrutor. Aulas, contratação e pagamento são combinados diretamente; o pacote não comprova aulas realizadas.</p>
+            <div class="lesson-options">
+              @for (packageItem of profile.lesson_packages; track packageItem.id) {
+                <section class="lesson-option">
+                  <p class="eyebrow">Categoria {{packageItem.category}}</p><h3>{{packageItem.name}}</h3>
+                  <p>{{packageItem.lesson_count}} aulas · {{packageItem.vehicle_included?'Com veículo':'Sem veículo'}}</p>
+                  <p class="option-price">{{formatPrice(packageItem.price_amount)}} <small>no total</small></p>
+                  <p>{{formatPrice(packageItem.price_per_lesson)}} por aula</p>
+                  @if(packageItem.description){<p>{{packageItem.description}}</p>}
+                  <button class="button primary" type="button" (click)="contact(packageItem.category, 'public-package')"><i class="pi pi-whatsapp"></i> Consultar pacote pelo WhatsApp</button>
+                </section>
+              }
+            </div>
+          }
           @if (contactError) { <p role="alert">{{contactError}}</p> }
           <h2>Verificações aprovadas</h2>
           @if (!profile.verified_claims.length) { <p>Nenhuma verificação pública disponível.</p> }
@@ -102,10 +120,10 @@ export class PublicInstructorProfileComponent {
     });
   }
 
-  contact(category: string) {
+  contact(category: string, source = 'public-profile') {
     if (!this.profile) return;
     this.contactError = '';
-    this.http.post<{ destination_url: string }>(`/instructors/${this.id}/whatsapp-contact/`, { category, source: 'public-profile' }).subscribe({
+    this.http.post<{ destination_url: string }>(`/instructors/${this.id}/whatsapp-contact/`, { category, source }).subscribe({
       next: result => { void this.whatsapp.open(result.destination_url).catch(() => { this.contactError = 'Não foi possível abrir o WhatsApp agora.'; this.changeDetector.detectChanges(); }); },
       error: () => { this.contactError = 'Não foi possível abrir o WhatsApp agora.'; this.changeDetector.detectChanges(); },
     });

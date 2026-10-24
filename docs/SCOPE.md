@@ -167,7 +167,7 @@ Inclui somente após gate positivo do piloto:
 ## Evolução posterior
 
 - alunos próprios do instrutor, agenda e link próprios;
-- pacotes, lembretes e calendário; assinatura PRO básica já pertence ao MVP após gate próprio;
+- lembretes e calendário; assinatura PRO básica já pertence ao MVP após gate próprio;
 - login Gov.br, Consulta Online Senatran, Datavalid ou Detran apenas com base legal, contrato, documentação e homologação;
 - novas categorias/UFs por configuração e análise local;
 - app nativo, chat, antifraude avançado e seguros/parcerias se métricas justificarem.

@@ -478,3 +478,14 @@ Namespaces planejados, sujeitos aos gates do plano: `/jurisdictions`, `/journey`
 dos eventos do marketplace. `GET /api/v1/marketplace/instructor/advanced-analytics/` comprova
 autorização backend e responde `403 entitlement_required` sem a capacidade. Assinatura nunca
 altera verificação, elegibilidade ou publicação.
+
+`GET/POST /api/v1/marketplace/instructor/packages/` e
+`PATCH /api/v1/marketplace/instructor/packages/{id}/` exigem a conta titular do
+perfil. `GET` retorna plano efetivo, contagem/limite de pacotes ativos e lista
+com indicação de visibilidade; `POST/PATCH` validam categoria, 2/5/10 aulas,
+preço total positivo, veículo e limite do plano dentro de transação com lock.
+Ao atingir o limite, retornam `400 package_limit_reached`; não há exclusão nem
+upgrade automático. `GET /api/v1/instructors/{id}/` inclui somente pacotes
+ativos visíveis e categorias com oferta individual ativa, além dos cartões de
+aulas individuais existentes. Pacote é oferta comercial, não comprovante de
+aula oficial nem reserva/pagamento da plataforma.
