@@ -118,6 +118,23 @@ def test_free_limit_inactive_edit_and_audit(instructor):
 
 
 @pytest.mark.django_db
+def test_package_form_receives_only_owner_profile_categories(instructor):
+    account, profile = instructor
+    profile.categories = ["A"]
+    profile.vehicle_available = False
+    profile.save(update_fields=["categories", "vehicle_available"])
+    endpoint = "/api/v1/marketplace/instructor/packages/"
+    response = client_for(account).get(endpoint)
+    assert response.status_code == 200
+    assert response.json()["available_categories"] == ["A"]
+    assert response.json()["vehicle_available"] is False
+    rejected = client_for(account).post(endpoint, payload(category="B"), format="json")
+    assert rejected.status_code == 400
+    assert rejected.json()["code"] == "invalid_package"
+    assert InstructorLessonPackage.objects.filter(instructor=profile).count() == 0
+
+
+@pytest.mark.django_db
 @pytest.mark.parametrize("lessons", [2, 5, 10])
 @pytest.mark.parametrize("vehicle", [False, True])
 def test_allowed_sizes_and_vehicle_options(instructor, lessons, vehicle):

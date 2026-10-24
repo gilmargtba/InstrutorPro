@@ -1130,6 +1130,12 @@ class InstructorLessonPackageListView(APIView):
                 "plan_code": plan_code,
                 "active_count": len(active),
                 "active_limit": limit,
+                "available_categories": [
+                    category
+                    for category in ("A", "B", "C", "D", "E")
+                    if category in instructor.categories
+                ],
+                "vehicle_available": instructor.vehicle_available,
                 "packages": [
                     {**package_data(package), "visible": package.pk in visible_ids}
                     for package in packages

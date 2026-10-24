@@ -1,5 +1,18 @@
 # Checkpoint do Projeto
 
+## Correção local — categorias no formulário de pacotes, 24/10/2026
+
+- O formulário oferecia A–E e iniciava em B mesmo quando a categoria não estava
+  cadastrada no perfil; o backend recusava corretamente o salvamento. A API
+  agora informa apenas as categorias do titular e a disponibilidade de veículo;
+  a interface usa a primeira categoria válida e orienta a atualizar o perfil
+  quando não há nenhuma. A validação do backend permanece obrigatória.
+- Testes de contrato e interface cobrem categoria única, ausência de categoria
+  e rejeição da categoria não cadastrada. Build Angular, 97 testes de interface,
+  Ruff e compilação Python passaram localmente. O teste Django/PostGIS não pôde
+  iniciar no Windows por falta de GDAL; deve passar no CI antes de publicação.
+  Esta correção ainda não está em produção.
+
 ## Pacotes de aulas por plano — publicados, 24/10/2026
 
 - Commit `14f88df` da branch `codex/lesson-packages` foi enviado a `origin/main`

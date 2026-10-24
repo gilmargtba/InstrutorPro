@@ -481,7 +481,9 @@ altera verificação, elegibilidade ou publicação.
 
 `GET/POST /api/v1/marketplace/instructor/packages/` e
 `PATCH /api/v1/marketplace/instructor/packages/{id}/` exigem a conta titular do
-perfil. `GET` retorna plano efetivo, contagem/limite de pacotes ativos e lista
+perfil. `GET` retorna plano efetivo, contagem/limite de pacotes ativos,
+`available_categories` e `vehicle_available` do perfil titular para orientar o
+formulário, além da lista
 com indicação de visibilidade; `POST/PATCH` validam categoria, 2/5/10 aulas,
 preço total positivo, veículo e limite do plano dentro de transação com lock.
 Ao atingir o limite, retornam `400 package_limit_reached`; não há exclusão nem
