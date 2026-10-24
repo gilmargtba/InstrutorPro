@@ -1,10 +1,11 @@
 # Checkpoint do Projeto
 
-## Pacotes de aulas por plano — validação para publicação, 24/10/2026
+## Pacotes de aulas por plano — publicados, 24/10/2026
 
-- Branch `codex/lesson-packages`, baseada em `origin/main` (`6ae36dc`).
-  O proprietário autorizou push e deploy em 24/10; validar CI da branch antes
-  de integrar `main` e iniciar o deploy com backup.
+- Commit `14f88df` da branch `codex/lesson-packages` foi enviado a `origin/main`
+  por fast-forward, sem force push, após autorização do proprietário. O CI da
+  branch concluiu com sucesso nos jobs backend e frontend (run `40058677471`),
+  incluindo pytest, migrações, OpenAPI, build e testes Angular.
 - Modelo e API de pacotes 2/5/10 aulas, com preço definido pelo instrutor,
   limite de ativos por plano (Free 1, Pro 6, Premium sem limite), bloqueio
   transacional e auditoria. Premium foi preparado como rascunho privado, sem
@@ -12,10 +13,21 @@
 - Política aprovada pelo proprietário: no downgrade/expiração, manter registros,
   preços e status; mostrar os pacotes ativos mais antigos até o limite efetivo,
   sem exclusão ou desativação automática.
-- Build Angular e 95 testes de interface passaram; Ruff check/format e
-  compilação Python passaram. Os testes Django e a conferência de migrations
-  ainda dependem do CI: Windows e WSL sem GDAL; Docker local indisponível.
-  Não integrar `main` nem publicar na VPS se o CI falhar.
+- Build Angular e 95 testes de interface passaram localmente; Ruff check/format
+  e compilação Python passaram. A validação Django/PostGIS ocorreu no CI,
+  porque Windows e WSL não dispõem de GDAL e o Docker local não respondeu.
+- Antes do deploy, `scripts/backup-production.sh` validou dump do banco e
+  arquivo de documentos privados em `/home/gilmar/backups/instrutorpro/production/`
+  com timestamp `20261024T034340Z`. As imagens anteriores de backend e frontend
+  foram preservadas com a etiqueta `pre-packages-20261024T034340Z` para
+  rollback da aplicação, mantendo a migration aditiva no banco.
+- A VPS avançou de `6ae36dc` para `14f88df` por fast-forward. Foram reconstruídos
+  e recriados somente backend e frontend; banco, gateway, worker, scheduler e
+  configuração local permaneceram intactos. A migration
+  `marketplace.0015_instructor_lesson_package` aparece aplicada. Readiness e
+  rota `/instrutor/pacotes` responderam HTTPS 200; a API privada de pacotes
+  respondeu 403 sem autenticação. Não houve criação de pacote real ou alteração
+  de assinatura durante o deploy.
 
 ## Cartões de valores no perfil público — 23/10/2026
 
