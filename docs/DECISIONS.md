@@ -1,5 +1,14 @@
 # Registro de Decisões e Questões Abertas
 
+### Solicitação do proprietário de 24/10/2026 — várias categorias por pacote
+
+Um pacote comercial pode reunir mais de uma categoria (por exemplo, A e B)
+com o mesmo número de aulas e preço total informado pelo instrutor. Cada
+categoria deve constar no perfil do titular. A visibilidade pública de cada
+categoria continua condicionada à oferta individual ativa e à publicação do
+perfil; o pacote conta uma única vez para o limite do plano. Os pacotes
+existentes de categoria única permanecem válidos.
+
 ### Decisão do proprietário de 23/10/2026 — pacotes de aulas por plano
 
 Pacotes comerciais de 2, 5 ou 10 aulas podem ser cadastrados, com preço total

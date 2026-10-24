@@ -2,6 +2,7 @@ import uuid
 from pathlib import Path
 
 from django.contrib.gis.db import models
+from django.contrib.postgres.fields import ArrayField
 from django.core.validators import RegexValidator
 from django.db.models import Q
 
@@ -168,6 +169,11 @@ class InstructorLessonPackage(models.Model):
     )
     name = models.CharField(max_length=120)
     category = models.CharField(max_length=1)
+    categories = ArrayField(
+        models.CharField(max_length=1, choices=[(value, value) for value in "ABCDE"]),
+        size=5,
+        default=list,
+    )
     lesson_count = models.PositiveSmallIntegerField()
     price_amount = models.DecimalField(max_digits=10, decimal_places=2)
     vehicle_included = models.BooleanField(default=False)
@@ -190,6 +196,9 @@ class InstructorLessonPackage(models.Model):
         constraints = [
             models.CheckConstraint(
                 condition=Q(category__in=["A", "B", "C", "D", "E"]), name="ck_package_category"
+            ),
+            models.CheckConstraint(
+                condition=~Q(categories=[]), name="ck_package_categories_not_empty"
             ),
             models.CheckConstraint(
                 condition=Q(lesson_count__in=[2, 5, 10]), name="ck_package_lesson_count"

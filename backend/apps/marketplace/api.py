@@ -1096,7 +1096,13 @@ class InstructorSaaSSummaryView(APIView):
 
 class LessonPackageInput(serializers.Serializer):
     name = serializers.CharField(max_length=120, trim_whitespace=True)
-    category = serializers.ChoiceField(choices=["A", "B", "C", "D", "E"])
+    category = serializers.ChoiceField(choices=["A", "B", "C", "D", "E"], required=False)
+    categories = serializers.ListField(
+        child=serializers.ChoiceField(choices=["A", "B", "C", "D", "E"]),
+        min_length=1,
+        max_length=5,
+        required=False,
+    )
     lesson_count = serializers.ChoiceField(choices=[2, 5, 10])
     price_amount = serializers.DecimalField(
         max_digits=10, decimal_places=2, min_value=Decimal("0.01")
@@ -1104,6 +1110,16 @@ class LessonPackageInput(serializers.Serializer):
     vehicle_included = serializers.BooleanField()
     description = serializers.CharField(max_length=500, required=False, allow_blank=True)
     is_active = serializers.BooleanField(required=False, default=True)
+
+    def validate(self, attrs):
+        if not self.partial and "category" not in attrs and "categories" not in attrs:
+            raise serializers.ValidationError({"categories": "Selecione uma categoria."})
+        categories = attrs.get("categories")
+        if categories and len(categories) != len(set(categories)):
+            raise serializers.ValidationError({"categories": "Não repita categorias."})
+        if categories and "category" in attrs and attrs["category"] != categories[0]:
+            raise serializers.ValidationError({"category": "Use a primeira categoria selecionada."})
+        return attrs
 
 
 def _package_error(exc):

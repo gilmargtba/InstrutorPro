@@ -29,7 +29,7 @@ describe('PublicInstructorProfileComponent lesson options', () => {
         { category: 'A', price_amount: 80, duration_minutes: 50 },
         { category: 'B', price_amount: 100, duration_minutes: 60 },
       ],
-      lesson_packages: [{ id: 'package-1', name: 'Cinco aulas', category: 'B', lesson_count: 5,
+      lesson_packages: [{ id: 'package-1', name: 'Cinco aulas', category: 'B', categories: ['B'], lesson_count: 5,
         price_amount: 450, price_per_lesson: 90, vehicle_included: true, description: 'Pacote opcional' }],
     });
     fixture.detectChanges();
@@ -48,5 +48,28 @@ describe('PublicInstructorProfileComponent lesson options', () => {
     const packageContact = http.expectOne('/instructors/instructor-1/whatsapp-contact/');
     expect(packageContact.request.body).toEqual({ category: 'B', source: 'public-package' });
     packageContact.flush({ destination_url: 'https://wa.me/5564999999999' });
+  });
+
+  it('shows both package categories and routes contact to the chosen one', () => {
+    const fixture = TestBed.createComponent(PublicInstructorProfileComponent);
+    const http = TestBed.inject(HttpTestingController);
+    http.expectOne('/instructors/instructor-1/').flush({
+      id: 'instructor-1', display_name: 'Instrutora Exemplo', bio: '', categories: ['A', 'B'],
+      transmission_options: ['MANUAL'], vehicle_available: true, availability_summary: '',
+      profile_photo_url: null, verified_claims: [], service_area: { city: 'Goiatuba', uf: 'GO', radius_km: 10 },
+      synthetic: false, price_amount: 80, offer_category: 'A', price_from: true, duration_minutes: 50,
+      vehicle: null, lesson_options: [], lesson_packages: [{ id: 'package-1', name: 'A e B',
+        category: 'A', categories: ['A', 'B'], lesson_count: 5, price_amount: 300,
+        price_per_lesson: 60, vehicle_included: true, description: '' }],
+    });
+    fixture.detectChanges();
+    const card = fixture.nativeElement.querySelector('.lesson-option') as HTMLElement;
+    expect(card.textContent).toContain('Categorias A, B');
+    const buttons = card.querySelectorAll('button');
+    expect(buttons.length).toBe(2);
+    buttons[1].click();
+    const contact = http.expectOne('/instructors/instructor-1/whatsapp-contact/');
+    expect(contact.request.body.category).toBe('B');
+    contact.flush({ destination_url: 'https://wa.me/5564999999999' });
   });
 });

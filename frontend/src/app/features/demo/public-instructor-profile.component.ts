@@ -6,7 +6,7 @@ import { publicMediaUrl } from '../../core/api-url';
 import { WhatsappLinkService } from '../../core/whatsapp-link.service';
 
 interface LessonOption { category: string; price_amount: number; duration_minutes: number; }
-interface LessonPackage { id: string; name: string; category: string; lesson_count: number; price_amount: number; price_per_lesson: number; vehicle_included: boolean; description: string; }
+interface LessonPackage { id: string; name: string; category: string; categories: string[]; lesson_count: number; price_amount: number; price_per_lesson: number; vehicle_included: boolean; description: string; }
 interface PublicProfile {
   id: string; display_name: string; bio: string; categories: string[]; transmission_options: string[];
   vehicle_available: boolean; availability_summary: string; profile_photo_url: string | null;
@@ -63,12 +63,12 @@ interface PublicProfile {
             <div class="lesson-options">
               @for (packageItem of profile.lesson_packages; track packageItem.id) {
                 <section class="lesson-option">
-                  <p class="eyebrow">Categoria {{packageItem.category}}</p><h3>{{packageItem.name}}</h3>
+                  <p class="eyebrow">Categorias {{packageItem.categories.join(', ')}}</p><h3>{{packageItem.name}}</h3>
                   <p>{{packageItem.lesson_count}} aulas · {{packageItem.vehicle_included?'Com veículo':'Sem veículo'}}</p>
                   <p class="option-price">{{formatPrice(packageItem.price_amount)}} <small>no total</small></p>
                   <p>{{formatPrice(packageItem.price_per_lesson)}} por aula</p>
                   @if(packageItem.description){<p>{{packageItem.description}}</p>}
-                  <button class="button primary" type="button" (click)="contact(packageItem.category, 'public-package')"><i class="pi pi-whatsapp"></i> Consultar pacote pelo WhatsApp</button>
+                  @for(category of packageItem.categories; track category){<button class="button primary" type="button" (click)="contact(category, 'public-package')"><i class="pi pi-whatsapp"></i> Consultar pacote {{category}} pelo WhatsApp</button>}
                 </section>
               }
             </div>

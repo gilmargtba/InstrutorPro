@@ -61,16 +61,20 @@ def package_visibility(instructor):
     )
     within_plan_limit = active if limit is None else active[:limit]
     visible = [
-        package for package in within_plan_limit if package.category in instructor.categories
+        package
+        for package in within_plan_limit
+        if any(category in instructor.categories for category in package.categories)
     ]
     return plan_code, limit, active, visible
 
 
-def package_data(package):
+def package_data(package, *, categories=None):
+    selected = categories if categories is not None else package.categories
     return {
         "id": str(package.id),
         "name": package.name,
-        "category": package.category,
+        "category": selected[0] if selected else package.category,
+        "categories": selected,
         "lesson_count": package.lesson_count,
         "price_amount": package.price_amount,
         "price_per_lesson": (package.price_amount / Decimal(package.lesson_count)).quantize(
@@ -102,11 +106,30 @@ def save_lesson_package(*, actor, profile, data, package_id=None, request_id=Non
         package = InstructorLessonPackage(instructor=locked, data_mode=mode)
         created = True
         was_active = False
+    selected = data.get("categories")
+    if selected is None and "category" in data:
+        selected = [data["category"]]
+    if selected is None:
+        selected = package.categories or ([package.category] if package.category else [])
+    if (
+        not selected
+        or len(selected) > 5
+        or len(selected) != len(set(selected))
+        or any(category not in "ABCDE" for category in selected)
+    ):
+        raise ValidationError("Selecione de uma a cinco categorias distintas para o pacote.")
+    if "category" in data and "categories" in data and data["category"] != selected[0]:
+        raise ValidationError("A categoria principal deve ser a primeira categoria do pacote.")
     for field, value in data.items():
+        if field in ("category", "categories"):
+            continue
         setattr(package, field, value)
-    if package.category not in locked.categories:
-        raise ValidationError("Selecione uma categoria cadastrada no seu perfil.")
-    if package.vehicle_included and not locked.vehicle_available:
+    deactivating_only = bool(package_id and data == {"is_active": False})
+    if not deactivating_only and any(category not in locked.categories for category in selected):
+        raise ValidationError("Selecione apenas categorias cadastradas no seu perfil.")
+    package.categories = list(selected)
+    package.category = selected[0]
+    if not deactivating_only and package.vehicle_included and not locked.vehicle_available:
         raise ValidationError("O perfil não informa veículo disponível para este pacote.")
     if package.is_active and not was_active:
         plan_code = effective_package_plan(actor)
@@ -130,6 +153,10 @@ def save_lesson_package(*, actor, profile, data, package_id=None, request_id=Non
         target_type="marketplace.InstructorLessonPackage",
         target_id=package.pk,
         request_id=request_id,
-        metadata={"active": package.is_active, "category": package.category, "created": created},
+        metadata={
+            "active": package.is_active,
+            "categories": package.categories,
+            "created": created,
+        },
     )
     return package

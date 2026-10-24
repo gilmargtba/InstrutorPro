@@ -483,11 +483,13 @@ altera verificação, elegibilidade ou publicação.
 `PATCH /api/v1/marketplace/instructor/packages/{id}/` exigem a conta titular do
 perfil. `GET` retorna plano efetivo, contagem/limite de pacotes ativos,
 `available_categories` e `vehicle_available` do perfil titular para orientar o
-formulário, além da lista
-com indicação de visibilidade; `POST/PATCH` validam categoria, 2/5/10 aulas,
+formulário, além da lista com indicação de visibilidade. `POST/PATCH` aceitam
+`categories` (lista de uma a cinco categorias distintas do perfil); `category`
+continua aceito para clientes anteriores como categoria única. A resposta
+inclui ambos, sendo `category` a primeira da lista. Validam 2/5/10 aulas,
 preço total positivo, veículo e limite do plano dentro de transação com lock.
 Ao atingir o limite, retornam `400 package_limit_reached`; não há exclusão nem
 upgrade automático. `GET /api/v1/instructors/{id}/` inclui somente pacotes
-ativos visíveis e categorias com oferta individual ativa, além dos cartões de
+ativos visíveis e somente suas categorias com oferta individual ativa, além dos cartões de
 aulas individuais existentes. Pacote é oferta comercial, não comprovante de
 aula oficial nem reserva/pagamento da plataforma.

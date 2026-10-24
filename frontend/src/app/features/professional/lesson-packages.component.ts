@@ -6,7 +6,7 @@ import { RouterLink } from '@angular/router';
 import { ProfessionalNavComponent } from './saas-pages.component';
 
 interface LessonPackage {
-  id: string; name: string; category: string; lesson_count: number;
+  id: string; name: string; category: string; categories: string[]; lesson_count: number;
   price_amount: number; price_per_lesson: number; vehicle_included: boolean;
   description: string; is_active: boolean; visible: boolean;
 }
@@ -27,7 +27,7 @@ interface PackageList {
       <p>Pacotes são ofertas comerciais; contratação e pagamento são combinados diretamente com o aluno. Não representam aulas oficialmente concluídas.</p>
       @if(error()){<p role="alert">{{error()}}</p>}
       <div class="package-grid">@for(item of current.packages;track item.id){
-        <article class="package-card"><h2>{{item.name}}</h2><p>Categoria {{item.category}} · {{item.lesson_count}} aulas · {{item.vehicle_included?'Com veículo':'Sem veículo'}}</p>
+        <article class="package-card"><h2>{{item.name}}</h2><p>Categorias {{item.categories.join(', ')}} · {{item.lesson_count}} aulas · {{item.vehicle_included?'Com veículo':'Sem veículo'}}</p>
           <p><strong>{{formatPrice(item.price_amount)}}</strong> no total · {{formatPrice(item.price_per_lesson)}} por aula</p>
           @if(item.description){<p>{{item.description}}</p>}
           <p>{{item.is_active?(item.visible?'Ativo e visível':'Ativo, oculto pelo limite do plano ou categoria'): 'Inativo'}}</p>
@@ -39,7 +39,7 @@ interface PackageList {
       @if(!current.available_categories.length){<p>Cadastre primeiro uma categoria no <a routerLink="/profissional/instrutor/onboarding">seu perfil de instrutor</a> para criar um pacote.</p>}
       <form #packageForm="ngForm" class="package-form" (ngSubmit)="save(packageForm.valid)">
         <label>Nome do pacote<input name="name" [(ngModel)]="draft.name" maxlength="120" required></label>
-        <label>Categoria<select name="category" [(ngModel)]="draft.category" required><option value="" disabled>Selecione uma categoria</option>@for(category of current.available_categories;track category){<option [value]="category">{{category}}</option>}</select></label>
+        <fieldset><legend>Categorias do pacote</legend>@for(category of formCategories(current.available_categories);track category){<label class="check"><input type="checkbox" [checked]="draft.categories.includes(category)" (change)="toggleCategory(category, $event)"> Categoria {{category}} @if(!current.available_categories.includes(category)){(não está mais no perfil; desmarque para salvar)}</label>}</fieldset>
         <label>Quantidade de aulas<select name="lessonCount" [(ngModel)]="draft.lesson_count" required><option [ngValue]="2">2</option><option [ngValue]="5">5</option><option [ngValue]="10">10</option></select></label>
         <label>Preço total (R$)<input name="price" type="number" step="0.01" min="0.01" [(ngModel)]="draft.price_amount" required></label>
         @if(draft.price_amount && draft.lesson_count){<p>Valor aproximado por aula: {{formatPrice(draft.price_amount/draft.lesson_count)}}</p>}
@@ -65,13 +65,15 @@ export class LessonPackagesComponent {
 
   constructor() { this.reload(); }
 
-  private emptyDraft() { return { name: '', category: this.data()?.available_categories[0] ?? '', lesson_count: 2, price_amount: null as number | null, vehicle_included: false, description: '', is_active: true }; }
-  reload() { this.loading.set(true); this.http.get<PackageList>('/marketplace/instructor/packages/').subscribe({ next: value => { this.data.set(value); if (!this.editingId()) this.draft.category = value.available_categories[0] ?? ''; this.loading.set(false); this.error.set(''); }, error: () => { this.loading.set(false); this.error.set('Não foi possível carregar os pacotes.'); } }); }
-  edit(item: LessonPackage) { this.editingId.set(item.id); this.draft = { name: item.name, category: item.category, lesson_count: item.lesson_count, price_amount: item.price_amount, vehicle_included: item.vehicle_included, description: item.description, is_active: item.is_active }; this.error.set(''); }
+  private emptyDraft() { const first = this.data()?.available_categories[0]; return { name: '', categories: first ? [first] : [], lesson_count: 2, price_amount: null as number | null, vehicle_included: false, description: '', is_active: true }; }
+  reload() { this.loading.set(true); this.http.get<PackageList>('/marketplace/instructor/packages/').subscribe({ next: value => { this.data.set(value); if (!this.editingId()) this.draft.categories = value.available_categories.slice(0, 1); this.loading.set(false); this.error.set(''); }, error: () => { this.loading.set(false); this.error.set('Não foi possível carregar os pacotes.'); } }); }
+  edit(item: LessonPackage) { this.editingId.set(item.id); this.draft = { name: item.name, categories: [...item.categories], lesson_count: item.lesson_count, price_amount: item.price_amount, vehicle_included: item.vehicle_included, description: item.description, is_active: item.is_active }; this.error.set(''); }
   reset() { this.editingId.set(null); this.draft = this.emptyDraft(); this.error.set(''); }
+  formCategories(available: string[]) { return [...new Set([...available, ...this.draft.categories])]; }
+  toggleCategory(category: string, event: Event) { const checked = (event.target as HTMLInputElement).checked; this.draft.categories = checked ? [...this.draft.categories, category] : this.draft.categories.filter(value => value !== category); this.error.set(''); }
   toggle(item: LessonPackage) { this.update(item.id, { is_active: !item.is_active }); }
   save(valid: boolean | null) {
-    if (!this.data()?.available_categories.includes(this.draft.category)) { this.error.set('Selecione uma categoria cadastrada no seu perfil.'); return; }
+    if (!this.draft.categories.length || !this.draft.categories.every(category => this.data()?.available_categories.includes(category))) { this.error.set('Selecione apenas categorias cadastradas no seu perfil.'); return; }
     if (this.draft.vehicle_included && !this.data()?.vehicle_available) { this.error.set('Informe um veículo disponível no seu perfil antes de incluí-lo no pacote.'); return; }
     if (!valid || !this.draft.price_amount || this.draft.price_amount <= 0) { this.error.set('Preencha o nome e um preço total positivo.'); return; }
     const id = this.editingId();

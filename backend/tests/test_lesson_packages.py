@@ -135,6 +135,59 @@ def test_package_form_receives_only_owner_profile_categories(instructor):
 
 
 @pytest.mark.django_db
+def test_one_package_can_cover_two_profile_categories(instructor):
+    account, profile = instructor
+    client = client_for(account)
+    endpoint = "/api/v1/marketplace/instructor/packages/"
+    data = payload("Pacote A e B", price_amount="300.00", lesson_count=5)
+    data.pop("category")
+    data["categories"] = ["A", "B"]
+    created = client.post(endpoint, data, format="json")
+    assert created.status_code == 201
+    assert created.json()["categories"] == ["A", "B"]
+    assert created.json()["price_per_lesson"] == 60
+    assert InstructorLessonPackage.objects.filter(instructor=profile, is_active=True).count() == 1
+    assert AuditEvent.objects.filter(
+        action="marketplace.lesson_package.created", metadata__categories=["A", "B"]
+    ).exists()
+    public = APIClient().get(f"/api/v1/instructors/{profile.pk}/")
+    assert public.status_code == 200
+    assert public.json()["lesson_packages"][0]["categories"] == ["A", "B"]
+    InstructorOffer.objects.filter(instructor=profile, category="B").update(is_active=False)
+    public = APIClient().get(f"/api/v1/instructors/{profile.pk}/")
+    assert public.json()["lesson_packages"][0]["categories"] == ["A"]
+    InstructorOffer.objects.filter(instructor=profile, category="A").update(is_active=False)
+    public = APIClient().get(f"/api/v1/instructors/{profile.pk}/")
+    assert public.json()["lesson_packages"] == []
+    updated = client.patch(
+        f"{endpoint}{created.json()['id']}/", {"categories": ["B"]}, format="json"
+    )
+    assert updated.status_code == 200
+    assert updated.json()["categories"] == ["B"]
+    profile.categories = ["A"]
+    profile.save(update_fields=["categories"])
+    deactivated = client.patch(
+        f"{endpoint}{created.json()['id']}/", {"is_active": False}, format="json"
+    )
+    assert deactivated.status_code == 200
+    assert deactivated.json()["is_active"] is False
+
+
+@pytest.mark.django_db
+def test_multi_category_package_rejects_unknown_and_repeated_categories(instructor):
+    account, profile = instructor
+    endpoint = "/api/v1/marketplace/instructor/packages/"
+    data = payload()
+    data.pop("category")
+    for categories in (["A", "E"], ["A", "A"], []):
+        response = client_for(account).post(
+            endpoint, {**data, "categories": categories}, format="json"
+        )
+        assert response.status_code == 400
+    assert InstructorLessonPackage.objects.filter(instructor=profile).count() == 0
+
+
+@pytest.mark.django_db
 @pytest.mark.parametrize("lessons", [2, 5, 10])
 @pytest.mark.parametrize("vehicle", [False, True])
 def test_allowed_sizes_and_vehicle_options(instructor, lessons, vehicle):

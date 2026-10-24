@@ -657,9 +657,14 @@ class PublicInstructorProfileView(InstructorSearchView):
                 )
         _, _, _, visible_packages = package_visibility(row)
         public_packages = [
-            package_data(package)
+            package_data(
+                package,
+                categories=[
+                    category for category in package.categories if category in lesson_options
+                ],
+            )
             for package in visible_packages
-            if package.category in lesson_options
+            if any(category in lesson_options for category in package.categories)
         ]
         record_marketplace_event(
             request=request,

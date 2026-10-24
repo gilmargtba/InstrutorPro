@@ -1,5 +1,19 @@
 # Checkpoint do Projeto
 
+## Pacote com várias categorias — implementação local, 24/10/2026
+
+- Um pacote pode selecionar várias categorias cadastradas no perfil, mantendo
+  preço e quantidade de aulas únicos e contando como um pacote no plano.
+  Migration aditiva preserva a categoria anterior e copia os registros já
+  existentes para a nova lista de categorias.
+- O perfil público expõe somente as categorias do pacote que ainda têm oferta
+  individual ativa; o contato via WhatsApp usa a categoria escolhida. A
+  validação de titularidade, limite, veículo e auditoria permanece no backend.
+- Build Angular e 99 testes de interface passaram; Ruff, formatação e
+  compilação Python passaram. O Windows não tem GDAL e o Docker local não
+  respondeu, portanto migração e testes Django/PostGIS exigem CI antes de
+  publicação. Esta fatia ainda não foi enviada ao GitHub nem à VPS.
+
 ## Correção local — categorias no formulário de pacotes, 24/10/2026
 
 - O formulário oferecia A–E e iniciava em B mesmo quando a categoria não estava
