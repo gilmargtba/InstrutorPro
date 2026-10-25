@@ -1,6 +1,6 @@
 # Checkpoint do Projeto
 
-## Revisão documental simplificada no Admin — implementação local, 25/10/2026
+## Revisão documental simplificada no Admin — publicada, 25/10/2026
 
 - O painel do perfil real agora mostra CNH, credenciamento e demais anexos da
   solicitação ativa no topo, com acesso direto ao arquivo privado após o revisor
@@ -16,9 +16,19 @@
 - O formulário de decisão documental é destacado; detalhes técnicos e históricos
   ficam recolhidos. Testes cobrem revisor autorizado sem acesso à UF, ausência
   de publicação automática, restrições de arquivos e visualização privada.
-  Sem push, deploy ou alteração de dados reais nesta fatia. Lint e sintaxe dos
-  templates passaram. O Windows não possui GDAL para executar pytest/PostGIS
-  local; CI ainda é necessário antes de publicar.
+  Lint, sintaxe dos templates e compilação Python passaram localmente. O CI
+  `40173647204` aprovou backend e frontend, incluindo pytest/PostGIS, migrações,
+  OpenAPI e testes Angular. O commit `2c33282` foi enviado por fast-forward a
+  `origin/main` e aplicado na VPS, sem alteração manual de dados reais.
+- O backup validado de banco e documentos privados é `20261025T090137Z`, em
+  `/home/gilmar/backups/instrutorpro/production/`. A imagem anterior do backend
+  foi preservada como `instrutorpro-backend:pre-admin-review-20261025T090137Z`
+  para rollback da aplicação; nenhum rollback de banco é previsto nesta fatia,
+  pois não há migration nova.
+- Somente o backend foi reconstruído e recriado. O gateway modificado localmente,
+  frontend, banco e workers foram preservados. O backend ficou saudável; em HTTPS,
+  readiness e busca responderam 200 e páginas do Admin redirecionaram ao login
+  (302). `manage.py check --deploy` retornou 0 com avisos OpenAPI/HSTS.
 
 ## Pacote com várias categorias — publicado, 24/10/2026
 
