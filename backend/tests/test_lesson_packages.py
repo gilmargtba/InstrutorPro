@@ -158,7 +158,8 @@ def test_one_package_can_cover_two_profile_categories(instructor):
     assert public.json()["lesson_packages"][0]["categories"] == ["A"]
     InstructorOffer.objects.filter(instructor=profile, category="A").update(is_active=False)
     public = APIClient().get(f"/api/v1/instructors/{profile.pk}/")
-    assert public.json()["lesson_packages"] == []
+    # A página pública exige ao menos uma oferta individual ativa.
+    assert public.status_code == 404
     updated = client.patch(
         f"{endpoint}{created.json()['id']}/", {"categories": ["B"]}, format="json"
     )
