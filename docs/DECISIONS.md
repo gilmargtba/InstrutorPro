@@ -156,6 +156,18 @@ cópia automática entre categorias. Perfil só deve ser anunciado como disponí
 quando a publicação manual o tornar efetivamente visível na busca. O e-mail
 transacional pós-publicação definido abaixo continua independente de PRO.
 
+### Decisão operacional de 25/10/2026 — conferência documental primeiro
+
+O Admin destaca CNH, credenciamento e outros anexos da solicitação ativa antes
+dos detalhes comerciais e territoriais. O revisor com permissões explícitas
+assume a solicitação, abre os arquivos limpos em visualização privada auditada
+e marca individualmente os que conferiu. Pode concluir a verificação interna
+sem ser a conta nominal responsável pela UF. Método e fonte realmente
+consultados continuam obrigatórios. Aprovação da UF permanece uma decisão da
+conta responsável configurada; publicação exige elegibilidade e decisão
+próprias. Não se presume que a foto ou o documento isolado comprove
+credenciamento oficial vigente.
+
 ### Decisão do proprietário de 05/10/2026 — revisão mais simples e aviso após publicação
 
 O revisor pode abrir os documentos privados, marcar individualmente os anexos

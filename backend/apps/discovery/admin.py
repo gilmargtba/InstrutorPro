@@ -38,6 +38,7 @@ from .services import (
     verify_professional,
 )
 from .verification_services import (
+    can_review,
     record_review_and_approve,
     reject_verification_request,
     review_checklist,
@@ -430,6 +431,7 @@ class VerificationRejectionForm(forms.Form):
 
 @admin.register(ProfessionalVerificationRequest)
 class ProfessionalVerificationRequestAdmin(admin.ModelAdmin):
+    change_form_template = "admin/discovery/verification_request_change_form.html"
     review_metadata_fields = (
         "verification_method",
         "verification_source",
@@ -595,6 +597,54 @@ class ProfessionalVerificationRequestAdmin(admin.ModelAdmin):
 
     def changeform_view(self, request, object_id=None, form_url="", extra_context=None):
         obj = self.get_object(request, object_id) if object_id else None
+        extra_context = dict(extra_context or {})
+        if obj and self.has_change_permission(request, obj):
+            can_assume = obj.status == obj.Status.SUBMITTED and can_review(request.user)
+            can_decide = bool(
+                obj.status == obj.Status.UNDER_REVIEW
+                and obj.reviewer_id == request.user.id
+                and request.user.has_perm("marketplace.review_instructor_document")
+                and can_review(request.user)
+            )
+            if can_assume or can_decide:
+                extra_context["quick_review"] = {
+                    "can_assume": can_assume,
+                    "can_decide": can_decide,
+                    "start_url": reverse(
+                        "admin:discovery_verification_request_transition", args=[obj.pk, "start"]
+                    ),
+                    "approve_url": reverse(
+                        "admin:discovery_verification_request_transition", args=[obj.pk, "approve"]
+                    ),
+                    "reject_url": reverse(
+                        "admin:discovery_verification_request_transition", args=[obj.pk, "reject"]
+                    ),
+                    "documents": list(
+                        obj.documents.select_related("requirement").order_by("uploaded_at")
+                    )
+                    if can_decide
+                    else [],
+                    "form": VerificationApprovalForm(
+                        initial={
+                            "verification_method": obj.verification_method
+                            or "Conferência documental humana",
+                            "verification_source": obj.verification_source,
+                            "internal_notes": obj.internal_notes,
+                        },
+                        pending_documents=[
+                            document
+                            for document in obj.documents.select_related("requirement")
+                            if document.scan_status == InstructorDocument.ScanStatus.CLEAN
+                            and document.status
+                            in {
+                                InstructorDocument.Status.PENDING,
+                                InstructorDocument.Status.UNDER_REVIEW,
+                            }
+                        ],
+                    )
+                    if can_decide
+                    else None,
+                }
         if (
             obj
             and self.has_change_permission(request, obj)
@@ -615,7 +665,7 @@ class ProfessionalVerificationRequestAdmin(admin.ModelAdmin):
                     reverse("admin:discovery_professionalverificationrequest_change", args=[obj.pk])
                 )
             extra_context = {
-                **(extra_context or {}),
+                **extra_context,
                 "show_save": False,
                 "show_save_and_continue": False,
                 "show_save_and_add_another": False,

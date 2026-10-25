@@ -756,4 +756,5 @@ def test_only_assigned_authorized_reviewer_can_download_clean_file(tmp_path):
         assert download.status_code == 200
         assert download["Cache-Control"] == "private, no-store"
         assert download["X-Content-Type-Options"] == "nosniff"
+        assert download["Content-Disposition"].startswith("inline;")
         download.close()

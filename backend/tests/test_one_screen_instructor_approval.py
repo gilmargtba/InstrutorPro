@@ -177,6 +177,79 @@ def test_reviewer_finds_files_and_must_assume_request_before_private_download():
 
 @pytest.mark.django_db
 @override_settings(**SETTINGS)
+def test_verification_request_shows_private_files_and_decision_in_one_screen():
+    web, _, _, _, _, item, document = scenario(start_review=False)
+    reviewer = Account.objects.get(username="gilmar")
+    reviewer.user_permissions.add(
+        Permission.objects.get(codename="change_professionalverificationrequest")
+    )
+    change_url = reverse("admin:discovery_professionalverificationrequest_change", args=[item.pk])
+    download_url = reverse("instructor-document-download", args=[document.pk])
+
+    submitted = web.get(change_url)
+    assert submitted.status_code == 200
+    assert "ASSUMIR ANÁLISE" in submitted.content.decode()
+    assert "credential.pdf" not in submitted.content.decode()
+    assert download_url not in submitted.content.decode()
+
+    start_url = reverse("admin:discovery_verification_request_transition", args=[item.pk, "start"])
+    assert web.post(start_url).status_code == 302
+    reviewing = web.get(change_url)
+    content = reviewing.content.decode()
+    assert reviewing.status_code == 200
+    assert "credential.pdf" in content
+    assert download_url in content
+    assert "APROVAR DOCUMENTOS E VERIFICAÇÃO" in content
+
+
+@pytest.mark.django_db
+@override_settings(**SETTINGS)
+def test_authorized_reviewer_can_decide_documents_without_responsible_username():
+    web, change, action, profile, readiness, item, document = scenario(start_review=False)
+    reviewer = Account.objects.create_user(
+        username="document-reviewer",
+        email="document-reviewer@example.invalid",
+        password="test-password-123",
+        is_staff=True,
+    )
+    reviewer.user_permissions.add(
+        Permission.objects.get(codename="change_instructorprofile"),
+        Permission.objects.get(codename="review_professional_verification"),
+        Permission.objects.get(codename="review_instructor_document"),
+    )
+    web.force_login(reviewer)
+    assert web.post(action, {"operation": "start_review"}).status_code == 302
+    page = web.get(change)
+    content = page.content.decode()
+    assert "credential.pdf" in content
+    assert "VISUALIZAR ARQUIVO PRIVADO" in content
+    assert "APROVAR DOCUMENTOS E VERIFICAÇÃO" in content
+    assert "ANALISAR E PUBLICAR" not in content
+    assert (
+        web.post(
+            action,
+            {
+                "operation": "approve_verification",
+                "confirm_verification": "on",
+                "reviewed_document_ids": [str(document.pk)],
+                "verification_method": "Conferência documental humana",
+                "verification_source": "Credencial e fonte conferidas",
+            },
+        ).status_code
+        == 302
+    )
+    item.refresh_from_db()
+    document.refresh_from_db()
+    profile.refresh_from_db()
+    readiness.refresh_from_db()
+    assert item.status == item.Status.VERIFIED
+    assert document.status == document.Status.APPROVED
+    assert profile.publication_status == profile.PublicationStatus.UNPUBLISHED
+    assert readiness.status == readiness.Status.REVIEW_REQUIRED
+
+
+@pytest.mark.django_db
+@override_settings(**SETTINGS)
 def test_older_document_is_locatable_but_not_downloadable_from_current_request():
     web, change, _, profile, _, _, _ = scenario()
     older_request = ProfessionalVerificationRequest.objects.create(

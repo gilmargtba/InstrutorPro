@@ -1,0 +1,34 @@
+{% extends "admin/change_form.html" %}
+{% block content %}
+{% if quick_review %}
+<section class="module" style="padding:18px;margin-bottom:18px;border:2px solid #187f83">
+  <h2>CNH e credenciamento — {{ original.profile.display_name }}</h2>
+  {% if quick_review.can_assume %}
+    <p>Assuma esta solicitação para abrir os documentos privados. Isso não aprova nem publica o instrutor.</p>
+    <form method="post" action="{{ quick_review.start_url }}">{% csrf_token %}
+      <button class="default" type="submit">ASSUMIR ANÁLISE</button>
+    </form>
+  {% elif quick_review.can_decide %}
+    <p>Abra os arquivos, confira os documentos e registre a fonte realmente consultada. Esta decisão aprova apenas a verificação interna; a publicação exige elegibilidade separada.</p>
+    {% if quick_review.documents %}
+      <table><thead><tr><th>Documento</th><th>Arquivo</th><th>Segurança</th><th>Revisão</th><th>Acesso privado</th></tr></thead><tbody>
+      {% for document in quick_review.documents %}
+        <tr><td>{{ document.document_label }}</td><td>{{ document.original_name }}</td><td>{{ document.get_scan_status_display }}</td><td>{{ document.get_status_display }}</td>
+          <td>{% if document.scan_status == 'CLEAN' %}<a class="button" href="{% url 'instructor-document-download' document.pk %}" target="_blank" rel="noopener noreferrer">VISUALIZAR</a>{% else %}Indisponível até a análise de segurança{% endif %}</td></tr>
+      {% endfor %}
+      </tbody></table>
+    {% else %}
+      <p><strong>Nenhum documento vinculado a esta solicitação.</strong> Peça ao instrutor que envie CNH e credenciamento.</p>
+    {% endif %}
+    <form method="post" action="{{ quick_review.approve_url }}" style="margin-top:18px">{% csrf_token %}
+      {{ quick_review.form.as_p }}
+      <button class="default" type="submit">APROVAR DOCUMENTOS E VERIFICAÇÃO</button>
+      <a class="button" href="{{ quick_review.reject_url }}">SOLICITAR CORREÇÃO OU REJEITAR</a>
+    </form>
+  {% endif %}
+</section>
+{% endif %}
+<details><summary>Dados e histórico da solicitação</summary>
+  {{ block.super }}
+</details>
+{% endblock %}

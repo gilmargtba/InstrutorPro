@@ -127,6 +127,23 @@ def approval_panel(profile, actor):
         if can_open_documents
         else []
     )
+    document_priority = {
+        InstructorDocument.DocumentType.DRIVER_LICENSE: 0,
+        InstructorDocument.DocumentType.PROFESSIONAL_CREDENTIAL: 1,
+        InstructorDocument.DocumentType.PROFESSIONAL_CERTIFICATE: 2,
+        InstructorDocument.DocumentType.SELFIE_WITH_CNH: 3,
+    }
+    current_documents = (
+        sorted(
+            documents,
+            key=lambda document: (
+                document_priority.get(document.document_type, 4),
+                document.uploaded_at,
+            ),
+        )
+        if can_open_documents
+        else []
+    )
     area_ok = bool(area and area.location_authorized and area.public_service_location)
     blockers = []
     if not registration_ok:
@@ -165,6 +182,7 @@ def approval_panel(profile, actor):
         and document.status
         in {InstructorDocument.Status.PENDING, InstructorDocument.Status.UNDER_REVIEW}
     ]
+    responsible = actor.username == getattr(settings, "REGULATORY_RESPONSIBLE_ADMIN", "gilmar")
     return {
         "profile": profile,
         "area": area,
@@ -175,6 +193,7 @@ def approval_panel(profile, actor):
         "documents": documents,
         "document_count": profile.documents.count() if can_review_documents else None,
         "document_inventory": document_inventory,
+        "current_documents": current_documents,
         "can_open_documents": can_open_documents,
         "can_review_documents": can_review_documents,
         "pending_documents": pending_documents,
@@ -196,10 +215,10 @@ def approval_panel(profile, actor):
         "can_review": can_review_request,
         "can_decide_verification": bool(verification and can_open_documents),
         "can_publish": can_manage_publication(actor),
+        "can_finish_publication": can_manage_publication(actor) and (uf_ok or responsible),
         "can_regulatory": actor.has_perm("territories.change_regulatoryreadiness"),
         "can_offer": actor.has_perm("marketplace.change_instructoroffer"),
-        "responsible": actor.username
-        == getattr(settings, "REGULATORY_RESPONSIBLE_ADMIN", "gilmar"),
+        "responsible": responsible,
     }
 
 
@@ -316,12 +335,8 @@ def _save_offer(actor, profile, data):
 @transaction.atomic
 def execute_approval_action(*, actor, profile, data, request_id=None):
     """Explicit human decisions in one transaction; no partial approval on failure."""
-    if (
-        not actor.is_authenticated
-        or not actor.can_operate
-        or actor.username != getattr(settings, "REGULATORY_RESPONSIBLE_ADMIN", "gilmar")
-    ):
-        raise PermissionDenied("Somente o administrador responsável pode usar este painel.")
+    if not actor.is_authenticated or not actor.can_operate:
+        raise PermissionDenied("Revisor administrativo ativo obrigatório.")
     profile = InstructorProfile.objects.select_for_update().get(pk=profile.pk)
     if profile.is_demo:
         raise InvalidWorkflowTransition("Este fluxo é somente para instrutores reais.")

@@ -1,5 +1,25 @@
 # Checkpoint do Projeto
 
+## Revisão documental simplificada no Admin — implementação local, 25/10/2026
+
+- O painel do perfil real agora mostra CNH, credenciamento e demais anexos da
+  solicitação ativa no topo, com acesso direto ao arquivo privado após o revisor
+  assumir o caso. PDF/imagem limpos abrem para visualização no navegador, sem
+  cache e com autorização e auditoria já existentes.
+- A própria solicitação de verificação apresenta a lista de arquivos e o
+  formulário de decisão no topo; histórico e metadados secundários ficam
+  recolhidos.
+- Um revisor operacional com permissões explícitas pode assumir e aprovar os
+  documentos e a verificação interna sem depender do nome da conta responsável
+  pela UF. A aprovação regulatória da UF continua restrita à conta responsável;
+  a publicação no mapa conserva área, oferta, contato e demais gates.
+- O formulário de decisão documental é destacado; detalhes técnicos e históricos
+  ficam recolhidos. Testes cobrem revisor autorizado sem acesso à UF, ausência
+  de publicação automática, restrições de arquivos e visualização privada.
+  Sem push, deploy ou alteração de dados reais nesta fatia. Lint e sintaxe dos
+  templates passaram. O Windows não possui GDAL para executar pytest/PostGIS
+  local; CI ainda é necessário antes de publicar.
+
 ## Pacote com várias categorias — publicado, 24/10/2026
 
 - Um pacote pode selecionar várias categorias cadastradas no perfil, mantendo

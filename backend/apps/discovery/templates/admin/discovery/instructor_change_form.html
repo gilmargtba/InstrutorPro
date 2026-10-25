@@ -3,19 +3,30 @@
 {% if approval_panel %}
 <section class="module" style="padding:18px;margin-bottom:18px;border:2px solid #187f83">
   <h2>APROVAÇÃO E PUBLICAÇÃO — {{ approval_panel.profile.display_name }}</h2>
-  <div style="padding:12px 16px;background:#eef7f7;border-left:4px solid #187f83;margin-bottom:16px">
-    <strong>Por onde começar</strong>
-    <ol>
-      <li>Assuma a solicitação enviada; só o revisor responsável pode abrir os arquivos privados.</li>
-      <li>Abra CNH, credenciamento e demais arquivos abaixo; confira cada um e registre a fonte da consulta.</li>
-      <li>Se houver área/UF informada, revise a norma e aprove a UF apenas com evidências e vigência confirmadas.</li>
-      <li>Publique somente quando as pendências restantes estiverem resolvidas e a decisão humana for confirmada.</li>
-    </ol>
-    {% if approval_panel.verification.status == 'SUBMITTED' and approval_panel.can_review and approval_panel.responsible %}
+  <div id="documentos-para-revisao" style="padding:14px 16px;background:#f5fbfb;border:1px solid #a6c8c9;margin-bottom:16px">
+    <h3 style="margin-top:0">1. CNH e credenciamento enviados</h3>
+    {% if approval_panel.verification %}
+      <p>Solicitação: <strong>{{ approval_panel.verification.get_status_display }}</strong> · Revisor: {{ approval_panel.verification.reviewer|default:"não atribuído" }} · {{ approval_panel.document_count|default:0 }} arquivo(s) no perfil.</p>
+    {% else %}<p>Nenhuma solicitação profissional enviada. Peça ao instrutor que conclua o envio.</p>{% endif %}
+    {% if approval_panel.verification.status == 'SUBMITTED' and approval_panel.can_review %}
+      <p>Assuma a solicitação para acessar os arquivos privados. Isso não aprova o instrutor.</p>
       <form method="post" action="{{ approval_panel.action_url }}">{% csrf_token %}
-        <button class="default" type="submit" name="operation" value="start_review">1. ASSUMIR ANÁLISE E LIBERAR VISUALIZAÇÃO PRIVADA</button>
+        <button class="default" type="submit" name="operation" value="start_review">ASSUMIR ANÁLISE E LIBERAR VISUALIZAÇÃO PRIVADA</button>
       </form>
-    {% endif %}
+    {% elif approval_panel.can_open_documents and approval_panel.current_documents %}
+      <table><thead><tr><th>Documento</th><th>Arquivo</th><th>Segurança</th><th>Revisão</th><th>Abrir</th></tr></thead><tbody>
+      {% for document in approval_panel.current_documents %}
+        <tr><td><strong>{{ document.document_label }}</strong></td><td>{{ document.original_name }}</td><td>{{ document.get_scan_status_display }}</td><td>{{ document.get_status_display }}</td>
+          <td>{% if document.scan_status == 'CLEAN' %}<a class="button" href="{% url 'instructor-document-download' document.pk %}" target="_blank" rel="noopener noreferrer">VISUALIZAR ARQUIVO PRIVADO</a>{% else %}Aguardando análise de segurança{% endif %}</td></tr>
+      {% endfor %}</tbody></table>
+      <p>Abra e confira cada arquivo. A decisão fica auditada; não há reconhecimento facial automático.</p>
+    {% elif approval_panel.can_open_documents %}<p><strong>Nenhum arquivo enviado nesta solicitação.</strong> Peça CNH e credenciamento ao instrutor.</p>
+    {% elif approval_panel.can_review_documents %}<p>Assuma a solicitação ativa para visualizar os nomes e abrir arquivos limpos com auditoria.</p>
+    {% else %}<p>Somente um revisor com permissão pode visualizar os metadados e abrir arquivos privados.</p>{% endif %}
+  </div>
+  <div style="padding:12px 16px;background:#eef7f7;border-left:4px solid #187f83;margin-bottom:16px">
+    <strong>2. Decidir a verificação e, se elegível, publicar</strong>
+    <p>Após conferir os arquivos, marque os documentos analisados, informe a fonte realmente consultada e use “Aprovar apenas verificação”. A verificação interna não publica o perfil. Para aparecer na busca, ainda são necessários os requisitos de UF, área pública, oferta e contato.</p>
     {% if not approval_panel.area %}
       <p><strong>Falta ao instrutor:</strong> informar cidade/UF e autorizar uma localização pública aproximada no cadastro. Sem UF não há revisão territorial a aprovar.</p>
     {% elif not approval_panel.area_ok %}
@@ -37,13 +48,14 @@
       <p>Preencher campos não aprova a UF: confira também a norma-base, a vigência e a fonte oficial antes da decisão humana.</p>
     </div>
   {% endif %}
-  <p><strong>Fluxo rápido:</strong> confira os documentos privados, registre método e fonte da consulta, confirme a UF somente se estiver pendente e use <strong>ANALISAR E PUBLICAR</strong>. Se houver divergência, use <strong>SOLICITAR CORREÇÃO</strong>. Nenhuma etapa é aprovada automaticamente.</p>
+  <p><strong>Fluxo rápido:</strong> confira os documentos privados, registre a fonte e aprove a verificação interna. Se houver divergência, use <strong>SOLICITAR CORREÇÃO</strong>. A publicação no mapa é uma decisão separada e só fica disponível quando os demais requisitos estiverem atendidos.</p>
   <p><strong>PRONTO PARA PUBLICAÇÃO:
     {% if approval_panel.ready_to_publish %}<span style="color:#087443">SIM</span>{% else %}<span style="color:#a04410">NÃO</span>{% endif %}
   </strong></p>
   {% if approval_panel.blockers %}<div class="messagelist warning"><strong>Motivos:</strong><ul>
     {% for reason in approval_panel.blockers %}<li>{{ reason }}</li>{% endfor %}
   </ul></div>{% endif %}
+  <details><summary>Ver status completo, ofertas e evidências da UF</summary>
   <p>Cadastro: {% if approval_panel.registration_ok %}🟢 PRONTO{% else %}🟡 PENDENTE{% endif %} ·
      Documentos: {% if approval_panel.documents_ok %}🟢 PRONTO{% else %}🟡 PENDENTE{% endif %} ·
      Verificação: {% if approval_panel.verification_ok %}🟢 PRONTO{% else %}🟡 PENDENTE{% endif %} ·
@@ -71,7 +83,9 @@
     <p>Observações: {{ approval_panel.readiness.notes|default:"não cadastradas"|linebreaksbr }}</p>
     {% if approval_panel.regulatory_missing %}<p style="color:#a04410">Faltam: {{ approval_panel.regulatory_missing|join:", " }}</p>{% endif %}
   {% endif %}
-  <h3>1. Documentos privados e verificação profissional</h3>
+  </details>
+  <details><summary>Histórico e detalhes dos documentos</summary>
+  <h3>Documentos privados e verificação profissional</h3>
   {% if approval_panel.verification %}
     <p>Pré-validação: {{ approval_panel.precheck }}. Resultado auxiliar; documentos, identidade e elegibilidade exigem decisão humana.</p>
     <p>Solicitação: <a href="{% url 'admin:discovery_professionalverificationrequest_change' approval_panel.verification.pk %}">{{ approval_panel.verification.get_status_display }}</a> · Revisor: {{ approval_panel.verification.reviewer|default:"não atribuído" }}</p>
@@ -92,10 +106,11 @@
     {% elif approval_panel.document_count %}<p>Assuma a solicitação ativa para visualizar os nomes e abrir arquivos limpos com auditoria.</p>
     {% else %}<p><strong>Nenhum arquivo enviado para este perfil.</strong> Peça ao instrutor que anexe a CNH e o credenciamento na solicitação de verificação.</p>{% endif %}
   {% else %}<p>Somente um revisor com permissão pode visualizar os metadados e abrir arquivos privados.</p>{% endif %}
-  {% if approval_panel.responsible %}
+  </details>
+  {% if approval_panel.can_review or approval_panel.can_publish or approval_panel.can_offer or approval_panel.can_regulatory %}
   <form method="post" action="{{ approval_panel.action_url }}" style="border-top:1px solid #ccd;padding-top:15px">
     {% csrf_token %}
-    {% if approval_panel.readiness.status == 'REVIEW_REQUIRED' and approval_panel.can_regulatory %}
+    {% if approval_panel.readiness.status == 'REVIEW_REQUIRED' and approval_panel.can_regulatory and approval_panel.responsible %}
       <h3>Confirmar revisão da UF</h3>
       <label><input type="checkbox" name="confirm_uf"> Conferi pessoalmente fonte oficial, evidências e vigência da UF acima</label><br>
       <label>Início da vigência confirmado <input type="date" name="valid_from" value="{{ approval_panel.readiness.valid_from|date:'Y-m-d' }}"></label>
@@ -107,11 +122,13 @@
       {% if approval_panel.pending_documents %}<p>Abra cada documento antes de marcar:</p>
         {% for document in approval_panel.pending_documents %}<label style="display:block"><input type="checkbox" name="reviewed_document_ids" value="{{ document.pk }}"> Conferi {{ document.document_label }} — {{ document.original_name }}</label>{% endfor %}
       {% endif %}
-      <label>Método da consulta <input type="text" name="verification_method" maxlength="40" value="{{ approval_panel.verification.verification_method }}"></label>
+      <label>Método da conferência <input type="text" name="verification_method" maxlength="40" value="{{ approval_panel.verification.verification_method|default:'Conferência documental humana' }}"></label>
       <label>Fonte consultada <input type="text" name="verification_source" maxlength="80" value="{{ approval_panel.verification.verification_source }}"></label>
       <label>Notas internas (sem CPF) <input type="text" name="verification_notes" value="{{ approval_panel.verification.internal_notes }}"></label><br>
       <label><input type="checkbox" name="confirm_verification"> Conferi pessoalmente a fonte e os documentos aplicáveis</label>
       <br>
+      <button class="default" type="submit" name="operation" value="approve_verification">APROVAR DOCUMENTOS E VERIFICAÇÃO</button>
+      <p>Esta decisão aprova a verificação interna, mas não publica o instrutor no mapa.</p>
       <label>Motivo da rejeição <select name="rejection_reason_code"><option value="">Selecione</option><option value="REQUIREMENT_MISSING">Requisito ausente</option><option value="DOCUMENT_UNREADABLE">Documento ilegível</option><option value="DOCUMENT_MISMATCH">Documento divergente</option><option value="OFFICIAL_AUTHORIZATION_NOT_CONFIRMED">Autorização não confirmada</option><option value="INFORMATION_INCONSISTENT">Informações inconsistentes</option></select></label>
       <button type="submit" name="operation" value="request_correction">SOLICITAR CORREÇÃO</button>
     {% endif %}
@@ -127,7 +144,7 @@
       <button type="submit" name="operation" value="save_offer">SALVAR OFERTA</button>
       </details>
     {% endif %}
-    {% if approval_panel.can_publish and not approval_panel.public %}
+    {% if approval_panel.can_finish_publication and not approval_panel.public %}
       <h3>Publicação manual</h3>
       <label>Motivo <input type="text" name="publication_reason" maxlength="500"></label>
       <label><input type="checkbox" name="confirm_publish"> Confirmo a decisão humana de publicar este instrutor real</label><br>
@@ -136,10 +153,9 @@
     {% endif %}
     <details><summary>Ações separadas de verificação e publicação</summary>
       {% if approval_panel.can_decide_verification %}
-        <button type="submit" name="operation" value="approve_verification">Aprovar apenas verificação</button>
         <button type="submit" name="operation" value="reject_verification">Rejeitar verificação</button>
       {% endif %}
-      {% if approval_panel.can_publish and not approval_panel.public %}<button type="submit" name="operation" value="publish">Publicar perfil já verificado</button>{% endif %}
+      {% if approval_panel.can_finish_publication and not approval_panel.public %}<button type="submit" name="operation" value="publish">Publicar perfil já verificado</button>{% endif %}
     </details>
   </form>
   {% endif %}

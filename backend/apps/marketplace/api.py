@@ -255,7 +255,7 @@ class InstructorDocumentDownloadView(APIView):
         )
         response = FileResponse(
             document.file.open("rb"),
-            as_attachment=True,
+            as_attachment=document.mime_type not in {"application/pdf", "image/jpeg", "image/png"},
             filename=document.original_name,
             content_type=document.mime_type,
         )

@@ -7,6 +7,14 @@ publicação, suspensão, despublicação e revogação da localização exigem
 `discovery.manage_instructor_publication` e conta operacional. O Admin mantém campos
 críticos somente leitura e suas ações usam os mesmos serviços transacionais e auditados.
 
+Na análise real, um revisor operacional com `discovery.review_professional_verification`
+e `marketplace.review_instructor_document` pode assumir uma solicitação e decidir
+somente os documentos atribuídos a ela, sem depender de um nome de usuário fixo.
+O arquivo limpo é exibido em resposta privada, sem cache e com auditoria; outros
+revisores e solicitações fora de análise não recebem acesso. A aprovação de UF
+continua reservada à conta responsável configurada e à permissão territorial;
+verificação documental não concede publicação no mapa.
+
 ## CODEX 02D
 
 Publicação exige `discovery.manage_instructor_publication` explícita e conta ativa. O serviço usa deny-by-default, lock, motivo e auditoria; não há endpoint administrativo público.
