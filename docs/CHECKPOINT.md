@@ -1,6 +1,6 @@
 # Checkpoint do Projeto
 
-## Pacote com várias categorias — implementação local, 24/10/2026
+## Pacote com várias categorias — publicado, 24/10/2026
 
 - Um pacote pode selecionar várias categorias cadastradas no perfil, mantendo
   preço e quantidade de aulas únicos e contando como um pacote no plano.
@@ -9,12 +9,23 @@
 - O perfil público expõe somente as categorias do pacote que ainda têm oferta
   individual ativa; o contato via WhatsApp usa a categoria escolhida. A
   validação de titularidade, limite, veículo e auditoria permanece no backend.
-- Build Angular e 99 testes de interface passaram; Ruff, formatação e
-  compilação Python passaram. O Windows não tem GDAL e o Docker local não
-  respondeu, portanto migração e testes Django/PostGIS exigem CI antes de
-  publicação. Esta fatia ainda não foi enviada ao GitHub nem à VPS.
+- Build Angular e 99 testes de interface passaram localmente; Ruff, formatação
+  e compilação Python passaram. O CI no GitHub (run `40154080805`) aprovou
+  backend e frontend, inclusive pytest, migrations e validação OpenAPI. O
+  primeiro run apontou um teste com expectativa incorreta para perfil sem
+  ofertas; corrigido no commit `58489bb` antes da publicação.
+- Commits `bfa4842`, `84d1f36` e `58489bb` foram enviados por fast-forward a
+  `origin/main` e aplicados na VPS sem alterar configuração local do gateway.
+  O backup de banco e documentos privados `20261025T022431Z` foi validado;
+  as imagens anteriores foram preservadas sob a tag
+  `pre-multicategory-20261025T022431Z` para rollback da aplicação.
+- Somente backend e frontend foram recriados. A migration aditiva
+  `marketplace.0016_instructor_lesson_package_categories` aparece aplicada;
+  backend saudável, readiness e `/instrutor/pacotes` em HTTPS 200, e API
+  privada de pacotes em 403 sem login. Nenhum pacote real foi criado ou
+  modificado manualmente no deploy.
 
-## Correção local — categorias no formulário de pacotes, 24/10/2026
+## Correção publicada — categorias no formulário de pacotes, 24/10/2026
 
 - O formulário oferecia A–E e iniciava em B mesmo quando a categoria não estava
   cadastrada no perfil; o backend recusava corretamente o salvamento. A API
@@ -23,9 +34,9 @@
   quando não há nenhuma. A validação do backend permanece obrigatória.
 - Testes de contrato e interface cobrem categoria única, ausência de categoria
   e rejeição da categoria não cadastrada. Build Angular, 97 testes de interface,
-  Ruff e compilação Python passaram localmente. O teste Django/PostGIS não pôde
-  iniciar no Windows por falta de GDAL; deve passar no CI antes de publicação.
-  Esta correção ainda não está em produção.
+  Ruff e compilação Python passaram localmente. Django/PostGIS, migrações e
+  OpenAPI passaram no CI run `40154080805`; a correção está em produção junto
+  com os pacotes multicategoria descritos acima.
 
 ## Pacotes de aulas por plano — publicados, 24/10/2026
 
