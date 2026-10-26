@@ -53,7 +53,7 @@ def payload(role="STUDENT"):
         "city": "Porto Alegre",
         "uf": "RS",
         "terms_version": "1.0",
-        "privacy_version": "2026-10-21",
+        "privacy_version": "2026-10-26",
         "terms_accepted": True,
         "privacy_acknowledged": True,
     }
@@ -97,7 +97,7 @@ def test_real_student_registration_is_atomic_and_records_exact_acceptance():
     acceptance = LegalAcceptanceRecord.objects.get(account=account)
     assert acceptance.terms_document.audience == "STUDENT"
     assert acceptance.terms_document.version == "1.0"
-    assert acceptance.privacy_notice.version == "2026-10-21"
+    assert acceptance.privacy_notice.version == "2026-10-26"
     assert acceptance.accepted_at is not None
 
 

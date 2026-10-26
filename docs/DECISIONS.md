@@ -8,8 +8,10 @@ somente visual: geocodificação, arredondamento da coordenada, limite de seleç
 próximo à cidade, validação Brasil, autorização de publicação e gates de
 elegibilidade permanecem. App nativo e falha de carregamento conservam o
 mapa alternativo. Antes de publicar esta ampliação em produção, revisar o
-aviso de privacidade versionado, que hoje menciona Google apenas na busca web,
-e o fluxo de dados dessa tela com o responsável por privacidade.
+aviso de privacidade versionado para incluir a área pública escolhida pelo
+instrutor e o fluxo de dados dessa tela. O proprietário aprovou expressamente
+essa atualização em 26/10/2026; a versão 2026-10-26 é publicada junto com o
+mapa, sem envio de CNH ou documentos ao Google.
 
 ### Solicitação do proprietário de 24/10/2026 — várias categorias por pacote
 

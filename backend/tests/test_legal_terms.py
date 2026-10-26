@@ -69,7 +69,7 @@ def test_acceptance_records_exact_terms_and_privacy_versions_and_is_idempotent()
     assert first.data["id"] == second.data["id"]
     row = LegalAcceptanceRecord.objects.get(account=user)
     assert row.terms_document.version == "1.0"
-    assert row.privacy_notice.version == "2026-10-21"
+    assert row.privacy_notice.version == "2026-10-26"
     assert (
         AuditEvent.objects.filter(
             actor=user, action="privacy.legal_terms.accepted", target_id=row.id

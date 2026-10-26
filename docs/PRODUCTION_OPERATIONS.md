@@ -23,7 +23,7 @@ restrita de produção, execute `./scripts/validate-production-config.sh`. A val
 imprime os segredos, não inicia o stack persistente e não concede autorização para dados
 reais. Todas as flags de cadastro, publicação e demanda permanecem desligadas.
 
-### Preparação do Google Maps na busca web
+### Preparação do Google Maps na busca web e no cadastro do instrutor
 
 O Google Maps é opcional e, por padrão, permanece desligado. Antes de ativá-lo,
 revisar os termos e a política de privacidade para o carregamento direto do
@@ -41,8 +41,9 @@ nunca em Git, chat ou histórico de comandos. Configurar
 e conferir `GET /api/v1/map/browser-config/` sem imprimir a chave. Testar o
 mapa no domínio real e o fallback em caso de erro; reverter a flag para
 `false` se a API Google falhar. Não remover `MAPTILER_API_KEY`: geocodificação,
-mapa do cadastro e fallback ainda dependem dela. Android/iOS não usam esta
-chave de navegador.
+fallback e mapa do cadastro no app nativo ainda dependem dela. O navegador web
+usa Google também na escolha da área pública do instrutor quando habilitado;
+Android/iOS não usam esta chave de navegador.
 
 ## Backup e restauração
 

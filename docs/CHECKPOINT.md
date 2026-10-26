@@ -9,10 +9,11 @@
 - A validação de ponto no Brasil e até 50 km do centro escolhido, a aproximação
   da coordenada, a geocodificação via backend e a autorização de publicação
   foram preservadas. Leaflet/MapTiler permanece como contingência e no nativo.
-- Build Angular e 105 testes de frontend passaram. Ainda não houve push nem
-  deploy desta fatia. Antes de publicar, atualizar e aprovar o aviso de
-  privacidade versionado, hoje limitado ao Google Maps na busca web; realizar
-  ensaio real da tela em produção após implantação.
+- Build Angular e 105 testes de frontend passaram na fatia do mapa. O
+  proprietário aprovou em 26/10 a atualização do aviso de privacidade para
+  cobrir também a escolha da área pública no cadastro. A nova versão
+  `2026-10-26` e a migration aditiva são preparadas antes do deploy; o ensaio
+  real da tela em produção ainda é necessário após implantação.
 
 ## Busca por cidade — publicada, 26/10/2026
 
