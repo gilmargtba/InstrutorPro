@@ -1,5 +1,16 @@
 # Registro de Decisões e Questões Abertas
 
+### Solicitação do proprietário de 26/10/2026 — Google Maps no cadastro do instrutor
+
+O mapa para escolher a área pública aproximada no onboarding web deve usar a
+mesma configuração Google Maps já empregada na busca pública. A mudança é
+somente visual: geocodificação, arredondamento da coordenada, limite de seleção
+próximo à cidade, validação Brasil, autorização de publicação e gates de
+elegibilidade permanecem. App nativo e falha de carregamento conservam o
+mapa alternativo. Antes de publicar esta ampliação em produção, revisar o
+aviso de privacidade versionado, que hoje menciona Google apenas na busca web,
+e o fluxo de dados dessa tela com o responsável por privacidade.
+
 ### Solicitação do proprietário de 24/10/2026 — várias categorias por pacote
 
 Um pacote comercial pode reunir mais de uma categoria (por exemplo, A e B)

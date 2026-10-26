@@ -1,5 +1,19 @@
 # Checkpoint do Projeto
 
+## Google Maps no mapa de cadastro do instrutor — local, 26/10/2026
+
+- O onboarding web passou a usar a configuração de navegador existente para
+  carregar Google Maps e Map ID, com marcador da área pública e seleção por
+  clique. A busca pública e o onboarding compartilham o carregador para evitar
+  configurações duplicadas da API JavaScript na mesma sessão.
+- A validação de ponto no Brasil e até 50 km do centro escolhido, a aproximação
+  da coordenada, a geocodificação via backend e a autorização de publicação
+  foram preservadas. Leaflet/MapTiler permanece como contingência e no nativo.
+- Build Angular e 105 testes de frontend passaram. Ainda não houve push nem
+  deploy desta fatia. Antes de publicar, atualizar e aprovar o aviso de
+  privacidade versionado, hoje limitado ao Google Maps na busca web; realizar
+  ensaio real da tela em produção após implantação.
+
 ## Busca por cidade — publicada, 26/10/2026
 
 - O commit `b32e195` foi enviado por fast-forward a `origin/main` e aplicado na

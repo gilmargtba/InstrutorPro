@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
-import { importLibrary, setOptions } from '@googlemaps/js-api-loader';
-
 import { publicMediaUrl } from '../core/api-url';
+import { loadGoogleMaps } from './google-maps-loader';
 import { MapProvider } from './map.provider';
 import { SearchInstructor } from './instructor-search.provider';
 
@@ -13,26 +12,13 @@ export class GoogleMapProvider implements MapProvider {
   private markers = new Map<string, google.maps.marker.AdvancedMarkerElement>();
   private onSelect: (id: string) => void = () => undefined;
   private generation = 0;
-  private configured = false;
 
   async mountReady(element: HTMLElement, onSelect: (id: string) => void, key: string, mapId: string): Promise<void> {
     this.destroy();
     const generation = this.generation;
     this.host = element;
     this.onSelect = onSelect;
-    if (!this.configured) {
-      setOptions({ key, language: 'pt-BR', region: 'BR', mapIds: [mapId] });
-      this.configured = true;
-    }
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    const loading = Promise.all([importLibrary('maps'), importLibrary('marker')]);
-    const deadline = new Promise<never>((_, reject) => {
-      timer = setTimeout(() => reject(new Error('Google Maps loading timed out.')), 8000);
-    });
-    let libraries: Awaited<typeof loading>;
-    try { libraries = await Promise.race([loading, deadline]); }
-    finally { clearTimeout(timer); }
-    const [{ Map }, { AdvancedMarkerElement }] = libraries;
+    const [{ Map }, { AdvancedMarkerElement }] = await loadGoogleMaps(key, mapId);
     if (generation !== this.generation) return;
     this.markerClass = AdvancedMarkerElement;
     element.replaceChildren();

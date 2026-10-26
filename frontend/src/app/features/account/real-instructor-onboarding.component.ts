@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import L from 'leaflet';
 import { BRAZIL_UFS } from '../../shared/brazil-ufs';
 import { GeocodingResult, InstructorSearchProvider } from '../../demo/instructor-search.provider';
+import { InstructorLocationMapProvider } from './instructor-location-map.provider';
 
 @Component({
   selector: 'app-real-instructor-onboarding',
@@ -42,6 +43,8 @@ import { GeocodingResult, InstructorSearchProvider } from '../../demo/instructor
       @if(locationResults().length>1){<div class="location-options" aria-label="Resultados da busca">@for(point of locationResults();track point.id){<button type="button" (click)="selectPublicLocation(point)">{{point.label}}</button>}</div>}
       @if(locationMessage()){<p class="location-result" role="status">{{locationMessage()}}</p>}
       <div class="map-wrapper"><div #publicMap class="public-location-map" role="application" aria-label="Mapa para ajustar o marcador público aproximado"></div>@if(!hasPublicLocation()){<p class="map-placeholder">Informe cidade e UF para localizar o mapa automaticamente. Se não houver resultado, use “Buscar área pública”.</p>}</div>
+      @if(map.source()==='maptiler'){<p class="map-help" role="status">Mapa alternativo em uso. O Google Maps não está disponível neste dispositivo ou momento.</p>}
+      @if(map.source()==='google'){<p class="map-help">Este mapa usa Google Maps. Ao carregá-lo, o navegador se conecta ao Google e compartilha dados técnicos e a área pública exibida; não marque sua residência.</p>}
       <p class="map-help">Após localizar a cidade, clique no mapa para escolher um ponto público próximo. A latitude e longitude são preenchidas automaticamente; não marque sua residência.</p>
       <label>Latitude pública aproximada<input name="latitude" [(ngModel)]="form.service_latitude" type="number" readonly></label>
       <label>Longitude pública aproximada<input name="longitude" [(ngModel)]="form.service_longitude" type="number" readonly></label>
@@ -60,8 +63,7 @@ export class RealInstructorOnboardingComponent implements AfterViewInit, OnDestr
   private readonly router = inject(Router);
   private readonly search = inject(InstructorSearchProvider);
   private readonly zone = inject(NgZone);
-  private map?: L.Map;
-  private marker?: L.CircleMarker;
+  readonly map = inject(InstructorLocationMapProvider);
   private locationAnchor?: L.LatLng;
   private locationSearchTimer?: ReturnType<typeof setTimeout>;
   private locationRequestVersion = 0;
@@ -85,10 +87,10 @@ export class RealInstructorOnboardingComponent implements AfterViewInit, OnDestr
 
   constructor(){this.http.get<any>('/account/me/').subscribe({next:r=>{const instructor=r.instructor;if(!instructor){void this.router.navigateByUrl('/cadastro/instrutor');return}this.categories=instructor.categories?.length?instructor.categories:['B'];this.offerDrafts={};for(const category of this.categories){const saved=instructor.offers?.find((offer:{category:string})=>offer.category===category);this.offerDrafts[category]={price_amount:saved?Number(saved.price_amount):(this.categories.length===1&&instructor.price_amount?Number(instructor.price_amount):null),duration_minutes:saved?.duration_minutes??(this.categories.length===1?instructor.duration_minutes??60:null)}}this.transmission=instructor.transmission_options?.[0]||'MANUAL';this.form={...this.form,instructor_display_name:instructor.display_name||'',bio:instructor.bio||'',whatsapp:instructor.whatsapp||'',instructor_city:instructor.city||'',instructor_uf:instructor.uf||'',service_latitude:instructor.service_latitude??null,service_longitude:instructor.service_longitude??null,service_radius_km:instructor.service_radius_km??10,service_location_authorized:!!instructor.service_location_authorized,vehicle:{category:instructor.vehicle?.category||this.categories[0],make:instructor.vehicle?.make||'',model:instructor.vehicle?.model||'',year:instructor.vehicle?.year||new Date().getFullYear(),transmission:instructor.vehicle?.transmission||this.transmission,...(instructor.vehicle?.ownership_type?{ownership_type:instructor.vehicle.ownership_type}:{})}};if(this.hasPublicLocation()){this.locationMessage.set(`Área pública salva: ${this.form.instructor_city}/${this.form.instructor_uf}.`);this.locationAnchor=L.latLng(this.form.service_latitude,this.form.service_longitude);this.renderMapPoint()}else if(this.form.instructor_city&&this.form.instructor_uf){this.searchCityIfReady()}},error:()=>void this.router.navigateByUrl('/entrar')})}
 
-  ngAfterViewInit(){if(!this.publicMapElement)return;this.map=L.map(this.publicMapElement.nativeElement,{zoomControl:true}).setView([-14.2,-51.9],4);L.tileLayer('/api/v1/map/tiles/{z}/{x}/{y}.png',{attribution:'&copy; MapTiler &copy; OpenStreetMap contributors',maxZoom:19}).addTo(this.map);this.map.on('click',event=>this.zone.run(()=>this.selectMapPoint(event.latlng)));this.renderMapPoint();setTimeout(()=>this.map?.invalidateSize(),0)}
-  ngOnDestroy(){if(this.locationSearchTimer)clearTimeout(this.locationSearchTimer);this.locationRequestVersion++;this.map?.remove();this.map=undefined;this.marker=undefined}
+  ngAfterViewInit(){if(!this.publicMapElement)return;this.map.mount(this.publicMapElement.nativeElement,point=>this.zone.run(()=>this.selectMapPoint(point)));this.renderMapPoint()}
+  ngOnDestroy(){if(this.locationSearchTimer)clearTimeout(this.locationSearchTimer);this.locationRequestVersion++;this.map.destroy()}
 
-  clearPublicLocation(){if(this.locationSearchTimer)clearTimeout(this.locationSearchTimer);this.locationRequestVersion++;this.locating.set(false);this.form.service_latitude=null;this.form.service_longitude=null;this.form.service_location_authorized=false;this.locationMessage.set('');this.locationResults.set([]);this.locationAnchor=undefined;if(this.marker&&this.map)this.map.removeLayer(this.marker);this.marker=undefined}
+  clearPublicLocation(){if(this.locationSearchTimer)clearTimeout(this.locationSearchTimer);this.locationRequestVersion++;this.locating.set(false);this.form.service_latitude=null;this.form.service_longitude=null;this.form.service_location_authorized=false;this.locationMessage.set('');this.locationResults.set([]);this.locationAnchor=undefined;this.map.clearPoint()}
 
   onLocationFieldsChanged(){this.clearPublicLocation();if(this.form.instructor_city?.trim().length<2||!this.form.instructor_uf)return;this.locationSearchTimer=setTimeout(()=>this.searchCityIfReady(),450)}
 
@@ -106,7 +108,7 @@ export class RealInstructorOnboardingComponent implements AfterViewInit, OnDestr
   private approximate(value:number){return Math.round(value*100)/100}
   private normalize(value:string){return value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toLocaleLowerCase('pt-BR')}
   hasPublicLocation(){return this.form.service_latitude!==null&&this.form.service_longitude!==null}
-  private renderMapPoint(){if(!this.map||!this.hasPublicLocation())return;const point=L.latLng(this.form.service_latitude,this.form.service_longitude);if(this.marker)this.marker.setLatLng(point);else this.marker=L.circleMarker(point,{radius:11,color:'#fff',weight:3,fillColor:'#f97316',fillOpacity:1,className:'public-location-pin'}).addTo(this.map);this.map.setView(point,13)}
+  private renderMapPoint(){if(this.hasPublicLocation())this.map.setPoint(this.form.service_latitude,this.form.service_longitude)}
 
   toggleCategory(category:string){this.categories=this.categories.includes(category)?this.categories.filter(value=>value!==category):[...this.categories,category].sort();if(this.categories.includes(category)&&!this.offerDrafts[category])this.offerDrafts[category]={price_amount:null,duration_minutes:null}}
 

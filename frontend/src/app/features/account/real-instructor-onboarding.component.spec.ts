@@ -1,11 +1,35 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { signal } from '@angular/core';
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import L from 'leaflet';
 import { RealInstructorOnboardingComponent } from './real-instructor-onboarding.component';
+import { InstructorLocationMapProvider } from './instructor-location-map.provider';
 
 describe('RealInstructorOnboardingComponent',()=>{
-  beforeEach(()=>TestBed.configureTestingModule({imports:[RealInstructorOnboardingComponent],providers:[provideHttpClient(),provideHttpClientTesting(),provideRouter([])]}));
+  let map: jasmine.SpyObj<InstructorLocationMapProvider>;
+  beforeEach(()=>{
+    map=jasmine.createSpyObj<InstructorLocationMapProvider>('InstructorLocationMapProvider',['mount','setPoint','clearPoint','destroy'],{source:signal('loading')});
+    TestBed.configureTestingModule({imports:[RealInstructorOnboardingComponent],providers:[provideHttpClient(),provideHttpClientTesting(),provideRouter([]),{provide:InstructorLocationMapProvider,useValue:map}]});
+  });
+  it('connects the chosen map provider and keeps point selection within the city',()=>{
+    const fixture=TestBed.createComponent(RealInstructorOnboardingComponent);
+    const http=TestBed.inject(HttpTestingController);
+    http.expectOne('/account/me/').flush({instructor:{display_name:'Instrutora Piloto',city:'Goiatuba',uf:'GO',service_latitude:-18.01,service_longitude:-49.35,service_location_authorized:true}});
+    fixture.detectChanges();
+    expect(map.mount).toHaveBeenCalled();
+    expect(map.setPoint).toHaveBeenCalledWith(-18.01,-49.35);
+    const onSelect=map.mount.calls.mostRecent().args[1];
+    onSelect(L.latLng(-18.02,-49.36));
+    expect(fixture.componentInstance.form.service_latitude).toBe(-18.02);
+    expect(map.setPoint).toHaveBeenCalledWith(-18.02,-49.36);
+    onSelect(L.latLng(40,-49));
+    expect(fixture.componentInstance.form.service_latitude).toBe(-18.02);
+    expect(fixture.componentInstance.locationMessage()).toContain('não encontrada no Brasil');
+    fixture.destroy();
+    expect(map.destroy).toHaveBeenCalled();
+  });
   it('saves only the allowed non-documental onboarding fields',()=>{
     const component=TestBed.createComponent(RealInstructorOnboardingComponent).componentInstance;
     const http=TestBed.inject(HttpTestingController);
