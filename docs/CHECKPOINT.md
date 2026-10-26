@@ -1,5 +1,21 @@
 # Checkpoint do Projeto
 
+## Busca por cidade — publicada, 26/10/2026
+
+- O commit `b32e195` foi enviado por fast-forward a `origin/main` e aplicado na
+  VPS. Apenas o frontend foi reconstruído e recriado; backend, banco, workers
+  e gateway não foram alterados. A customização local do gateway e as cópias
+  privadas de `.env` da VPS foram preservadas.
+- Backup validado antes da publicação: banco e documentos privados com marcador
+  `20261026T044110Z` em `/home/gilmar/backups/instrutorpro/production/`.
+  A imagem anterior do frontend foi preservada como
+  `instrutorpro-frontend:pre-city-scope-20261026T044110Z` para rollback.
+- Smoke HTTPS: página do mapa HTTP 200 com o bundle novo `main-ASPVHQWS.js`;
+  busca pública filtrada por `city=Goiatuba&uf=GO` retornou 0, enquanto a API
+  de cidades publicadas informa 1 instrutor em Formosa. Readiness `status=ok`
+  com banco `up`; frontend ativo e backend/banco saudáveis. Nenhum cadastro ou
+  estado de publicação foi modificado.
+
 ## Correção local — cidade escolhida no mapa, 25/10/2026
 
 - Uma cidade reconhecida pelo geocodificador agora preenche o recorte `city`/`uf`
@@ -16,7 +32,7 @@
   do respectivo perfil no Admin continua necessária.
 - Validação local após o ajuste final: 101 testes Angular e build de produção
   aprovados; build mantém avisos preexistentes de orçamento.
-  Correção ainda não enviada ao GitHub nem publicada na VPS.
+  Publicação posterior registrada acima.
 
 ## Revisão documental simplificada no Admin — publicada, 25/10/2026
 
