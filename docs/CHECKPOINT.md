@@ -1,6 +1,6 @@
 # Checkpoint do Projeto
 
-## Google Maps no mapa de cadastro do instrutor — local, 26/10/2026
+## Google Maps no mapa de cadastro do instrutor — publicado, 26/10/2026
 
 - O onboarding web passou a usar a configuração de navegador existente para
   carregar Google Maps e Map ID, com marcador da área pública e seleção por
@@ -9,11 +9,25 @@
 - A validação de ponto no Brasil e até 50 km do centro escolhido, a aproximação
   da coordenada, a geocodificação via backend e a autorização de publicação
   foram preservadas. Leaflet/MapTiler permanece como contingência e no nativo.
-- Build Angular e 105 testes de frontend passaram na fatia do mapa. O
-  proprietário aprovou em 26/10 a atualização do aviso de privacidade para
-  cobrir também a escolha da área pública no cadastro. A nova versão
-  `2026-10-26` e a migration aditiva são preparadas antes do deploy; o ensaio
-  real da tela em produção ainda é necessário após implantação.
+- O proprietário aprovou a atualização do aviso de privacidade para cobrir a
+  escolha da área pública no cadastro. Os commits `54cc41c` e `4beebe3`
+  foram enviados por fast-forward a `origin/main` e aplicados na VPS. A
+  migration aditiva `privacy.0006` publicou a versão `2026-10-26`.
+- Build Angular e 105 testes frontend passaram localmente. Em PostGIS sintético
+  isolado na VPS, `makemigrations --check`, migrations e 438 testes backend
+  passaram; os recursos temporários de teste foram removidos. A CI
+  `40365732577` terminou com sucesso em backend e frontend.
+- Antes do deploy, `scripts/backup-production.sh` validou banco e documentos
+  privados em `/home/gilmar/backups/instrutorpro/production/` com marcador
+  `20261026T170940Z`. As imagens anteriores ficaram preservadas com tag
+  `pre-google-onboarding-20261026T170940Z` para rollback. Apenas backend e
+  frontend foram recriados; os containers de gateway, banco, workers e
+  scheduler não foram recriados, e os arquivos privados foram preservados.
+- Smoke HTTPS: página de onboarding HTTP 200 com `main-EJMHY6P4.js`, aviso
+  `2026-10-26`, browser-config `provider=google` com chave e Map ID presentes,
+  readiness `ok` e backend saudável. Não houve aprovação nem publicação de
+  instrutor pelo deploy. O mapa autenticado ainda requer confirmação visual
+  por um instrutor no navegador; fallback MapTiler fica disponível.
 
 ## Busca por cidade — publicada, 26/10/2026
 
