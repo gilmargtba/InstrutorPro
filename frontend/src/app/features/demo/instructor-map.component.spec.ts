@@ -74,7 +74,7 @@ describe('InstructorMapComponent geolocation', () => {
     fixture.detectChanges();
     fixture.componentInstance.filters.location = 'Brasília';
     fixture.componentInstance.search();
-    expect(search).toHaveBeenCalledWith(-15.79, -47.88, fixture.componentInstance.filters);
+    expect(search).toHaveBeenCalledWith(-15.79, -47.88, fixture.componentInstance.filters, 'DF', 'Brasília');
   });
 
   it('keeps the UF from the selected autocomplete suggestion', () => {
@@ -88,7 +88,7 @@ describe('InstructorMapComponent geolocation', () => {
       uf_resolution:'RESOLVED',latitude:-15.79,longitude:-47.88,place_type:'place',bbox:null,
     });
     expect(geocode).not.toHaveBeenCalled();
-    expect(search).toHaveBeenCalledWith(-15.79, -47.88, fixture.componentInstance.filters);
+    expect(search).toHaveBeenCalledWith(-15.79, -47.88, fixture.componentInstance.filters, 'DF', 'Brasília');
   });
 
   it('requires explicit UF confirmation when the provider cannot resolve it', () => {
@@ -107,7 +107,7 @@ describe('InstructorMapComponent geolocation', () => {
     expect(fixture.componentInstance.pendingLocation).not.toBeNull();
     fixture.componentInstance.confirmedUf = 'DF';
     fixture.componentInstance.confirmLocationUf();
-    expect(search).toHaveBeenCalledWith(-15.79, -47.88, fixture.componentInstance.filters);
+    expect(search).toHaveBeenCalledWith(-15.79, -47.88, fixture.componentInstance.filters, 'DF', 'Localidade');
   });
 
   it('allows an unrestricted distance without inventing an instructor category', () => {
@@ -166,9 +166,13 @@ describe('InstructorMapComponent geolocation', () => {
       local: 'Goiatuba, GO', cidade: 'Goiatuba', uf: 'GO',
     })[key as 'local' | 'cidade' | 'uf'] ?? null);
     const api = TestBed.inject(InstructorSearchProvider);
-    spyOn(api, 'geocode').and.returnValue(of({provider: 'MAPTILER', results: [{
+    spyOn(api, 'geocode').and.callFake(query => of({provider: 'MAPTILER', results: [query === 'Brasília' ? {
+      id: 'place.2', label: 'Brasília, Distrito Federal, Brasil', city: 'Brasília', uf: 'DF',
+      uf_resolution: 'RESOLVED' as const, latitude: -15.79, longitude: -47.88,
+      place_type: 'place', bbox: null,
+    } : {
       id: 'place.1', label: 'Goiatuba, Goiás, Brasil', city: 'Goiatuba', uf: 'GO',
-      uf_resolution: 'RESOLVED', latitude: -18.01, longitude: -49.37,
+      uf_resolution: 'RESOLVED' as const, latitude: -18.01, longitude: -49.37,
       place_type: 'place', bbox: null,
     }]}));
     const search = spyOn(api, 'search').and.returnValue(of(result));
@@ -177,7 +181,44 @@ describe('InstructorMapComponent geolocation', () => {
     expect(search).toHaveBeenCalledWith(-18.01, -49.37, fixture.componentInstance.filters, 'GO', 'Goiatuba');
     fixture.componentInstance.filters.location = 'Brasília';
     fixture.componentInstance.search();
-    expect(search).toHaveBeenCalledWith(-18.01, -49.37, fixture.componentInstance.filters);
+    expect(search).toHaveBeenCalledWith(-15.79, -47.88, fixture.componentInstance.filters, 'DF', 'Brasília');
+  });
+
+  it('keeps a Goiatuba city search scoped when its link omits cidade', () => {
+    const route = TestBed.inject(ActivatedRoute);
+    spyOn(route.snapshot.queryParamMap, 'get').and.callFake(key => ({
+      local: 'Goiatuba, Goiás, Brasil', uf: 'GO', raio: 'todos',
+    })[key as 'local' | 'uf' | 'raio'] ?? null);
+    const api = TestBed.inject(InstructorSearchProvider);
+    spyOn(api, 'geocode').and.returnValue(of({provider: 'MAPTILER', results: [{
+      id: 'municipality.1', label: 'Goiatuba, Goiás, Brasil', city: 'Goiatuba', uf: 'GO',
+      uf_resolution: 'RESOLVED', latitude: -18.0154, longitude: -49.364,
+      place_type: 'municipality', bbox: null,
+    }]}));
+    const search = spyOn(api, 'search').and.returnValue(of(result));
+    const navigate = spyOn(TestBed.inject(Router), 'navigate').and.resolveTo(true);
+    const fixture = TestBed.createComponent(InstructorMapComponent);
+    fixture.detectChanges();
+    expect(search).toHaveBeenCalledWith(-18.0154, -49.364, fixture.componentInstance.filters, 'GO', 'Goiatuba');
+    expect(navigate).toHaveBeenCalledWith([], jasmine.objectContaining({
+      queryParams: jasmine.objectContaining({cidade: 'Goiatuba', uf: 'GO', raio: 'todos'}),
+    }));
+    expect(fixture.componentInstance.items).toEqual([]);
+  });
+
+  it('keeps a street search nationwide instead of treating its parent city as selected', () => {
+    const fixture = TestBed.createComponent(InstructorMapComponent);
+    const api = TestBed.inject(InstructorSearchProvider);
+    spyOn(api, 'geocode').and.returnValue(of({provider: 'MAPTILER', results: [{
+      id: 'address.1', label: 'Rua Goiatuba, Catalão, GO', city: 'Catalão', uf: 'GO',
+      uf_resolution: 'RESOLVED', latitude: -18.18, longitude: -47.94,
+      place_type: 'address', bbox: null,
+    }]}));
+    const search = spyOn(api, 'search').and.returnValue(of(result));
+    fixture.detectChanges();
+    fixture.componentInstance.filters.location = 'Rua Goiatuba';
+    fixture.componentInstance.search();
+    expect(search).toHaveBeenCalledWith(-18.18, -47.94, fixture.componentInstance.filters);
   });
 
   it('does not widen a clicked city search when geocoding resolves another UF', () => {

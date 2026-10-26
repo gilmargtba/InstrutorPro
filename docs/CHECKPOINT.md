@@ -1,5 +1,23 @@
 # Checkpoint do Projeto
 
+## Correção local — cidade escolhida no mapa, 25/10/2026
+
+- Uma cidade reconhecida pelo geocodificador agora preenche o recorte `city`/`uf`
+  da busca e normaliza o link com `cidade`, mesmo quando o link de entrada só
+  contém `local`/`uf`. Escolher Goiatuba não pode retornar um perfil cuja área
+  pública de atendimento é Formosa apenas porque o raio está em “todos”.
+- Endereço/bairro e localização GPS continuam sem recorte implícito de cidade;
+  a busca sem raio segue possível. A mensagem de resultado vazio distingue
+  cadastro de perfil efetivamente publicado. Elegibilidade, ofertas, UF e
+  publicação não foram alteradas.
+- Consulta pública à API de produção mostrou `GO: 1`, cidade publicada:
+  Formosa; Goiatuba não consta entre as cidades com instrutor pesquisável.
+  Isso não comprova o motivo individual de um cadastro não aparecer; a revisão
+  do respectivo perfil no Admin continua necessária.
+- Validação local após o ajuste final: 101 testes Angular e build de produção
+  aprovados; build mantém avisos preexistentes de orçamento.
+  Correção ainda não enviada ao GitHub nem publicada na VPS.
+
 ## Revisão documental simplificada no Admin — publicada, 25/10/2026
 
 - O painel do perfil real agora mostra CNH, credenciamento e demais anexos da

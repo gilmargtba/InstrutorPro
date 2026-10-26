@@ -172,7 +172,11 @@ import { WhatsappLinkService } from '../../core/whatsapp-link.service';
           </div>
         } @else if (searched && !items.length) {
           <div class="map-message empty">
-            <span>Nenhum instrutor encontrado com os filtros atuais.</span>
+            @if (citySearchLabel) {
+              <span>Nenhum instrutor publicado em {{citySearchLabel}} com os filtros atuais. Cadastros ainda não publicados não aparecem na busca.</span>
+            } @else {
+              <span>Nenhum instrutor encontrado com os filtros atuais.</span>
+            }
             @if (filters.category) {<button type="button" (click)="showAllCategories()">Ver todas as categorias</button>}
             @if (!anyDistance) {<button type="button" (click)="increaseRadius()">Aumentar raio</button>}
             <button type="button" (click)="filtersOpen=true">Alterar filtros</button>
@@ -411,6 +415,15 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
   }
 
   private searchFromPoint(point:GeocodingResult, revision:number) {
+        // A resolved city is an explicit locality search, even when an older link
+        // contains only `local` and `uf` instead of the `cidade` query parameter.
+        if (!this.cityScope && point.city && point.uf &&
+            ['place', 'municipality', 'locality'].includes(point.place_type)) {
+          this.cityScope = point.city;
+          this.ufScope = point.uf;
+          this.scopedLocation = point.label;
+          this.filters.location = point.label;
+        }
         this.map.focus(point.latitude, point.longitude, 12);
         this.suggestions = [];
         if (this.cityScope && point.uf !== this.ufScope) this.clearCityScope();
@@ -477,6 +490,10 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
 
   get visibleItems(): SearchInstructor[] {
     return this.showAllResults || !this.selected ? this.items : [this.selected];
+  }
+
+  get citySearchLabel(): string {
+    return this.cityScope && this.ufScope ? `${this.cityScope}/${this.ufScope}` : '';
   }
 
   openResultList() {
