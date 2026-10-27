@@ -1,5 +1,20 @@
 # Checkpoint do Projeto
 
+## Diretório por UF, cidade e instrutor — preparado localmente, 27/10/2026
+
+- A busca nacional passa a listar nomes de instrutores pesquisáveis por UF e
+  cidade. Clicar na cidade abre o mapa filtrado por `city`/`uf`; clicar no nome
+  abre esse mapa com o instrutor selecionado e o marcador em foco.
+- O link usa a coordenada pública aproximada já aprovada para evitar que a
+  geocodificação abra outra cidade. O backend continua exigindo verificação,
+  elegibilidade, publicação e oferta ativa. Nenhum endereço residencial ou
+  documento é incluído na resposta pública.
+- Build Angular e 26 testes das telas de busca passaram; 46 testes Django da
+  API passaram em PostGIS isolado. A seleção explícita permanece no resultado
+  mesmo quando o limite de itens por busca é atingido, mas nunca ignora os
+  filtros de cidade, UF e elegibilidade. Ruff e formatação passaram. Não houve
+  push ou deploy nesta fatia.
+
 ## Google Maps no mapa de cadastro do instrutor — publicado, 26/10/2026
 
 - O onboarding web passou a usar a configuração de navegador existente para

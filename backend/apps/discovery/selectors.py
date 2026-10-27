@@ -2,7 +2,7 @@ from django.conf import settings
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import D
-from django.db.models import Count, Min, Q
+from django.db.models import Case, IntegerField, Min, Q, Value, When
 from django.utils import timezone
 
 from apps.marketplace.capabilities import enabled
@@ -36,7 +36,7 @@ def published_instructor_profiles():
     return queryset.distinct()
 
 
-def published_instructor_counts_by_city():
+def published_instructor_directory():
     data_mode = "SYNTHETIC" if settings.SYNTHETIC_MARKETPLACE_ENABLED else "REAL"
     eligible_offer = Q()
     for category in ("A", "B", "C", "D", "E"):
@@ -50,9 +50,9 @@ def published_instructor_counts_by_city():
         published_instructor_profiles()
         .filter(service_area__public_service_location__isnull=False)
         .filter(eligible_offer)
-        .values("service_area__uf", "service_area__city")
-        .annotate(total=Count("id", distinct=True))
-        .order_by("service_area__uf", "service_area__city")
+        .select_related("service_area")
+        .distinct()
+        .order_by("service_area__uf", "service_area__city", "display_name", "id")
     )
 
 
@@ -68,6 +68,7 @@ def search_published_instructors(
     vehicle_available=None,
     max_price=None,
     ordering="distance",
+    focus_id=None,
 ):
     data_mode = "SYNTHETIC" if settings.SYNTHETIC_MARKETPLACE_ENABLED else "REAL"
     origin = Point(float(longitude), float(latitude), srid=4326)
@@ -110,6 +111,15 @@ def search_published_instructors(
     if max_price is not None:
         queryset = queryset.filter(minimum_price__lte=max_price)
     order = ("minimum_price", "distance", "id") if ordering == "price" else ("distance", "id")
+    if focus_id:
+        queryset = queryset.annotate(
+            focus_rank=Case(
+                When(id=focus_id, then=Value(0)),
+                default=Value(1),
+                output_field=IntegerField(),
+            )
+        )
+        order = ("focus_rank", *order)
     return (
         queryset.select_related("service_area")
         .prefetch_related("profile_photos", "documents__requirement", "offers")

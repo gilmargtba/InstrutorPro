@@ -59,4 +59,14 @@ describe('InstructorSearchProvider radius', () => {
     expect(request.request.params.has('radius_km')).toBeFalse();
     request.flush({count: 0, results: []});
   });
+
+  it('prioritizes only the selected instructor when a directory link supplies its id', () => {
+    TestBed.inject(InstructorSearchProvider).search(-18, -49, filters, 'GO', 'Goiatuba', 'selected-id').subscribe();
+    const request = TestBed.inject(HttpTestingController).expectOne(request =>
+      request.url === '/instructors/search/');
+    expect(request.request.params.get('uf')).toBe('GO');
+    expect(request.request.params.get('city')).toBe('Goiatuba');
+    expect(request.request.params.get('focus_id')).toBe('selected-id');
+    request.flush({count: 0, results: []});
+  });
 });

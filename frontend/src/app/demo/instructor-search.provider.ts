@@ -6,7 +6,8 @@ export interface SearchInstructor { id:string;display_name:string;latitude:numbe
 export interface GeocodingResult { id:string;label:string;latitude:number;longitude:number;place_type:string;city:string;uf:string;uf_resolution:'RESOLVED'|'NEEDS_CONFIRMATION';bbox:number[]|null }
 export interface GeocodeResponse { results:GeocodingResult[];provider:string }
 interface SearchResponse { count:number;results:SearchInstructor[] }
-export interface InstructorStateSummary { uf:string;count:number;search_location:string;cities:{name:string;count:number}[] }
+export interface InstructorDirectoryEntry { id:string;display_name:string;latitude:number;longitude:number }
+export interface InstructorStateSummary { uf:string;count:number;search_location:string;cities:{name:string;count:number;instructors?:InstructorDirectoryEntry[]}[] }
 interface StateSummaryResponse { states:InstructorStateSummary[] }
 
 @Injectable({providedIn:'root'})
@@ -14,13 +15,14 @@ export class InstructorSearchProvider {
   private readonly http=inject(HttpClient);
   geocode(query:string,limit=5){return this.http.get<GeocodeResponse>('/geocoding/search/',{params:{q:query,limit}})}
   states(){return this.http.get<StateSummaryResponse>('/instructors/states/')}
-  search(latitude:number,longitude:number,filters:SearchFilters,uf?:string,city?:string){
+  search(latitude:number,longitude:number,filters:SearchFilters,uf?:string,city?:string,focusId?:string){
     let params=new HttpParams().set('latitude',latitude).set('longitude',longitude).set('ordering',filters.ordering);
     if(filters.category) params=params.set('category',filters.category);
     if(filters.vehicleAvailable!==null) params=params.set('vehicle_available',filters.vehicleAvailable);
     if(filters.radius!==null) params=params.set('radius_km',filters.radius);
     if(uf) params=params.set('uf',uf);
     if(city) params=params.set('city',city);
+    if(focusId) params=params.set('focus_id',focusId);
     if(filters.transmission) params=params.set('transmission',filters.transmission);
     if(filters.maxPrice) params=params.set('max_price',filters.maxPrice);
     return this.http.get<SearchResponse>('/instructors/search/',{params});

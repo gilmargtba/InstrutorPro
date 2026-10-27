@@ -77,7 +77,10 @@ export class GoogleMapProvider implements MapProvider {
     }
     const marker = this.markers.get(id);
     const position = marker?.position;
-    if (position) this.map?.panTo(position);
+    if (position) {
+      this.map?.panTo(position);
+      if ((this.map?.getZoom() ?? 0) < 15) this.map?.setZoom(15);
+    }
   }
 
   refresh(): void {

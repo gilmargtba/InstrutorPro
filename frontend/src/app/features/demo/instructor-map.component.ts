@@ -228,7 +228,7 @@ import { WhatsappLinkService } from '../../core/whatsapp-link.service';
                     <div class="result-copy">
                       <strong>{{ instructor.display_name }}</strong>
                       @if(instructor.verified_claims.includes('CREDENTIAL_VERIFIED')){<em class="verified"><i class="pi pi-verified"></i> Credenciamento verificado</em>}
-                      <span>{{ instructor.distance_km }} km de você</span>
+                      <span>{{ instructor.city }}/{{ instructor.uf }} · {{ instructor.distance_km }} km {{ citySearchLabel ? 'do ponto da busca' : 'de você' }}</span>
                       <small>
                         Categoria {{ instructor.categories.join(', ') }} ·
                         {{ instructor.transmission === 'MANUAL' ? 'Manual' : 'Automático' }}
@@ -304,6 +304,7 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
   private cityScope = '';
   private ufScope = '';
   private scopedLocation = '';
+  private requestedInstructorId = '';
   private readonly locationQueries = new Subject<string>();
   private readonly suggestionsRequest: Subscription;
   private geocodingRequest?: Subscription;
@@ -338,14 +339,28 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
     const routedLocation = this.route.snapshot.queryParamMap.get('local');
     const routedCity = this.route.snapshot.queryParamMap.get('cidade');
     const routedUf = this.route.snapshot.queryParamMap.get('uf');
+    const routedLatitude = Number(this.route.snapshot.queryParamMap.get('lat'));
+    const routedLongitude = Number(this.route.snapshot.queryParamMap.get('lng'));
     if (routedLocation && routedCity && routedUf && this.brazilUfs.includes(routedUf as typeof BRAZIL_UFS[number])) {
       this.cityScope = routedCity;
       this.ufScope = routedUf;
       this.scopedLocation = routedLocation;
+      this.requestedInstructorId = this.route.snapshot.queryParamMap.get('instrutor') ?? '';
     }
     if (routedLocation) {
       this.filters.location = routedLocation;
-      this.search();
+      if (this.cityScope && Number.isFinite(routedLatitude) && Number.isFinite(routedLongitude) &&
+          routedLatitude >= -35 && routedLatitude <= 6 && routedLongitude >= -74 && routedLongitude <= -32) {
+        this.searched = true;
+        this.loading = true;
+        this.scrollToResults();
+        this.searchFromPoint({
+          id: '', label: routedLocation, latitude: routedLatitude, longitude: routedLongitude,
+          place_type: 'locality', city: routedCity!, uf: routedUf!, uf_resolution: 'RESOLVED', bbox: null,
+        }, this.beginSearch());
+      } else {
+        this.search();
+      }
     } else if (this.mobile) {
       const position = this.location.takePending();
       if (position) this.searchFromCoordinates(position.latitude, position.longitude);
@@ -427,18 +442,20 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
         this.map.focus(point.latitude, point.longitude, 12);
         this.suggestions = [];
         if (this.cityScope && point.uf !== this.ufScope) this.clearCityScope();
-        void this.router.navigate([], {queryParams:{local:this.cityScope ? this.scopedLocation : point.label,uf:point.uf,cidade:this.cityScope || null,categoria:this.filters.category || null,raio:this.filters.radius ?? 'todos'},replaceUrl:true});
+        void this.router.navigate([], {queryParams:{local:this.cityScope ? this.scopedLocation : point.label,uf:point.uf,cidade:this.cityScope || null,categoria:this.filters.category || null,raio:this.filters.radius ?? 'todos',...(this.cityScope ? {lat:point.latitude,lng:point.longitude} : {}),instrutor:this.requestedInstructorId || null},replaceUrl:true});
         const searchRequest = this.cityScope
-          ? this.api.search(point.latitude, point.longitude, this.filters, this.ufScope, this.cityScope)
+          ? (this.requestedInstructorId
+              ? this.api.search(point.latitude, point.longitude, this.filters, this.ufScope, this.cityScope, this.requestedInstructorId)
+              : this.api.search(point.latitude, point.longitude, this.filters, this.ufScope, this.cityScope))
           : this.api.search(point.latitude, point.longitude, this.filters);
         this.searchRequest = searchRequest.subscribe({
           next: (response) => {
             if (revision !== this.searchRevision) return;
             this.items = response.results;
-            this.selected = this.items.length === 1 ? this.items[0] : null;
+            this.selected = this.items.find(item => item.id === this.requestedInstructorId) ?? (this.items.length === 1 ? this.items[0] : null);
             this.loading = false;
-            this.drawerOpen = this.items.length === 1;
-            this.showAllResults = this.items.length !== 1;
+            this.drawerOpen = !!this.selected;
+            this.showAllResults = !this.selected;
             this.map.render(this.items, this.selected?.id ?? null);
             this.changeDetector.detectChanges();
           },
@@ -485,6 +502,10 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
     this.selected = item;
     this.showAllResults = false;
     this.drawerOpen = true;
+    if (this.view === 'list') {
+      this.view = 'map';
+      setTimeout(() => this.map.refresh());
+    }
     this.map.select(item.id);
   }
 
@@ -550,6 +571,7 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
     this.cityScope = '';
     this.ufScope = '';
     this.scopedLocation = '';
+    this.requestedInstructorId = '';
   }
 
   initials(name: string) {

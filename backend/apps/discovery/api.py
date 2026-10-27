@@ -51,7 +51,7 @@ from .models import (
     ProfessionalVerificationRequest,
 )
 from .selectors import (
-    published_instructor_counts_by_city,
+    published_instructor_directory,
     published_instructor_profiles,
     search_published_instructors,
 )
@@ -343,6 +343,7 @@ class SearchParameters(serializers.Serializer):
         max_digits=8, decimal_places=2, min_value=1, required=False
     )
     ordering = serializers.ChoiceField(choices=["distance", "price"], default="distance")
+    focus_id = serializers.UUIDField(required=False)
 
 
 class InstructorResult(serializers.Serializer):
@@ -472,6 +473,7 @@ class InstructorSearchView(APIView):
                 "vehicle_available",
                 "max_price",
                 "ordering",
+                "focus_id",
                 "source",
             ]
         ],
@@ -754,19 +756,30 @@ class InstructorStateSummaryView(APIView):
     @extend_schema(responses=InstructorStateSummary(many=True))
     def get(self, request):
         cities_by_uf = {}
-        for row in published_instructor_counts_by_city():
-            cities_by_uf.setdefault(row["service_area__uf"], []).append(
-                {"name": row["service_area__city"], "count": row["total"]}
+        for row in published_instructor_directory():
+            area = row.service_area
+            cities = cities_by_uf.setdefault(area.uf, {})
+            city = cities.setdefault(area.city, {"name": area.city, "count": 0, "instructors": []})
+            city["count"] += 1
+            city["instructors"].append(
+                {
+                    "id": str(row.id),
+                    "display_name": row.display_name,
+                    "latitude": round(area.public_service_location.y, 5),
+                    "longitude": round(area.public_service_location.x, 5),
+                }
             )
-        results = [
-            {
-                "uf": uf,
-                "count": sum(city["count"] for city in cities),
-                "search_location": cities[0]["name"],
-                "cities": cities,
-            }
-            for uf, cities in sorted(cities_by_uf.items())
-        ]
+        results = []
+        for uf, grouped in sorted(cities_by_uf.items()):
+            cities = [grouped[name] for name in sorted(grouped)]
+            results.append(
+                {
+                    "uf": uf,
+                    "count": sum(city["count"] for city in cities),
+                    "search_location": cities[0]["name"],
+                    "cities": cities,
+                }
+            )
         return Response({"states": results})
 
 

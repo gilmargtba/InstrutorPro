@@ -619,8 +619,8 @@ def test_search_uses_canonical_uf_alongside_postgis_coordinates(actor):
 
 @pytest.mark.django_db
 def test_national_summary_counts_only_published_instructors(actor):
-    make_profile(actor)
-    make_profile(actor)
+    first, *_ = make_profile(actor)
+    second, *_ = make_profile(actor)
     make_profile(actor, publication_status="UNPUBLISHED")
     profile, area, *_ = make_profile(actor)
     area.uf = "SP"
@@ -636,13 +636,42 @@ def test_national_summary_counts_only_published_instructors(actor):
                 "uf": "RS",
                 "count": 2,
                 "search_location": "Porto Alegre",
-                "cities": [{"name": "Porto Alegre", "count": 2}],
+                "cities": [
+                    {
+                        "name": "Porto Alegre",
+                        "count": 2,
+                        "instructors": [
+                            {
+                                "id": str(profile.id),
+                                "display_name": profile.display_name,
+                                "latitude": -30.0346,
+                                "longitude": -51.2177,
+                            }
+                            for profile in sorted(
+                                (first, second), key=lambda item: (item.display_name, item.id)
+                            )
+                        ],
+                    }
+                ],
             },
             {
                 "uf": "SP",
                 "count": 1,
                 "search_location": "São Paulo",
-                "cities": [{"name": "São Paulo", "count": 1}],
+                "cities": [
+                    {
+                        "name": "São Paulo",
+                        "count": 1,
+                        "instructors": [
+                            {
+                                "id": str(profile.id),
+                                "display_name": profile.display_name,
+                                "latitude": -30.0346,
+                                "longitude": -51.2177,
+                            }
+                        ],
+                    }
+                ],
             },
         ]
     }
@@ -650,16 +679,38 @@ def test_national_summary_counts_only_published_instructors(actor):
 
 @pytest.mark.django_db
 def test_city_summary_and_city_search_only_include_matching_published_profiles(actor):
-    make_profile(actor)
-    _, area, *_ = make_profile(actor)
+    first, *_ = make_profile(actor)
+    second, area, *_ = make_profile(actor)
     area.city = "Caxias do Sul"
     area.public_service_location = Point(-51.18, -29.17, srid=4326)
     area.save(update_fields=["city", "public_service_location"])
     response = APIClient().get("/api/v1/instructors/states/")
     assert response.status_code == 200
     assert response.json()["states"][0]["cities"] == [
-        {"name": "Caxias do Sul", "count": 1},
-        {"name": "Porto Alegre", "count": 1},
+        {
+            "name": "Caxias do Sul",
+            "count": 1,
+            "instructors": [
+                {
+                    "id": str(second.id),
+                    "display_name": second.display_name,
+                    "latitude": -29.17,
+                    "longitude": -51.18,
+                }
+            ],
+        },
+        {
+            "name": "Porto Alegre",
+            "count": 1,
+            "instructors": [
+                {
+                    "id": str(first.id),
+                    "display_name": first.display_name,
+                    "latitude": -30.0346,
+                    "longitude": -51.2177,
+                }
+            ],
+        },
     ]
     search = APIClient().get(
         "/api/v1/instructors/search/",
@@ -677,6 +728,43 @@ def test_city_summary_and_city_search_only_include_matching_published_profiles(a
         .json()["count"]
         == 0
     )
+
+
+@pytest.mark.django_db
+@override_settings(INSTRUCTOR_SEARCH_MAX_RESULTS=1)
+def test_city_link_keeps_selected_published_instructor_in_limited_results(actor):
+    _, near_area, *_ = make_profile(actor)
+    near_area.city = "Caxias do Sul"
+    near_area.save(update_fields=["city"])
+    selected, area, *_ = make_profile(actor)
+    area.city = "Caxias do Sul"
+    area.public_service_location = Point(-51.18, -29.17, srid=4326)
+    area.save(update_fields=["city", "public_service_location"])
+    response = APIClient().get(
+        "/api/v1/instructors/search/",
+        {
+            "latitude": -30.0346,
+            "longitude": -51.2177,
+            "uf": "RS",
+            "city": "Caxias do Sul",
+            "focus_id": str(selected.id),
+        },
+    )
+    assert response.status_code == 200
+    assert [item["id"] for item in response.json()["results"]] == [str(selected.id)]
+
+    other_city = APIClient().get(
+        "/api/v1/instructors/search/",
+        {
+            "latitude": -30.0346,
+            "longitude": -51.2177,
+            "uf": "RS",
+            "city": "Porto Alegre",
+            "focus_id": str(selected.id),
+        },
+    )
+    assert other_city.status_code == 200
+    assert str(selected.id) not in {item["id"] for item in other_city.json()["results"]}
 
 
 @pytest.mark.django_db

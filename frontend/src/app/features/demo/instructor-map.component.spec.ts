@@ -184,6 +184,33 @@ describe('InstructorMapComponent geolocation', () => {
     expect(search).toHaveBeenCalledWith(-15.79, -47.88, fixture.componentInstance.filters, 'DF', 'Brasília');
   });
 
+  it('opens a listed instructor at the public point without geocoding another city', () => {
+    const route = TestBed.inject(ActivatedRoute);
+    spyOn(route.snapshot.queryParamMap, 'get').and.callFake(key => ({
+      local: 'Goiatuba, GO', cidade: 'Goiatuba', uf: 'GO',
+      lat: '-18.01', lng: '-49.37', instrutor: 'published',
+    })[key as 'local' | 'cidade' | 'uf' | 'lat' | 'lng' | 'instrutor'] ?? null);
+    const api = TestBed.inject(InstructorSearchProvider);
+    const geocode = spyOn(api, 'geocode');
+    const search = spyOn(api, 'search').and.returnValue(of({count: 1, results: [{
+      id: 'published', display_name: 'Instrutor Publicado', latitude: -18.01,
+      longitude: -49.37, distance_km: 0, categories: ['B'], offer_category: 'B',
+      transmission: 'MANUAL', vehicle_available: true, price_amount: 90,
+      price_from: false, duration_minutes: 60, vehicle: null,
+      availability_summary: '', demo: false, profile_photo_url: null,
+      verified_claims: [], city: 'Goiatuba', uf: 'GO',
+    }]}));
+    const map = TestBed.inject(SearchMapProvider);
+    const focus = spyOn(map, 'focus');
+    const fixture = TestBed.createComponent(InstructorMapComponent);
+    fixture.detectChanges();
+    expect(geocode).not.toHaveBeenCalled();
+    expect(search).toHaveBeenCalledWith(-18.01, -49.37, fixture.componentInstance.filters, 'GO', 'Goiatuba', 'published');
+    expect(focus).toHaveBeenCalledWith(-18.01, -49.37, 12);
+    expect(fixture.componentInstance.selected?.id).toBe('published');
+    expect(fixture.componentInstance.drawerOpen).toBeTrue();
+  });
+
   it('keeps a Goiatuba city search scoped when its link omits cidade', () => {
     const route = TestBed.inject(ActivatedRoute);
     spyOn(route.snapshot.queryParamMap, 'get').and.callFake(key => ({
