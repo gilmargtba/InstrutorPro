@@ -1,6 +1,6 @@
 # Checkpoint do Projeto
 
-## Diretório por UF, cidade e instrutor — preparado localmente, 27/10/2026
+## Diretório por UF, cidade e instrutor — publicado, 27/10/2026
 
 - A busca nacional passa a listar nomes de instrutores pesquisáveis por UF e
   cidade. Clicar na cidade abre o mapa filtrado por `city`/`uf`; clicar no nome
@@ -12,8 +12,17 @@
 - Build Angular e 26 testes das telas de busca passaram; 46 testes Django da
   API passaram em PostGIS isolado. A seleção explícita permanece no resultado
   mesmo quando o limite de itens por busca é atingido, mas nunca ignora os
-  filtros de cidade, UF e elegibilidade. Ruff e formatação passaram. Não houve
-  push ou deploy nesta fatia.
+  filtros de cidade, UF e elegibilidade. Ruff e formatação passaram.
+- O commit isolado `c03a4a9` foi enviado a `origin/main` sem os commits locais
+  de revisão administrativa e aplicado na VPS por fast-forward. Antes da
+  atualização, o backup validado do banco e dos documentos privados recebeu
+  o marcador `20261027T191445Z`; as imagens anteriores de backend e frontend
+  foram preservadas com a tag `pre-city-directory-20261027T191445Z`.
+- Somente backend e frontend foram reconstruídos e recriados. O endpoint de
+  prontidão retornou `ok` com banco `up`; a página de busca respondeu HTTP 200;
+  a lista pública retornou GO/Formosa com um instrutor, e a busca filtrada
+  por `city=Formosa`, `uf=GO` e `focus_id` retornou o mesmo perfil. A operação
+  não alterou cadastro ou decisão de publicação de nenhum instrutor.
 
 ## Google Maps no mapa de cadastro do instrutor — publicado, 26/10/2026
 
