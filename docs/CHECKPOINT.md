@@ -1,5 +1,17 @@
 # Checkpoint do Projeto
 
+## Diretório no mapa local — preparado, 27/10/2026
+
+- A tela `/aluno/instrutores/mapa` mostra, abaixo de “Usar minha localização”,
+  os instrutores pesquisáveis agrupados por UF e cidade. A lista consome o
+  endpoint público já existente e oferece recarga quando a consulta falha.
+- Clicar na cidade abre o mapa filtrado pela cidade e UF; clicar no nome abre o
+  ponto público aproximado com o cartão de perfil e contato. A consulta por
+  cidade não impõe raio ou categoria automaticamente. Endereço residencial e
+  documentos continuam ausentes da lista e do mapa.
+- Build Angular e testes focados da busca local, nacional e do provedor passaram.
+  Pendente publicação; não houve mudança no backend nem na VPS nesta fatia.
+
 ## Diretório por UF, cidade e instrutor — publicado, 27/10/2026
 
 - A busca nacional passa a listar nomes de instrutores pesquisáveis por UF e

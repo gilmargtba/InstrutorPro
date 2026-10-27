@@ -9,6 +9,8 @@ import {
   SearchFilters,
   SearchInstructor,
   GeocodingResult,
+  InstructorDirectoryEntry,
+  InstructorStateSummary,
 } from '../../demo/instructor-search.provider';
 import { SearchMapProvider } from '../../demo/search-map.provider';
 import { BRAZIL_UFS } from '../../shared/brazil-ufs';
@@ -74,6 +76,41 @@ import { WhatsappLinkService } from '../../core/whatsapp-link.service';
         @if(pendingLocation){<label>Confirme a UF desta localidade
           <select name="confirmedUf" [(ngModel)]="confirmedUf"><option value="">Selecione a UF</option>@for(uf of brazilUfs;track uf){<option [value]="uf">{{uf}}</option>}</select>
         </label><button type="button" [disabled]="!confirmedUf" (click)="confirmLocationUf()">Confirmar UF</button>}
+
+        <section class="instructor-directory" aria-labelledby="instructor-directory-title">
+          <div class="directory-heading">
+            <p class="eyebrow">Explore as cidades</p>
+            <h2 id="instructor-directory-title">Instrutores por UF e cidade</h2>
+            <p>Selecione a cidade para ver todos no mapa ou escolha um instrutor para abrir seu ponto público e as opções de contato.</p>
+          </div>
+          @if (directoryLoading) {
+            <p role="status">Carregando cidades com instrutores…</p>
+          } @else if (directoryError) {
+            <p role="alert">Não foi possível carregar a lista. <button type="button" class="directory-retry" (click)="loadDirectory()">Tentar novamente</button></p>
+          } @else if (!directoryStates.length) {
+            <p>Nenhum instrutor publicado está disponível na busca neste momento.</p>
+          } @else {
+            <div class="directory-states">
+              @for (state of directoryStates; track state.uf) {
+                <details class="directory-state" [open]="directoryStates.length === 1">
+                  <summary>{{ state.uf }} <span>{{ state.count }} {{ state.count === 1 ? 'instrutor' : 'instrutores' }}</span></summary>
+                  @for (city of state.cities; track city.name) {
+                    <div class="directory-city-group">
+                      <button type="button" class="directory-city" (click)="openDirectoryCity(state.uf, city.name, city.instructors?.[0])">
+                        <span>{{ city.name }}</span><span>{{ city.count }} {{ city.count === 1 ? 'instrutor' : 'instrutores' }} <i class="pi pi-arrow-right"></i></span>
+                      </button>
+                      @for (instructor of city.instructors ?? []; track instructor.id) {
+                        <button type="button" class="directory-instructor" (click)="openDirectoryInstructor(state.uf, city.name, instructor)" [attr.aria-label]="'Ver ' + instructor.display_name + ' no mapa e opções de contato'">
+                          <i class="pi pi-user"></i><span>{{ instructor.display_name }}</span><small>Mapa e contato <i class="pi pi-arrow-right"></i></small>
+                        </button>
+                      }
+                    </div>
+                  }
+                </details>
+              }
+            </div>
+          }
+        </section>
       </div>
 
       <div class="map-workspace" id="resultado-busca">
@@ -301,6 +338,9 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
   pendingLocation: GeocodingResult | null = null;
   confirmedUf = '';
   contactError = '';
+  directoryStates: InstructorStateSummary[] = [];
+  directoryLoading = false;
+  directoryError = false;
   private cityScope = '';
   private ufScope = '';
   private scopedLocation = '';
@@ -309,6 +349,7 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
   private readonly suggestionsRequest: Subscription;
   private geocodingRequest?: Subscription;
   private searchRequest?: Subscription;
+  private directoryRequest?: Subscription;
   private searchRevision = 0;
 
   constructor() {
@@ -365,6 +406,61 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
       const position = this.location.takePending();
       if (position) this.searchFromCoordinates(position.latitude, position.longitude);
     }
+    if (!routedLocation) this.loadDirectory();
+  }
+
+  loadDirectory() {
+    this.directoryRequest?.unsubscribe();
+    this.directoryLoading = true;
+    this.directoryError = false;
+    this.directoryRequest = this.api.states().subscribe({
+      next: response => {
+        this.directoryStates = response.states;
+        this.directoryLoading = false;
+        this.changeDetector.detectChanges();
+      },
+      error: () => {
+        this.directoryLoading = false;
+        this.directoryError = true;
+        this.changeDetector.detectChanges();
+      },
+    });
+  }
+
+  openDirectoryCity(uf: string, city: string, point?: InstructorDirectoryEntry) {
+    this.openDirectorySelection(uf, city, point);
+  }
+
+  openDirectoryInstructor(uf: string, city: string, instructor: InstructorDirectoryEntry) {
+    this.openDirectorySelection(uf, city, instructor, instructor.id);
+  }
+
+  private openDirectorySelection(uf: string, city: string, point?: InstructorDirectoryEntry, instructorId = '') {
+    this.cityScope = city;
+    this.ufScope = uf;
+    this.scopedLocation = `${city}, ${uf}`;
+    this.requestedInstructorId = instructorId;
+    this.filters = {
+      location: this.scopedLocation,
+      radius: null,
+      category: '',
+      transmission: '',
+      vehicleAvailable: null,
+      maxPrice: null,
+      ordering: 'distance',
+    };
+    this.anyDistance = true;
+    if (!point) { this.search(); return; }
+    const revision = this.beginSearch();
+    this.searched = true;
+    this.loading = true;
+    this.error = false;
+    this.locationMessage = '';
+    this.scrollToResults();
+    this.searchFromPoint({
+      id: '', label: this.scopedLocation, latitude: point.latitude, longitude: point.longitude,
+      place_type: 'locality', city, uf, uf_resolution: 'RESOLVED', bbox: null,
+    }, revision);
   }
 
   search() {
@@ -564,6 +660,7 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
 
   backToIntro() {
     this.searched = false;
+    if (!this.directoryStates.length && !this.directoryLoading) this.loadDirectory();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -604,6 +701,7 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
 
   ngOnDestroy() {
     this.beginSearch();
+    this.directoryRequest?.unsubscribe();
     this.suggestionsRequest.unsubscribe();
     this.map.destroy();
   }

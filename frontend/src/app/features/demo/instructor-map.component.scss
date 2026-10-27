@@ -135,6 +135,8 @@ h1 span { color: var(--teal); }
 .privacy-note { margin-top: 1rem; color: #769098; font-size: .78rem; }
 .privacy-note i { margin-right: .35rem; color: var(--teal); }
 
+.use-location { min-height: 2.75rem; padding: .55rem 1rem; border: 1px solid #bdd9d5; border-radius: .75rem; color: var(--teal-dark); background: #fff; font-weight: 800; cursor: pointer; }
+.use-location:hover, .use-location:focus-visible { background: #e9f4f1; }
 .map-workspace {
   position: relative;
   width: min(100% - 2rem, 88rem);

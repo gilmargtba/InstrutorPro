@@ -20,7 +20,7 @@ describe('InstructorMapComponent geolocation', () => {
     await TestBed.configureTestingModule({
       imports: [InstructorMapComponent],
       providers: [
-        {provide: InstructorSearchProvider, useValue: {geocode: () => of({results: []}), search: () => of(result)}},
+        {provide: InstructorSearchProvider, useValue: {geocode: () => of({results: []}), search: () => of(result), states: () => of({states: []})}},
         {provide: SearchMapProvider, useValue: {source: signal('maptiler'), mount: () => undefined, focus: () => undefined, render: () => undefined, select: () => undefined, refresh: () => undefined, destroy: () => undefined}},
         {provide: ActivatedRoute, useValue: {snapshot: {queryParamMap: {get: () => null}}}},
         {provide: Router, useValue: {navigate: () => Promise.resolve(true)}},
@@ -34,6 +34,57 @@ describe('InstructorMapComponent geolocation', () => {
     expect(fixture.componentInstance.anyDistance).toBeTrue();
     expect(fixture.componentInstance.filters.radius).toBeNull();
     expect(fixture.componentInstance.filters.vehicleAvailable).toBeNull();
+  });
+
+  it('lists published instructors below location and opens the selected point with contact card', () => {
+    const api = TestBed.inject(InstructorSearchProvider);
+    spyOn(api, 'states').and.returnValue(of({states: [{
+      uf: 'GO', count: 1, search_location: 'Formosa', cities: [{
+        name: 'Formosa', count: 1, instructors: [{
+          id: 'published', display_name: 'Instrutor Publicado', latitude: -15.54, longitude: -47.34,
+        }],
+      }],
+    }]}));
+    const instructor: SearchInstructor = {
+      id: 'published', display_name: 'Instrutor Publicado', latitude: -15.54,
+      longitude: -47.34, distance_km: 0, categories: ['B'], offer_category: 'B',
+      transmission: 'MANUAL', vehicle_available: true, price_amount: 90,
+      price_from: false, duration_minutes: 60, vehicle: null,
+      availability_summary: '', demo: false, profile_photo_url: null,
+      verified_claims: [], city: 'Formosa', uf: 'GO',
+    };
+    const search = spyOn(api, 'search').and.returnValue(of({count: 1, results: [instructor]}));
+    const fixture = TestBed.createComponent(InstructorMapComponent);
+    fixture.detectChanges();
+    const locationButton = fixture.nativeElement.querySelector('.use-location') as HTMLButtonElement;
+    const directory = fixture.nativeElement.querySelector('.instructor-directory') as HTMLElement;
+    expect(locationButton.compareDocumentPosition(directory) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(directory.textContent).toContain('Formosa');
+    const instructorButton = directory.querySelector('.directory-instructor') as HTMLButtonElement;
+    instructorButton.click();
+    expect(search).toHaveBeenCalledWith(-15.54, -47.34, fixture.componentInstance.filters, 'GO', 'Formosa', 'published');
+    expect(fixture.componentInstance.selected).toBe(instructor);
+    expect(fixture.componentInstance.drawerOpen).toBeTrue();
+    expect(fixture.componentInstance.anyDistance).toBeTrue();
+  });
+
+  it('opens the selected city with its UF and all published instructors', () => {
+    const api = TestBed.inject(InstructorSearchProvider);
+    spyOn(api, 'states').and.returnValue(of({states: [{
+      uf: 'GO', count: 2, search_location: 'Formosa', cities: [{
+        name: 'Formosa', count: 2, instructors: [
+          {id: 'first', display_name: 'Primeiro', latitude: -15.54, longitude: -47.34},
+          {id: 'second', display_name: 'Segundo', latitude: -15.55, longitude: -47.35},
+        ],
+      }],
+    }]}));
+    const search = spyOn(api, 'search').and.returnValue(of({count: 0, results: []}));
+    const fixture = TestBed.createComponent(InstructorMapComponent);
+    fixture.detectChanges();
+    (fixture.nativeElement.querySelector('.directory-city') as HTMLButtonElement).click();
+    expect(search).toHaveBeenCalledWith(-15.54, -47.34, fixture.componentInstance.filters, 'GO', 'Formosa');
+    expect(fixture.componentInstance.filters.radius).toBeNull();
+    expect(fixture.componentInstance.filters.category).toBe('');
   });
 
   it('searches with coordinates only after explicit permission', async () => {
