@@ -153,6 +153,7 @@ def upload_professional_document(
     requirement=None,
     document_type="",
     manual_identity_review_authorized=False,
+    admin_upload_authorized=False,
     request_id=None,
 ):
     if not upload_available():
@@ -174,12 +175,30 @@ def upload_professional_document(
             .select_related("profile__person__account")
             .get(pk=verification_request.pk)
         )
-        if actor != item.profile.person.account or item.status != item.Status.DRAFT:
+        admin_intake = bool(
+            admin_upload_authorized
+            and item.admin_document_intake
+            and item.status == item.Status.UNDER_REVIEW
+            and item.reviewer_id == getattr(actor, "pk", None)
+            and actor is not None
+            and actor != item.profile.person.account
+            and actor.is_authenticated
+            and actor.can_operate
+            and actor.has_perm("discovery.review_professional_verification")
+            and actor.has_perm("marketplace.review_instructor_document")
+        )
+        if not admin_intake and (
+            actor != item.profile.person.account or item.status != item.Status.DRAFT
+        ):
             raise DocumentUploadError("Somente o titular pode enviar durante o rascunho.")
+        if admin_upload_authorized and not admin_intake:
+            raise DocumentUploadError("Envio administrativo não autorizado para esta solicitação.")
         if requirement is None and document_type not in InstructorDocument.DocumentType.values:
             raise DocumentUploadError("Selecione um tipo de documento profissional válido.")
-        if requirement is not None and document_type:
+        if requirement is not None and document_type and not admin_intake:
             raise DocumentUploadError("Informe um requisito ou um tipo voluntário, não ambos.")
+        if requirement is not None and document_type and requirement.document_type != document_type:
+            raise DocumentUploadError("O tipo de documento não corresponde ao requisito.")
         if (
             requirement is not None
             and not applicable_requirements(item.profile).filter(pk=requirement.pk).exists()
@@ -187,6 +206,8 @@ def upload_professional_document(
             raise DocumentUploadError("Documento não solicitado para esta configuração.")
         if requirement is not None and item.documents.filter(requirement=requirement).exists():
             raise DocumentUploadError("Remova o documento anterior antes de substituí-lo.")
+        if admin_intake and item.documents.filter(document_type=document_type).exists():
+            raise DocumentUploadError("Este tipo já foi anexado nesta análise.")
         document = InstructorDocument.objects.create(
             instructor=item.profile,
             verification_request=item,
@@ -202,6 +223,8 @@ def upload_professional_document(
         )
         schedule_document_retention(document)
         _audit(actor, document, "uploaded", request_id)
+        if admin_intake:
+            _audit(actor, document, "uploaded_by_admin_with_owner_authorization", request_id)
         _audit(None, document, "scan_started", request_id)
     try:
         result = scan_with_clamd(document.file)
@@ -254,3 +277,31 @@ def remove_draft_document(*, actor, document, request_id=None):
         storage, key = locked.file.storage, locked.file.name
         locked.delete()
         transaction.on_commit(lambda: storage.delete(key))
+
+
+@transaction.atomic
+def remove_admin_intake_document(*, actor, document, request_id=None):
+    """Assigned reviewer can correct an intake before the verification decision."""
+    item = ProfessionalVerificationRequest.objects.select_for_update().get(
+        pk=document.verification_request_id
+    )
+    locked = InstructorDocument.objects.select_for_update().get(pk=document.pk)
+    if not (
+        item.admin_document_intake
+        and item.status == item.Status.UNDER_REVIEW
+        and item.reviewer_id == getattr(actor, "pk", None)
+        and actor is not None
+        and actor.is_authenticated
+        and actor.can_operate
+        and actor.has_perm("discovery.review_professional_verification")
+        and actor.has_perm("marketplace.review_instructor_document")
+        and actor != item.profile.person.account
+        and locked.verification_request_id == item.pk
+        and locked.data_mode == DataMode.REAL
+        and locked.status in {locked.Status.PENDING, locked.Status.UNDER_REVIEW}
+    ):
+        raise DocumentUploadError("Arquivo não pode ser removido nesta análise.")
+    _audit(actor, locked, "admin_intake_removed", request_id)
+    storage, key = locked.file.storage, locked.file.name
+    locked.delete()
+    transaction.on_commit(lambda: storage.delete(key))

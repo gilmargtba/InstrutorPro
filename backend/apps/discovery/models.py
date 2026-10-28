@@ -244,6 +244,7 @@ class ProfessionalVerificationRequest(ProtectedStateModel):
     previous_verified_request = models.ForeignKey(
         "self", null=True, blank=True, on_delete=models.PROTECT, related_name="supplements"
     )
+    admin_document_intake = models.BooleanField(default=False, editable=False)
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.DRAFT)
     submitted_at = models.DateTimeField(null=True, blank=True, db_index=True)
     review_started_at = models.DateTimeField(null=True, blank=True)

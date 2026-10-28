@@ -1,9 +1,11 @@
 from datetime import timedelta
+from unittest.mock import patch
 from uuid import uuid4
 
 import pytest
 from django.contrib.auth.models import Permission
 from django.contrib.gis.geos import Point
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, override_settings
 from django.urls import reverse
 from django.utils import timezone
@@ -16,14 +18,23 @@ from apps.discovery.models import (
     InstructorServiceArea,
     ProfessionalVerificationRequest,
     PublicationDecision,
+    allow_critical_state_mutation,
 )
 from apps.discovery.selectors import search_published_instructors
-from apps.discovery.verification_services import start_verification_review
+from apps.discovery.verification_services import (
+    record_review_and_approve,
+    start_admin_document_intake,
+    start_verification_review,
+)
 from apps.marketplace.models import (
     DataMode,
     InstructorContactChannel,
     InstructorDocument,
     InstructorOffer,
+)
+from apps.marketplace.real_documents import (
+    remove_admin_intake_document,
+    upload_professional_document,
 )
 from apps.people.models import Person, RoleAssignment
 from apps.territories.models import Country, FederativeUnit, RegulatoryReadiness
@@ -142,6 +153,175 @@ def combined_data(document):
         "confirm_publish": "on",
         "publication_reason": "Publicação humana após elegibilidade",
     }
+
+
+@pytest.mark.django_db
+@override_settings(
+    **{
+        **SETTINGS,
+        "REAL_DOCUMENT_UPLOADS": True,
+        "PROFESSIONAL_DOCUMENT_UPLOAD_MODE": "PRODUCTION",
+        "REAL_DOCUMENT_UPLOAD_ENABLED": True,
+        "CLAMD_HOST": "clamav",
+    }
+)
+def test_admin_attaches_cnh_and_credential_to_selected_instructor_without_auto_publication(
+    tmp_path,
+):
+    with override_settings(MEDIA_ROOT=tmp_path):
+        web, change, _, profile, _, original, old_document = scenario()
+        old_document.delete()
+        original.status = original.Status.VERIFIED
+        with allow_critical_state_mutation():
+            original.save(update_fields=["status"])
+        profile.verification_status = profile.VerificationStatus.VERIFIED
+        with allow_critical_state_mutation():
+            profile.save(update_fields=["verification_status"])
+        url = reverse("admin:discovery_instructor_document_intake", args=[profile.pk])
+
+        def file(name):
+            return SimpleUploadedFile(name, b"%PDF-1.4\n%%EOF", content_type="application/pdf")
+
+        missing_authorization = web.post(
+            url, {"document_type": "DRIVER_LICENSE", "document": file("cnh.pdf")}
+        )
+        assert missing_authorization.status_code == 302
+        assert ProfessionalVerificationRequest.objects.filter(profile=profile).count() == 1
+        with patch("apps.marketplace.real_documents.scan_with_clamd", return_value="CLEAN"):
+            for document_type, filename in (
+                ("DRIVER_LICENSE", "cnh.pdf"),
+                ("PROFESSIONAL_CREDENTIAL", "credenciamento.pdf"),
+            ):
+                response = web.post(
+                    url,
+                    {
+                        "document_type": document_type,
+                        "document": file(filename),
+                        "owner_upload_authorized": "on",
+                    },
+                )
+                assert response.status_code == 302
+        intake = profile.verification_requests.order_by("-created_at").first()
+        assert intake.admin_document_intake
+        assert intake.previous_verified_request_id == original.pk
+        assert intake.status == intake.Status.UNDER_REVIEW
+        assert intake.documents.count() == 2
+        profile.refresh_from_db()
+        assert profile.verification_status == profile.VerificationStatus.PENDING
+        assert profile.publication_status == profile.PublicationStatus.UNPUBLISHED
+        page = web.get(change)
+        assert b"cnh.pdf" in page.content
+        assert b"credenciamento.pdf" in page.content
+        assert AuditEvent.objects.filter(
+            action="discovery.professional_verification.admin_document_intake_started",
+            target_id=intake.pk,
+        ).exists()
+        assert (
+            AuditEvent.objects.filter(
+                action="marketplace.professional_document.uploaded_by_admin_with_owner_authorization"
+            ).count()
+            == 2
+        )
+
+
+@pytest.mark.django_db
+@override_settings(**SETTINGS)
+def test_admin_document_intake_cannot_approve_without_both_types():
+    web, _, _, profile, _, original, document = scenario()
+    original.refresh_from_db()
+    original.admin_document_intake = True
+    original.previous_verified_request = ProfessionalVerificationRequest.objects.create(
+        profile=profile, status=ProfessionalVerificationRequest.Status.VERIFIED
+    )
+    original.save(update_fields=["admin_document_intake", "previous_verified_request"])
+    document.scan_status = document.ScanStatus.CLEAN
+    document.save(update_fields=["scan_status"])
+    admin = Account.objects.get(username="gilmar")
+    with pytest.raises(Exception, match="CNH e o credenciamento"):
+        record_review_and_approve(
+            actor=admin,
+            verification_request=original,
+            method="Conferência documental humana",
+            source="Fonte oficial consultada",
+            notes="",
+            consultation_confirmed=True,
+            reviewed_document_ids=[str(document.pk)],
+        )
+    profile.refresh_from_db()
+    assert profile.publication_status == profile.PublicationStatus.UNPUBLISHED
+
+
+@pytest.mark.django_db
+@override_settings(**SETTINGS)
+def test_admin_document_intake_requires_consent_and_both_reviewer_permissions():
+    _, _, _, profile, _, original, _ = scenario()
+    original.refresh_from_db()
+    original.status = original.Status.VERIFIED
+    with allow_critical_state_mutation():
+        original.save(update_fields=["status"])
+    actor = Account.objects.get(username="gilmar")
+    with pytest.raises(Exception, match="autorização do instrutor"):
+        start_admin_document_intake(actor=actor, profile=profile)
+    actor.user_permissions.remove(Permission.objects.get(codename="review_instructor_document"))
+    actor = Account.objects.get(pk=actor.pk)
+    with pytest.raises(Exception, match="Permissões de revisão"):
+        start_admin_document_intake(actor=actor, profile=profile, owner_upload_authorized=True)
+    assert ProfessionalVerificationRequest.objects.filter(profile=profile).count() == 1
+
+
+@pytest.mark.django_db
+@override_settings(
+    **{
+        **SETTINGS,
+        "REAL_DOCUMENT_UPLOADS": True,
+        "PROFESSIONAL_DOCUMENT_UPLOAD_MODE": "PRODUCTION",
+        "REAL_DOCUMENT_UPLOAD_ENABLED": True,
+        "CLAMD_HOST": "clamav",
+    }
+)
+def test_admin_can_replace_blocked_file_without_approving_or_publishing(tmp_path):
+    with override_settings(MEDIA_ROOT=tmp_path):
+        _, _, _, profile, _, original, old_document = scenario()
+        old_document.delete()
+        original.refresh_from_db()
+        original.status = original.Status.VERIFIED
+        with allow_critical_state_mutation():
+            original.save(update_fields=["status"])
+        actor = Account.objects.get(username="gilmar")
+        item, created = start_admin_document_intake(
+            actor=actor, profile=profile, owner_upload_authorized=True
+        )
+        assert created
+
+        def file():
+            return SimpleUploadedFile("cnh.pdf", b"%PDF-1.4\n%%EOF", content_type="application/pdf")
+
+        with patch("apps.marketplace.real_documents.scan_with_clamd", return_value="BLOCKED"):
+            blocked = upload_professional_document(
+                actor=actor,
+                verification_request=item,
+                upload=file(),
+                document_type="DRIVER_LICENSE",
+                admin_upload_authorized=True,
+            )
+        assert blocked.scan_status == blocked.ScanStatus.BLOCKED
+        remove_admin_intake_document(actor=actor, document=blocked)
+        assert not item.documents.exists()
+        with patch("apps.marketplace.real_documents.scan_with_clamd", return_value="CLEAN"):
+            clean = upload_professional_document(
+                actor=actor,
+                verification_request=item,
+                upload=file(),
+                document_type="DRIVER_LICENSE",
+                admin_upload_authorized=True,
+            )
+        assert clean.scan_status == clean.ScanStatus.CLEAN
+        profile.refresh_from_db()
+        assert profile.publication_status == profile.PublicationStatus.UNPUBLISHED
+        assert AuditEvent.objects.filter(
+            action="marketplace.professional_document.admin_intake_removed",
+            target_id=blocked.pk,
+        ).exists()
 
 
 @pytest.mark.django_db

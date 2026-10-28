@@ -13,6 +13,14 @@ from django.utils.html import escape, format_html
 
 from apps.audit.models import AuditEvent
 from apps.marketplace.models import InstructorDocument
+from apps.marketplace.real_documents import (
+    DocumentUploadError,
+    applicable_requirements,
+    inspect_real_upload,
+    remove_admin_intake_document,
+    upload_available,
+    upload_professional_document,
+)
 from apps.people.identifiers import decrypt_identifier, mask_cpf
 
 from .admin_approval import approval_panel, execute_approval_action
@@ -42,6 +50,7 @@ from .verification_services import (
     record_review_and_approve,
     reject_verification_request,
     review_checklist,
+    start_admin_document_intake,
     start_verification_review,
 )
 
@@ -133,6 +142,11 @@ class InstructorProfileAdmin(admin.ModelAdmin):
     def get_urls(self):
         return [
             path(
+                "<uuid:object_id>/document-intake/",
+                self.admin_site.admin_view(self.document_intake_view),
+                name="discovery_instructor_document_intake",
+            ),
+            path(
                 "<uuid:object_id>/approval-action/",
                 self.admin_site.admin_view(self.approval_action_view),
                 name="discovery_instructor_approval_action",
@@ -151,6 +165,29 @@ class InstructorProfileAdmin(admin.ModelAdmin):
                 panel = approval_panel(profile, request.user)
                 panel["action_url"] = reverse(
                     "admin:discovery_instructor_approval_action", args=[profile.pk]
+                )
+                panel["document_intake_url"] = reverse(
+                    "admin:discovery_instructor_document_intake", args=[profile.pk]
+                )
+                panel["document_requirements"] = list(applicable_requirements(profile))
+                panel["can_admin_intake"] = bool(
+                    panel["can_review_documents"]
+                    and upload_available()
+                    and profile.publication_status
+                    == InstructorProfile.PublicationStatus.UNPUBLISHED
+                    and profile.profile_status == InstructorProfile.Status.UNDER_REVIEW
+                    and profile.person.account_id != request.user.pk
+                    and panel["verification"]
+                    and (
+                        panel["verification"].status
+                        == ProfessionalVerificationRequest.Status.VERIFIED
+                        or (
+                            panel["verification"].admin_document_intake
+                            and panel["verification"].status
+                            == ProfessionalVerificationRequest.Status.UNDER_REVIEW
+                            and panel["verification"].reviewer_id == request.user.pk
+                        )
+                    )
                 )
                 if panel["readiness"] and panel["can_regulatory"]:
                     panel["readiness_edit_url"] = reverse(
@@ -175,6 +212,101 @@ class InstructorProfileAdmin(admin.ModelAdmin):
                     )
                 extra_context = {**(extra_context or {}), "approval_panel": panel}
         return super().changeform_view(request, object_id, form_url, extra_context)
+
+    def document_intake_view(self, request, object_id):
+        if request.method != "POST":
+            raise Http404
+        profile = self.get_object(request, object_id)
+        if profile is None or profile.is_demo:
+            raise Http404
+        if not self.has_change_permission(request, profile):
+            raise PermissionDenied
+        back = reverse("admin:discovery_instructorprofile_change", args=[profile.pk])
+        if request.POST.get("operation") == "remove":
+            try:
+                document = InstructorDocument.objects.get(
+                    pk=request.POST.get("document_id"), instructor=profile
+                )
+                remove_admin_intake_document(
+                    actor=request.user,
+                    document=document,
+                    request_id=getattr(request, "request_id", None),
+                )
+                self.message_user(
+                    request, "Arquivo removido com auditoria. Envie o correto.", messages.SUCCESS
+                )
+            except (
+                InstructorDocument.DoesNotExist,
+                DocumentUploadError,
+                ValidationError,
+                ValueError,
+            ):
+                self.message_user(request, "Não foi possível remover este arquivo.", messages.ERROR)
+            return HttpResponseRedirect(back)
+        if request.POST.get("owner_upload_authorized") != "on":
+            self.message_user(
+                request,
+                "Confirme a autorização do instrutor para anexar o arquivo.",
+                messages.ERROR,
+            )
+            return HttpResponseRedirect(back)
+        document_type = request.POST.get("document_type", "")
+        if document_type not in {
+            InstructorDocument.DocumentType.DRIVER_LICENSE,
+            InstructorDocument.DocumentType.PROFESSIONAL_CREDENTIAL,
+        }:
+            self.message_user(request, "Selecione CNH ou credenciamento.", messages.ERROR)
+            return HttpResponseRedirect(back)
+        upload = request.FILES.get("document")
+        if upload is None:
+            self.message_user(request, "Escolha o arquivo privado para anexar.", messages.ERROR)
+            return HttpResponseRedirect(back)
+        try:
+            inspect_real_upload(upload)
+            requirement = None
+            requirement_id = request.POST.get("requirement_id", "").strip()
+            if requirement_id:
+                requirement = applicable_requirements(profile).filter(pk=requirement_id).first()
+                if requirement is None or requirement.document_type != document_type:
+                    raise DocumentUploadError(
+                        "O requisito selecionado não corresponde ao documento."
+                    )
+            item, _ = start_admin_document_intake(
+                actor=request.user,
+                profile=profile,
+                owner_upload_authorized=True,
+                request_id=getattr(request, "request_id", None),
+            )
+            document = upload_professional_document(
+                actor=request.user,
+                verification_request=item,
+                upload=upload,
+                requirement=requirement,
+                document_type=document_type,
+                admin_upload_authorized=True,
+                request_id=getattr(request, "request_id", None),
+            )
+            if document.scan_status == InstructorDocument.ScanStatus.CLEAN:
+                self.message_user(
+                    request,
+                    "Arquivo privado anexado. Abra e revise antes de decidir.",
+                    messages.SUCCESS,
+                )
+            else:
+                self.message_user(
+                    request,
+                    "Arquivo em quarentena; aguarde análise de segurança.",
+                    messages.WARNING,
+                )
+        except (
+            DocumentUploadError,
+            InvalidWorkflowTransition,
+            WorkflowPermissionDenied,
+            ValidationError,
+            ValueError,
+        ) as exc:
+            self.message_user(request, str(exc), messages.ERROR)
+        return HttpResponseRedirect(back)
 
     def approval_action_view(self, request, object_id):
         if request.method != "POST":

@@ -157,6 +157,76 @@ def start_document_supplement(*, actor, profile, request_id=None):
 
 
 @transaction.atomic
+def start_admin_document_intake(*, actor, profile, owner_upload_authorized=False, request_id=None):
+    """Open an audited, assigned review for documents supplied with owner authorization."""
+    if not can_review(actor) or not actor.has_perm("marketplace.review_instructor_document"):
+        raise WorkflowPermissionDenied(
+            "Permissões de revisão profissional e documental obrigatórias."
+        )
+    if not owner_upload_authorized:
+        raise WorkflowPermissionDenied("A autorização do instrutor deve ser confirmada.")
+    profile = (
+        InstructorProfile.objects.select_for_update()
+        .select_related("person__account")
+        .get(pk=profile.pk)
+    )
+    _require_feature(profile)
+    if actor == profile.person.account or not upload_available():
+        raise WorkflowPermissionDenied(
+            "O envio administrativo exige outro revisor e scanner disponível."
+        )
+    latest = (
+        ProfessionalVerificationRequest.objects.select_for_update()
+        .filter(profile=profile)
+        .order_by("-created_at", "-pk")
+        .first()
+    )
+    if latest and latest.admin_document_intake and latest.status == latest.Status.UNDER_REVIEW:
+        if latest.reviewer_id != actor.pk:
+            raise WorkflowPermissionDenied("Somente o revisor responsável pode adicionar arquivos.")
+        return latest, False
+    if not latest or latest.status != latest.Status.VERIFIED:
+        raise InvalidWorkflowTransition("Esta inclusão exige uma verificação anterior concluída.")
+    if (
+        profile.profile_status != InstructorProfile.Status.UNDER_REVIEW
+        or profile.publication_status != InstructorProfile.PublicationStatus.UNPUBLISHED
+    ):
+        raise InvalidWorkflowTransition("O perfil deve estar em revisão e fora da busca.")
+    requirements = list(applicable_requirements(profile))
+    now = timezone.now()
+    item = ProfessionalVerificationRequest.objects.create(
+        profile=profile,
+        previous_verified_request=latest,
+        admin_document_intake=True,
+        status=ProfessionalVerificationRequest.Status.UNDER_REVIEW,
+        reviewer=actor,
+        submitted_at=now,
+        review_started_at=now,
+        requirements_snapshot=[
+            {
+                "id": str(rule.pk),
+                "rule_version": rule.rule_version,
+                "required": rule.required,
+                "document_type": rule.document_type,
+            }
+            for rule in requirements
+        ],
+    )
+    profile.verification_status = InstructorProfile.VerificationStatus.PENDING
+    with allow_critical_state_mutation():
+        profile.save(update_fields=["verification_status"])
+    _audit(
+        actor,
+        "admin_document_intake_started",
+        item,
+        "OWNER_AUTHORIZATION_CONFIRMED",
+        request_id,
+        previous_verified_request_id=str(latest.pk),
+    )
+    return item, True
+
+
+@transaction.atomic
 def save_verification_draft(*, actor, profile, cpf, request_id=None):
     profile = InstructorProfile.objects.select_for_update().get(pk=profile.pk)
     if actor != profile.person.account:
@@ -464,6 +534,19 @@ def record_review_and_approve(
 @transaction.atomic
 def approve_verification_request(*, actor, verification_request, request_id=None):
     item = _lock_for_decision(actor, verification_request)
+    if item.admin_document_intake:
+        for document_type in (
+            InstructorDocument.DocumentType.DRIVER_LICENSE,
+            InstructorDocument.DocumentType.PROFESSIONAL_CREDENTIAL,
+        ):
+            if not item.documents.filter(
+                document_type=document_type,
+                scan_status=InstructorDocument.ScanStatus.CLEAN,
+                status=InstructorDocument.Status.APPROVED,
+            ).exists():
+                raise InvalidWorkflowTransition(
+                    "A CNH e o credenciamento precisam de conferência e aprovação individual."
+                )
     if item.previous_verified_request_id and (
         not item.documents.exists()
         or item.documents.exclude(

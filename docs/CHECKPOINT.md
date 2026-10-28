@@ -1,5 +1,24 @@
 # Checkpoint do Projeto
 
+## Inclusão administrativa de CNH e credenciamento — preparada localmente, 28/10/2026
+
+- A tela do perfil no Django Admin permite ao revisor autorizado anexar CNH e
+  credenciamento entregues pelo instrutor, um arquivo por vez, com confirmação
+  explícita da autorização do titular. O envio abre uma nova solicitação privada
+  vinculada à verificação anterior e atribuída ao próprio revisor.
+- O arquivo passa pelo scanner, fica em armazenamento privado e só pode ser
+  aberto com auditoria pelo revisor responsável. A decisão exige revisão
+  individual dos dois tipos; anexar arquivos não aprova nem publica o perfil.
+- Antes da decisão, o revisor pode remover com auditoria um arquivo pendente ou
+  bloqueado e reenviar o correto, sem perder a análise vinculada ao instrutor.
+- O caso Israel permanece sem documentos anexados nesta entrega local. A UF CE
+  também permanece em revisão regulatória. Para entrar na busca, o Admin ainda
+  deve conferir os arquivos reais, aprovar a verificação e confirmar a evidência
+  da UF antes de decidir a publicação.
+- Esta alteração ainda não foi enviada ao GitHub nem publicada na VPS.
+- Validação local: 76 testes de documentos e aprovação em PostGIS descartável,
+  Ruff, `manage.py check` e `makemigrations --check --dry-run` passaram.
+
 ## Reanálise do Gilmar e documentos no Admin — publicada, 28/10/2026
 
 - Os commits `7ae5c81` e `e9959ba` avançaram `origin/main` por fast-forward e a

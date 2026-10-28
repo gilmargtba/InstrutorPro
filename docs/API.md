@@ -413,6 +413,21 @@ Check-in não é homologação oficial. Evidências e mensagens de caso são pri
 
 ## Administração — por fase
 
+No Django Admin, `POST /admin/discovery/instructorprofile/{uuid}/document-intake/`
+recebe multipart `document`, `document_type` (`DRIVER_LICENSE` ou
+`PROFESSIONAL_CREDENTIAL`), `owner_upload_authorized=on` e, quando aplicável,
+`requirement_id`. Exige permissão de alteração do perfil, revisão profissional e
+documental; abre ou reutiliza uma análise atribuída ao revisor, com vínculo à
+solicitação verificada anterior. Os arquivos ficam em armazenamento privado,
+passam pelo scanner e só podem ser vistos pelo revisor responsável com auditoria.
+O envio não aprova a verificação nem publica o perfil. A análise administrativa
+exige CNH e credenciamento limpos e aprovados individualmente; a publicação
+continua sujeita às demais regras de elegibilidade, inclusive a UF.
+Antes da decisão, o revisor atribuído pode remover um anexo pendente ou
+bloqueado no mesmo formulário (`operation=remove`, `document_id`), com auditoria,
+para reenviar o arquivo correto. Documentos já aprovados não podem ser removidos
+por esse atalho.
+
 ```http
 GET  /admin/instructor-applications
 GET  /admin/instructor-applications/{application_id}
