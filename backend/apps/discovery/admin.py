@@ -444,6 +444,7 @@ class ProfessionalVerificationRequestAdmin(admin.ModelAdmin):
         "instructor_name",
         "service_uf",
         "service_city",
+        "document_count",
         "submitted_date",
         "precheck_result",
         "status_badge",
@@ -610,6 +611,7 @@ class ProfessionalVerificationRequestAdmin(admin.ModelAdmin):
                 extra_context["quick_review"] = {
                     "can_assume": can_assume,
                     "can_decide": can_decide,
+                    "document_count": len(obj.documents.all()),
                     "start_url": reverse(
                         "admin:discovery_verification_request_transition", args=[obj.pk, "start"]
                     ),
@@ -689,6 +691,11 @@ class ProfessionalVerificationRequestAdmin(admin.ModelAdmin):
             return obj.profile.service_area.city
         except InstructorServiceArea.DoesNotExist:
             return "—"
+
+    @admin.display(description="Arquivos vinculados")
+    def document_count(self, obj):
+        count = len(obj.documents.all())
+        return f"{count} arquivo(s)" if count else "Nenhum arquivo"
 
     @admin.display(description="Enviada em", ordering="submitted_at")
     def submitted_date(self, obj):

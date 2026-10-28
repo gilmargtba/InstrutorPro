@@ -204,6 +204,48 @@ def test_verification_request_shows_private_files_and_decision_in_one_screen():
 
 @pytest.mark.django_db
 @override_settings(**SETTINGS)
+def test_admin_finds_documents_by_instructor_and_request():
+    web, _, _, _, _, item, document = scenario()
+    reviewer = Account.objects.get(username="gilmar")
+    reviewer.user_permissions.add(
+        Permission.objects.get(codename="change_professionalverificationrequest"),
+        Permission.objects.get(codename="view_instructordocument"),
+    )
+    request_url = reverse("admin:discovery_professionalverificationrequest_change", args=[item.pk])
+    queue = web.get(reverse("admin:discovery_professionalverificationrequest_changelist"))
+    assert queue.status_code == 200
+    assert "Instrutor Real" in queue.content.decode()
+    assert "1 arquivo(s)" in queue.content.decode()
+
+    document_list = web.get(reverse("admin:marketplace_instructordocument_changelist"))
+    content = document_list.content.decode()
+    assert document_list.status_code == 200
+    assert "Escolher instrutor e ver documentos" in content
+    assert "Instrutor Real" in content
+    assert "Credencial profissional" in content
+    assert "credential.pdf" in content
+    assert request_url in content
+    assert "1 arquivo(s) vinculado(s)" in web.get(request_url).content.decode()
+
+
+@pytest.mark.django_db
+@override_settings(**SETTINGS)
+def test_document_list_does_not_expose_real_file_before_assignment():
+    web, _, _, _, _, item, document = scenario(start_review=False)
+    reviewer = Account.objects.get(username="gilmar")
+    reviewer.user_permissions.add(
+        Permission.objects.get(codename="view_instructordocument"),
+        Permission.objects.get(codename="change_professionalverificationrequest"),
+    )
+    document_list = web.get(reverse("admin:marketplace_instructordocument_changelist"))
+    assert document_list.status_code == 200
+    assert "credential.pdf" not in document_list.content.decode()
+    assert "Documentos vinculados ao instrutor" in document_list.content.decode()
+    assert "Escolher instrutor e ver documentos" in document_list.content.decode()
+
+
+@pytest.mark.django_db
+@override_settings(**SETTINGS)
 def test_authorized_reviewer_can_decide_documents_without_responsible_username():
     web, change, action, profile, readiness, item, document = scenario(start_review=False)
     reviewer = Account.objects.create_user(

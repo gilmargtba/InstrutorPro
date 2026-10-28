@@ -1,0 +1,10 @@
+{% extends "admin/change_list.html" %}
+
+{% block content %}
+<div class="module" style="padding:16px;margin-bottom:16px;border-left:4px solid #187f83">
+  <h2>Documentos vinculados ao instrutor</h2>
+  <p>Para conferir CNH e credenciamento de um instrutor real, abra sua solicitação na fila de verificação e assuma a análise. Somente o revisor responsável pode abrir os arquivos privados, após a análise de segurança. A lista abaixo pode conter arquivos sintéticos de demonstração.</p>
+  {% if can_open_verification_queue %}<a class="button" href="{% url 'admin:discovery_professionalverificationrequest_changelist' %}">Escolher instrutor e ver documentos</a>{% endif %}
+</div>
+{{ block.super }}
+{% endblock %}

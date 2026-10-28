@@ -123,6 +123,23 @@ class DocumentRequirementAdmin(admin.ModelAdmin):
 
 @admin.register(InstructorDocument)
 class InstructorDocumentAdmin(admin.ModelAdmin):
+    change_list_template = "admin/marketplace/instructordocument/change_list.html"
+
+    @staticmethod
+    def _can_open_verification_queue(request):
+        return request.user.has_perm(
+            "discovery.view_professionalverificationrequest"
+        ) or request.user.has_perm("discovery.change_professionalverificationrequest")
+
+    def changelist_view(self, request, extra_context=None):
+        return super().changelist_view(
+            request,
+            extra_context={
+                **(extra_context or {}),
+                "can_open_verification_queue": self._can_open_verification_queue(request),
+            },
+        )
+
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
         real = (
@@ -139,14 +156,15 @@ class InstructorDocumentAdmin(admin.ModelAdmin):
 
     list_display = (
         "original_name",
-        "instructor",
-        "requirement",
+        "instructor_name",
+        "document_label_display",
         "document_type",
         "status",
         "scan_status",
         "valid_until",
         "version",
     )
+    list_select_related = ("instructor", "requirement", "verification_request")
     list_filter = ("status", "scan_status", "data_mode", "requirement__uf")
     readonly_fields = (
         "secure_download",
@@ -162,6 +180,30 @@ class InstructorDocumentAdmin(admin.ModelAdmin):
         "reviewed_at",
     )
     actions = ("approve_selected", "reject_selected")
+
+    def get_list_display(self, request):
+        columns = super().get_list_display(request)
+        if self._can_open_verification_queue(request):
+            return (*columns, "verification_link")
+        return columns
+
+    @admin.display(description="Instrutor", ordering="instructor__display_name")
+    def instructor_name(self, obj):
+        return obj.instructor.display_name
+
+    @admin.display(description="Documento")
+    def document_label_display(self, obj):
+        return obj.document_label
+
+    @admin.display(description="Análise do instrutor")
+    def verification_link(self, obj):
+        if not obj.verification_request_id:
+            return "Sem solicitação vinculada"
+        url = reverse(
+            "admin:discovery_professionalverificationrequest_change",
+            args=[obj.verification_request_id],
+        )
+        return format_html('<a href="{}">Abrir análise</a>', url)
 
     def get_readonly_fields(self, request, obj=None):
         fields = super().get_readonly_fields(request, obj)

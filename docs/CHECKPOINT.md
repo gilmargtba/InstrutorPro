@@ -1,5 +1,22 @@
 # Checkpoint do Projeto
 
+## Documentos por instrutor na análise administrativa — preparado, 27/10/2026
+
+- A fila de verificação mostra quantos arquivos estão vinculados a cada
+  solicitação. A tela do instrutor escolhido confirma a mesma contagem e, após
+  o revisor assumir a análise, oferece os arquivos limpos da solicitação para
+  visualização privada com auditoria.
+- A lista genérica de documentos explica por que documentos reais ainda não
+  aparecem antes da atribuição e leva à fila de verificação. Para registros
+  visíveis, exibe o nome público do instrutor, o tipo do documento e um link à
+  solicitação correspondente, evitando rótulos de objetos com UUID.
+- O controle de acesso não mudou: arquivos reais permanecem ocultos de outros
+  revisores e só podem ser abertos pelo revisor atribuído na etapa de análise.
+  A aprovação documental continua decisão humana, separada da publicação.
+- Validação local: 22 testes da análise em uma tela, 69 testes de segurança e
+  documentos reais, Ruff e formatação passaram em PostGIS sintético isolado.
+  Pendente push e deploy; nenhum documento de produção foi aberto nesta fatia.
+
 ## Diretório no mapa local — publicado, 27/10/2026
 
 - A tela `/aluno/instrutores/mapa` mostra, abaixo de “Usar minha localização”,

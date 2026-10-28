@@ -3,6 +3,7 @@
 {% if quick_review %}
 <section class="module" style="padding:18px;margin-bottom:18px;border:2px solid #187f83">
   <h2>CNH e credenciamento — {{ original.profile.display_name }}</h2>
+  <p><strong>{{ quick_review.document_count }} arquivo(s) vinculado(s) a esta solicitação.</strong> Os arquivos de outro instrutor não aparecem nesta análise.</p>
   {% if quick_review.can_assume %}
     <p>Assuma esta solicitação para abrir os documentos privados. Isso não aprova nem publica o instrutor.</p>
     <form method="post" action="{{ quick_review.start_url }}">{% csrf_token %}
