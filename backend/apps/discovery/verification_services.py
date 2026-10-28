@@ -84,9 +84,16 @@ def _advance_profile(*, actor, item, target, allowed, reason, request_id=None):
 
 
 def can_start_document_supplement(profile, latest=None):
-    """A supplement is available only for a verified, unpublished real instructor."""
+    """Allow another human review after verification or a sensitive owner edit."""
     if latest is None:
         latest = profile.verification_requests.order_by("-created_at").first()
+    owner_edit_requires_review = (
+        profile.verification_status == InstructorProfile.VerificationStatus.PENDING
+        and profile.verification_history.order_by("-created_at")
+        .values_list("provider", flat=True)
+        .first()
+        == "OWNER_EDIT"
+    )
     return bool(
         latest
         and (
@@ -100,11 +107,14 @@ def can_start_document_supplement(profile, latest=None):
         and enabled("REAL_PROFESSIONAL_VERIFICATION")
         and upload_available()
         and profile.person.cpf_ciphertext
-        and profile.verification_status
-        in {
-            InstructorProfile.VerificationStatus.VERIFIED,
-            InstructorProfile.VerificationStatus.REJECTED,
-        }
+        and (
+            profile.verification_status
+            in {
+                InstructorProfile.VerificationStatus.VERIFIED,
+                InstructorProfile.VerificationStatus.REJECTED,
+            }
+            or owner_edit_requires_review
+        )
         and profile.profile_status
         in {InstructorProfile.Status.UNDER_REVIEW, InstructorProfile.Status.REJECTED}
         and profile.publication_status == InstructorProfile.PublicationStatus.UNPUBLISHED

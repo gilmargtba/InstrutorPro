@@ -599,6 +599,16 @@ class ProfessionalVerificationRequestAdmin(admin.ModelAdmin):
     def changeform_view(self, request, object_id=None, form_url="", extra_context=None):
         obj = self.get_object(request, object_id) if object_id else None
         extra_context = dict(extra_context or {})
+        if obj and self.has_view_permission(request, obj) and obj.status == obj.Status.VERIFIED:
+            profile = obj.profile
+            if profile.publication_status != InstructorProfile.PublicationStatus.APPROVED:
+                extra_context["publication_pending"] = {
+                    "verification_status": profile.get_verification_status_display(),
+                    "publication_status": profile.get_publication_status_display(),
+                    "profile_url": reverse(
+                        "admin:discovery_instructorprofile_change", args=[profile.pk]
+                    ),
+                }
         if obj and self.has_change_permission(request, obj):
             can_assume = obj.status == obj.Status.SUBMITTED and can_review(request.user)
             can_decide = bool(

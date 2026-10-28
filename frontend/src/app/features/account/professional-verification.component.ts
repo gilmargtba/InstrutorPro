@@ -5,6 +5,9 @@ import { RouterLink } from '@angular/router';
 
 type VerificationState = {
   status: 'DRAFT'|'SUBMITTED'|'UNDER_REVIEW'|'VERIFIED'|'REJECTED';
+  profile_verification_status?: string;
+  publication_status?: string;
+  reverification_required?: boolean;
   cpf_masked: string;
   submitted_at: string|null;
   review_started_at: string|null;
@@ -31,7 +34,10 @@ type VerificationState = {
     <header class="page-head"><div><p class="eyebrow">Área privada do instrutor</p><h1>Verificação profissional</h1></div></header>
     @if(state(); as current){
       <article class="notice">
-        <h2>{{label(current.status)}}</h2>
+        <h2>{{current.reverification_required ? 'Nova revisão necessária' : label(current.status)}}</h2>
+        @if(current.reverification_required){
+          <p role="status">Seu perfil saiu da busca após uma alteração em dados usados na verificação. A solicitação anterior continua aprovada, mas o perfil precisa de nova análise e publicação. Use “Complementar documentos” para enviar a comprovação atualizada.</p>
+        }
         @if(current.status === 'SUBMITTED' || current.status === 'UNDER_REVIEW'){
           <p role="status">Prazo estimado de análise: 24 a 48 horas após o envio completo. Se houver pendências ou necessidade de nova conferência, o prazo pode ser maior. A aprovação não é automática.</p>
         }

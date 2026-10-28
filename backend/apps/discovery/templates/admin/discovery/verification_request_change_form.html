@@ -1,5 +1,12 @@
 {% extends "admin/change_form.html" %}
 {% block content %}
+{% if publication_pending %}
+<section class="module" style="padding:18px;margin-bottom:18px;border:2px solid #b45309">
+  <h2>Esta solicitação foi verificada, mas o perfil não está na busca</h2>
+  <p>Estado atual do perfil: verificação {{ publication_pending.verification_status }}; publicação {{ publication_pending.publication_status }}. Uma alteração posterior pode exigir nova análise. A decisão antiga não libera o perfil automaticamente.</p>
+  <p><a class="button" href="{{ publication_pending.profile_url }}">VER PERFIL E PENDÊNCIAS ATUAIS</a></p>
+</section>
+{% endif %}
 {% if quick_review %}
 <section class="module" style="padding:18px;margin-bottom:18px;border:2px solid #187f83">
   <h2>CNH e credenciamento — {{ original.profile.display_name }}</h2>

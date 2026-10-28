@@ -15,6 +15,13 @@ Cada documento complementar requer decisão individual do revisor responsável a
 da nova verificação humana. A decisão anterior permanece no histórico; nenhum anexo
 gera verificação, publicação ou autorização oficial automaticamente.
 
+Quando uma edição sensível do titular invalida um perfil antes publicado, a resposta
+também distingue `profile_verification_status`, `publication_status` e
+`reverification_required` do status da solicitação antiga. Nesse caso,
+`can_start_supplement` permite abrir uma nova solicitação vinculada à última
+verificação humana, desde que o upload privado esteja disponível. A nova revisão
+e a republicação continuam decisões humanas separadas.
+
 `GET /api/v1/instructor/verification/` informa `document_upload_available`,
 `document_types` e `requirements` separadamente. Zero requisitos aprovados não impede
 upload voluntário quando o gate técnico está ativo.

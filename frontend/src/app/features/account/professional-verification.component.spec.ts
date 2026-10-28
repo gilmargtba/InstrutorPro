@@ -86,4 +86,12 @@ describe('ProfessionalVerificationComponent',()=>{
     expect(fixture.nativeElement.querySelector('input[name="cpf"]')).toBeNull();
     expect(fixture.nativeElement.textContent).not.toContain('Salvar rascunho');
   });
+  it('explains why an approved request no longer publishes the profile',()=>{
+    const fixture=TestBed.createComponent(ProfessionalVerificationComponent);const http=TestBed.inject(HttpTestingController);
+    http.expectOne('/instructor/verification/').flush({status:'VERIFIED',profile_verification_status:'PENDING',publication_status:'UNPUBLISHED',reverification_required:true,cpf_masked:'***.***.***-25',can_edit:false,can_start_supplement:true,documents:[]});
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Nova revisão necessária');
+    expect(fixture.nativeElement.textContent).toContain('Seu perfil saiu da busca');
+    expect(fixture.nativeElement.textContent).toContain('Complementar documentos');
+  });
 });

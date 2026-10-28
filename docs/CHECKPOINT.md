@@ -1,5 +1,21 @@
 # Checkpoint do Projeto
 
+## Reanálise após edição de categorias — preparada, 28/10/2026
+
+- Diagnóstico somente leitura em produção: GILMAR CESAR teve verificação e
+  publicação aprovadas em 6/10, mas uma edição de `categories` em 24/10
+  invalidou a verificação corrente e retirou o perfil da busca, conforme
+  `AuditEvent`. As solicitações anteriores permanecem `VERIFIED`; o perfil
+  atual está `UNDER_REVIEW/PENDING/UNPUBLISHED`.
+- Correção local: o titular nessa situação pode abrir uma complementação
+  documental vinculada à última solicitação verificada. A API e a tela do
+  instrutor distinguem verificação histórica da pendência atual; a tela Admin
+  da solicitação antiga indica que o perfil não está publicado e leva às
+  pendências atuais. Nenhuma decisão de verificação ou publicação é automática.
+- Validação: 66 testes backend relacionados em PostGIS descartável, nove testes
+  Angular em Chrome Headless, build Angular e Ruff passaram. Sem push, deploy
+  ou alteração dos dados de produção nesta correção.
+
 ## Documentos por instrutor na análise administrativa — preparado, 27/10/2026
 
 - A fila de verificação mostra quantos arquivos estão vinculados a cada

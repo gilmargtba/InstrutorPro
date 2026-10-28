@@ -4,7 +4,7 @@ import pytest
 from django.contrib.auth.models import Permission
 from django.contrib.gis.geos import Point
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import override_settings
+from django.test import Client, override_settings
 from django.utils import timezone
 from rest_framework.test import APIClient
 
@@ -15,6 +15,7 @@ from apps.discovery.models import (
     InstructorServiceArea,
     ProfessionalVerificationRequest,
 )
+from apps.discovery.services import invalidate_after_owner_sensitive_edit
 from apps.discovery.verification_services import (
     record_review_and_approve,
     reject_verification_request,
@@ -424,6 +425,68 @@ def reviewer(username, *, can_access_document):
     if can_access_document:
         account.user_permissions.add(Permission.objects.get(codename="review_instructor_document"))
     return account
+
+
+@pytest.mark.django_db
+@override_settings(**ENABLED)
+def test_owner_category_edit_can_open_new_review_without_reusing_approval(tmp_path):
+    with override_settings(MEDIA_ROOT=tmp_path):
+        owner, instructor = profile("category-edit-owner")
+        analyst = reviewer("category-edit-analyst", can_access_document=True)
+        client = APIClient()
+        client.force_authenticate(owner)
+        assert (
+            client.patch(
+                "/api/v1/instructor/verification/", {"cpf": "52998224725"}, format="json"
+            ).status_code
+            == 200
+        )
+        with override_settings(REAL_DOCUMENT_UPLOADS=False):
+            assert (
+                client.post(
+                    "/api/v1/instructor/verification/submit/", {}, format="json"
+                ).status_code
+                == 201
+            )
+        original = ProfessionalVerificationRequest.objects.get(profile=instructor)
+        start_verification_review(actor=analyst, verification_request=original)
+        record_review_and_approve(
+            actor=analyst,
+            verification_request=original,
+            method="Consulta manual",
+            source="Fonte de teste autorizada",
+            notes="",
+            consultation_confirmed=True,
+        )
+        invalidate_after_owner_sensitive_edit(
+            actor=owner, profile=instructor, changed_fields={"categories"}
+        )
+        instructor.refresh_from_db()
+        state = client.get("/api/v1/instructor/verification/").json()
+        assert state["status"] == "VERIFIED"
+        assert state["profile_verification_status"] == "PENDING"
+        assert state["publication_status"] == "UNPUBLISHED"
+        assert state["reverification_required"] is True
+        assert state["can_start_supplement"] is True
+        analyst.is_superuser = True
+        analyst.save(update_fields=["is_superuser"])
+        admin_client = Client()
+        admin_client.force_login(analyst)
+        review_page = admin_client.get(
+            f"/admin/discovery/professionalverificationrequest/{original.pk}/change/"
+        )
+        assert review_page.status_code == 200
+        assert (
+            "Esta solicitação foi verificada, mas o perfil não está na busca"
+            in review_page.content.decode()
+        )
+        opened = client.post("/api/v1/instructor/verification/supplement/", {}, format="json")
+        assert opened.status_code == 201
+        assert opened.json()["is_supplement"] is True
+        assert ProfessionalVerificationRequest.objects.filter(profile=instructor).count() == 2
+        original.refresh_from_db()
+        assert original.status == original.Status.VERIFIED
+        assert instructor.publication_status == "UNPUBLISHED"
 
 
 @pytest.mark.django_db

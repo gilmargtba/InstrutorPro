@@ -145,6 +145,17 @@ def _verification_payload(profile):
 
     return {
         "status": item.status if item else ProfessionalVerificationRequest.Status.DRAFT,
+        "profile_verification_status": profile.verification_status,
+        "publication_status": profile.publication_status,
+        "reverification_required": bool(
+            item
+            and item.status == ProfessionalVerificationRequest.Status.VERIFIED
+            and profile.verification_status == InstructorProfile.VerificationStatus.PENDING
+            and profile.verification_history.order_by("-created_at")
+            .values_list("provider", flat=True)
+            .first()
+            == "OWNER_EDIT"
+        ),
         "cpf_masked": mask_cpf(profile.person.cpf_last2),
         "submitted_at": item.submitted_at if item else None,
         "review_started_at": item.review_started_at if item else None,
