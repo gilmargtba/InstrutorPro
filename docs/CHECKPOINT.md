@@ -1,6 +1,6 @@
 # Checkpoint do Projeto
 
-## Inclusão administrativa de CNH e credenciamento — preparada localmente, 28/10/2026
+## Inclusão administrativa de CNH e credenciamento — publicada, 28/10/2026
 
 - A tela do perfil no Django Admin permite ao revisor autorizado anexar CNH e
   credenciamento entregues pelo instrutor, um arquivo por vez, com confirmação
@@ -15,7 +15,17 @@
   também permanece em revisão regulatória. Para entrar na busca, o Admin ainda
   deve conferir os arquivos reais, aprovar a verificação e confirmar a evidência
   da UF antes de decidir a publicação.
-- Esta alteração ainda não foi enviada ao GitHub nem publicada na VPS.
+- O commit `d63056d` foi enviado por fast-forward a `origin/main` e aplicado na
+  VPS. O backup validado do banco e documentos privados tem marcador
+  `20261028T082429Z`; a imagem anterior do backend está preservada como
+  `instrutorpro-backend:pre-admin-intake-20261028T082429Z`.
+- Apenas o backend foi reconstruído e recriado; a alteração local preexistente
+  do gateway na VPS foi preservada. A migration aditiva
+  `discovery.0014_admin_document_intake` foi aplicada. O backend ficou saudável,
+  `manage.py check` passou, o teste técnico de upload/ClamAV/armazenamento
+  privado/IDOR passou e a readiness HTTPS retornou banco `up`.
+- Nenhum documento real, verificação, UF ou perfil foi aprovado ou publicado
+  pelo deploy. O Admin redireciona visitantes não autenticados ao login.
 - Validação local: 76 testes de documentos e aprovação em PostGIS descartável,
   Ruff, `manage.py check` e `makemigrations --check --dry-run` passaram.
 
