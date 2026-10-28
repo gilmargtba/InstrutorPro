@@ -1,6 +1,6 @@
 # Checkpoint do Projeto
 
-## Diretório no mapa local — preparado, 27/10/2026
+## Diretório no mapa local — publicado, 27/10/2026
 
 - A tela `/aluno/instrutores/mapa` mostra, abaixo de “Usar minha localização”,
   os instrutores pesquisáveis agrupados por UF e cidade. A lista consome o
@@ -9,8 +9,15 @@
   ponto público aproximado com o cartão de perfil e contato. A consulta por
   cidade não impõe raio ou categoria automaticamente. Endereço residencial e
   documentos continuam ausentes da lista e do mapa.
-- Build Angular e testes focados da busca local, nacional e do provedor passaram.
-  Pendente publicação; não houve mudança no backend nem na VPS nesta fatia.
+- Build Angular e 28 testes focados da busca local, nacional e do provedor
+  passaram. O commit `a60b36f` foi enviado por fast-forward a `origin/main` e
+  aplicado na VPS. O backup validado do banco e dos documentos privados tem
+  marcador `20261028T014710Z`; a imagem web anterior foi preservada como
+  `instrutorpro-frontend:pre-local-directory-20261028T014710Z`.
+- Apenas a imagem do frontend foi reconstruída e o serviço web recriado. HTTPS
+  retornou 200 para a página do mapa com `main-GS64VOXT.js`; readiness retornou
+  `ok`, e a API pública retornou uma UF. Backend e banco permaneceram saudáveis.
+  Nenhum cadastro, documento ou decisão de publicação foi alterado.
 
 ## Diretório por UF, cidade e instrutor — publicado, 27/10/2026
 
