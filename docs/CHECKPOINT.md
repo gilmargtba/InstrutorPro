@@ -1,6 +1,22 @@
 # Checkpoint do Projeto
 
-## Reanálise após edição de categorias — preparada, 28/10/2026
+## Reanálise do Gilmar e documentos no Admin — publicada, 28/10/2026
+
+- Os commits `7ae5c81` e `e9959ba` avançaram `origin/main` por fast-forward e a
+  VPS chegou a `e9959ba`. Apenas backend e frontend foram reconstruídos e
+  recriados; o ajuste local do gateway foi preservado.
+- Backup validado do banco e dos documentos privados em
+  `/home/gilmar/backups/instrutorpro/production/`, marcador `20261028T034225Z`.
+  Imagens anteriores preservadas como
+  `instrutorpro-backend:pre-verification-review-20261028T034225Z` e
+  `instrutorpro-frontend:pre-verification-review-20261028T034225Z`.
+- `manage.py check` passou; backend, banco e ClamAV estão saudáveis.
+  Readiness HTTPS retornou banco `up`; a página de verificação retornou 200
+  e o Admin redirecionou para login. `can_start_supplement` está disponível
+  para Gilmar. O perfil continua fora da busca até nova decisão humana de
+  verificação e publicação.
+
+## Reanálise após edição de categorias — publicada, 28/10/2026
 
 - Diagnóstico somente leitura em produção: GILMAR CESAR teve verificação e
   publicação aprovadas em 6/10, mas uma edição de `categories` em 24/10
@@ -13,10 +29,10 @@
   da solicitação antiga indica que o perfil não está publicado e leva às
   pendências atuais. Nenhuma decisão de verificação ou publicação é automática.
 - Validação: 66 testes backend relacionados em PostGIS descartável, nove testes
-  Angular em Chrome Headless, build Angular e Ruff passaram. Sem push, deploy
-  ou alteração dos dados de produção nesta correção.
+  Angular em Chrome Headless, build Angular e Ruff passaram. Nenhum dado de
+  instrutor foi alterado pelo deploy; resultado acima.
 
-## Documentos por instrutor na análise administrativa — preparado, 27/10/2026
+## Documentos por instrutor na análise administrativa — publicado, 28/10/2026
 
 - A fila de verificação mostra quantos arquivos estão vinculados a cada
   solicitação. A tela do instrutor escolhido confirma a mesma contagem e, após
@@ -31,7 +47,8 @@
   A aprovação documental continua decisão humana, separada da publicação.
 - Validação local: 22 testes da análise em uma tela, 69 testes de segurança e
   documentos reais, Ruff e formatação passaram em PostGIS sintético isolado.
-  Pendente push e deploy; nenhum documento de produção foi aberto nesta fatia.
+  Push e deploy registrados acima; nenhum documento de produção foi aberto
+  nesta fatia.
 
 ## Diretório no mapa local — publicado, 27/10/2026
 
