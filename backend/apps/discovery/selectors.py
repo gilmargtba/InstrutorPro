@@ -6,7 +6,6 @@ from django.db.models import Case, IntegerField, Min, Q, Value, When
 from django.utils import timezone
 
 from apps.marketplace.capabilities import enabled
-from apps.territories.policies import approved_instructor_publication_ufs
 
 from .models import InstructorProfile
 
@@ -29,10 +28,6 @@ def published_instructor_profiles():
         person__role_assignments__revoked_at__isnull=True,
         service_area__location_authorized=True,
     ).filter(Q(verified_until__isnull=True) | Q(verified_until__gt=now))
-    if not settings.SYNTHETIC_MARKETPLACE_ENABLED:
-        queryset = queryset.filter(
-            service_area__uf__in=approved_instructor_publication_ufs().values("code")
-        )
     return queryset.distinct()
 
 

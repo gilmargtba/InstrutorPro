@@ -1,5 +1,22 @@
 # Registro de Decisões e Questões Abertas
 
+### Decisão do proprietário de 01/11/2026 — busca e publicação em todas as UFs
+
+A aprovação geral de `RegulatoryReadiness` por UF deixa de ser requisito da
+publicação de instrutores reais e da consulta pública. A UF e a área pública de
+atendimento continuam obrigatórias. Permanecem a verificação profissional
+humana, a publicação manual, os documentos exigidos pela solicitação, a oferta
+ativa, o contato e os demais filtros já existentes. A aprovação individual de
+CNH e credenciamento na inclusão administrativa continua obrigatória.
+
+Perfis reais anteriormente publicados podem voltar a aparecer na busca quando
+somente a aprovação geral da UF os ocultava; a mudança não altera registros de
+publicação, verificação ou documentos no banco. O modo sintético permanece
+separado da busca real. A plataforma não declara autorização oficial do
+instrutor; a verificação humana de sua habilitação e credenciamento permanece
+responsabilidade operacional. Esta decisão substitui somente o gate geral de
+UF das decisões anteriores, sem dispensar as condições oficiais de atuação.
+
 ### Solicitação do proprietário de 26/10/2026 — Google Maps no cadastro do instrutor
 
 O mapa para escolher a área pública aproximada no onboarding web deve usar a

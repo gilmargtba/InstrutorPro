@@ -37,11 +37,6 @@ from apps.marketplace.models import (
     MarketplaceEvent,
 )
 from apps.people.models import Person, RoleAssignment
-from apps.territories.models import Country, FederativeUnit, RegulatoryReadiness
-from apps.territories.policies import (
-    INSTRUCTOR_PROVIDER_TYPE,
-    INSTRUCTOR_PUBLICATION_CAPABILITY,
-)
 
 
 @pytest.fixture
@@ -388,30 +383,6 @@ def test_real_manual_verification_requires_provenance_and_no_document_upload(act
         authority="DETRAN-RS",
         method="MANUAL_VISUAL_NO_RETENTION",
         provenance_reference="operator-check-001",
-    )
-    with pytest.raises(InvalidWorkflowTransition, match="UF não possui autorização"):
-        approve_publication(actor=actor, profile=profile, reason="PILOT_APPROVE")
-
-    country, _ = Country.objects.get_or_create(code="BR", defaults={"name": "Brasil"})
-    rs, _ = FederativeUnit.objects.get_or_create(
-        code="RS",
-        defaults={"country": country, "name": "Rio Grande do Sul", "ibge_code": "43"},
-    )
-    RegulatoryReadiness.objects.create(
-        federative_unit=rs,
-        provider_type=INSTRUCTOR_PROVIDER_TYPE,
-        capability=INSTRUCTOR_PUBLICATION_CAPABILITY,
-        status=RegulatoryReadiness.Status.APPROVED,
-        valid_from=timezone.localdate(),
-        source_url="https://publicacoeslegais.detran.rs.gov.br/portaria-detran-rs-n-99-2026",
-        source_reference="Portaria DETRAN/RS 99/2026",
-        source_authority="DETRAN-RS",
-        source_consulted_at=timezone.localdate(),
-        evidence="Fonte e autorização individual conferidas no teste.",
-        reviewed_by=actor,
-        reviewed_at=timezone.now(),
-        approved_by=actor,
-        approved_at=timezone.now(),
     )
     approve_publication(actor=actor, profile=profile, reason="PILOT_APPROVE")
     profile.refresh_from_db()

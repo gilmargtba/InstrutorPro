@@ -1,5 +1,20 @@
 # Checkpoint do Projeto
 
+## Publicação e busca sem aprovação geral de UF — local, 01/11/2026
+
+- Por decisão expressa do proprietário, `RegulatoryReadiness` não bloqueia
+  publicação manual nem a projeção pública dos instrutores reais. O painel
+  deixa de pedir confirmação da revisão geral da UF. UF/área, verificação
+  profissional, documentação aplicável, oferta ativa, contato e decisão de
+  publicação continuam separados.
+- Perfis reais já publicados podem ficar visíveis após a atualização mesmo
+  que o status territorial esteja pendente. Nenhum dado ou status de perfil é
+  alterado automaticamente. Modo sintético permanece separado.
+- A checagem humana da autorização profissional individual e dos documentos
+  continua necessária. Esta mudança de produto não concede credenciamento
+  oficial nem valida a situação real de qualquer perfil antigo.
+- Alteração ainda local; sem push ou deploy nesta fatia.
+
 ## Inclusão administrativa de CNH e credenciamento — publicada, 28/10/2026
 
 - A tela do perfil no Django Admin permite ao revisor autorizado anexar CNH e

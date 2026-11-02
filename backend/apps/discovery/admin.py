@@ -189,11 +189,6 @@ class InstructorProfileAdmin(admin.ModelAdmin):
                         )
                     )
                 )
-                if panel["readiness"] and panel["can_regulatory"]:
-                    panel["readiness_edit_url"] = reverse(
-                        "admin:territories_regulatoryreadiness_change",
-                        args=[panel["readiness"].pk],
-                    )
                 panel["profile_url"] = (
                     f"{settings.FRONTEND_PUBLIC_URL}/aluno/instrutores/{profile.pk}"
                 )

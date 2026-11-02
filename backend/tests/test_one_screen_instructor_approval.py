@@ -143,9 +143,6 @@ def scenario(*, evidence=True, offer=True, start_review=True):
 def combined_data(document):
     return {
         "operation": "approve_publish",
-        "confirm_uf": "on",
-        "valid_from": timezone.localdate().isoformat(),
-        "uf_reason": "Fonte e vigência conferidas",
         "confirm_verification": "on",
         "reviewed_document_ids": [str(document.pk)],
         "verification_method": "Conferência documental humana",
@@ -522,7 +519,7 @@ def test_submitted_request_can_be_reviewed_and_published_in_one_human_action():
         obj.refresh_from_db()
     assert item.status == item.Status.VERIFIED
     assert item.reviewer.username == "gilmar"
-    assert readiness.status == readiness.Status.APPROVED
+    assert readiness.status == readiness.Status.REVIEW_REQUIRED
     assert document.status == document.Status.APPROVED
     assert profile.publication_status == profile.PublicationStatus.APPROVED
 
@@ -550,12 +547,12 @@ def test_panel_shows_all_blockers_and_never_approves_on_get():
     assert response.status_code == 200
     content = response.content.decode()
     assert "APROVAÇÃO E PUBLICAÇÃO" in content
-    assert "UF GO sem aprovação regulatória vigente" in content
+    assert "UF GO sem aprovação regulatória vigente" not in content
     assert "Nenhuma oferta real ativa" in content
-    assert "link da fonte oficial" in content
-    assert "Próximo passo: completar a revisão da UF GO" in content
-    assert reverse("admin:territories_regulatoryreadiness_change", args=[readiness.pk]) in content
-    assert "Salve a evidência na nova aba" in content
+    assert "Próximo passo: completar a revisão da UF GO" not in content
+    assert (
+        reverse("admin:territories_regulatoryreadiness_change", args=[readiness.pk]) not in content
+    )
     assert "ANALISAR E PUBLICAR" in content
     readiness.refresh_from_db()
     profile.refresh_from_db()
@@ -567,12 +564,12 @@ def test_panel_shows_all_blockers_and_never_approves_on_get():
 
 @pytest.mark.django_db
 @override_settings(**SETTINGS)
-def test_regulatory_shortcut_is_hidden_without_regulatory_permission():
+def test_regulatory_shortcut_is_absent_from_publication_panel():
     web, change, _, _, readiness, _, _ = scenario(evidence=False)
     admin = Account.objects.get(username="gilmar")
     admin.user_permissions.remove(Permission.objects.get(codename="change_regulatoryreadiness"))
     content = web.get(change).content.decode()
-    assert "Peça a um administrador com permissão regulatória" in content
+    assert "CONFIRMAR REVISÃO DA UF" not in content
     edit_url = reverse("admin:territories_regulatoryreadiness_change", args=[readiness.pk])
     assert edit_url not in content
 
@@ -595,10 +592,10 @@ def test_combined_action_rolls_back_every_decision_when_offer_is_missing():
 
 @pytest.mark.django_db
 @override_settings(**SETTINGS)
-def test_combined_action_requires_explicit_human_uf_confirmation():
+def test_combined_action_requires_explicit_human_verification_confirmation():
     web, _, action, profile, readiness, item, document = scenario()
     data = combined_data(document)
-    del data["confirm_uf"]
+    del data["confirm_verification"]
     response = web.post(action, data, follow=True)
     assert response.status_code == 200
     readiness.refresh_from_db()
@@ -610,20 +607,18 @@ def test_combined_action_requires_explicit_human_uf_confirmation():
 
 @pytest.mark.django_db
 @override_settings(**SETTINGS)
-def test_combined_action_approves_uf_documents_verification_and_publication_once():
+def test_combined_action_approves_documents_and_publication_without_uf_review():
     web, change, action, profile, readiness, item, document = scenario()
     response = web.post(action, combined_data(document), follow=True)
     assert response.status_code == 200
     for obj in (profile, readiness, item, document):
         obj.refresh_from_db()
-    assert readiness.status == readiness.Status.APPROVED
-    assert readiness.reviewed_by.username == "gilmar"
-    assert readiness.approved_by.username == "gilmar"
+    assert readiness.status == readiness.Status.REVIEW_REQUIRED
     assert item.status == item.Status.VERIFIED
     assert document.status == document.Status.APPROVED
     assert profile.publication_status == profile.PublicationStatus.APPROVED
     assert PublicationDecision.objects.filter(profile=profile, decision="APPROVE").count() == 1
-    assert AuditEvent.objects.filter(action="territories.regulatory_readiness_approve").count() == 1
+    assert AuditEvent.objects.filter(action="territories.regulatory_readiness_approve").count() == 0
     page = web.get(change).content.decode()
     assert "VER PERFIL PÚBLICO" in page
     assert "TESTAR NA BUSCA" in page
@@ -699,21 +694,21 @@ def test_human_publication_accepts_a_and_b_with_only_a_offer_but_search_keeps_b_
 
 @pytest.mark.django_db
 @override_settings(**SETTINGS)
-def test_incomplete_uf_evidence_never_changes_readiness_or_verification():
+def test_missing_uf_evidence_does_not_block_document_review_and_publication():
     web, _, action, profile, readiness, item, document = scenario(evidence=False)
     response = web.post(action, combined_data(document), follow=True)
     assert response.status_code == 200
-    assert "Faltam evidências da UF" in response.content.decode()
+    assert "Faltam evidências da UF" not in response.content.decode()
     readiness.refresh_from_db()
     item.refresh_from_db()
     assert readiness.status == readiness.Status.REVIEW_REQUIRED
-    assert item.status == item.Status.UNDER_REVIEW
-    assert not PublicationDecision.objects.filter(profile=profile).exists()
+    assert item.status == item.Status.VERIFIED
+    assert PublicationDecision.objects.filter(profile=profile, decision="APPROVE").exists()
 
 
 @pytest.mark.django_db
 @override_settings(**SETTINGS)
-def test_non_responsible_admin_cannot_use_combined_action():
+def test_unassigned_admin_cannot_use_combined_action():
     web, _, action, profile, readiness, item, document = scenario()
     other = Account.objects.create_user(
         username="another-admin",
@@ -724,12 +719,46 @@ def test_non_responsible_admin_cannot_use_combined_action():
     )
     web.force_login(other)
     response = web.post(action, combined_data(document))
-    assert response.status_code == 403
+    assert response.status_code == 302
     readiness.refresh_from_db()
     item.refresh_from_db()
     assert readiness.status == readiness.Status.REVIEW_REQUIRED
     assert item.status == item.Status.UNDER_REVIEW
     assert not PublicationDecision.objects.filter(profile=profile).exists()
+
+
+@pytest.mark.django_db
+@override_settings(**SETTINGS)
+def test_ce_instructor_is_searchable_after_human_publication_without_uf_approval():
+    web, _, action, profile, readiness, item, credential = scenario()
+    area = profile.service_area
+    area.uf = "CE"
+    area.city = "Fortaleza"
+    area.save(update_fields=["uf", "city"])
+    cnh = InstructorDocument.objects.create(
+        instructor=profile,
+        verification_request=item,
+        document_type=InstructorDocument.DocumentType.DRIVER_LICENSE,
+        file=f"private-test/{uuid4()}.pdf",
+        original_name="cnh.pdf",
+        mime_type="application/pdf",
+        size_bytes=8,
+        sha256="2" * 64,
+        scan_status=InstructorDocument.ScanStatus.CLEAN,
+        data_mode=DataMode.REAL,
+    )
+    data = combined_data(credential)
+    data["reviewed_document_ids"].append(str(cnh.pk))
+    assert web.post(action, data).status_code == 302
+    profile.refresh_from_db()
+    assert profile.publication_status == profile.PublicationStatus.APPROVED
+    assert list(
+        search_published_instructors(
+            latitude=-18.02, longitude=-49.35, uf="CE", city="Fortaleza"
+        ).values_list("pk", flat=True)
+    ) == [profile.pk]
+    readiness.refresh_from_db()
+    assert readiness.status == readiness.Status.REVIEW_REQUIRED
 
 
 @pytest.mark.django_db

@@ -40,28 +40,15 @@
   </div>
   <div style="padding:12px 16px;background:#eef7f7;border-left:4px solid #187f83;margin-bottom:16px">
     <strong>2. Decidir a verificação e, se elegível, publicar</strong>
-    <p>Após conferir os arquivos, marque os documentos analisados, informe a fonte realmente consultada e use “Aprovar apenas verificação”. A verificação interna não publica o perfil. Para aparecer na busca, ainda são necessários os requisitos de UF, área pública, oferta e contato.</p>
+    <p>Após conferir os arquivos, marque os documentos analisados, informe a fonte realmente consultada e use “Aprovar apenas verificação”. A verificação interna não publica o perfil. Para aparecer na busca, ainda são necessários UF e área pública informadas, oferta e contato.</p>
     {% if not approval_panel.area %}
-      <p><strong>Falta ao instrutor:</strong> informar cidade/UF e autorizar uma localização pública aproximada no cadastro. Sem UF não há revisão territorial a aprovar.</p>
+      <p><strong>Falta ao instrutor:</strong> informar cidade/UF e autorizar uma localização pública aproximada no cadastro.</p>
     {% elif not approval_panel.area_ok %}
       <p><strong>Falta ao instrutor:</strong> autorizar a área pública de atendimento e definir a localização aproximada.</p>
     {% endif %}
     {% if not approval_panel.contact_ok %}<p><strong>Falta ao instrutor:</strong> configurar o WhatsApp profissional ativo.</p>{% endif %}
     {% if not approval_panel.active_categories %}<p><strong>Falta oferta real ativa:</strong> confirme categoria, preço e duração com o instrutor antes de cadastrar ou ativar uma oferta.</p>{% endif %}
   </div>
-  {% if approval_panel.readiness.status == 'REVIEW_REQUIRED' and approval_panel.regulatory_missing %}
-    <div class="messagelist warning" style="padding:12px;margin-bottom:16px">
-      <strong>Próximo passo: completar a revisão da UF {{ approval_panel.area.uf }}.</strong>
-      <p>Faltam: {{ approval_panel.regulatory_missing|join:", " }}.</p>
-      {% if approval_panel.readiness_edit_url %}
-        <a class="button" href="{{ approval_panel.readiness_edit_url }}" target="_blank" rel="noopener noreferrer">ABRIR EVIDÊNCIAS DA UF {{ approval_panel.area.uf }}</a>
-        <p>Salve a evidência na nova aba e atualize esta página para continuar.</p>
-      {% else %}
-        <p>Peça a um administrador com permissão regulatória para registrar a evidência.</p>
-      {% endif %}
-      <p>Preencher campos não aprova a UF: confira também a norma-base, a vigência e a fonte oficial antes da decisão humana.</p>
-    </div>
-  {% endif %}
   <p><strong>Fluxo rápido:</strong> confira os documentos privados, registre a fonte e aprove a verificação interna. Se houver divergência, use <strong>SOLICITAR CORREÇÃO</strong>. A publicação no mapa é uma decisão separada e só fica disponível quando os demais requisitos estiverem atendidos.</p>
   <p><strong>PRONTO PARA PUBLICAÇÃO:
     {% if approval_panel.ready_to_publish %}<span style="color:#087443">SIM</span>{% else %}<span style="color:#a04410">NÃO</span>{% endif %}
@@ -69,11 +56,11 @@
   {% if approval_panel.blockers %}<div class="messagelist warning"><strong>Motivos:</strong><ul>
     {% for reason in approval_panel.blockers %}<li>{{ reason }}</li>{% endfor %}
   </ul></div>{% endif %}
-  <details><summary>Ver status completo, ofertas e evidências da UF</summary>
+  <details><summary>Ver status completo e ofertas</summary>
   <p>Cadastro: {% if approval_panel.registration_ok %}🟢 PRONTO{% else %}🟡 PENDENTE{% endif %} ·
      Documentos: {% if approval_panel.documents_ok %}🟢 PRONTO{% else %}🟡 PENDENTE{% endif %} ·
      Verificação: {% if approval_panel.verification_ok %}🟢 PRONTO{% else %}🟡 PENDENTE{% endif %} ·
-     UF: {% if approval_panel.uf_ok %}🟢 READY{% elif approval_panel.readiness.status == 'REVIEW_REQUIRED' %}🟡 REVIEW_REQUIRED{% else %}🔴 BLOQUEADA{% endif %} ·
+     UF: {% if approval_panel.uf_ok %}🟢 INFORMADA{% else %}🟡 PENDENTE{% endif %} ·
      Área: {% if approval_panel.area_ok %}🟢 PRONTA{% else %}🟡 PENDENTE{% endif %} ·
      WhatsApp: {% if approval_panel.contact_ok %}🟢 PRONTO{% else %}🟡 PENDENTE{% endif %} ·
      Perfil público: {% if approval_panel.public %}🟢 PUBLICADO{% else %}🟡 NÃO PUBLICADO{% endif %}</p>
@@ -87,16 +74,6 @@
   {% if approval_panel.offers %}<table><thead><tr><th>Categoria</th><th>Preço</th><th>Duração</th><th>Ativa</th></tr></thead><tbody>
     {% for offer in approval_panel.offers %}<tr><td>{{ offer.category }}</td><td>R$ {{ offer.price_amount }}</td><td>{{ offer.duration_minutes }} min</td><td>{{ offer.is_active|yesno:"sim,não" }}</td></tr>{% endfor %}
   </tbody></table>{% endif %}
-  {% if approval_panel.readiness %}
-    <h3>Revisão regulatória — {{ approval_panel.area.uf }}</h3>
-    <p>Status: {{ approval_panel.readiness.get_status_display }} · Norma: {{ approval_panel.readiness.source_reference|default:"não cadastrada" }} ·
-       Órgão: {{ approval_panel.readiness.source_authority|default:"não cadastrado" }} ·
-       Consulta: {{ approval_panel.readiness.source_consulted_at|default:"não cadastrada" }}</p>
-    <p>Fonte: {% if approval_panel.readiness.source_url %}<a href="{{ approval_panel.readiness.source_url }}" target="_blank" rel="noopener noreferrer">{{ approval_panel.readiness.source_url }}</a>{% else %}não cadastrada{% endif %}</p>
-    <p>Evidências: {{ approval_panel.readiness.evidence|default:"não cadastradas"|linebreaksbr }}</p>
-    <p>Observações: {{ approval_panel.readiness.notes|default:"não cadastradas"|linebreaksbr }}</p>
-    {% if approval_panel.regulatory_missing %}<p style="color:#a04410">Faltam: {{ approval_panel.regulatory_missing|join:", " }}</p>{% endif %}
-  {% endif %}
   </details>
   <details><summary>Histórico e detalhes dos documentos</summary>
   <h3>Documentos privados e verificação profissional</h3>
@@ -121,16 +98,9 @@
     {% else %}<p><strong>Nenhum arquivo enviado para este perfil.</strong> Peça ao instrutor que anexe a CNH e o credenciamento na solicitação de verificação.</p>{% endif %}
   {% else %}<p>Somente um revisor com permissão pode visualizar os metadados e abrir arquivos privados.</p>{% endif %}
   </details>
-  {% if approval_panel.can_review or approval_panel.can_publish or approval_panel.can_offer or approval_panel.can_regulatory %}
+  {% if approval_panel.can_review or approval_panel.can_publish or approval_panel.can_offer %}
   <form method="post" action="{{ approval_panel.action_url }}" style="border-top:1px solid #ccd;padding-top:15px">
     {% csrf_token %}
-    {% if approval_panel.readiness.status == 'REVIEW_REQUIRED' and approval_panel.can_regulatory and approval_panel.responsible %}
-      <h3>Confirmar revisão da UF</h3>
-      <label><input type="checkbox" name="confirm_uf"> Conferi pessoalmente fonte oficial, evidências e vigência da UF acima</label><br>
-      <label>Início da vigência confirmado <input type="date" name="valid_from" value="{{ approval_panel.readiness.valid_from|date:'Y-m-d' }}"></label>
-      <label>Justificativa <input type="text" name="uf_reason" maxlength="500"></label>
-      <button type="submit" name="operation" value="approve_uf">CONFIRMAR REVISÃO DA UF E CONTINUAR</button>
-    {% endif %}
     {% if approval_panel.can_decide_verification %}
       <h3>Decisão profissional</h3>
       {% if approval_panel.pending_documents %}<p>Abra cada documento antes de marcar:</p>
@@ -163,7 +133,7 @@
       <label>Motivo <input type="text" name="publication_reason" maxlength="500"></label>
       <label><input type="checkbox" name="confirm_publish"> Confirmo a decisão humana de publicar este instrutor real</label><br>
       {% if approval_panel.can_decide_verification or approval_panel.verification_ok %}<button class="default" type="submit" name="operation" value="approve_publish">ANALISAR E PUBLICAR</button>{% else %}<p>Assuma e confira a solicitação antes de tentar a publicação.</p>{% endif %}
-      <p>O botão combinado só executa as revisões da UF e da verificação se as confirmações específicas acima estiverem marcadas; tudo é revertido se qualquer gate falhar.</p>
+      <p>O botão combinado executa a revisão profissional quando a confirmação específica acima estiver marcada; tudo é revertido se qualquer requisito de publicação falhar.</p>
     {% endif %}
     <details><summary>Ações separadas de verificação e publicação</summary>
       {% if approval_panel.can_decide_verification %}

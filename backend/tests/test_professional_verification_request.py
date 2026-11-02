@@ -24,11 +24,6 @@ from apps.discovery.verification_services import (
     start_verification_review,
 )
 from apps.people.models import Person, RoleAssignment
-from apps.territories.models import Country, FederativeUnit, RegulatoryReadiness
-from apps.territories.policies import (
-    INSTRUCTOR_PROVIDER_TYPE,
-    INSTRUCTOR_PUBLICATION_CAPABILITY,
-)
 
 VERIFICATION_ENABLED = {
     "SYNTHETIC_MARKETPLACE_ENABLED": False,
@@ -339,7 +334,7 @@ def test_rejection_cannot_change_reason_for_another_reviewer_and_uses_structured
 
 @pytest.mark.django_db
 @override_settings(**VERIFICATION_ENABLED)
-def test_verified_real_request_requires_territorial_gate_then_manual_publication():
+def test_verified_real_request_allows_manual_publication_without_territorial_gate():
     owner, profile = instructor("publication-owner")
     admin = reviewer("publication-reviewer")
     admin.user_permissions.add(Permission.objects.get(codename="manage_instructor_publication"))
@@ -373,29 +368,6 @@ def test_verified_real_request_requires_territorial_gate_then_manual_publication
     profile.refresh_from_db()
     assert profile.profile_status == InstructorProfile.Status.UNDER_REVIEW
     assert profile.publication_status == InstructorProfile.PublicationStatus.UNPUBLISHED
-    with pytest.raises(InvalidWorkflowTransition, match="UF não possui autorização"):
-        approve_publication(actor=admin, profile=profile, reason="ADMIN_REVIEWED_PUBLICATION")
-    country, _ = Country.objects.get_or_create(code="BR", defaults={"name": "Brasil"})
-    rs, _ = FederativeUnit.objects.get_or_create(
-        code="RS",
-        defaults={"country": country, "name": "Rio Grande do Sul", "ibge_code": "43"},
-    )
-    RegulatoryReadiness.objects.create(
-        federative_unit=rs,
-        provider_type=INSTRUCTOR_PROVIDER_TYPE,
-        capability=INSTRUCTOR_PUBLICATION_CAPABILITY,
-        status=RegulatoryReadiness.Status.APPROVED,
-        valid_from=timezone.localdate(),
-        source_url="https://publicacoeslegais.detran.rs.gov.br/portaria-detran-rs-n-99-2026",
-        source_reference="Portaria DETRAN/RS 99/2026",
-        source_authority="DETRAN-RS",
-        source_consulted_at=timezone.localdate(),
-        evidence="Fonte e autorização individual conferidas no teste.",
-        reviewed_by=admin,
-        reviewed_at=timezone.now(),
-        approved_by=admin,
-        approved_at=timezone.now(),
-    )
     decision = approve_publication(
         actor=admin, profile=profile, reason="ADMIN_REVIEWED_PUBLICATION"
     )
@@ -411,7 +383,7 @@ def test_verified_real_request_requires_territorial_gate_then_manual_publication
 
 @pytest.mark.django_db
 @override_settings(**VERIFICATION_ENABLED)
-def test_admin_publication_button_confirms_reason_and_preserves_regulatory_gate():
+def test_admin_publication_button_confirms_reason_without_territorial_gate():
     owner, profile = instructor("admin-publication-owner")
     manager = reviewer("admin-publication-manager")
     manager.user_permissions.add(
@@ -449,31 +421,6 @@ def test_admin_publication_button_confirms_reason_and_preserves_regulatory_gate(
     web.force_login(manager)
     assert web.get(url).status_code == 200
     assert web.post(url, {"reason": "  "}).status_code == 302
-    assert web.post(url, {"reason": "Revisão manual concluída"}).status_code == 302
-    profile.refresh_from_db()
-    assert profile.publication_status == InstructorProfile.PublicationStatus.UNPUBLISHED
-
-    country, _ = Country.objects.get_or_create(code="BR", defaults={"name": "Brasil"})
-    rs, _ = FederativeUnit.objects.get_or_create(
-        code="RS",
-        defaults={"country": country, "name": "Rio Grande do Sul", "ibge_code": "43"},
-    )
-    RegulatoryReadiness.objects.create(
-        federative_unit=rs,
-        provider_type=INSTRUCTOR_PROVIDER_TYPE,
-        capability=INSTRUCTOR_PUBLICATION_CAPABILITY,
-        status=RegulatoryReadiness.Status.APPROVED,
-        valid_from=timezone.localdate(),
-        source_url="https://publicacoeslegais.detran.rs.gov.br/portaria-detran-rs-n-99-2026",
-        source_reference="Portaria DETRAN/RS 99/2026",
-        source_authority="DETRAN-RS",
-        source_consulted_at=timezone.localdate(),
-        evidence="Fonte e autorização individual conferidas no teste.",
-        reviewed_by=manager,
-        reviewed_at=timezone.now(),
-        approved_by=manager,
-        approved_at=timezone.now(),
-    )
     assert web.post(url, {"reason": "Revisão manual concluída"}).status_code == 302
     profile.refresh_from_db()
     assert profile.publication_status == InstructorProfile.PublicationStatus.APPROVED

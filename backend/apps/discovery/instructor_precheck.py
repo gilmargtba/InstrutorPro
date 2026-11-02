@@ -39,8 +39,8 @@ PRECHECK_MESSAGES = {
     "WHATSAPP_MISSING": "Informe seu WhatsApp profissional.",
 }
 
-# Applicant-controlled prerequisites only. UF regulatory evidence and human document
-# decisions are deliberately absent: they belong to the authorized reviewer.
+# Applicant-controlled prerequisites only. Human document decisions are
+# deliberately absent: they belong to the authorized reviewer.
 SUBMISSION_BLOCKERS = {
     "REGISTRATION_INCOMPLETE",
     "CPF_INVALID",

@@ -512,7 +512,7 @@ def test_real_selector_excludes_synthetic_and_requires_approved_real_offer():
     REAL_PRODUCTION_AUTHORIZATION="CONTROLLED_PILOT",
     REAL_MARKETPLACE_SEARCH=True,
 )
-def test_real_selector_blocks_publication_in_uf_without_explicit_readiness():
+def test_real_selector_accepts_published_profile_without_uf_readiness():
     go = _published_profile(
         "selector-go",
         is_demo=False,
@@ -525,7 +525,7 @@ def test_real_selector_blocks_publication_in_uf_without_explicit_readiness():
     results = search_published_instructors(
         latitude=-16.6869, longitude=-49.2648, radius_km=10, category="B"
     )
-    assert go not in list(results)
+    assert go in list(results)
 
 
 @pytest.mark.django_db
@@ -578,7 +578,7 @@ def test_public_search_profile_and_contact_are_independent_of_global_gate():
         data_mode=DataMode.REAL,
         publication_status="UNPUBLISHED",
     )
-    _published_profile(
+    go = _published_profile(
         "unapproved-uf-lead",
         is_demo=False,
         data_mode=DataMode.REAL,
@@ -604,8 +604,9 @@ def test_public_search_profile_and_contact_are_independent_of_global_gate():
             "/api/v1/instructors/search/",
             {"latitude": -16.6869, "longitude": -49.2648, "radius_km": 10, "category": "B"},
         ).json()["count"]
-        == 0
+        == 1
     )
+    assert client.get(f"/api/v1/instructors/{go.id}/").status_code == 200
     assert client.get(f"/api/v1/instructors/{unpublished.id}/").status_code == 404
     assert client.post(f"/api/v1/instructors/{unpublished.id}/whatsapp-contact/").status_code == 404
 

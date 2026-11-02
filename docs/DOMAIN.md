@@ -507,6 +507,7 @@ Representa as 27 UFs e a ativação operacional por configuração, sem cidade e
 - `commercial_status` representa estratégia operacional/comercial da InstrutorProCNH: `PREPARATION`, `FIRST_WAVE`, `ACTIVE`, `PAUSED`;
 - `regulatory_status` representa prontidão interna para uma capacidade regulada: `NOT_REVIEWED`, `RESEARCHING`, `REVIEW_REQUIRED`, `APPROVED`, `SUSPENDED`;
 - `regulatory_status` é contextual, não uma flag global: considera UF, tipo de prestador, serviço/capacidade, vigência, fonte e revisão humana;
+- Para a busca/publicação de instrutores reais, a decisão do proprietário de 01/11/2026 retira `RegulatoryReadiness` como gate geral de UF. A verificação profissional individual e a decisão manual de publicação permanecem; o status territorial pode continuar registrado para governança sem conceder elegibilidade por si só.
 - `commercial_status` nunca concede autorização, verificação ou publicação;
 - a primeira onda técnica/comercial autorizada é RS, SC, SP, RJ e ES; AM, RO, AC e RR permanecem na matriz regulatória sem ativação automática; cidade de operação assistida/piloto é configuração posterior;
 - `FederativeUnit.commercial_status` materializa somente a estratégia comercial; `RegulatoryReadiness` registra contexto separado por UF, tipo de prestador e capacidade, com vigência, fonte e revisão humana opcionais;

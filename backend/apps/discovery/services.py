@@ -270,7 +270,9 @@ def decide_publication(*, actor, profile, decision, reason, request_id=None):
     verification = p.verification_history.order_by("-created_at").first()
     if decision == "APPROVE":
         from apps.marketplace.documents import documents_satisfy_active_requirements
-        from apps.territories.policies import instructor_publication_is_allowed
+
+        if not p.is_demo and not getattr(p, "service_area", None):
+            raise InvalidWorkflowTransition("Área de atendimento não informada")
 
         if p.verification_requests.filter(
             status__in=[
@@ -282,13 +284,6 @@ def decide_publication(*, actor, profile, decision, reason, request_id=None):
             raise InvalidWorkflowTransition(
                 "Publicação bloqueada enquanto há solicitação de verificação ativa."
             )
-        if not p.is_demo:
-            area = getattr(p, "service_area", None)
-            if not area or not instructor_publication_is_allowed(area.uf):
-                raise InvalidWorkflowTransition(
-                    "Publicação real bloqueada: a UF não possui autorização regulatória vigente"
-                )
-
         verified_request = bool(
             verification
             and verification.provider == "MANUAL_AUTHORIZED_SOURCE"

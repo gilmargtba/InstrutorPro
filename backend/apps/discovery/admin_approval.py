@@ -1,9 +1,7 @@
 """One-screen administrative orchestration; domain decisions remain in services."""
 
-from datetime import date
 from decimal import Decimal, InvalidOperation
 
-from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.utils import timezone
@@ -12,13 +10,6 @@ from apps.audit.models import AuditEvent
 from apps.marketplace.capabilities import enabled
 from apps.marketplace.documents import can_review_document
 from apps.marketplace.models import DataMode, InstructorDocument, InstructorOffer
-from apps.territories.models import RegulatoryReadiness
-from apps.territories.policies import (
-    INSTRUCTOR_PROVIDER_TYPE,
-    INSTRUCTOR_PUBLICATION_CAPABILITY,
-    instructor_publication_is_allowed,
-)
-from apps.territories.services import approve_instructor_publication_uf
 
 from .models import InstructorProfile, InstructorServiceArea, ProfessionalVerificationRequest
 from .selectors import published_instructor_profiles
@@ -40,40 +31,8 @@ def _area(profile):
         return None
 
 
-def _readiness(area):
-    if not area:
-        return None
-    return (
-        RegulatoryReadiness.objects.select_related("federative_unit")
-        .filter(
-            federative_unit__code=area.uf,
-            provider_type=INSTRUCTOR_PROVIDER_TYPE,
-            capability=INSTRUCTOR_PUBLICATION_CAPABILITY,
-        )
-        .first()
-    )
-
-
-def regulatory_evidence_missing(item):
-    if item is None:
-        return ["Análise regulatória da UF não cadastrada"]
-    labels = {
-        "source_url": "link da fonte oficial",
-        "source_reference": "norma/referência",
-        "source_authority": "órgão responsável",
-        "source_consulted_at": "data da consulta",
-        "evidence": "evidências",
-        "notes": "observações",
-    }
-    missing = [label for field, label in labels.items() if not getattr(item, field)]
-    if item.source_consulted_at and item.source_consulted_at > timezone.localdate():
-        missing.append("data da consulta válida")
-    return missing
-
-
 def approval_panel(profile, actor):
     area = _area(profile)
-    readiness = _readiness(area)
     verification = profile.verification_requests.order_by("-created_at", "-pk").first()
     offers = list(profile.offers.filter(data_mode=DataMode.REAL).order_by("category", "created_at"))
     active_categories = {
@@ -95,7 +54,7 @@ def approval_panel(profile, actor):
             role="INSTRUCTOR", revoked_at__isnull=True
         ).exists()
     )
-    uf_ok = bool(area and instructor_publication_is_allowed(area.uf))
+    uf_ok = bool(area and area.uf)
     verification_ok = bool(
         verification
         and verification.status == ProfessionalVerificationRequest.Status.VERIFIED
@@ -153,9 +112,7 @@ def approval_panel(profile, actor):
     if not verification_ok:
         blockers.append("Verificação profissional ainda não aprovada")
     if not uf_ok:
-        blockers.append(
-            f"UF {area.uf if area else 'não informada'} sem aprovação regulatória vigente"
-        )
+        blockers.append("UF de atendimento não informada")
     if not area_ok:
         blockers.append("Área pública de atendimento não autorizada ou sem localização")
     if not active_categories:
@@ -182,12 +139,9 @@ def approval_panel(profile, actor):
         and document.status
         in {InstructorDocument.Status.PENDING, InstructorDocument.Status.UNDER_REVIEW}
     ]
-    responsible = actor.username == getattr(settings, "REGULATORY_RESPONSIBLE_ADMIN", "gilmar")
     return {
         "profile": profile,
         "area": area,
-        "readiness": readiness,
-        "regulatory_missing": regulatory_evidence_missing(readiness),
         "verification": verification,
         "precheck": verification.get_precheck_status_display() if verification else "Não iniciada",
         "documents": documents,
@@ -215,36 +169,14 @@ def approval_panel(profile, actor):
         "can_review": can_review_request,
         "can_decide_verification": bool(verification and can_open_documents),
         "can_publish": can_manage_publication(actor),
-        "can_finish_publication": can_manage_publication(actor) and (uf_ok or responsible),
-        "can_regulatory": actor.has_perm("territories.change_regulatoryreadiness"),
+        "can_finish_publication": can_manage_publication(actor),
         "can_offer": actor.has_perm("marketplace.change_instructoroffer"),
-        "responsible": responsible,
     }
 
 
 def _require_confirmation(data, name, message):
     if data.get(name) != "on":
         raise InvalidWorkflowTransition(message)
-
-
-def _approve_uf(actor, panel, data):
-    _require_confirmation(data, "confirm_uf", "Confirme pessoalmente a fonte e a vigência da UF.")
-    item = panel["readiness"]
-    if item is None or item.status != RegulatoryReadiness.Status.REVIEW_REQUIRED:
-        raise InvalidWorkflowTransition("A UF não está pendente de revisão.")
-    missing = regulatory_evidence_missing(item)
-    if missing:
-        raise InvalidWorkflowTransition("Faltam evidências da UF: " + ", ".join(missing))
-    try:
-        valid_from = date.fromisoformat(data.get("valid_from", ""))
-    except ValueError as exc:
-        raise InvalidWorkflowTransition("Informe a data de início de vigência confirmada.") from exc
-    approve_instructor_publication_uf(
-        actor=actor,
-        readiness_id=item.pk,
-        valid_from=valid_from,
-        reason=data.get("uf_reason", "").strip(),
-    )
 
 
 def _verify(actor, panel, data, request_id):
@@ -342,10 +274,6 @@ def execute_approval_action(*, actor, profile, data, request_id=None):
         raise InvalidWorkflowTransition("Este fluxo é somente para instrutores reais.")
     operation = data.get("operation")
     panel = approval_panel(profile, actor)
-    if operation in {"approve_uf", "approve_publish"} and data.get("confirm_uf") == "on":
-        _approve_uf(actor, panel, data)
-    elif operation == "approve_uf":
-        _approve_uf(actor, panel, data)
     if (
         operation in {"approve_verification", "approve_publish"}
         and data.get("confirm_verification") == "on"
@@ -372,6 +300,6 @@ def execute_approval_action(*, actor, profile, data, request_id=None):
         _save_offer(actor, profile, data)
     elif operation in {"publish", "approve_publish"}:
         return _publish(actor, profile, data, request_id)
-    elif operation not in {"approve_uf", "approve_verification"}:
+    elif operation != "approve_verification":
         raise InvalidWorkflowTransition("Ação administrativa inválida.")
     return None
