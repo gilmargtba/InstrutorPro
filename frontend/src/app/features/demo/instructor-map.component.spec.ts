@@ -235,6 +235,25 @@ describe('InstructorMapComponent geolocation', () => {
     expect(search).toHaveBeenCalledWith(-15.79, -47.88, fixture.componentInstance.filters, 'DF', 'Brasília');
   });
 
+  it('opens a city-only link directly on the map with the matching city and UF', () => {
+    const route = TestBed.inject(ActivatedRoute);
+    spyOn(route.snapshot.queryParamMap, 'get').and.callFake(key =>
+      key === 'cidade' ? 'Goiatuba, GO, Brasil' : null);
+    const api = TestBed.inject(InstructorSearchProvider);
+    spyOn(api, 'geocode').and.returnValue(of({provider: 'MAPTILER', results: [{
+      id: 'goiatuba', label: 'Goiatuba, Goiás, Brasil', city: 'Goiatuba', uf: 'GO',
+      uf_resolution: 'RESOLVED', latitude: -18.01, longitude: -49.37,
+      place_type: 'place', bbox: null,
+    }]}));
+    const search = spyOn(api, 'search').and.returnValue(of(result));
+    const fixture = TestBed.createComponent(InstructorMapComponent);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.searched).toBeTrue();
+    expect(fixture.componentInstance.filters.location).toBe('Goiatuba, GO, Brasil');
+    expect(search).toHaveBeenCalledWith(-18.01, -49.37, fixture.componentInstance.filters, 'GO', 'Goiatuba');
+    expect(fixture.nativeElement.querySelector('.results-open .map-stage')).not.toBeNull();
+  });
+
   it('opens a listed instructor at the public point without geocoding another city', () => {
     const route = TestBed.inject(ActivatedRoute);
     spyOn(route.snapshot.queryParamMap, 'get').and.callFake(key => ({

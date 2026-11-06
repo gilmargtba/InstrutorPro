@@ -118,15 +118,27 @@ import { WhatsappLinkService } from '../../core/whatsapp-link.service';
           <button class="back-to-intro" type="button" (click)="backToIntro()" aria-label="Voltar">
             <i class="pi pi-arrow-left"></i>
           </button>
-          <label class="toolbar-location">
+          <div class="toolbar-location">
             <i class="pi pi-map-marker"></i>
             <input
               name="toolbarLocation"
               [(ngModel)]="filters.location"
               placeholder="Informe sua cidade"
+              aria-label="Cidade ou região para buscar instrutores"
               required
+              (input)="suggest(filters.location)"
             />
-          </label>
+            @if (suggestions.length) {
+              <div class="toolbar-suggestions" role="listbox">
+                @for (place of suggestions; track place.id) {
+                  <button type="button" (click)="choose(place)">{{ place.label }}</button>
+                }
+              </div>
+            }
+          </div>
+          <button class="toolbar-nearby" type="button" (click)="useMyLocation()" aria-label="Usar minha localização" title="Usar minha localização">
+            <i class="pi pi-crosshairs"></i>
+          </button>
           <button class="toolbar-search" type="submit" [disabled]="loading">
             <i class="pi pi-search"></i><span>Buscar</span>
           </button>
@@ -200,27 +212,6 @@ import { WhatsappLinkService } from '../../core/whatsapp-link.service';
           </div>
         }
 
-        @if (loading) {
-          <div class="map-message"><i class="pi pi-spin pi-spinner"></i> Buscando na região…</div>
-        } @else if (error) {
-          <div class="map-message error">
-            <span>Não foi possível consultar o mapa agora.</span>
-            <button type="button" (click)="search()">Tentar novamente</button>
-          </div>
-        } @else if (searched && !items.length) {
-          <div class="map-message empty">
-            @if (citySearchLabel) {
-              <span>Nenhum instrutor publicado em {{citySearchLabel}} com os filtros atuais. Cadastros ainda não publicados não aparecem na busca.</span>
-            } @else {
-              <span>Nenhum instrutor encontrado com os filtros atuais.</span>
-            }
-            @if (filters.category) {<button type="button" (click)="showAllCategories()">Ver todas as categorias</button>}
-            @if (!anyDistance) {<button type="button" (click)="increaseRadius()">Aumentar raio</button>}
-            <button type="button" (click)="filtersOpen=true">Alterar filtros</button>
-            <button type="button" (click)="backToIntro()">Buscar outra região</button>
-            @if (!mobile) {<a routerLink="/aluno/demanda">Informar minha necessidade</a>}
-          </div>
-        }
         @if(contactError){<p class="contact-error" role="alert">{{contactError}}</p>}
 
         <div class="mobile-tabs" aria-label="Visualização dos resultados">
@@ -234,6 +225,28 @@ import { WhatsappLinkService } from '../../core/whatsapp-link.service';
 
         <div class="map-stage" [class.list-view]="view === 'list'" [class.google-map]="mapSource() === 'google'">
           <div class="leaflet-map" #map></div>
+
+          @if (loading) {
+            <div class="map-message"><i class="pi pi-spin pi-spinner"></i> Buscando na região…</div>
+          } @else if (error) {
+            <div class="map-message error">
+              <span>Não foi possível consultar o mapa agora.</span>
+              <button type="button" (click)="search()">Tentar novamente</button>
+            </div>
+          } @else if (searched && !items.length) {
+            <div class="map-message empty">
+              @if (citySearchLabel) {
+                <span>Nenhum instrutor publicado em {{citySearchLabel}} com os filtros atuais. Cadastros ainda não publicados não aparecem na busca.</span>
+              } @else {
+                <span>Nenhum instrutor encontrado com os filtros atuais.</span>
+              }
+              @if (filters.category) {<button type="button" (click)="showAllCategories()">Ver todas as categorias</button>}
+              @if (!anyDistance) {<button type="button" (click)="increaseRadius()">Aumentar raio</button>}
+              <button type="button" (click)="filtersOpen=true">Alterar filtros</button>
+              <button type="button" (click)="backToIntro()">Buscar outra região</button>
+              @if (!mobile) {<a routerLink="/aluno/demanda">Informar minha necessidade</a>}
+            </div>
+          }
 
           <section class="results-drawer" aria-live="polite">
             <header>
@@ -297,7 +310,7 @@ import { WhatsappLinkService } from '../../core/whatsapp-link.service';
       </div>
     </section>
   `,
-  styleUrl: './instructor-map.component.scss',
+  styleUrls: ['./instructor-map.component.scss', './instructor-map-directory.component.scss'],
 })
 export class InstructorMapComponent implements AfterViewInit, OnDestroy {
   @ViewChild('map') mapElement!: ElementRef<HTMLElement>;
@@ -377,9 +390,16 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
         this.anyDistance = false;
       }
     }
-    const routedLocation = this.route.snapshot.queryParamMap.get('local');
-    const routedCity = this.route.snapshot.queryParamMap.get('cidade');
-    const routedUf = this.route.snapshot.queryParamMap.get('uf');
+    const cityParameter = this.route.snapshot.queryParamMap.get('cidade')?.trim() ?? '';
+    // City links may use either separate cidade/uf parameters or a single
+    // human-readable value such as "Goiatuba, GO, Brasil".
+    const cityParts = cityParameter.split(',').map(part => part.trim());
+    const routedUf = this.route.snapshot.queryParamMap.get('uf')?.trim().toUpperCase()
+      || (cityParts.length > 1 && this.brazilUfs.includes(cityParts[1].toUpperCase() as typeof BRAZIL_UFS[number])
+        ? cityParts[1].toUpperCase() : '');
+    const routedCity = cityParts[0] ?? '';
+    const routedLocation = this.route.snapshot.queryParamMap.get('local')?.trim()
+      || (routedCity && routedUf ? `${routedCity}, ${routedUf}, Brasil` : cityParameter);
     const routedLatitude = Number(this.route.snapshot.queryParamMap.get('lat'));
     const routedLongitude = Number(this.route.snapshot.queryParamMap.get('lng'));
     if (routedLocation && routedCity && routedUf && this.brazilUfs.includes(routedUf as typeof BRAZIL_UFS[number])) {

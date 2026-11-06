@@ -1,5 +1,21 @@
 # Checkpoint do Projeto
 
+## Busca por cidade com mapa em destaque — local, 06/11/2026
+
+- Links com `?cidade=Goiatuba, GO, Brasil` agora iniciam a busca diretamente,
+  preservando o filtro explícito de cidade e UF no backend. O fluxo anterior
+  com `local`, `cidade`, `uf` e coordenadas continua aceito.
+- A busca aberta ganhou mapa ocupando a área principal, barra de cidade com
+  sugestões e atalho para localização consentida, além da lista recolhível de
+  resultados na base do mapa. O aviso de carregamento e os erros aparecem
+  dentro do mapa, sem cobrir o campo de busca.
+- Não houve mudança nos critérios de publicação nem na precisão pública das
+  coordenadas. O mapa continua usando o provedor configurado no servidor.
+- Os 22 testes da página e `npm run build` passaram. A conferência visual
+  local mostrou o novo layout, mas a API local não estava disponível para
+  validar instrutores reais e os blocos de mapa. Permanecem alertas de tamanho
+  para o bundle inicial e alguns estilos. Sem push ou deploy nesta fatia.
+
 ## Página institucional inspirada na referência visual — local, 06/11/2026
 
 - A página inicial Angular ganhou busca destacada por cidade, apresentação em

@@ -1,0 +1,39 @@
+.suggestions, .toolbar-suggestions {
+  position: absolute;
+  z-index: 30;
+  display: grid;
+  width: min(100%, 42rem);
+  max-height: 16rem;
+  overflow-y: auto;
+  border: 1px solid #cadeda;
+  border-radius: .8rem;
+  background: #fff;
+  box-shadow: 0 .8rem 1.8rem rgba(16, 61, 93, .15);
+}
+.suggestions { top: 100%; left: 0; }
+.toolbar-suggestions { top: calc(100% + .25rem); left: 0; }
+.suggestions button, .toolbar-suggestions button {
+  padding: .7rem .9rem;
+  border: 0;
+  color: var(--ink);
+  background: #fff;
+  text-align: left;
+  cursor: pointer;
+}
+.suggestions button:hover, .toolbar-suggestions button:hover { background: #e9f4f1; }
+.instructor-directory { width: min(100%, 52rem); margin-top: 4.5rem; text-align: left; }
+.directory-heading h2 { margin: 0; color: var(--ink); font-size: clamp(1.6rem, 3vw, 2.3rem); }
+.directory-heading p:last-child { color: var(--muted); line-height: 1.55; }
+.directory-states { display: grid; gap: .75rem; margin-top: 1.5rem; }
+.directory-state { padding: .25rem 1rem; border: 1px solid #d6e5e2; border-radius: .9rem; background: #fff; }
+.directory-state summary { display: flex; justify-content: space-between; gap: 1rem; padding: .9rem 0; color: var(--ink); font-weight: 850; cursor: pointer; }
+.directory-state summary span { color: var(--muted); font-size: .85rem; font-weight: 600; }
+.directory-city-group { padding: .25rem 0 .75rem; border-top: 1px solid #e4eeec; }
+.directory-city, .directory-instructor { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: .75rem; border: 0; background: transparent; text-align: left; cursor: pointer; }
+.directory-city { padding: .7rem 0; color: var(--teal-dark); font-weight: 850; }
+.directory-city span:last-child { color: var(--muted); font-size: .8rem; font-weight: 600; }
+.directory-instructor { padding: .45rem .6rem; border-radius: .5rem; color: var(--ink); }
+.directory-instructor:hover, .directory-city:hover { background: #e9f4f1; }
+.directory-instructor span { flex: 1; }
+.directory-instructor small { color: var(--teal-dark); }
+.directory-retry { border: 0; color: var(--teal-dark); background: transparent; font-weight: 800; cursor: pointer; }
