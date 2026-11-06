@@ -1,0 +1,14 @@
+.interest-overlay { position: fixed; inset: 0; z-index: 1100; background: rgba(10, 25, 38, .68); display: grid; place-items: center; padding: 1rem; }
+.interest-dialog { width: min(100%, 31rem); max-height: calc(100dvh - 2rem); overflow-y: auto; border-radius: .9rem; padding: 1.35rem; background: #fff; color: #173c55; box-shadow: 0 1rem 3rem rgba(0, 0, 0, .22); }
+.interest-dialog h2 { margin: 0 0 .65rem; font-size: 1.3rem; line-height: 1.25; }
+.interest-dialog p { line-height: 1.45; }
+.interest-dialog form { display: grid; gap: .8rem; }
+.interest-dialog form > label { display: grid; gap: .3rem; font-weight: 650; }
+.interest-dialog input:not([type='checkbox']) { width: 100%; padding: .7rem; border: 1px solid #a9bec5; border-radius: .45rem; font: inherit; }
+.interest-dialog .interest-consent { display: flex; align-items: start; gap: .5rem; font-weight: 400; font-size: .9rem; }
+.interest-dialog .interest-consent input { margin-top: .25rem; }
+.interest-dialog .interest-retention { margin: 0; font-size: .85rem; }
+.interest-actions { display: flex; justify-content: end; gap: .5rem; }
+.interest-actions button, .interest-dialog > button { border: 0; border-radius: .4rem; padding: .7rem 1rem; cursor: pointer; }
+.interest-actions button[type='submit'] { background: #258849; color: #fff; }
+.interest-actions button:disabled { opacity: .6; cursor: wait; }

@@ -26,8 +26,19 @@ Fonte oficial do programa de privacidade, revisada em **22/07/2026** contra a LG
 
 1. Nenhum dado pessoal real entra em desenvolvimento, demonstração ou piloto antes do gate de prontidão ao final deste documento.
 2. Aceite de termos e consentimento LGPD são atos distintos. Aceitar contrato, aviso de privacidade ou política obrigatória não cria consentimento nem autoriza finalidade opcional.
+
 3. Cookies, SDKs e pixels não estritamente necessários permanecem ausentes ou desativados até escolha granular. Publicidade comportamental, enriquecimento de perfil e venda de dados ficam fora do MVP.
 4. Biometria, reconhecimento facial, cópia de cartão, tracking contínuo, IA sobre dados pessoais e decisão adversa baseada somente em perfil/score ficam fora do MVP.
+
+O aviso opcional de disponibilidade para busca vazia tem finalidade própria:
+contato manual por WhatsApp caso surja instrutor na cidade informada. A coleta
+permanece desligada até o administrador associar aviso vigente que descreva
+essa finalidade e aprovar texto/versionamento do consentimento. O prazo inicial
+proposto é de 90 dias, ajustável no Admin entre 1 e 365 dias; a exclusão é
+executada diariamente após o vencimento. O pedido não garante atendimento,
+não é encaminhado automaticamente a instrutores e não altera elegibilidade.
+O titular recebe um protocolo e pode pedir retirada com o protocolo e o
+telefone informado; a conferência não revela se o contato existe.
 
 O fluxo opcional de foto do instrutor segurando a CNH, decidido em 11/10/2026,
 é apenas evidência privada para conferência visual humana. Não extrai template

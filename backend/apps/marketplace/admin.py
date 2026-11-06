@@ -14,6 +14,8 @@ from .documents import (
     review_profile_photo,
 )
 from .models import (
+    AvailabilityInterest,
+    AvailabilityInterestPolicy,
     DataMode,
     DocumentRequirement,
     Entitlement,
@@ -33,6 +35,129 @@ from .models import (
     StudentProfile,
     Subscription,
 )
+
+
+@admin.register(AvailabilityInterestPolicy)
+class AvailabilityInterestPolicyAdmin(admin.ModelAdmin):
+    list_display = ("enabled", "retention_days", "privacy_notice", "consent_version", "updated_at")
+
+    def has_module_permission(self, request):
+        return request.user.is_superuser
+
+    def has_add_permission(self, request):
+        return request.user.is_superuser and not AvailabilityInterestPolicy.objects.exists()
+
+    def has_change_permission(self, request, obj=None):
+        return request.user.is_superuser
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def save_model(self, request, obj, form, change):
+        obj.full_clean()
+        super().save_model(request, obj, form, change)
+        AuditEvent.objects.create(
+            actor=request.user,
+            action="marketplace.availability_interest_policy.saved",
+            target_type="marketplace.AvailabilityInterestPolicy",
+            request_id=getattr(request, "request_id", None),
+            metadata={
+                "enabled": obj.enabled,
+                "retention_days": obj.retention_days,
+                "privacy_notice_version": obj.privacy_notice.version
+                if obj.privacy_notice
+                else None,
+            },
+        )
+
+
+@admin.register(AvailabilityInterest)
+class AvailabilityInterestAdmin(admin.ModelAdmin):
+    list_display = ("city", "uf", "status", "created_at", "expires_at")
+    list_filter = ("uf", "status")
+    fields = (
+        "city",
+        "uf",
+        "name",
+        "phone",
+        "status",
+        "created_at",
+        "expires_at",
+        "privacy_notice",
+        "consent_version",
+        "consent_text_sha256",
+        "consented_at",
+    )
+    readonly_fields = (
+        "city",
+        "uf",
+        "name",
+        "phone",
+        "privacy_notice",
+        "consent_version",
+        "consent_text_sha256",
+        "consented_at",
+        "created_at",
+        "expires_at",
+        "status",
+    )
+    actions = ("mark_contacted",)
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return request.user.is_superuser or request.user.has_perm(
+            "marketplace.change_availabilityinterest"
+        )
+
+    def has_view_permission(self, request, obj=None):
+        return request.user.is_superuser or request.user.has_perm(
+            "marketplace.view_availabilityinterest"
+        )
+
+    def name(self, obj):
+        from apps.people.identifiers import _fernet
+
+        return _fernet().decrypt(obj.name_encrypted.encode("ascii")).decode("utf-8")
+
+    def phone(self, obj):
+        from apps.people.identifiers import _fernet
+
+        return _fernet().decrypt(obj.phone_encrypted.encode("ascii")).decode("ascii")
+
+    def change_view(self, request, object_id, form_url="", extra_context=None):
+        obj = self.get_object(request, object_id)
+        if obj and self.has_view_permission(request, obj):
+            AuditEvent.objects.create(
+                actor=request.user,
+                action="marketplace.availability_interest.viewed",
+                target_type="marketplace.AvailabilityInterest",
+                target_id=obj.pk,
+                request_id=getattr(request, "request_id", None),
+            )
+        return super().change_view(request, object_id, form_url, extra_context)
+
+    @admin.action(description="Marcar contato manual realizado")
+    def mark_contacted(self, request, queryset):
+        if not self.has_view_permission(request) or not request.user.has_perm(
+            "marketplace.change_availabilityinterest"
+        ):
+            self.message_user(request, "Permissão insuficiente.", level="error")
+            return
+        for obj in queryset.filter(status=AvailabilityInterest.Status.NEW):
+            obj.status = AvailabilityInterest.Status.CONTACTED
+            obj.save(update_fields=["status"])
+            AuditEvent.objects.create(
+                actor=request.user,
+                action="marketplace.availability_interest.contacted",
+                target_type="marketplace.AvailabilityInterest",
+                target_id=obj.pk,
+                request_id=getattr(request, "request_id", None),
+            )
 
 
 @admin.register(StudentProfile)

@@ -745,3 +745,63 @@ class LessonRequest(models.Model):
         verbose_name = "solicitação de aula"
         verbose_name_plural = "solicitações de aulas"
         indexes = [models.Index(fields=["instructor", "status", "created_at"])]
+
+
+class AvailabilityInterestPolicy(models.Model):
+    """Explicit, administrator controlled gate for anonymous contact collection."""
+
+    id = models.PositiveSmallIntegerField(primary_key=True, default=1, editable=False)
+    enabled = models.BooleanField(default=False)
+    retention_days = models.PositiveSmallIntegerField(default=90)
+    privacy_notice = models.ForeignKey(
+        "privacy.PrivacyNotice", null=True, blank=True, on_delete=models.PROTECT
+    )
+    consent_version = models.CharField(max_length=40, blank=True)
+    consent_text = models.TextField(blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+
+        if self.pk != 1:
+            raise ValidationError("Só é permitida uma configuração de interesse.")
+        if self.retention_days is not None and not 1 <= self.retention_days <= 365:
+            raise ValidationError({"retention_days": "Informe entre 1 e 365 dias."})
+        if self.enabled and not (
+            self.retention_days
+            and self.privacy_notice_id
+            and self.privacy_notice.is_current
+            and self.privacy_notice.published_at
+            and self.consent_version
+            and self.consent_text.strip()
+        ):
+            raise ValidationError("Configure prazo, aviso vigente e consentimento antes de ativar.")
+
+    class Meta:
+        verbose_name = "configuração do aviso de disponibilidade"
+
+
+class AvailabilityInterest(models.Model):
+    class Status(models.TextChoices):
+        NEW = "NEW", "Novo"
+        CONTACTED = "CONTACTED", "Contatado"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    city = models.CharField(max_length=120)
+    uf = models.CharField(max_length=2)
+    name_encrypted = models.TextField()
+    phone_encrypted = models.TextField()
+    phone_fingerprint = models.CharField(max_length=64)
+    idempotency_key = models.UUIDField(unique=True)
+    status = models.CharField(max_length=12, choices=Status.choices, default=Status.NEW)
+    privacy_notice = models.ForeignKey("privacy.PrivacyNotice", on_delete=models.PROTECT)
+    consent_version = models.CharField(max_length=40)
+    consent_text_sha256 = models.CharField(max_length=64)
+    consented_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField(db_index=True)
+
+    class Meta:
+        verbose_name = "interessado em disponibilidade de instrutor"
+        verbose_name_plural = "interessados em disponibilidade de instrutores"
+        indexes = [models.Index(fields=["uf", "city", "status"], name="mkt_interest_uf_city_idx")]

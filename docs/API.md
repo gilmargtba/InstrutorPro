@@ -1,5 +1,20 @@
 # Contrato da API
 
+## Interesse em disponibilidade de instrutor (local, 06/11/2026)
+
+`GET /api/v1/marketplace/availability-interest/` retorna `{enabled:false}`
+até o superusuário ativar a política com prazo, aviso vigente e texto de
+consentimento específico. Quando ativa, informa versão do aviso, versão/texto
+do consentimento e prazo em dias. `POST` recebe cidade, UF, nome, telefone com
+DDD, data de nascimento (usada só para aferir maioridade), versões, aceite
+explícito e UUID de idempotência. Retorna protocolo e data de expiração;
+repetições do mesmo UUID não geram outro registro. Não retorna telefone/nome.
+
+`POST /api/v1/marketplace/availability-interest/withdraw/` recebe protocolo e
+telefone e responde genericamente, excluindo o registro quando ambos
+correspondem. Ambos os POSTs têm limite de envio; a nova finalidade permanece
+desativada até a revisão do aviso de privacidade em produção.
+
 ## Hotfix documental de 27/09/2026
 
 ### Complementação após verificação concluída

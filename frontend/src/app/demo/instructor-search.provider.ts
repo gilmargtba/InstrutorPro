@@ -9,12 +9,17 @@ interface SearchResponse { count:number;results:SearchInstructor[] }
 export interface InstructorDirectoryEntry { id:string;display_name:string;latitude:number;longitude:number }
 export interface InstructorStateSummary { uf:string;count:number;search_location:string;cities:{name:string;count:number;instructors?:InstructorDirectoryEntry[]}[] }
 interface StateSummaryResponse { states:InstructorStateSummary[] }
+export interface AvailabilityInterestPolicy { enabled:boolean;retention_days?:number;privacy_notice_version?:string;consent_version?:string;consent_text?:string }
+export interface AvailabilityInterestRequest { city:string;uf:string;name:string;phone:string;birth_date:string;privacy_notice_version:string;consent_version:string;consent_granted:boolean;idempotency_key:string }
 
 @Injectable({providedIn:'root'})
 export class InstructorSearchProvider {
   private readonly http=inject(HttpClient);
   geocode(query:string,limit=5){return this.http.get<GeocodeResponse>('/geocoding/search/',{params:{q:query,limit}})}
   states(){return this.http.get<StateSummaryResponse>('/instructors/states/')}
+  availabilityInterestPolicy(){return this.http.get<AvailabilityInterestPolicy>('/marketplace/availability-interest/')}
+  submitAvailabilityInterest(data:AvailabilityInterestRequest){return this.http.post<{id:string;expires_at:string}>('/marketplace/availability-interest/',data)}
+  withdrawAvailabilityInterest(reference:string,phone:string){return this.http.post('/marketplace/availability-interest/withdraw/',{reference,phone})}
   search(latitude:number,longitude:number,filters:SearchFilters,uf?:string,city?:string,focusId?:string){
     let params=new HttpParams().set('latitude',latitude).set('longitude',longitude).set('ordering',filters.ordering);
     if(filters.category) params=params.set('category',filters.category);

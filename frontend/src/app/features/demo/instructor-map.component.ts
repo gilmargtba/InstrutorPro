@@ -11,6 +11,7 @@ import {
   GeocodingResult,
   InstructorDirectoryEntry,
   InstructorStateSummary,
+  AvailabilityInterestPolicy,
 } from '../../demo/instructor-search.provider';
 import { SearchMapProvider } from '../../demo/search-map.provider';
 import { BRAZIL_UFS } from '../../shared/brazil-ufs';
@@ -244,7 +245,9 @@ import { WhatsappLinkService } from '../../core/whatsapp-link.service';
               @if (!anyDistance) {<button type="button" (click)="increaseRadius()">Aumentar raio</button>}
               <button type="button" (click)="filtersOpen=true">Alterar filtros</button>
               <button type="button" (click)="backToIntro()">Buscar outra região</button>
-              @if (!mobile) {<a routerLink="/aluno/demanda">Informar minha necessidade</a>}
+              @if (interestPolicy?.enabled && citySearchLabel) {
+                <button type="button" (click)="interestDialogOpen=true">Avise-me quando houver instrutor</button>
+              }
             </div>
           }
 
@@ -308,9 +311,34 @@ import { WhatsappLinkService } from '../../core/whatsapp-link.service';
           Coordenadas representam áreas aproximadas de atendimento.
         </p>
       </div>
+      @if (interestDialogOpen && interestPolicy?.enabled) {
+        <div class="interest-overlay" (click)="closeInterestDialog()">
+          <section class="interest-dialog" role="dialog" aria-modal="true" aria-labelledby="interest-title" (click)="$event.stopPropagation()">
+            @if (interestSaved) {
+              <h2 id="interest-title">Pedido de aviso recebido</h2>
+              <p>Se um instrutor estiver disponível em {{citySearchLabel}}, a equipe poderá entrar em contato pelo WhatsApp dentro do prazo informado.</p>
+              <p>Protocolo: <strong>{{interestReference}}</strong>. Guarde este número. Para retirar o consentimento depois, informe o protocolo e o mesmo telefone à equipe de privacidade.</p>
+              <a href="mailto:focusgtba@gmail.com?subject=Retirada%20de%20interesse%20em%20instrutor">Contatar privacidade</a>
+              <button type="button" (click)="closeInterestDialog()">Fechar</button>
+            } @else {
+              <h2 id="interest-title">Ainda não há instrutores disponíveis em {{citySearchLabel}}</h2>
+              <p>Deixe seu contato para que a equipe possa avisar você manualmente quando houver disponibilidade.</p>
+              <form (ngSubmit)="submitInterest()">
+                <label>Nome completo<input name="interestName" [(ngModel)]="interestName" required maxlength="120" autocomplete="name" /></label>
+                <label>WhatsApp com DDD<input name="interestPhone" [(ngModel)]="interestPhone" required maxlength="24" inputmode="tel" autocomplete="tel" /></label>
+                <label>Data de nascimento<input name="interestBirthDate" [(ngModel)]="interestBirthDate" type="date" required autocomplete="bday" /></label>
+                <p class="interest-retention">Dados guardados por até {{interestPolicy.retention_days}} dias. Não há aviso automático nem garantia de disponibilidade.</p>
+                <label class="interest-consent"><input name="interestConsent" [(ngModel)]="interestConsent" type="checkbox" required /> {{interestPolicy.consent_text}} <a routerLink="/privacidade" target="_blank" rel="noopener">Política de Privacidade</a></label>
+                @if (interestError) {<p role="alert">{{interestError}}</p>}
+                <div class="interest-actions"><button type="button" (click)="closeInterestDialog()">Cancelar</button><button type="submit" [disabled]="interestSubmitting">{{interestSubmitting ? 'Enviando…' : 'Salvar'}}</button></div>
+              </form>
+            }
+          </section>
+        </div>
+      }
     </section>
   `,
-  styleUrls: ['./instructor-map.component.scss', './instructor-map-directory.component.scss'],
+  styleUrls: ['./instructor-map.component.scss', './instructor-map-directory.component.scss', './instructor-map-interest.component.scss'],
 })
 export class InstructorMapComponent implements AfterViewInit, OnDestroy {
   @ViewChild('map') mapElement!: ElementRef<HTMLElement>;
@@ -354,6 +382,17 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
   directoryStates: InstructorStateSummary[] = [];
   directoryLoading = false;
   directoryError = false;
+  interestPolicy: AvailabilityInterestPolicy | null = null;
+  interestDialogOpen = false;
+  interestSaved = false;
+  interestSubmitting = false;
+  interestError = '';
+  interestReference = '';
+  interestName = '';
+  interestPhone = '';
+  interestBirthDate = '';
+  interestConsent = false;
+  private interestKey = crypto.randomUUID();
   private cityScope = '';
   private ufScope = '';
   private scopedLocation = '';
@@ -573,6 +612,16 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
             this.drawerOpen = !!this.selected;
             this.showAllResults = !this.selected;
             this.map.render(this.items, this.selected?.id ?? null);
+            if (!this.items.length && this.cityScope && this.ufScope && !this.filters.category &&
+                this.filters.radius === null && this.filters.maxPrice === null &&
+                !this.filters.transmission && this.filters.vehicleAvailable === null) {
+              this.api.availabilityInterestPolicy().subscribe({next: policy => {
+                if (revision !== this.searchRevision) return;
+                this.interestPolicy = policy;
+                this.interestDialogOpen = policy.enabled;
+                this.changeDetector.detectChanges();
+              }, error: () => { this.interestPolicy = null; }});
+            }
             this.changeDetector.detectChanges();
           },
           error: () => { if (revision === this.searchRevision) this.fail(); },
@@ -714,6 +763,8 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
   }
 
   private beginSearch():number {
+    this.interestDialogOpen = false;
+    this.interestPolicy = null;
     this.geocodingRequest?.unsubscribe();
     this.searchRequest?.unsubscribe();
     return ++this.searchRevision;
@@ -724,5 +775,34 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
     this.directoryRequest?.unsubscribe();
     this.suggestionsRequest.unsubscribe();
     this.map.destroy();
+  }
+
+  closeInterestDialog() { this.interestDialogOpen = false; }
+
+  submitInterest() {
+    if (!this.interestPolicy?.enabled || !this.cityScope || !this.ufScope || !this.interestConsent || this.interestSubmitting) return;
+    this.interestSubmitting = true;
+    this.interestError = '';
+    this.api.submitAvailabilityInterest({
+      city: this.cityScope, uf: this.ufScope, name: this.interestName, phone: this.interestPhone,
+      birth_date: this.interestBirthDate, privacy_notice_version: this.interestPolicy.privacy_notice_version ?? '',
+      consent_version: this.interestPolicy.consent_version ?? '', consent_granted: true,
+      idempotency_key: this.interestKey,
+    }).subscribe({
+      next: response => {
+        this.interestSubmitting = false;
+        this.interestSaved = true;
+        this.interestReference = response.id;
+        this.interestName = this.interestPhone = this.interestBirthDate = '';
+        this.interestConsent = false;
+        this.interestKey = crypto.randomUUID();
+        this.changeDetector.detectChanges();
+      },
+      error: () => {
+        this.interestSubmitting = false;
+        this.interestError = 'Não foi possível salvar seu contato. Confira os dados e tente novamente.';
+        this.changeDetector.detectChanges();
+      },
+    });
   }
 }

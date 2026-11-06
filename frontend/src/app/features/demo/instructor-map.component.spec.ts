@@ -20,7 +20,7 @@ describe('InstructorMapComponent geolocation', () => {
     await TestBed.configureTestingModule({
       imports: [InstructorMapComponent],
       providers: [
-        {provide: InstructorSearchProvider, useValue: {geocode: () => of({results: []}), search: () => of(result), states: () => of({states: []})}},
+        {provide: InstructorSearchProvider, useValue: {geocode: () => of({results: []}), search: () => of(result), states: () => of({states: []}), availabilityInterestPolicy: () => of({enabled: false}), submitAvailabilityInterest: () => of({id: 'saved', expires_at: ''})}},
         {provide: SearchMapProvider, useValue: {source: signal('maptiler'), mount: () => undefined, focus: () => undefined, render: () => undefined, select: () => undefined, refresh: () => undefined, destroy: () => undefined}},
         {provide: ActivatedRoute, useValue: {snapshot: {queryParamMap: {get: () => null}}}},
         {provide: Router, useValue: {navigate: () => Promise.resolve(true)}},
@@ -34,6 +34,25 @@ describe('InstructorMapComponent geolocation', () => {
     expect(fixture.componentInstance.anyDistance).toBeTrue();
     expect(fixture.componentInstance.filters.radius).toBeNull();
     expect(fixture.componentInstance.filters.vehicleAvailable).toBeNull();
+  });
+
+  it('opens the interest form only for an empty resolved city when collection is enabled', () => {
+    const api = TestBed.inject(InstructorSearchProvider);
+    spyOn(api, 'availabilityInterestPolicy').and.returnValue(of({
+      enabled: true, retention_days: 90, privacy_notice_version: 'notice-1',
+      consent_version: 'interest-1', consent_text: 'Aceito contato manual.',
+    }));
+    const fixture = TestBed.createComponent(InstructorMapComponent);
+    fixture.detectChanges();
+    fixture.componentInstance.choose({
+      id: 'goiatuba', label: 'Goiatuba, GO, Brasil', latitude: -18.01, longitude: -49.37,
+      place_type: 'locality', city: 'Goiatuba', uf: 'GO', uf_resolution: 'RESOLVED', bbox: null,
+    });
+    fixture.detectChanges();
+    expect(fixture.componentInstance.interestDialogOpen).toBeTrue();
+    expect((fixture.nativeElement as HTMLElement).querySelector('[role="dialog"]')?.textContent).toContain('Goiatuba/GO');
+    fixture.componentInstance.closeInterestDialog();
+    expect(fixture.componentInstance.interestDialogOpen).toBeFalse();
   });
 
   it('lists published instructors below location and opens the selected point with contact card', () => {

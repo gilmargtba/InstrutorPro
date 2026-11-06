@@ -1,5 +1,25 @@
 # Checkpoint do Projeto
 
+## Aviso de disponibilidade em busca vazia — local, 06/11/2026
+
+- A busca sem resultados em uma cidade/UF resolvida e sem filtros restritivos
+  pode abrir um formulário de interesse com nome, WhatsApp, data de nascimento
+  para aferição de maioridade e consentimento específico. A data de nascimento
+  é validada e descartada, sem entrar no registro do interessado.
+- A coleta está **desativada por padrão**. No Admin, o superusuário configura
+  prazo inicial de 90 dias (editável entre 1 e 365), aviso de privacidade
+  vigente e publicado, versão e texto do consentimento, e só então ativa a
+  configuração. O aviso vigente deve cobrir expressamente esta nova finalidade
+  antes da ativação. Nenhum contato é enviado automaticamente.
+- Nome e telefone ficam criptografados, o telefone tem índice cego, a leitura
+  no Admin e a marcação de contato manual geram auditoria. Há limite de envio,
+  chave idempotente, retirada por protocolo/telefone e exclusão diária ao vencer o prazo. O fluxo não publica
+  instrutores nem altera critérios de elegibilidade.
+- Migration `marketplace.0017` validada sem diferenças; 4 testes de backend,
+  lint, Django check e 23 testes Angular passaram. O build Angular passou com alertas de tamanho
+  preexistentes. Sem push ou deploy. Antes de ativar em produção, revisar o
+  aviso, o procedimento de direitos do titular e testar com a operação real.
+
 ## Busca por cidade com mapa em destaque — local, 06/11/2026
 
 - Links com `?cidade=Goiatuba, GO, Brasil` agora iniciam a busca diretamente,
