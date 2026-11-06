@@ -1,5 +1,20 @@
 # Checkpoint do Projeto
 
+## Página institucional inspirada na referência visual — local, 06/11/2026
+
+- A página inicial Angular ganhou busca destacada por cidade, apresentação em
+  etapas, explicação do mapa, critérios de revisão interna, entrada para
+  instrutores e dúvidas frequentes. Cabeçalho e rodapé usam a mesma direção
+  visual. A logo original da InstrutorProCNH foi preservada.
+- Os textos e gráficos são próprios. Não foram copiados depoimentos, números,
+  fotos ou alegações de credenciamento oficial do site de referência.
+- As rotas de busca, cadastro, CFC, aplicativo e privacidade permanecem ligadas
+  aos fluxos existentes. A funcionalidade de localização mantém o pedido de
+  permissão somente após clique do usuário.
+- `npm run build` passou. O Angular emitiu alertas de tamanho para o bundle
+  inicial e para o estilo da nova página; a página local foi aberta e conferida
+  visualmente. Sem push ou deploy nesta fatia.
+
 ## Publicação e busca sem aprovação geral de UF — local, 01/11/2026
 
 - Por decisão expressa do proprietário, `RegulatoryReadiness` não bloqueia
