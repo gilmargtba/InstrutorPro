@@ -10,6 +10,7 @@ export class GoogleMapProvider implements MapProvider {
   private host?: HTMLElement;
   private markerClass?: typeof google.maps.marker.AdvancedMarkerElement;
   private markers = new Map<string, google.maps.marker.AdvancedMarkerElement>();
+  private selectedId: string | null = null;
   private onSelect: (id: string) => void = () => undefined;
   private generation = 0;
 
@@ -39,6 +40,7 @@ export class GoogleMapProvider implements MapProvider {
 
   render(items: SearchInstructor[], selectedId: string | null): void {
     if (!this.map || !this.markerClass) return;
+    this.selectedId = selectedId;
     for (const marker of this.markers.values()) marker.map = null;
     this.markers.clear();
     const bounds = new google.maps.LatLngBounds();
@@ -61,17 +63,20 @@ export class GoogleMapProvider implements MapProvider {
       this.markers.set(item.id, marker);
       bounds.extend(position);
     }
-    if (items.length === 1) this.focus(items[0].latitude, items[0].longitude, 13);
-    else if (items.length > 1) {
+    if (selectedId) {
+      this.select(selectedId);
+    } else if (items.length === 1) {
+      this.focus(items[0].latitude, items[0].longitude, 14);
+    } else if (items.length > 1) {
       this.map.fitBounds(bounds, 60);
       google.maps.event.addListenerOnce(this.map, 'idle', () => {
-        if (this.map && (this.map.getZoom() ?? 0) > 14) this.map.setZoom(14);
+        if (this.map && !this.selectedId && (this.map.getZoom() ?? 0) > 14) this.map.setZoom(14);
       });
     }
-    if (selectedId) this.select(selectedId);
   }
 
   select(id: string): void {
+    this.selectedId = id;
     for (const [markerId, marker] of this.markers) {
       (marker.content as HTMLElement | null)?.classList.toggle('selected', markerId === id);
     }
@@ -79,7 +84,7 @@ export class GoogleMapProvider implements MapProvider {
     const position = marker?.position;
     if (position) {
       this.map?.panTo(position);
-      if ((this.map?.getZoom() ?? 0) < 15) this.map?.setZoom(15);
+      if ((this.map?.getZoom() ?? 0) < 18) this.map?.setZoom(18);
     }
   }
 
@@ -92,6 +97,7 @@ export class GoogleMapProvider implements MapProvider {
     this.generation++;
     for (const marker of this.markers.values()) marker.map = null;
     this.markers.clear();
+    this.selectedId = null;
     this.map = undefined;
     this.markerClass = undefined;
     this.host?.replaceChildren();

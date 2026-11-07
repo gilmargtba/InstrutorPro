@@ -297,6 +297,9 @@ import { WhatsappLinkService } from '../../core/whatsapp-link.service';
                         [queryParams]="{categoria: instructor.offer_category}"
                         (click)="$event.stopPropagation()"
                       >Ver perfil</a>
+                      <button type="button" class="show-location" (click)="$event.stopPropagation(); showPublicPoint(instructor)" [attr.aria-label]="'Ver ponto público aproximado de ' + instructor.display_name + ' no mapa'">
+                        <i class="pi pi-map-marker"></i> Ver ponto aproximado
+                      </button>
                       <button type="button" class="whatsapp" (click)="$event.stopPropagation(); contact(instructor)"><i class="pi pi-whatsapp"></i> Chamar no WhatsApp</button>
                     </div>
                   </article>
@@ -672,6 +675,11 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
       setTimeout(() => this.map.refresh());
     }
     this.map.select(item.id);
+  }
+
+  showPublicPoint(item: SearchInstructor) {
+    this.select(item);
+    this.scrollToResults();
   }
 
   get visibleItems(): SearchInstructor[] {

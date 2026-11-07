@@ -1,5 +1,18 @@
 # Checkpoint do Projeto
 
+## Foco no ponto público do instrutor — local, 06/11/2026
+
+- A lista da busca ganhou a ação “Ver ponto aproximado”, que seleciona o
+  instrutor, abre o mapa quando necessário e aproxima o marcador publicado.
+  Google Maps e Leaflet chegam ao zoom 18; o ajuste automático de vários
+  resultados não reduz mais o zoom depois da seleção no Google Maps.
+- A fonte continua sendo apenas `public_service_location` da busca publicada.
+  O cadastro real arredonda o ponto para duas casas decimais antes de salvar;
+  portanto, esta interação não mostra endereço residencial nem promete
+  navegação até uma porta. Nenhum gate de elegibilidade ou dado privado mudou.
+- Build Angular e 27 testes direcionados passaram. Alertas de tamanho do
+  bundle e estilos permanecem. Sem push ou deploy nesta fatia.
+
 ## Aviso de disponibilidade em busca vazia — local, 06/11/2026
 
 - A busca sem resultados em uma cidade/UF resolvida e sem filtros restritivos

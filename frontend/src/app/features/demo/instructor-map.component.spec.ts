@@ -85,6 +85,11 @@ describe('InstructorMapComponent geolocation', () => {
     expect(fixture.componentInstance.selected).toBe(instructor);
     expect(fixture.componentInstance.drawerOpen).toBeTrue();
     expect(fixture.componentInstance.anyDistance).toBeTrue();
+    const map = TestBed.inject(SearchMapProvider);
+    const select = spyOn(map, 'select');
+    (fixture.nativeElement.querySelector('.show-location') as HTMLButtonElement).click();
+    expect(select).toHaveBeenCalledWith('published');
+    expect(fixture.componentInstance.view).toBe('map');
   });
 
   it('opens the selected city with its UF and all published instructors', () => {
