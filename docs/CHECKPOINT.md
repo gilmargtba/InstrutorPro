@@ -1,5 +1,23 @@
 # Checkpoint do Projeto
 
+## Deploy de busca por cidade e foco no mapa — produção, 11/11/2026
+
+- Os cinco commits `3b39b11` a `a34f2fb` avançaram `origin/main` sem force push.
+  A VPS foi atualizada por `git pull --ff-only` até `a34f2fb9112cfc6dfbb5bd2b1ccd13747aa9effd`.
+- Antes da atualização, `scripts/backup-production.sh` validou banco e documentos
+  privados em `/home/gilmar/backups/instrutorpro/production/`, com marcador
+  `20261111T223417Z`. As imagens anteriores de backend, frontend, worker e
+  scheduler foram preservadas com a tag `pre-a34f2fb-20261111` para rollback
+  da aplicação. A migration aditiva `marketplace.0017` permanece em caso de
+  rollback do código; nenhum dado foi restaurado ou alterado manualmente.
+- Backend, frontend, worker e scheduler foram reconstruídos e ficaram saudáveis.
+  `manage.py check` e `migrate --check` passaram. Home, diretório de instrutores,
+  mapa local e readiness responderam HTTP 200 em HTTPS a partir da VPS;
+  readiness confirmou banco `up`.
+- A configuração de interesse por disponibilidade continua desativada até
+  revisão do aviso de privacidade e ativação explícita no Admin. A alteração
+  preexistente em `deploy/nginx/instrutorpro-gateway.conf` na VPS foi preservada.
+
 ## Foco no ponto público do instrutor — local, 06/11/2026
 
 - A lista da busca ganhou a ação “Ver ponto aproximado”, que seleciona o
