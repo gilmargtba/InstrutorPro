@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.urls import path
-from .availability_interest_api import AvailabilityInterestView, AvailabilityInterestWithdrawalView
 
 from .api import (
     DemandAggregateView,
@@ -22,10 +21,13 @@ from .api import (
     SessionMeView,
     StudentRegistrationView,
 )
+from .availability_interest_api import AvailabilityInterestView, AvailabilityInterestWithdrawalView
 
 urlpatterns = [
     path("marketplace/availability-interest/", AvailabilityInterestView.as_view()),
-    path("marketplace/availability-interest/withdraw/", AvailabilityInterestWithdrawalView.as_view()),
+    path(
+        "marketplace/availability-interest/withdraw/", AvailabilityInterestWithdrawalView.as_view()
+    ),
     path("marketplace/instructor/packages/", InstructorLessonPackageListView.as_view()),
     path("marketplace/instructor/packages/<uuid:pk>/", InstructorLessonPackageDetailView.as_view()),
     path("marketplace/instructor/saas-summary/", InstructorSaaSSummaryView.as_view()),
