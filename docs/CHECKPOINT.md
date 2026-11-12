@@ -1,6 +1,6 @@
 # Checkpoint do Projeto
 
-## Pausa temporária de CFC/Autoescola — local, 12/11/2026
+## Pausa temporária de CFC/Autoescola — produção, 12/11/2026
 
 - O menu, rodapé e card profissional deixam de convidar ao módulo CFC.
   Links diretos de cadastro, painel e ativação exibem aviso de indisponibilidade.
@@ -12,7 +12,16 @@
   validação do fluxo; não depende de migration nem de apagar dados.
 - Build Angular, seis testes de navegação, Ruff lint/format e `git diff --check`
   passaram. A execução local do pytest Django depende de GDAL/PostGIS, ausentes
-  neste Windows; a validação integrada permanece para o CI antes da publicação.
+  neste Windows; o CI do commit `ca76019` passou nos jobs backend e frontend
+  (run `43212660609`).
+- `origin/main` e a VPS chegaram a `ca76019` por avanço sem force push. Antes
+  do deploy, os backups de banco e documentos privados foram validados com o
+  marcador `20261112T115400Z`. As imagens anteriores de backend e frontend
+  foram preservadas com a tag `pre-cfc-pause-20261112` para rollback.
+- Backend e frontend foram reconstruídos e ficaram saudáveis. `manage.py check`
+  e `migrate --check` passaram; não houve migration nova. Em produção,
+  `CFC_MODULE_ENABLED=False`, a API CFC respondeu HTTP 403, e a home respondeu
+  HTTP 200. O diretório e o Admin permanecem fora do módulo pausado.
 
 ## Deploy de busca por cidade e foco no mapa — produção, 11/11/2026
 
