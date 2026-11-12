@@ -16,7 +16,7 @@ from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import serializers, status
 from rest_framework.exceptions import APIException, PermissionDenied
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
@@ -34,6 +34,13 @@ from .models import CFC, CFCInstructorLink, CFCMembership
 class EmailUnavailable(APIException):
     status_code = 503
     default_detail = "O pré-cadastro está indisponível até o e-mail transacional funcionar."
+
+
+class CFCModuleEnabled(BasePermission):
+    message = "O módulo CFC/Autoescola está temporariamente indisponível."
+
+    def has_permission(self, request, view):
+        return settings.CFC_MODULE_ENABLED
 
 
 def _email_ready():
@@ -158,7 +165,7 @@ class CFCActivationSerializer(serializers.Serializer):
 
 
 class CFCMembershipListView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [CFCModuleEnabled, IsAuthenticated]
 
     def get(self, request):
         if not request.user.can_operate:
@@ -172,7 +179,7 @@ class CFCMembershipListView(APIView):
 
 
 class CFCDetailView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [CFCModuleEnabled, IsAuthenticated]
 
     def get(self, request, cfc_id):
         cfc = _membership(request.user, cfc_id).cfc
@@ -213,7 +220,7 @@ class CFCDetailView(APIView):
 
 
 class CFCInstructorListCreateView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [CFCModuleEnabled, IsAuthenticated]
     throttle_scope = "cfc_pre_registration"
 
     def get_throttles(self):
@@ -288,7 +295,7 @@ class CFCInstructorListCreateView(APIView):
 
 
 class CFCInstructorResendView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [CFCModuleEnabled, IsAuthenticated]
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = "password_reset"
 
@@ -326,7 +333,7 @@ class CFCInstructorResendView(APIView):
 
 
 class CFCInstructorActivationView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [CFCModuleEnabled, AllowAny]
     authentication_classes = []
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = "registration"

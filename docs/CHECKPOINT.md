@@ -1,5 +1,19 @@
 # Checkpoint do Projeto
 
+## Pausa temporária de CFC/Autoescola — local, 12/11/2026
+
+- O menu, rodapé e card profissional deixam de convidar ao módulo CFC.
+  Links diretos de cadastro, painel e ativação exibem aviso de indisponibilidade.
+- `CFC_MODULE_ENABLED` inicia desativado e nega leitura, pré-cadastro, alteração
+  de quantidade, reenvio e ativação via API. Nenhum CFC, vínculo, conta ou
+  convite existente é excluído ou alterado. Cadastro individual de instrutor,
+  busca e painel administrativo permanecem disponíveis.
+- A reativação requer habilitar explicitamente backend e frontend, com nova
+  validação do fluxo; não depende de migration nem de apagar dados.
+- Build Angular, seis testes de navegação, Ruff lint/format e `git diff --check`
+  passaram. A execução local do pytest Django depende de GDAL/PostGIS, ausentes
+  neste Windows; a validação integrada permanece para o CI antes da publicação.
+
 ## Deploy de busca por cidade e foco no mapa — produção, 11/11/2026
 
 - Os cinco commits `3b39b11` a `a34f2fb` avançaram `origin/main` sem force push.

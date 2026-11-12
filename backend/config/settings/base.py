@@ -222,6 +222,7 @@ REAL_INSTRUCTOR_PUBLICATION_ENABLED = (
 )
 REAL_STUDENT_DEMAND_ENABLED = os.getenv("REAL_STUDENT_DEMAND_ENABLED", "false").lower() == "true"
 PUBLIC_DEMAND_MAP_ENABLED = os.getenv("PUBLIC_DEMAND_MAP_ENABLED", "false").lower() == "true"
+CFC_MODULE_ENABLED = os.getenv("CFC_MODULE_ENABLED", "false").lower() == "true"
 DEMAND_MAP_MIN_AGGREGATION_COUNT = int(os.getenv("DEMAND_MAP_MIN_AGGREGATION_COUNT", "0"))
 MAPTILER_API_KEY = os.getenv("MAPTILER_API_KEY", "")
 MAPTILER_GEOCODING_URL = os.getenv("MAPTILER_GEOCODING_URL", "https://api.maptiler.com/geocoding")

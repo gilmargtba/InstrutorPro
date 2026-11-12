@@ -1,5 +1,14 @@
 # Registro de Decisões e Questões Abertas
 
+### Pausa temporária do módulo CFC/Autoescola — 12/11/2026
+
+Por solicitação do proprietário, a entrada pública, o painel, o pré-cadastro
+de instrutores e a ativação por convite do CFC ficam indisponíveis. Links já
+emitidos exibem aviso de pausa; a API nega novas operações. Cadastros, vínculos
+e histórico existentes permanecem preservados. A busca e o cadastro individual
+de instrutores continuam disponíveis. Reativar exige decisão operacional e
+configuração explícita do backend e do frontend.
+
 ### Decisão do proprietário de 01/11/2026 — busca e publicação em todas as UFs
 
 A aprovação geral de `RegulatoryReadiness` por UF deixa de ser requisito da

@@ -2,6 +2,8 @@
 
 ## CFC-001 — painel privado e pré-cadastro individual (18/10/2026)
 
+Estado operacional: pausado temporariamente em 12/11/2026, sem exclusão de dados.
+
 - [x] entidade CFC separada, responsável autorizado e contagens privadas;
 - [x] pré-cadastro inativo por nome/e-mail, convite e ativação pelo próprio instrutor;
 - [x] perfil inicial não publicado e aceite jurídico individual;

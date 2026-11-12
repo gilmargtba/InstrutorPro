@@ -19,7 +19,7 @@ import { PasswordResetConfirmComponent, PasswordResetRequestComponent } from './
 import { ProfessionalVerificationComponent } from './features/account/professional-verification.component';
 import { MobileStudentHomeComponent } from './features/home/mobile-student-home.component';
 import { AppDownloadComponent } from './features/home/app-download.component';
-import { CFCDashboardComponent, CFCEntryComponent, CFCInstructorActivationComponent, ProfessionalLandingComponent } from './features/cfc/cfc-pages.component';
+import { CFCDashboardComponent, CFCEntryComponent, CFCInstructorActivationComponent, CFCUnavailableComponent, ProfessionalLandingComponent } from './features/cfc/cfc-pages.component';
 
 const webRoutes: Routes = [
   { path:'', component:HomeComponent, title:'InstrutorProCNH — Sua jornada para a CNH' },
@@ -35,9 +35,9 @@ const webRoutes: Routes = [
   { path:'aluno/instrutores/:id', component:PublicInstructorProfileComponent, title:'Perfil do instrutor — InstrutorProCNH' },
   { path:'aluno/solicitar', component:LessonRequestComponent, title:'Solicitar aula — InstrutorProCNH' },
   { path:'profissional', component:ProfessionalLandingComponent, title:'Área profissional — InstrutorProCNH' },
-  { path:'cfc/cadastro', component:CFCEntryComponent, title:'Cadastro de CFC e autoescola — InstrutorProCNH' },
-  { path:'cfc', component:CFCDashboardComponent, title:'Painel do CFC — InstrutorProCNH' },
-  { path:'cfc/ativar-instrutor', component:CFCInstructorActivationComponent, title:'Ativar conta de instrutor — InstrutorProCNH' },
+  { path:'cfc/cadastro', component:environment.cfcEnabled?CFCEntryComponent:CFCUnavailableComponent, title:'CFC e autoescola — InstrutorProCNH' },
+  { path:'cfc', component:environment.cfcEnabled?CFCDashboardComponent:CFCUnavailableComponent, title:'CFC e autoescola — InstrutorProCNH' },
+  { path:'cfc/ativar-instrutor', component:environment.cfcEnabled?CFCInstructorActivationComponent:CFCUnavailableComponent, title:'CFC e autoescola — InstrutorProCNH' },
   { path:'instrutor', component:InstructorSaasDashboardComponent, title:'Visão geral do instrutor — InstrutorProCNH' },
   { path:'instrutor/desempenho', component:InstructorPerformanceComponent, title:'Desempenho — InstrutorProCNH' },
   { path:'instrutor/plano', component:InstructorPlanComponent, title:'Meu plano — InstrutorProCNH' },

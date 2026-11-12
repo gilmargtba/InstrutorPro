@@ -14,6 +14,7 @@ from apps.people.models import Person, RoleAssignment
 from apps.privacy.models import LegalAcceptanceRecord, LegalDocument, PrivacyNotice
 
 CAPABILITIES = {
+    "CFC_MODULE_ENABLED": True,
     "INSTRUCTOR_REGISTRATION_MODE": "PRODUCTION",
     "REAL_ACCOUNT_REGISTRATION": True,
     "REAL_PERSONAL_DATA": True,
@@ -22,6 +23,33 @@ CAPABILITIES = {
     "DEFAULT_FROM_EMAIL": "no-reply@example.invalid",
     "FRONTEND_PUBLIC_URL": "https://example.invalid",
 }
+
+
+@pytest.mark.django_db
+@override_settings(CFC_MODULE_ENABLED=False)
+def test_cfc_pause_blocks_private_and_activation_endpoints_without_changing_data(cfc_manager):
+    _, cfc, client = cfc_manager
+    assert client.get("/api/v1/cfc/memberships/").status_code == 403
+    assert (
+        client.patch(
+            f"/api/v1/cfc/{cfc.pk}/", {"declared_instructor_count": 2}, format="json"
+        ).status_code
+        == 403
+    )
+    assert (
+        client.post(
+            f"/api/v1/cfc/{cfc.pk}/instructors/",
+            {"display_name": "Teste", "email": "teste@example.invalid"},
+            format="json",
+        ).status_code
+        == 403
+    )
+    assert (
+        APIClient().post("/api/v1/cfc/activate-instructor/", {}, format="json").status_code == 403
+    )
+    cfc.refresh_from_db()
+    assert cfc.declared_instructor_count == 0
+    assert not CFCInstructorLink.objects.filter(cfc=cfc).exists()
 
 
 @pytest.fixture

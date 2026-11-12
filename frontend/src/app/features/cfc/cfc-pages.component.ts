@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 type CfcSummary = {
   id: string;
@@ -17,11 +18,18 @@ type CfcLink = { id: string; display_name: string; email: string; status: 'PENDI
   imports: [RouterLink],
   template: `<section class="page wide"><header class="page-head"><div><p class="eyebrow">Área profissional</p><h1>Como você atua na jornada?</h1><p>Escolha seu acesso.</p></div></header>
     <div class="cards"><article><i class="pi pi-car"></i><h2>Instrutor</h2><p>Crie sua própria conta e acompanhe a análise do seu perfil.</p><a class="button primary" routerLink="/cadastro/instrutor">Cadastrar instrutor</a></article>
-    <article><i class="pi pi-building"></i><h2>CFC</h2><p>Informe quantos instrutores integram seu CFC e inicie o pré-cadastro individual de cada um. Cada instrutor ativa sua própria conta por e-mail.</p><a class="button secondary" routerLink="/cfc">Acessar painel do CFC</a><small>O acesso inicial do CFC é habilitado pelo administrador.</small></article></div>
-    <p>Pré-cadastro e vínculo com CFC não equivalem a verificação, credenciamento oficial ou publicação na busca.</p></section>`,
-  styles: [`.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}.cards article{display:grid;gap:.7rem;align-content:start;padding:1.5rem;border:1px solid #c8dcd8;border-radius:1rem;background:#fff}.cards i{font-size:2rem;color:#0b8180}.cards small{display:block;color:#526b73}@media(max-width:700px){.cards{grid-template-columns:1fr}}`],
+    @if(cfcEnabled){<article><i class="pi pi-building"></i><h2>CFC</h2><p>Informe quantos instrutores integram seu CFC e inicie o pré-cadastro individual de cada um. Cada instrutor ativa sua própria conta por e-mail.</p><a class="button secondary" routerLink="/cfc">Acessar painel do CFC</a><small>O acesso inicial do CFC é habilitado pelo administrador.</small></article>}</div>
+    @if(cfcEnabled){<p>Pré-cadastro e vínculo com CFC não equivalem a verificação, credenciamento oficial ou publicação na busca.</p>}</section>`,
+  styles: [`.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,20rem),1fr));gap:1rem}.cards article{display:grid;gap:.7rem;align-content:start;padding:1.5rem;border:1px solid #c8dcd8;border-radius:1rem;background:#fff}.cards i{font-size:2rem;color:#0b8180}.cards small{display:block;color:#526b73}@media(max-width:700px){.cards{grid-template-columns:1fr}}`],
 })
-export class ProfessionalLandingComponent {}
+export class ProfessionalLandingComponent { readonly cfcEnabled = environment.cfcEnabled; }
+
+@Component({
+  selector: 'app-cfc-unavailable',
+  imports: [RouterLink],
+  template: `<section class="page narrow"><header class="page-head"><div><p class="eyebrow">CFC / Autoescola</p><h1>Módulo temporariamente indisponível</h1><p>O acesso ao CFC está pausado. Os cadastros e vínculos já existentes foram preservados.</p></div></header><a class="button primary" routerLink="/">Voltar ao início</a></section>`,
+})
+export class CFCUnavailableComponent {}
 
 @Component({
   selector: 'app-cfc-entry',

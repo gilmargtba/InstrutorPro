@@ -1,5 +1,13 @@
 # Contrato da API
 
+## Pausa temporária do CFC/Autoescola (12/11/2026)
+
+Com `CFC_MODULE_ENABLED=false` (padrão), todos os endpoints
+`/api/v1/cfc/` recusam operações com HTTP 403, incluindo leitura privada,
+pré-cadastro, reenvio e ativação por convite. A pausa não apaga registros nem
+altera a elegibilidade dos instrutores. A reativação exige configuração
+explícita e revisão do fluxo operacional.
+
 ## Interesse em disponibilidade de instrutor (local, 06/11/2026)
 
 `GET /api/v1/marketplace/availability-interest/` retorna `{enabled:false}`
