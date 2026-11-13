@@ -33,11 +33,18 @@ def setup_policy(db):
             is_current=True,
             published_at=timezone.now(),
         )
-    return AvailabilityInterestPolicy.objects.create(
-        privacy_notice=notice,
-        consent_version="interest-1",
-        consent_text="Autorizo contato manual pelo WhatsApp sobre disponibilidade de instrutores.",
+    policy, _ = AvailabilityInterestPolicy.objects.update_or_create(
+        pk=1,
+        defaults={
+            "enabled": False,
+            "privacy_notice": notice,
+            "consent_version": "interest-1",
+            "consent_text": (
+                "Autorizo contato manual pelo WhatsApp sobre disponibilidade de instrutores."
+            ),
+        },
     )
+    return policy
 
 
 def payload(policy):

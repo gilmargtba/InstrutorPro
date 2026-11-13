@@ -13,8 +13,10 @@
   preserva pedidos anteriores como escopo `CITY`. Uma nova versão do aviso de
   privacidade descreve finalidade, dados, prazo e retirada. Outra migration
   prepara a política com 90 dias e **desativada**.
-- A coleta não foi ativada na VPS. Falta revisão do texto do aviso e do
-  consentimento pelo responsável antes de receber contatos reais.
+- O proprietário aprovou em 13/11/2026 o aviso, a coleta por 90 dias, o contato
+  manual e o deploy após CI. A migration `marketplace.0020` ativa somente a
+  política preparada com essas versões e prazo; o rollback a desativa. A
+  publicação ainda depende do CI e do deploy.
 - Build Angular e 35 testes direcionados passaram; Ruff lint/format,
   compilação de Python e `git diff --check` passaram. Pytest Django e
   `makemigrations --check` não puderam rodar no Windows sem GDAL/PostGIS; o
