@@ -1,5 +1,25 @@
 # Checkpoint do Projeto
 
+## Pedido de aviso por UF, cidade e região — local, 13/11/2026
+
+- A busca sem instrutor oferece o formulário de interesse para UF, cidade e
+  região. Após GPS, o visitante confirma a localidade no formulário; nenhuma
+  coordenada precisa é salva no pedido. O menu e o rodapé incluem “Sem instrutor
+  na região?” com página própria, também disponível no app mobile.
+- GPS e bairro usam raio inicial de 10 km para que a ausência de instrutores
+  próximos não seja mascarada por resultados distantes; a pessoa ainda pode
+  selecionar qualquer distância. A busca por UF limita os resultados à UF.
+- A API aceita escopo explícito e valida UF/cidade/região. Migration aditiva
+  preserva pedidos anteriores como escopo `CITY`. Uma nova versão do aviso de
+  privacidade descreve finalidade, dados, prazo e retirada. Outra migration
+  prepara a política com 90 dias e **desativada**.
+- A coleta não foi ativada na VPS. Falta revisão do texto do aviso e do
+  consentimento pelo responsável antes de receber contatos reais.
+- Build Angular e 35 testes direcionados passaram; Ruff lint/format,
+  compilação de Python e `git diff --check` passaram. Pytest Django e
+  `makemigrations --check` não puderam rodar no Windows sem GDAL/PostGIS; o
+  Docker local não está em execução. A validação integrada fica pendente no CI.
+
 ## Pausa temporária de CFC/Autoescola — produção, 12/11/2026
 
 - O menu, rodapé e card profissional deixam de convidar ao módulo CFC.

@@ -14,7 +14,13 @@ from .availability_interest import (
 
 
 class InterestSerializer(serializers.Serializer):
-    city = serializers.CharField(max_length=120, trim_whitespace=True)
+    scope = serializers.ChoiceField(choices=("UF", "CITY", "REGION"), default="CITY")
+    city = serializers.CharField(
+        max_length=120, trim_whitespace=True, required=False, allow_blank=True, default=""
+    )
+    region = serializers.CharField(
+        max_length=120, trim_whitespace=True, required=False, allow_blank=True, default=""
+    )
     uf = serializers.CharField(max_length=2)
     name = serializers.CharField(max_length=120, trim_whitespace=True)
     phone = serializers.CharField(max_length=24)

@@ -1,5 +1,14 @@
 # Registro de Decisões e Questões Abertas
 
+### Pedido de aviso em busca vazia — 13/11/2026
+
+O visitante pode solicitar contato manual quando não houver instrutores na
+UF, cidade ou região buscada. O menu “Sem instrutor na região?” conduz à mesma
+finalidade. Em uma busca por GPS, o visitante confirma a localidade sem guardar
+coordenadas no pedido. O prazo inicial aprovado é de 90 dias; não há envio
+automático nem garantia de disponibilidade. A coleta permanece desativada até
+aprovação do aviso de privacidade versionado e ativação explícita da política.
+
 ### Pausa temporária do módulo CFC/Autoescola — 12/11/2026
 
 Por solicitação do proprietário, a entrada pública, o painel, o pré-cadastro

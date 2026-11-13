@@ -73,10 +73,12 @@ class AvailabilityInterestPolicyAdmin(admin.ModelAdmin):
 
 @admin.register(AvailabilityInterest)
 class AvailabilityInterestAdmin(admin.ModelAdmin):
-    list_display = ("city", "uf", "status", "created_at", "expires_at")
-    list_filter = ("uf", "status")
+    list_display = ("scope", "city", "region", "uf", "status", "created_at", "expires_at")
+    list_filter = ("scope", "uf", "status")
     fields = (
+        "scope",
         "city",
+        "region",
         "uf",
         "name",
         "phone",
@@ -89,7 +91,9 @@ class AvailabilityInterestAdmin(admin.ModelAdmin):
         "consented_at",
     )
     readonly_fields = (
+        "scope",
         "city",
+        "region",
         "uf",
         "name",
         "phone",

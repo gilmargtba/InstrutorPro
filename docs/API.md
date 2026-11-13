@@ -8,12 +8,14 @@ pré-cadastro, reenvio e ativação por convite. A pausa não apaga registros ne
 altera a elegibilidade dos instrutores. A reativação exige configuração
 explícita e revisão do fluxo operacional.
 
-## Interesse em disponibilidade de instrutor (local, 06/11/2026)
+## Interesse em disponibilidade de instrutor (ampliação local, 13/11/2026)
 
 `GET /api/v1/marketplace/availability-interest/` retorna `{enabled:false}`
 até o superusuário ativar a política com prazo, aviso vigente e texto de
 consentimento específico. Quando ativa, informa versão do aviso, versão/texto
-do consentimento e prazo em dias. `POST` recebe cidade, UF, nome, telefone com
+do consentimento e prazo em dias. `POST` recebe `scope` (`UF`, `CITY` ou
+`REGION`), UF, cidade obrigatória nos dois últimos casos, região obrigatória
+em `REGION`, nome, telefone com
 DDD, data de nascimento (usada só para aferir maioridade), versões, aceite
 explícito e UUID de idempotência. Retorna protocolo e data de expiração;
 repetições do mesmo UUID não geram outro registro. Não retorna telefone/nome.
@@ -21,7 +23,10 @@ repetições do mesmo UUID não geram outro registro. Não retorna telefone/nome
 `POST /api/v1/marketplace/availability-interest/withdraw/` recebe protocolo e
 telefone e responde genericamente, excluindo o registro quando ambos
 correspondem. Ambos os POSTs têm limite de envio; a nova finalidade permanece
-desativada até a revisão do aviso de privacidade em produção.
+desativada até a aprovação do aviso de privacidade versionado e ativação
+explícita da política. A busca por GPS não envia coordenadas ao cadastro de
+interesse; o visitante confirma UF, cidade e região no formulário. A migração
+prepara uma política desativada com prazo de 90 dias e texto de consentimento.
 
 ## Hotfix documental de 27/09/2026
 

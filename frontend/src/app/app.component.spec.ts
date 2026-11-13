@@ -24,6 +24,7 @@ describe('InstrutorProCNH shell', () => {
     const hrefs = [...(fixture.nativeElement as HTMLElement).querySelectorAll('nav a')]
       .map(a => a.getAttribute('href'));
     expect(hrefs).toContain('/aluno/instrutores');
+    expect(hrefs).toContain('/aluno/sem-instrutor');
     expect(hrefs).toContain('/profissional/instrutor/entrada');
     expect(hrefs).toContain('/cadastro/aluno');
     expect(hrefs).not.toContain('/cfc/cadastro');

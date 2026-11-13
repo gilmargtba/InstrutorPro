@@ -4,6 +4,7 @@ import { ClinicDemoComponent, DemandDemoComponent, InstructorDashboardComponent,
 import { PublicInstructorProfileComponent } from './features/demo/public-instructor-profile.component';
 import { LessonRequestComponent } from './features/demo/lesson-request.component';
 import { InstructorMapComponent } from './features/demo/instructor-map.component';
+import { NoInstructorComponent } from './features/demo/no-instructor.component';
 import { InstructorNationalMapComponent } from './features/demo/instructor-national-map.component';
 import { InstructorOnboardingComponent } from './features/demo/instructor-onboarding.component';
 import { StudentMarketplaceComponent } from './features/demo/student-marketplace.component';
@@ -32,6 +33,7 @@ const webRoutes: Routes = [
   { path:'aluno/servicos', component:ServiceDiscoveryComponent, title:'Encontre serviços — InstrutorProCNH' },
   { path:'aluno/instrutores', component:InstructorNationalMapComponent, title:'Instrutores no Brasil — InstrutorProCNH' },
   { path:'aluno/instrutores/mapa', component:InstructorMapComponent, title:'Mapa local de instrutores — InstrutorProCNH' },
+  { path:'aluno/sem-instrutor', component:NoInstructorComponent, title:'Sem instrutor na região? — InstrutorProCNH' },
   { path:'aluno/instrutores/:id', component:PublicInstructorProfileComponent, title:'Perfil do instrutor — InstrutorProCNH' },
   { path:'aluno/solicitar', component:LessonRequestComponent, title:'Solicitar aula — InstrutorProCNH' },
   { path:'profissional', component:ProfessionalLandingComponent, title:'Área profissional — InstrutorProCNH' },
@@ -71,6 +73,7 @@ export const mobileRoutes: Routes = [
   { path: '', component: MobileStudentHomeComponent, title: 'Encontre instrutores — InstrutorProCNH' },
   { path: 'aluno/instrutores', redirectTo: 'aluno/instrutores/mapa', pathMatch: 'full' },
   { path: 'aluno/instrutores/mapa', component: InstructorMapComponent, title: 'Buscar instrutores — InstrutorProCNH' },
+  { path: 'aluno/sem-instrutor', component: NoInstructorComponent, title: 'Sem instrutor na região? — InstrutorProCNH' },
   { path: 'aluno/instrutores/:id', component: PublicInstructorProfileComponent, title: 'Perfil do instrutor — InstrutorProCNH' },
   { path: 'privacidade', component: PrivacyPolicyComponent, title: 'Política de Privacidade — InstrutorProCNH' },
   { path: '**', redirectTo: '' },

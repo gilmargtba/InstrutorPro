@@ -245,7 +245,8 @@ import { WhatsappLinkService } from '../../core/whatsapp-link.service';
               @if (!anyDistance) {<button type="button" (click)="increaseRadius()">Aumentar raio</button>}
               <button type="button" (click)="filtersOpen=true">Alterar filtros</button>
               <button type="button" (click)="backToIntro()">Buscar outra região</button>
-              @if (interestPolicy?.enabled && citySearchLabel) {
+              <a routerLink="/aluno/sem-instrutor" [queryParams]="{uf: interestUf || null, cidade: interestCity || null, regiao: interestRegion || null}">Sem instrutor na região?</a>
+              @if (interestPolicy?.enabled) {
                 <button type="button" (click)="interestDialogOpen=true">Avise-me quando houver instrutor</button>
               }
             </div>
@@ -319,14 +320,24 @@ import { WhatsappLinkService } from '../../core/whatsapp-link.service';
           <section class="interest-dialog" role="dialog" aria-modal="true" aria-labelledby="interest-title" (click)="$event.stopPropagation()">
             @if (interestSaved) {
               <h2 id="interest-title">Pedido de aviso recebido</h2>
-              <p>Se um instrutor estiver disponível em {{citySearchLabel}}, a equipe poderá entrar em contato pelo WhatsApp dentro do prazo informado.</p>
+              <p>Se um instrutor estiver disponível em {{interestLocationLabel}}, a equipe poderá entrar em contato pelo WhatsApp dentro do prazo informado.</p>
               <p>Protocolo: <strong>{{interestReference}}</strong>. Guarde este número. Para retirar o consentimento depois, informe o protocolo e o mesmo telefone à equipe de privacidade.</p>
               <a href="mailto:focusgtba@gmail.com?subject=Retirada%20de%20interesse%20em%20instrutor">Contatar privacidade</a>
               <button type="button" (click)="closeInterestDialog()">Fechar</button>
             } @else {
-              <h2 id="interest-title">Ainda não há instrutores disponíveis em {{citySearchLabel}}</h2>
+              <h2 id="interest-title">Avise-me quando houver instrutor em {{interestLocationLabel}}</h2>
               <p>Deixe seu contato para que a equipe possa avisar você manualmente quando houver disponibilidade.</p>
               <form (ngSubmit)="submitInterest()">
+                <label>Área de interesse
+                  <select name="interestScope" [(ngModel)]="interestScope">
+                    <option value="UF">Toda a UF</option><option value="CITY">Cidade</option><option value="REGION">Região da cidade</option>
+                  </select>
+                </label>
+                <label>UF
+                  <select name="interestUf" [(ngModel)]="interestUf" required><option value="">Selecione a UF</option>@for(uf of brazilUfs;track uf){<option [value]="uf">{{uf}}</option>}</select>
+                </label>
+                @if (interestScope !== 'UF') {<label>Cidade<input name="interestCity" [(ngModel)]="interestCity" required maxlength="120" /></label>}
+                @if (interestScope === 'REGION') {<label>Bairro ou região (sem endereço residencial)<input name="interestRegion" [(ngModel)]="interestRegion" required maxlength="120" /></label>}
                 <label>Nome completo<input name="interestName" [(ngModel)]="interestName" required maxlength="120" autocomplete="name" /></label>
                 <label>WhatsApp com DDD<input name="interestPhone" [(ngModel)]="interestPhone" required maxlength="24" inputmode="tel" autocomplete="tel" /></label>
                 <label>Data de nascimento<input name="interestBirthDate" [(ngModel)]="interestBirthDate" type="date" required autocomplete="bday" /></label>
@@ -395,6 +406,10 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
   interestPhone = '';
   interestBirthDate = '';
   interestConsent = false;
+  interestScope: 'UF'|'CITY'|'REGION' = 'CITY';
+  interestUf = '';
+  interestCity = '';
+  interestRegion = '';
   private interestKey = crypto.randomUUID();
   private cityScope = '';
   private ufScope = '';
@@ -406,6 +421,7 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
   private searchRequest?: Subscription;
   private directoryRequest?: Subscription;
   private searchRevision = 0;
+  private radiusChoiceExplicit = false;
 
   constructor() {
     this.suggestionsRequest = this.locationQueries.pipe(
@@ -588,6 +604,10 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
   }
 
   private searchFromPoint(point:GeocodingResult, revision:number) {
+        if (['neighborhood', 'district'].includes(point.place_type) && !this.radiusChoiceExplicit) {
+          this.filters.radius = 10;
+          this.anyDistance = false;
+        }
         // A resolved city is an explicit locality search, even when an older link
         // contains only `local` and `uf` instead of the `cidade` query parameter.
         if (!this.cityScope && point.city && point.uf &&
@@ -605,7 +625,9 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
           ? (this.requestedInstructorId
               ? this.api.search(point.latitude, point.longitude, this.filters, this.ufScope, this.cityScope, this.requestedInstructorId)
               : this.api.search(point.latitude, point.longitude, this.filters, this.ufScope, this.cityScope))
-          : this.api.search(point.latitude, point.longitude, this.filters);
+          : point.place_type === 'region' && !point.city
+            ? this.api.search(point.latitude, point.longitude, this.filters, point.uf)
+            : this.api.search(point.latitude, point.longitude, this.filters);
         this.searchRequest = searchRequest.subscribe({
           next: (response) => {
             if (revision !== this.searchRevision) return;
@@ -615,15 +637,11 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
             this.drawerOpen = !!this.selected;
             this.showAllResults = !this.selected;
             this.map.render(this.items, this.selected?.id ?? null);
-            if (!this.items.length && this.cityScope && this.ufScope && !this.filters.category &&
-                this.filters.radius === null && this.filters.maxPrice === null &&
-                !this.filters.transmission && this.filters.vehicleAvailable === null) {
-              this.api.availabilityInterestPolicy().subscribe({next: policy => {
-                if (revision !== this.searchRevision) return;
-                this.interestPolicy = policy;
-                this.interestDialogOpen = policy.enabled;
-                this.changeDetector.detectChanges();
-              }, error: () => { this.interestPolicy = null; }});
+            if (!this.items.length && point.uf && this.searchHasNoRestrictiveFilters()) {
+              const regionTypes = ['neighborhood', 'district', 'locality'];
+              const isRegion = !!point.city && regionTypes.includes(point.place_type) &&
+                point.label.split(',')[0].trim().toLocaleLowerCase('pt-BR') !== point.city.toLocaleLowerCase('pt-BR');
+              this.offerInterest(revision, point.uf, point.city, isRegion ? point.label.split(',')[0].trim() : '');
             }
             this.changeDetector.detectChanges();
           },
@@ -657,11 +675,15 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
 
   private searchFromCoordinates(latitude:number, longitude:number, revision=this.beginSearch()) {
     this.clearCityScope();
+    if (!this.radiusChoiceExplicit) {
+      this.filters.radius = 10;
+      this.anyDistance = false;
+    }
     this.locationMessage='Buscando instrutores próximos à localização autorizada.';
     this.searched=true;this.loading=true;this.error=false;this.scrollToResults();
     this.map.focus(latitude,longitude,12);
     this.searchRequest = this.api.search(latitude,longitude,this.filters).subscribe({
-      next:response=>{if(revision!==this.searchRevision)return;this.items=response.results;this.selected=this.items.length===1?this.items[0]:null;this.loading=false;this.drawerOpen=this.items.length===1;this.showAllResults=this.items.length!==1;this.map.render(this.items,this.selected?.id??null);this.changeDetector.detectChanges()},
+      next:response=>{if(revision!==this.searchRevision)return;this.items=response.results;this.selected=this.items.length===1?this.items[0]:null;this.loading=false;this.drawerOpen=this.items.length===1;this.showAllResults=this.items.length!==1;this.map.render(this.items,this.selected?.id??null);if(!this.items.length && this.searchHasNoRestrictiveFilters())this.offerInterest(revision);this.changeDetector.detectChanges()},
       error:()=>{if(revision===this.searchRevision)this.fail()},
     });
   }
@@ -688,6 +710,12 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
 
   get citySearchLabel(): string {
     return this.cityScope && this.ufScope ? `${this.cityScope}/${this.ufScope}` : '';
+  }
+
+  get interestLocationLabel(): string {
+    if (!this.interestUf) return 'sua região';
+    if (this.interestScope === 'UF') return this.interestUf;
+    return `${this.interestScope === 'REGION' && this.interestRegion ? `${this.interestRegion}, ` : ''}${this.interestCity || 'sua cidade'}/${this.interestUf}`;
   }
 
   openResultList() {
@@ -731,6 +759,7 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
   }
 
   setAnyDistance(enabled: boolean) {
+    this.radiusChoiceExplicit = true;
     this.anyDistance = enabled;
     this.filters.radius = enabled ? null : 10;
   }
@@ -773,6 +802,7 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
   private beginSearch():number {
     this.interestDialogOpen = false;
     this.interestPolicy = null;
+    this.interestSaved = false;
     this.geocodingRequest?.unsubscribe();
     this.searchRequest?.unsubscribe();
     return ++this.searchRevision;
@@ -787,12 +817,39 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
 
   closeInterestDialog() { this.interestDialogOpen = false; }
 
+  private searchHasNoRestrictiveFilters(): boolean {
+    return !this.filters.category &&
+      (this.filters.radius === null || (this.filters.radius === 10 && !this.radiusChoiceExplicit)) &&
+      this.filters.maxPrice === null &&
+      !this.filters.transmission && this.filters.vehicleAvailable === null;
+  }
+
+  private offerInterest(revision: number, uf = '', city = '', region = ''): void {
+    this.interestUf = uf;
+    this.interestCity = city;
+    this.interestRegion = region;
+    this.interestScope = region ? 'REGION' : city ? 'CITY' : 'UF';
+    this.api.availabilityInterestPolicy().subscribe({
+      next: policy => {
+        if (revision !== this.searchRevision) return;
+        this.interestPolicy = policy;
+        this.interestDialogOpen = policy.enabled;
+        this.changeDetector.detectChanges();
+      },
+      error: () => { if (revision === this.searchRevision) this.interestPolicy = null; },
+    });
+  }
+
   submitInterest() {
-    if (!this.interestPolicy?.enabled || !this.cityScope || !this.ufScope || !this.interestConsent || this.interestSubmitting) return;
+    if (!this.interestPolicy?.enabled || !this.interestUf ||
+        (this.interestScope !== 'UF' && !this.interestCity.trim()) ||
+        (this.interestScope === 'REGION' && !this.interestRegion.trim()) ||
+        !this.interestConsent || this.interestSubmitting) return;
     this.interestSubmitting = true;
     this.interestError = '';
     this.api.submitAvailabilityInterest({
-      city: this.cityScope, uf: this.ufScope, name: this.interestName, phone: this.interestPhone,
+      scope: this.interestScope, city: this.interestCity, region: this.interestRegion,
+      uf: this.interestUf, name: this.interestName, phone: this.interestPhone,
       birth_date: this.interestBirthDate, privacy_notice_version: this.interestPolicy.privacy_notice_version ?? '',
       consent_version: this.interestPolicy.consent_version ?? '', consent_granted: true,
       idempotency_key: this.interestKey,

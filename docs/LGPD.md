@@ -31,7 +31,9 @@ Fonte oficial do programa de privacidade, revisada em **22/07/2026** contra a LG
 4. Biometria, reconhecimento facial, cópia de cartão, tracking contínuo, IA sobre dados pessoais e decisão adversa baseada somente em perfil/score ficam fora do MVP.
 
 O aviso opcional de disponibilidade para busca vazia tem finalidade própria:
-contato manual por WhatsApp caso surja instrutor na cidade informada. A coleta
+contato manual por WhatsApp caso surja instrutor na UF, cidade ou região
+informada. Após busca por GPS sem resultado, a pessoa confirma manualmente a
+localidade; coordenadas precisas não integram o pedido. A coleta
 permanece desligada até o administrador associar aviso vigente que descreva
 essa finalidade e aprovar texto/versionamento do consentimento. O prazo inicial
 proposto é de 90 dias, ajustável no Admin entre 1 e 365 dias; a exclusão é

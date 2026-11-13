@@ -10,7 +10,7 @@ export interface InstructorDirectoryEntry { id:string;display_name:string;latitu
 export interface InstructorStateSummary { uf:string;count:number;search_location:string;cities:{name:string;count:number;instructors?:InstructorDirectoryEntry[]}[] }
 interface StateSummaryResponse { states:InstructorStateSummary[] }
 export interface AvailabilityInterestPolicy { enabled:boolean;retention_days?:number;privacy_notice_version?:string;consent_version?:string;consent_text?:string }
-export interface AvailabilityInterestRequest { city:string;uf:string;name:string;phone:string;birth_date:string;privacy_notice_version:string;consent_version:string;consent_granted:boolean;idempotency_key:string }
+export interface AvailabilityInterestRequest { scope:'UF'|'CITY'|'REGION';city:string;region:string;uf:string;name:string;phone:string;birth_date:string;privacy_notice_version:string;consent_version:string;consent_granted:boolean;idempotency_key:string }
 
 @Injectable({providedIn:'root'})
 export class InstructorSearchProvider {

@@ -782,12 +782,19 @@ class AvailabilityInterestPolicy(models.Model):
 
 
 class AvailabilityInterest(models.Model):
+    class Scope(models.TextChoices):
+        UF = "UF", "UF"
+        CITY = "CITY", "Cidade"
+        REGION = "REGION", "Região"
+
     class Status(models.TextChoices):
         NEW = "NEW", "Novo"
         CONTACTED = "CONTACTED", "Contatado"
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    city = models.CharField(max_length=120)
+    scope = models.CharField(max_length=8, choices=Scope.choices, default=Scope.CITY)
+    city = models.CharField(max_length=120, blank=True)
+    region = models.CharField(max_length=120, blank=True)
     uf = models.CharField(max_length=2)
     name_encrypted = models.TextField()
     phone_encrypted = models.TextField()

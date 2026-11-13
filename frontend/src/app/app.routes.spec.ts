@@ -8,3 +8,8 @@ it('shows an unavailable page for direct CFC links while the module is paused', 
     expect(routes.find(route => route.path === path)?.component).toBe(CFCUnavailableComponent);
   }
 });
+
+it('offers the no-instructor page on web and mobile', () => {
+  expect(routes.some(route => route.path === 'aluno/sem-instrutor')).toBeTrue();
+  expect(mobileRoutes.some(route => route.path === 'aluno/sem-instrutor')).toBeTrue();
+});

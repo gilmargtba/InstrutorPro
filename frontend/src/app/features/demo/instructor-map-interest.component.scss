@@ -4,7 +4,7 @@
 .interest-dialog p { line-height: 1.45; }
 .interest-dialog form { display: grid; gap: .8rem; }
 .interest-dialog form > label { display: grid; gap: .3rem; font-weight: 650; }
-.interest-dialog input:not([type='checkbox']) { width: 100%; padding: .7rem; border: 1px solid #a9bec5; border-radius: .45rem; font: inherit; }
+.interest-dialog input:not([type='checkbox']), .interest-dialog select { width: 100%; padding: .7rem; border: 1px solid #a9bec5; border-radius: .45rem; font: inherit; }
 .interest-dialog .interest-consent { display: flex; align-items: start; gap: .5rem; font-weight: 400; font-size: .9rem; }
 .interest-dialog .interest-consent input { margin-top: .25rem; }
 .interest-dialog .interest-retention { margin: 0; font-size: .85rem; }

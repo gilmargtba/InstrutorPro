@@ -33,8 +33,21 @@ class InterestValidationError(ValueError):
 
 def validate_interest_data(data):
     data["uf"] = data["uf"].upper()
-    if not data["city"].strip() or len(data["name"].strip().split()) < 2:
-        raise InterestValidationError("Informe cidade e nome completo.")
+    data["city"] = data.get("city", "").strip()
+    data["region"] = data.get("region", "").strip()
+    if len(data["name"].strip().split()) < 2:
+        raise InterestValidationError("Informe seu nome completo.")
+    if (
+        data["scope"] in (AvailabilityInterest.Scope.CITY, AvailabilityInterest.Scope.REGION)
+        and not data["city"]
+    ):
+        raise InterestValidationError("Informe a cidade da busca.")
+    if data["scope"] == AvailabilityInterest.Scope.REGION and not data["region"]:
+        raise InterestValidationError("Informe a região da cidade.")
+    if data["scope"] == AvailabilityInterest.Scope.UF:
+        data["city"] = data["region"] = ""
+    elif data["scope"] == AvailabilityInterest.Scope.CITY:
+        data["region"] = ""
     if not FederativeUnit.objects.filter(code=data["uf"]).exists():
         raise InterestValidationError("UF inválida.")
     if len(re.sub(r"\D", "", data["phone"])) not in (10, 11):
@@ -78,7 +91,9 @@ def create_availability_interest(*, data, request_id=None):
         phone = re.sub(r"\D", "", data["phone"])
         now = timezone.now()
         item = AvailabilityInterest.objects.create(
-            city=data["city"].strip(),
+            scope=data["scope"],
+            city=data["city"],
+            region=data["region"],
             uf=data["uf"],
             name_encrypted=_fernet().encrypt(data["name"].strip().encode("utf-8")).decode("ascii"),
             phone_encrypted=_fernet().encrypt(phone.encode("ascii")).decode("ascii"),
@@ -95,7 +110,11 @@ def create_availability_interest(*, data, request_id=None):
             target_type="marketplace.AvailabilityInterest",
             target_id=item.pk,
             request_id=request_id,
-            metadata={"uf": item.uf, "privacy_notice_version": policy.privacy_notice.version},
+            metadata={
+                "uf": item.uf,
+                "scope": item.scope,
+                "privacy_notice_version": policy.privacy_notice.version,
+            },
         )
         return item, True
 

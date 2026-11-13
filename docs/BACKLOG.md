@@ -1,5 +1,13 @@
 # Backlog Priorizado
 
+## AVISO-REGIONAL — preparado localmente em 13/11/2026
+
+- [x] formulário para UF, cidade ou região com confirmação manual após GPS;
+- [x] entrada “Sem instrutor na região?” no menu e página própria;
+- [x] registro privado, prazo, idempotência e retirada reaproveitados;
+- [ ] revisão humana do aviso de privacidade e ativação da política em produção;
+- [ ] homologar contato manual e exclusão por prazo antes da ativação.
+
 ## CFC-001 — painel privado e pré-cadastro individual (18/10/2026)
 
 Estado operacional: pausado temporariamente em 12/11/2026, sem exclusão de dados.

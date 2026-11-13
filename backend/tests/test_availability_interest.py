@@ -137,3 +137,43 @@ def test_interest_requires_adult_and_separate_consent_and_is_idempotent(setup_po
     item.save(update_fields=["expires_at"])
     assert purge_expired_availability_interests() == 1
     assert not AvailabilityInterest.objects.exists()
+
+
+@pytest.mark.django_db
+@override_settings(
+    PII_FIELD_ENCRYPTION_KEY="MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA=",
+    PII_FINGERPRINT_KEY="test-only-fingerprint-key-with-32-bytes-minimum",
+)
+def test_interest_accepts_uf_city_and_region_without_precise_coordinates(setup_policy):
+    policy = setup_policy
+    policy.enabled = True
+    policy.full_clean()
+    policy.save()
+    client = APIClient()
+    base = payload(policy)
+    assert (
+        client.post(URL, {**base, "scope": "REGION", "region": ""}, format="json").status_code
+        == 400
+    )
+    assert client.post(URL, {**base, "scope": "CITY", "city": ""}, format="json").status_code == 400
+    assert client.post(URL, {**base, "scope": "INVALID"}, format="json").status_code == 400
+
+    for scope, city, region in (
+        ("UF", "", ""),
+        ("CITY", "Goiatuba", ""),
+        ("REGION", "Goiatuba", "Centro"),
+    ):
+        response = client.post(
+            URL,
+            {
+                **base,
+                "scope": scope,
+                "city": city,
+                "region": region,
+                "idempotency_key": str(uuid.uuid4()),
+            },
+            format="json",
+        )
+        assert response.status_code == 201
+        item = AvailabilityInterest.objects.get(pk=response.json()["id"])
+        assert (item.scope, item.city, item.region, item.uf) == (scope, city, region, "GO")

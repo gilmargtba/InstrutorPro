@@ -55,6 +55,57 @@ describe('InstructorMapComponent geolocation', () => {
     expect(fixture.componentInstance.interestDialogOpen).toBeFalse();
   });
 
+  it('offers a UF interest when an unfiltered UF search has no results', () => {
+    const api = TestBed.inject(InstructorSearchProvider);
+    spyOn(api, 'availabilityInterestPolicy').and.returnValue(of({enabled: true, retention_days: 90}));
+    const search = spyOn(api, 'search').and.returnValue(of(result));
+    const fixture = TestBed.createComponent(InstructorMapComponent);
+    fixture.detectChanges();
+    fixture.componentInstance.choose({
+      id: 'go', label: 'Goiás, Brasil', latitude: -16.68, longitude: -49.25,
+      place_type: 'region', city: '', uf: 'GO', uf_resolution: 'RESOLVED', bbox: null,
+    });
+    expect(search).toHaveBeenCalledWith(-16.68, -49.25, fixture.componentInstance.filters, 'GO');
+    expect(fixture.componentInstance.interestDialogOpen).toBeTrue();
+    expect(fixture.componentInstance.interestScope).toBe('UF');
+    expect(fixture.componentInstance.interestUf).toBe('GO');
+  });
+
+  it('uses a nearby radius for a neighborhood while preserving an explicit all-distance choice', async () => {
+    const api = TestBed.inject(InstructorSearchProvider);
+    const search = spyOn(api, 'search').and.returnValue(of(result));
+    const fixture = TestBed.createComponent(InstructorMapComponent);
+    fixture.detectChanges();
+    fixture.componentInstance.choose({
+      id: 'bairro', label: 'Centro, Goiatuba, Goiás, Brasil', latitude: -18.01, longitude: -49.37,
+      place_type: 'neighborhood', city: 'Goiatuba', uf: 'GO', uf_resolution: 'RESOLVED', bbox: null,
+    });
+    expect(fixture.componentInstance.filters.radius).toBe(10);
+    expect(search).toHaveBeenCalled();
+    fixture.componentInstance.setAnyDistance(true);
+    fixture.componentInstance.useMyLocation();
+    const success = getCurrentPosition.calls.mostRecent().args[0];
+    success({coords: {latitude: -18.01, longitude: -49.37}});
+    await fixture.whenStable();
+    expect(fixture.componentInstance.filters.radius).toBeNull();
+  });
+
+  it('offers interest after an empty GPS search without storing coordinates in the form', async () => {
+    const api = TestBed.inject(InstructorSearchProvider);
+    spyOn(api, 'availabilityInterestPolicy').and.returnValue(of({enabled: true, retention_days: 90}));
+    const fixture = TestBed.createComponent(InstructorMapComponent);
+    fixture.detectChanges();
+    fixture.componentInstance.useMyLocation();
+    const success = getCurrentPosition.calls.mostRecent().args[0];
+    success({coords: {latitude: -18.01, longitude: -49.37}});
+    await fixture.whenStable();
+    expect(fixture.componentInstance.interestDialogOpen).toBeTrue();
+    expect(fixture.componentInstance.interestUf).toBe('');
+    expect(fixture.componentInstance.interestCity).toBe('');
+    expect(fixture.componentInstance.filters.radius).toBe(10);
+    expect((fixture.nativeElement as HTMLElement).querySelector('[role="dialog"]')?.textContent).toContain('Selecione a UF');
+  });
+
   it('lists published instructors below location and opens the selected point with contact card', () => {
     const api = TestBed.inject(InstructorSearchProvider);
     spyOn(api, 'states').and.returnValue(of({states: [{
@@ -121,6 +172,7 @@ describe('InstructorMapComponent geolocation', () => {
     success({coords: {latitude: -30.0346, longitude: -51.2177}});
     await fixture.whenStable();
     expect(search).toHaveBeenCalledWith(-30.0346, -51.2177, fixture.componentInstance.filters);
+    expect(fixture.componentInstance.filters.radius).toBe(10);
     expect(fixture.componentInstance.locationMessage).toContain('localização autorizada');
   });
 
