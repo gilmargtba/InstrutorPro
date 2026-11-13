@@ -15,7 +15,8 @@ def prepare_disabled_interest_policy(apps, schema_editor):
                 "consent_version": "availability-interest-2026-11-13",
                 "consent_text": (
                     "Autorizo a equipe InstrutorProCNH a usar meu nome, WhatsApp e localidade "
-                    "para me avisar manualmente quando houver instrutor disponível na área escolhida. "
+                    "para me avisar manualmente quando houver instrutor disponível "
+                    "na área escolhida. "
                     "Posso retirar este pedido pelo canal de privacidade."
                 ),
             },
@@ -25,7 +26,7 @@ def prepare_disabled_interest_policy(apps, schema_editor):
 class Migration(migrations.Migration):
     dependencies = [
         ("marketplace", "0018_availability_interest_scope"),
-        ("privacy", "0006_availability_interest_notice"),
+        ("privacy", "0007_availability_interest_notice"),
     ]
 
     operations = [migrations.RunPython(prepare_disabled_interest_policy, migrations.RunPython.noop)]
