@@ -1,6 +1,6 @@
 # Checkpoint do Projeto
 
-## Pedido de aviso por UF, cidade e região — produção, 13/11/2026
+## Pedido de aviso por UF, cidade e região — produção, 15/11/2026
 
 - A busca sem instrutor oferece o formulário de interesse para UF, cidade e
   região. Após GPS, o visitante confirma a localidade no formulário; nenhuma
@@ -25,7 +25,9 @@
   (`private-documents-20261113T132655Z.tar`) em
   `/home/gilmar/backups/instrutorpro/production/`. As imagens anteriores
   receberam a tag `pre-interest-20261113` para rollback.
-- Backend, frontend, worker e scheduler foram reconstruídos e iniciados na VPS.
+- Backend foi atualizado em 13/11; frontend, worker e scheduler foram iniciados
+  com as imagens novas em 15/11 após a retomada do deploy. Os quatro serviços
+  estão na versão aprovada pelo CI.
   `manage.py migrate --check` e `manage.py check` passaram; os serviços estão
   saudáveis. GET da política confirma `enabled=true`, 90 dias, aviso
   `2026-11-13` e consentimento `availability-interest-2026-11-13`. Home, busca,
