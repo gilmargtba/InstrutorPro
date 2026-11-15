@@ -1,6 +1,6 @@
 # Checkpoint do Projeto
 
-## Pedido de aviso por UF, cidade e região — local, 13/11/2026
+## Pedido de aviso por UF, cidade e região — produção, 13/11/2026
 
 - A busca sem instrutor oferece o formulário de interesse para UF, cidade e
   região. Após GPS, o visitante confirma a localidade no formulário; nenhuma
@@ -15,12 +15,23 @@
   prepara a política com 90 dias e **desativada**.
 - O proprietário aprovou em 13/11/2026 o aviso, a coleta por 90 dias, o contato
   manual e o deploy após CI. A migration `marketplace.0020` ativa somente a
-  política preparada com essas versões e prazo; o rollback a desativa. A
-  publicação ainda depende do CI e do deploy.
-- Build Angular e 35 testes direcionados passaram; Ruff lint/format,
-  compilação de Python e `git diff --check` passaram. Pytest Django e
-  `makemigrations --check` não puderam rodar no Windows sem GDAL/PostGIS; o
-  Docker local não está em execução. A validação integrada fica pendente no CI.
+  política preparada com essas versões e prazo; o rollback a desativa.
+- `origin/main` e a VPS receberam `417d910`. O CI `43431430703` passou nos
+  jobs backend e frontend, incluindo pytest, migrações, build Angular e 120
+  testes Angular. Ruff e `git diff --check` também passaram. O Windows local
+  continua sem GDAL/PostGIS; a validação integrada ocorreu no CI.
+- Antes da atualização, backup validado do banco
+  (`instrutorpro-20261113T132655Z.dump`) e dos documentos privados
+  (`private-documents-20261113T132655Z.tar`) em
+  `/home/gilmar/backups/instrutorpro/production/`. As imagens anteriores
+  receberam a tag `pre-interest-20261113` para rollback.
+- Backend, frontend, worker e scheduler foram reconstruídos e iniciados na VPS.
+  `manage.py migrate --check` e `manage.py check` passaram; os serviços estão
+  saudáveis. GET da política confirma `enabled=true`, 90 dias, aviso
+  `2026-11-13` e consentimento `availability-interest-2026-11-13`. Home, busca,
+  mapa e `/aluno/sem-instrutor` responderam HTTP 200.
+- O contato com interessados é manual. Nenhum pedido com dados pessoais foi
+  criado durante a verificação de produção.
 
 ## Pausa temporária de CFC/Autoescola — produção, 12/11/2026
 
