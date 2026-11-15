@@ -1,5 +1,16 @@
 # Checkpoint do Projeto
 
+## Correção do formulário de interesse — local, 15/11/2026
+
+- A página `/aluno/sem-instrutor` permanecia em “Verificando disponibilidade”
+  após a resposta assíncrona da API. O componente agora solicita atualização da
+  tela ao receber a política ou o resultado do envio. Falhas e demora na consulta
+  exibem opção de tentar novamente, sem liberar coleta enquanto a política não
+  estiver confirmada.
+- O teste com resposta assíncrona reproduz o problema e passou após a correção.
+  Suíte Angular completa: 121 testes aprovados; build de produção aprovado com
+  avisos de orçamento já existentes. Publicação depende do CI e do deploy.
+
 ## Pedido de aviso por UF, cidade e região — produção, 15/11/2026
 
 - A busca sem instrutor oferece o formulário de interesse para UF, cidade e

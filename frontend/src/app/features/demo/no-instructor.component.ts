@@ -1,7 +1,8 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { timeout } from 'rxjs';
 
 import { InstructorSearchProvider, AvailabilityInterestPolicy } from '../../demo/instructor-search.provider';
 import { BRAZIL_UFS } from '../../shared/brazil-ufs';
@@ -33,7 +34,12 @@ import { BRAZIL_UFS } from '../../shared/brazil-ufs';
             <a href="mailto:focusgtba@gmail.com?subject=Retirada%20de%20interesse%20em%20instrutor">Contatar privacidade</a>
           } @else if (!policy?.enabled) {
             <h2>Cadastro de interesse indisponível</h2>
-            <p>O formulário será liberado quando o aviso de privacidade e o atendimento manual estiverem ativos.</p>
+            @if (loadError) {
+              <p>Não foi possível consultar o cadastro agora. Tente novamente.</p>
+              <button type="button" (click)="loadPolicy()">Tentar novamente</button>
+            } @else {
+              <p>O formulário será liberado quando o aviso de privacidade e o atendimento manual estiverem ativos.</p>
+            }
             <a routerLink="/aluno/instrutores/mapa">Voltar à busca</a>
           } @else {
             <h2>Quero ser avisado</h2>
@@ -73,9 +79,11 @@ import { BRAZIL_UFS } from '../../shared/brazil-ufs';
 export class NoInstructorComponent implements OnInit {
   private readonly api = inject(InstructorSearchProvider);
   private readonly route = inject(ActivatedRoute);
+  private readonly cdr = inject(ChangeDetectorRef);
   readonly ufs = BRAZIL_UFS;
   policy: AvailabilityInterestPolicy | null = null;
   loading = true;
+  loadError = false;
   saved = false;
   submitting = false;
   error = '';
@@ -97,9 +105,15 @@ export class NoInstructorComponent implements OnInit {
     this.city = query.get('cidade')?.slice(0, 120) ?? '';
     this.region = query.get('regiao')?.slice(0, 120) ?? '';
     this.scope = this.region && this.city ? 'REGION' : this.city ? 'CITY' : 'UF';
-    this.api.availabilityInterestPolicy().subscribe({
-      next: policy => { this.policy = policy; this.loading = false; },
-      error: () => { this.loading = false; },
+    this.loadPolicy();
+  }
+
+  loadPolicy(): void {
+    this.loading = true;
+    this.loadError = false;
+    this.api.availabilityInterestPolicy().pipe(timeout({first: 10000})).subscribe({
+      next: policy => { this.policy = policy; this.loading = false; this.cdr.markForCheck(); },
+      error: () => { this.policy = null; this.loading = false; this.loadError = true; this.cdr.markForCheck(); },
     });
   }
 
@@ -115,10 +129,11 @@ export class NoInstructorComponent implements OnInit {
       consent_version: this.policy.consent_version ?? '', consent_granted: true,
       idempotency_key: this.idempotencyKey,
     }).subscribe({
-      next: result => { this.submitting = false; this.saved = true; this.reference = result.id; this.name = this.phone = this.birthDate = ''; this.idempotencyKey = crypto.randomUUID(); },
+      next: result => { this.submitting = false; this.saved = true; this.reference = result.id; this.name = this.phone = this.birthDate = ''; this.idempotencyKey = crypto.randomUUID(); this.cdr.markForCheck(); },
       error: (response: HttpErrorResponse) => {
         this.submitting = false;
         this.error = typeof response.error?.detail === 'string' ? response.error.detail : 'Não foi possível salvar. Confira os dados e tente novamente.';
+        this.cdr.markForCheck();
       },
     });
   }
