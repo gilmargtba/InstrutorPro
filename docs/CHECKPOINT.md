@@ -1,6 +1,6 @@
 # Checkpoint do Projeto
 
-## Correção do formulário de interesse — local, 15/11/2026
+## Correção do formulário de interesse — produção, 15/11/2026
 
 - A página `/aluno/sem-instrutor` permanecia em “Verificando disponibilidade”
   após a resposta assíncrona da API. O componente agora solicita atualização da
@@ -9,7 +9,14 @@
   estiver confirmada.
 - O teste com resposta assíncrona reproduz o problema e passou após a correção.
   Suíte Angular completa: 121 testes aprovados; build de produção aprovado com
-  avisos de orçamento já existentes. Publicação depende do CI e do deploy.
+  avisos de orçamento já existentes. O commit `ecffda2` passou no CI
+  `43734300250` (backend e frontend) e foi publicado em `origin/main`.
+- A VPS avançou para `ecffda2`; somente o frontend foi reconstruído e reiniciado,
+  com contêiner saudável. A imagem anterior foi preservada como
+  `instrutorpro-frontend:pre-interest-form-fix-20261115` para rollback.
+  Conferência no navegador de produção confirmou o formulário visível com
+  escopo UF/cidade/região, nome, WhatsApp e consentimento. Nenhum contato de
+  teste foi enviado.
 
 ## Pedido de aviso por UF, cidade e região — produção, 15/11/2026
 
