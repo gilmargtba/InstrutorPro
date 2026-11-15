@@ -1,6 +1,6 @@
 # Checkpoint do Projeto
 
-## Zoom do ponto público na busca — local, 15/11/2026
+## Zoom do ponto público na busca — produção, 15/11/2026
 
 - A seleção de um instrutor centraliza seu marcador no mapa. O controle
   “Aproximar” continua o zoom até o limite do provedor (Google 20, Leaflet 19)
@@ -9,7 +9,13 @@
 - O marcador continua representando a área pública aproximada de atendimento,
   não o endereço residencial. A API e as coordenadas publicadas não mudaram.
 - Suíte Angular: 122 testes aprovados. Build de produção aprovado com avisos de
-  orçamento de bundle e estilos já existentes. Publicação pendente.
+  orçamento de bundle e estilos já existentes. Os commits `2bb2f90` e
+  `fe812da` passaram no CI (`43760070827` e `43774933141`) e foram publicados
+  em `origin/main` e na VPS. Apenas o frontend foi reconstruído; o contêiner
+  está saudável. A imagem anterior permanece como
+  `instrutorpro-frontend:pre-map-zoom-20261115` para rollback.
+- Verificação no navegador de produção confirmou o Google Maps, o botão visível
+  no celular e o aviso de zoom máximo após selecionar o instrutor de Formosa.
 
 ## Correção do formulário de interesse — produção, 15/11/2026
 
