@@ -26,6 +26,11 @@ export class GoogleMapProvider implements MapProvider {
     this.map = new Map(element, {
       center: { lat: -14.2, lng: -51.9 }, zoom: 4, mapId,
       clickableIcons: false, mapTypeControl: false, streetViewControl: false,
+      maxZoom: 20,
+    });
+    this.map.addListener('zoom_changed', () => {
+      const position = this.selectedId ? this.markers.get(this.selectedId)?.position : undefined;
+      if (position) this.map?.setCenter(position);
     });
   }
 
@@ -87,6 +92,16 @@ export class GoogleMapProvider implements MapProvider {
       if ((this.map?.getZoom() ?? 0) < 18) this.map?.setZoom(18);
     }
   }
+
+  zoomSelected(): boolean {
+    if (!this.map || this.atMaxZoom()) return false;
+    const position = this.selectedId ? this.markers.get(this.selectedId)?.position : undefined;
+    if (position) this.map.setCenter(position);
+    this.map.setZoom(Math.min((this.map.getZoom() ?? 4) + 1, 20));
+    return true;
+  }
+
+  atMaxZoom(): boolean { return (this.map?.getZoom() ?? 0) >= 20; }
 
   refresh(): void {
     const center = this.map?.getCenter();

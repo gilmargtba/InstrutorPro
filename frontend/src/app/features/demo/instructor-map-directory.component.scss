@@ -37,3 +37,6 @@
 .directory-instructor span { flex: 1; }
 .directory-instructor small { color: var(--teal-dark); }
 .directory-retry { border: 0; color: var(--teal-dark); background: transparent; font-weight: 800; cursor: pointer; }
+.selected-map-zoom { position: absolute; z-index: 5; top: 3.5rem; left: .75rem; display: flex; align-items: center; gap: .5rem; max-width: calc(100% - 1.5rem); }
+.selected-map-zoom button { width: 2.5rem; height: 2.5rem; border: 1px solid #bdd5d1; border-radius: .4rem; background: #fff; color: var(--ink); font-size: 1.5rem; cursor: pointer; box-shadow: 0 .2rem .6rem #12374626; }
+.selected-map-zoom span { padding: .45rem .65rem; border-radius: .5rem; background: #fff; color: var(--ink); font-size: .78rem; box-shadow: 0 .2rem .6rem #12374626; }

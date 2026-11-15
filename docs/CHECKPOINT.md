@@ -1,5 +1,16 @@
 # Checkpoint do Projeto
 
+## Zoom do ponto público na busca — local, 15/11/2026
+
+- A seleção de um instrutor centraliza seu marcador no mapa. O controle
+  “Aproximar” continua o zoom até o limite do provedor (Google 20, Leaflet 19)
+  e informa quando não é possível aproximar mais. O ponto selecionado permanece
+  no centro durante o zoom. Uma nova busca limpa o aviso.
+- O marcador continua representando a área pública aproximada de atendimento,
+  não o endereço residencial. A API e as coordenadas publicadas não mudaram.
+- Suíte Angular: 122 testes aprovados. Build de produção aprovado com avisos de
+  orçamento de bundle e estilos já existentes. Publicação pendente.
+
 ## Correção do formulário de interesse — produção, 15/11/2026
 
 - A página `/aluno/sem-instrutor` permanecia em “Verificando disponibilidade”

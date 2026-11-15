@@ -21,7 +21,7 @@ describe('InstructorMapComponent geolocation', () => {
       imports: [InstructorMapComponent],
       providers: [
         {provide: InstructorSearchProvider, useValue: {geocode: () => of({results: []}), search: () => of(result), states: () => of({states: []}), availabilityInterestPolicy: () => of({enabled: false}), submitAvailabilityInterest: () => of({id: 'saved', expires_at: ''})}},
-        {provide: SearchMapProvider, useValue: {source: signal('maptiler'), mount: () => undefined, focus: () => undefined, render: () => undefined, select: () => undefined, refresh: () => undefined, destroy: () => undefined}},
+        {provide: SearchMapProvider, useValue: {source: signal('maptiler'), mount: () => undefined, focus: () => undefined, render: () => undefined, select: () => undefined, zoomSelected: () => false, atMaxZoom: () => true, refresh: () => undefined, destroy: () => undefined}},
         {provide: ActivatedRoute, useValue: {snapshot: {queryParamMap: {get: () => null}}}},
         {provide: Router, useValue: {navigate: () => Promise.resolve(true)}},
       ],
@@ -141,6 +141,9 @@ describe('InstructorMapComponent geolocation', () => {
     (fixture.nativeElement.querySelector('.show-location') as HTMLButtonElement).click();
     expect(select).toHaveBeenCalledWith('published');
     expect(fixture.componentInstance.view).toBe('map');
+    (fixture.nativeElement.querySelector('.selected-map-zoom button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.selected-map-zoom [role="status"]')?.textContent).toContain('Zoom máximo atingido');
   });
 
   it('opens the selected city with its UF and all published instructors', () => {

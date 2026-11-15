@@ -75,6 +75,10 @@ export class SearchMapProvider implements MapProvider {
     this.active?.select(id);
   }
 
+  zoomSelected(): boolean { return this.active?.zoomSelected() ?? false; }
+
+  atMaxZoom(): boolean { return this.active?.atMaxZoom() ?? false; }
+
   refresh(): void { this.active?.refresh(); }
 
   destroy(): void {

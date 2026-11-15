@@ -225,7 +225,13 @@ import { WhatsappLinkService } from '../../core/whatsapp-link.service';
         </div>
 
         <div class="map-stage" [class.list-view]="view === 'list'" [class.google-map]="mapSource() === 'google'">
-          <div class="leaflet-map" #map></div>
+          <div class="leaflet-map" #map (wheel)="onMapWheel($event)"></div>
+          @if (selected) {
+            <div class="selected-map-zoom">
+              <button type="button" (click)="zoomToSelected()" [attr.aria-label]="'Aproximar o ponto público de ' + selected.display_name" title="Aproximar o instrutor selecionado">+</button>
+              @if (zoomMessage) {<span role="status">{{ zoomMessage }}</span>}
+            </div>
+          }
 
           @if (loading) {
             <div class="map-message"><i class="pi pi-spin pi-spinner"></i> Buscando na região…</div>
@@ -393,6 +399,7 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
   pendingLocation: GeocodingResult | null = null;
   confirmedUf = '';
   contactError = '';
+  zoomMessage = '';
   directoryStates: InstructorStateSummary[] = [];
   directoryLoading = false;
   directoryError = false;
@@ -690,6 +697,7 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
 
   select(item: SearchInstructor) {
     this.selected = item;
+    this.zoomMessage = '';
     this.showAllResults = false;
     this.drawerOpen = true;
     if (this.view === 'list') {
@@ -697,6 +705,18 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
       setTimeout(() => this.map.refresh());
     }
     this.map.select(item.id);
+  }
+
+  zoomToSelected() {
+    if (!this.selected) return;
+    this.zoomMessage = this.map.zoomSelected() ? '' : 'Zoom máximo atingido. O mapa permanece no ponto público do instrutor selecionado.';
+  }
+
+  onMapWheel(event: WheelEvent) {
+    if (this.selected && event.deltaY < 0 && this.map.atMaxZoom()) {
+      this.zoomMessage = 'Zoom máximo atingido. O mapa permanece no ponto público do instrutor selecionado.';
+      this.changeDetector.markForCheck();
+    }
   }
 
   showPublicPoint(item: SearchInstructor) {
@@ -800,6 +820,7 @@ export class InstructorMapComponent implements AfterViewInit, OnDestroy {
   }
 
   private beginSearch():number {
+    this.zoomMessage = '';
     this.interestDialogOpen = false;
     this.interestPolicy = null;
     this.interestSaved = false;
